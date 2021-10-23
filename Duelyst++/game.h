@@ -15,11 +15,15 @@ public:
 	void input();
 	void update();
 	void render(Renderer& rm);
-	void move(int x, int y);
+	void moveCursor(int x, int y);
+	bool moveable(int x, int y);
+	void highlightTile(int x, int y, eColor col);
+	void highlightMoveable(int x, int y);
 	CardList cl;
 	Player player[2];
 	Map map;
-	std::vector<Tile*> select;
+	std::vector<Tile*> highlighted;
+	Unit* selected;
 	bool turn;
 	int px, py;
 };

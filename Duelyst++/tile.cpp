@@ -4,8 +4,10 @@
 //Tile constructor / destructor
 Tile::Tile() { 
 	border.createFromFile("resources/tile.txt");
-	sprite.resize(5, 5); 
+	sprite.resize(5, 5);
+	setFeature(TILE_NONE);
 	setCol(false);
+	unit = nullptr;
 } 
 Tile::~Tile() {}
 
