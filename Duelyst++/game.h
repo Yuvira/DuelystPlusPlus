@@ -15,9 +15,8 @@ public:
 	void input();
 	void update();
 	void render(Renderer& rm);
+	void move(int x, int y);
 	CardList cl;
-	Sprite board;
-	Sprite pointer;
 	Player player[2];
 	Map map;
 	bool turn;

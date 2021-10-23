@@ -4,11 +4,6 @@
 //Game constructor / destructor
 Game::Game() {
 
-	//Generate board
-	board.createFromFile("resources/board2.txt");
-	board.pos.X = 1;
-	board.pos.Y = 1;
-
 	//Default units
 	player[0].unit.push_back(*(dynamic_cast<Unit*>(cl.clist[0])));
 	player[1].unit.push_back(*(dynamic_cast<Unit*>(cl.clist[0])));
@@ -18,7 +13,7 @@ Game::Game() {
 	//Misc
 	px = 0;
 	py = 0;
-	pointer.buffer[0].Char.AsciiChar = '';
+	map.tile[0][0].select(true);
 
 }
 Game::~Game() {}
@@ -30,10 +25,10 @@ void Game::input() {
 	int asciiVal = _getch();
 
 	//Move pointer
-	if (asciiVal == 119 || asciiVal == 87) { py += 4; py %= 5; } //W
-	if (asciiVal == 97 || asciiVal == 65) { px += 8; px %= 9; } //A
-	if (asciiVal == 115 || asciiVal == 83) { ++py; py %= 5; }    //S
-	if (asciiVal == 100 || asciiVal == 68) { ++px; px %= 9; }    //D
+	if (asciiVal == 119 || asciiVal == 87) { move(0, 4); } //W
+	if (asciiVal == 97 || asciiVal == 65) { move(8, 0); }  //A
+	if (asciiVal == 115 || asciiVal == 83) { move(0, 1); } //S
+	if (asciiVal == 100 || asciiVal == 68) { move(1, 0); } //D
 
 	//Select
 	//if (asciiVal == 32) { selection(); }
@@ -43,21 +38,15 @@ void Game::input() {
 //Update loop
 void Game::update() {
 
-	//Update pointer pos
-	pointer.pos.X = (px * 6) + 4;
-	pointer.pos.Y = (py * 6) + 7;
-
 }
 
 //Render objects
 void Game::render(Renderer& rm) {
 
-	//Board
-	rm.render(board);
-
 	//Tiles
 	for (int a = 0; a < 9; ++a) {
 		for (int b = 0; b < 5; ++b) {
+			rm.render(map.tile[a][b].border);
 			rm.render(map.tile[a][b].sprite);
 		}
 	}
@@ -66,7 +55,12 @@ void Game::render(Renderer& rm) {
 	for (int a = 0; a < player[0].unit.size(); ++a) { player[0].unit[a].render(rm); }
 	for (int a = 0; a < player[1].unit.size(); ++a) { player[1].unit[a].render(rm); }
 
-	//Pointer
-	rm.render(pointer);
+}
 
+//Move cursor position
+void Game::move(int x, int y) {
+	map.tile[px][py].select(false);
+	px += x; px %= 9;
+	py += y; py %= 5;
+	map.tile[px][py].select(true);
 }

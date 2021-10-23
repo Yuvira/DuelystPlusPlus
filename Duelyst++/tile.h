@@ -24,8 +24,11 @@ public:
 	Tile();
 	~Tile();
 	void setFeature(eFeature f);
+	void select(bool b);
+	bool selected;
 	eFeature feature;
 	Unit* unit;
+	Sprite border;
 	Sprite sprite;
 };
 
