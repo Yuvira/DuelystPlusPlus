@@ -1,7 +1,7 @@
 //Include
 #include "unit.h"
 
-//Game constructor
+//Game constructor / destructor
 Unit::Unit(eFaction _faction, eTribe _tribe, int _cost, int _attack, int _health, std::string path) {
 	type = CARD_UNIT;
 	faction = _faction;
@@ -17,8 +17,6 @@ Unit::Unit(eFaction _faction, eTribe _tribe, int _cost, int _attack, int _health
 	else { sprite.createFromFile(path); }
 	updateStatSprites();
 }
-
-//Deconstructor
 Unit::~Unit() {}
 
 //Render sprite

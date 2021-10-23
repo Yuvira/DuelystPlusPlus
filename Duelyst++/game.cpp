@@ -1,7 +1,7 @@
 //Include
 #include "game.h"
 
-//Game constructor
+//Game constructor / destructor
 Game::Game() {
 
 	//Generate board
@@ -21,8 +21,6 @@ Game::Game() {
 	pointer.buffer[0].Char.AsciiChar = '';
 
 }
-
-//Deconstructor
 Game::~Game() {}
 
 //Input

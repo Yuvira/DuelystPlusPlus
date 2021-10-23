@@ -1,7 +1,7 @@
 //Include
 #include "renderer.h"
 
-//Renderer constructor
+//Renderer constructor / destructor
 Renderer::Renderer() {
 	frameBuffer[0] = CreateConsoleScreenBuffer (GENERIC_READ | GENERIC_WRITE, FILE_SHARE_WRITE | FILE_SHARE_READ, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
 	frameBuffer[1] = CreateConsoleScreenBuffer (GENERIC_READ | GENERIC_WRITE, FILE_SHARE_WRITE | FILE_SHARE_READ, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
@@ -9,8 +9,6 @@ Renderer::Renderer() {
 	startPos.Y = 0;
 	currentBuffer = false;
 }
-
-//Deconstructor
 Renderer::~Renderer() {}
 
 //Swap screen buffers

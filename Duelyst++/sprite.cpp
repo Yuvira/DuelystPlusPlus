@@ -1,7 +1,7 @@
 //Include
 #include "sprite.h"
 
-//Sprite constructor
+//Sprite constructor / destructor
 Sprite::Sprite(int sx, int sy) {
 	pos.X = 0;
 	pos.Y = 0;
@@ -13,8 +13,6 @@ Sprite::Sprite(int sx, int sy) {
 	buffer = new CHAR_INFO[size];
 	clear();
 }
-
-//Deconstructor
 Sprite::~Sprite() { }
 
 //Clear sprite

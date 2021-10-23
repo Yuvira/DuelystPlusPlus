@@ -1,8 +1,6 @@
 //Include
 #include "player.h"
 
-//Game constructor
+//Game constructor / destructor
 Player::Player() {}
-
-//Deconstructor
 Player::~Player() {}

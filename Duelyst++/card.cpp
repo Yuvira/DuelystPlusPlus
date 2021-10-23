@@ -1,8 +1,6 @@
 //Include
 #include "card.h"
 
-//Game constructor
+//Game constructor / destructor
 Card::Card() {}
-
-//Deconstructor
 Card::~Card() {}
