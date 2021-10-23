@@ -5,7 +5,7 @@
 Tile::Tile() { 
 	border.createFromFile("resources/tile.txt");
 	sprite.resize(5, 5); 
-	select(false);
+	setCol(false);
 } 
 Tile::~Tile() {}
 
@@ -27,20 +27,19 @@ void Tile::setFeature(eFeature f) {
 		sprite.buffer[11].Char.AsciiChar = 'Þ';
 		sprite.buffer[13].Char.AsciiChar = 'Ý';
 		sprite.buffer[17].Char.AsciiChar = 'ß';
-		sprite.buffer[7].Attributes = FOREGROUND_BLUE | FOREGROUND_INTENSITY;
-		sprite.buffer[11].Attributes = FOREGROUND_BLUE | FOREGROUND_INTENSITY;
-		sprite.buffer[13].Attributes = FOREGROUND_BLUE | FOREGROUND_INTENSITY;
-		sprite.buffer[17].Attributes = FOREGROUND_BLUE | FOREGROUND_INTENSITY;
+		sprite.buffer[7].Attributes = COLOR_LTBLUE;
+		sprite.buffer[11].Attributes = COLOR_LTBLUE;
+		sprite.buffer[13].Attributes = COLOR_LTBLUE;
+		sprite.buffer[17].Attributes = COLOR_LTBLUE;
 	}
 
 }
 
 //Select tile
-void Tile::select(bool b) {
-	WORD col = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY;
-	if (b) { col = FOREGROUND_GREEN | FOREGROUND_BLUE; }
-	for (int a = 0; a < border.size; ++a) { border.buffer[a].Attributes = col; }
-	selected = b;
+void Tile::setCol(WORD col) {
+	for (int a = 0; a < border.size; ++a) { 
+		border.buffer[a].Attributes = col; 
+	}
 }
 
 //Map constructor / destructor

@@ -53,13 +53,13 @@ void Unit::updateStatSprites() {
 	sATK.resize(s.length(), 1);
 	for (int a = 0; a < s.length(); ++a) {
 		sATK.buffer[a].Char.AsciiChar = s[a];
-		sATK.buffer[a].Attributes = FOREGROUND_GREEN;
+		sATK.buffer[a].Attributes = COLOR_GREEN;
 	}
 	s = std::to_string(health);
 	sHP.resize(s.length(), 1);
 	for (int a = 0; a < s.length(); ++a) {
 		sHP.buffer[a].Char.AsciiChar = s[a];
-		sHP.buffer[a].Attributes = FOREGROUND_RED;
+		sHP.buffer[a].Attributes = COLOR_RED;
 	}
 }
 

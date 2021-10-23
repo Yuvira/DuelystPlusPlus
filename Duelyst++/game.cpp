@@ -9,11 +9,21 @@ Game::Game() {
 	player[1].unit.push_back(*(dynamic_cast<Unit*>(cl.clist[0])));
 	player[0].unit[0].setPos(0, 2, map);
 	player[1].unit[0].setPos(8, 2, map);
+	player[0].unit[0].player = &player[0];
+	player[1].unit[0].player = &player[1];
+	player[0].unit[0].game = this;
+	player[1].unit[0].game = this;
 
 	//Misc
 	px = 0;
 	py = 0;
-	map.tile[0][0].select(true);
+	turn = false;
+	for (int a = 0; a < 9; ++a) {
+		for (int b = 0; b < 5; ++b) {
+			map.tile[a][b].setCol(COLOR_LTWHITE);
+		}
+	}
+	move(0, 0);
 
 }
 Game::~Game() {}
@@ -59,8 +69,17 @@ void Game::render(Renderer& rm) {
 
 //Move cursor position
 void Game::move(int x, int y) {
-	map.tile[px][py].select(false);
+
+	//Clear selected tiles
+	for (int a = 0; a < select.size(); ++a) { select[a]->setCol(COLOR_LTWHITE); }
+	select.clear();
+	
+	//Move cursor
 	px += x; px %= 9;
 	py += y; py %= 5;
-	map.tile[px][py].select(true);
+
+	//Select tile at cursor
+	map.tile[px][py].setCol(COLOR_AQUA);
+	select.push_back(&map.tile[px][py]);
+
 }

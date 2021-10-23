@@ -24,8 +24,7 @@ public:
 	Tile();
 	~Tile();
 	void setFeature(eFeature f);
-	void select(bool b);
-	bool selected;
+	void setCol(WORD col);
 	eFeature feature;
 	Unit* unit;
 	Sprite border;

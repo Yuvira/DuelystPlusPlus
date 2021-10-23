@@ -19,6 +19,7 @@ public:
 	CardList cl;
 	Player player[2];
 	Map map;
+	std::vector<Tile*> select;
 	bool turn;
 	int px, py;
 };
