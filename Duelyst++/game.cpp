@@ -22,8 +22,7 @@ Game::Game() {
 	player[1].unit[0].game = this;
 
 	//Misc
-	px = 0;
-	py = 0;
+	pos = Coord(0, 0);
 	turn = false;
 	for (int a = 0; a < 9; ++a) {
 		for (int b = 0; b < 5; ++b) {
@@ -54,8 +53,8 @@ void Game::input() {
 
 		//Select
 		else if (asciiVal == 32) {
-			if (map.tile[px][py].unit != nullptr) {
-				if (map.tile[px][py].unit->player == &player[turn]) {
+			if (map.tile[pos.x][pos.y].unit != nullptr) {
+				if (map.tile[pos.x][pos.y].unit->player == &player[turn]) {
 					for (int a = 0; a < 9; ++a) {
 						for (int b = 0; b < 5; ++b) {
 							if (map.tile[a][b].border.buffer[0].Attributes == COLOR_GRAY) {
@@ -65,10 +64,10 @@ void Game::input() {
 						}
 					}
 					if (moveable.size() > 0) {
-						selected = map.tile[px][py].unit;
-						map.tile[px][py].setCol(COLOR_LTWHITE);
+						selected = map.tile[pos.x][pos.y].unit;
+						map.tile[pos.x][pos.y].setCol(COLOR_LTWHITE);
 						mode = MODE_MOVE;
-						path.push_back(Coord(px, py));
+						path.push_back(pos);
 					}
 				}
 			}
@@ -90,8 +89,7 @@ void Game::input() {
 			int a = path.size() - 1;
 			if (path.size() > 0) {
 				selected->setPos(path[a].x, path[a].y, map);
-				px = path[a].x;
-				py = path[a].y;
+				pos = path[a];
 			}
 			moveable.clear();
 			selected = nullptr;
@@ -158,16 +156,16 @@ void Game::moveCursor(int x, int y) {
 	highlighted.clear();
 	
 	//Move cursor
-	px += x; px %= 9;
-	py += y; py %= 5;
+	pos.x += x; pos.x %= 9;
+	pos.y += y; pos.y %= 5;
 
 	//Select tile at cursor
-	highlightTile(px, py, COLOR_AQUA);
+	highlightTile(pos.x, pos.y, COLOR_AQUA);
 
 	//Highlight moveable spaces
-	if (map.tile[px][py].unit != nullptr) {
-		if (map.tile[px][py].unit->player == &player[turn]) {
-			highlightMoveable(px, py);
+	if (map.tile[pos.x][pos.y].unit != nullptr) {
+		if (map.tile[pos.x][pos.y].unit->player == &player[turn]) {
+			highlightMoveable(pos.x, pos.y);
 		}
 	}
 
@@ -181,9 +179,9 @@ void Game::moveArrow(int x, int y) {
 	int _y = path[path.size() - 1].y;
 
 	//Return if back to start
-	if (_x + x == px && _y + y == py) {
+	if (_x + x == pos.x && _y + y == pos.y) {
 		path.clear();
-		path.push_back(Coord(px, py));
+		path.push_back(pos);
 		return;
 	}
 

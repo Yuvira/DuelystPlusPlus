@@ -45,8 +45,8 @@ public:
 	std::vector<Coord> path;
 	Unit* selected;
 	eMode mode;
+	Coord pos;
 	bool turn;
-	int px, py;
 };
 
 #endif
