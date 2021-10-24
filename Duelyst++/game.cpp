@@ -23,12 +23,12 @@ Game::Game() {
 
 	//Misc
 	pos = Coord(0, 0);
-	turn = false;
 	for (int a = 0; a < 9; ++a) {
 		for (int b = 0; b < 5; ++b) {
 			map.tile[a][b].setCol(COLOR_LTWHITE);
 		}
 	}
+	changeTurn(false);
 	moveCursor(0, 0);
 	selected = nullptr;
 	mode = MODE_NONE;
@@ -72,6 +72,9 @@ void Game::input() {
 				}
 			}
 		}
+
+		//Change turn
+		else if (asciiVal == 10 || asciiVal == 13) { changeTurn(!turn); }
 
 	}
 
@@ -148,6 +151,24 @@ void Game::render(Renderer& rm) {
 
 }
 
+//Change turn
+void Game::changeTurn(bool t) {
+	turn = t;
+	for (int a = 0; a < hostile.size(); ++a) { hostile[a]->setCol(COLOR_LTWHITE); }
+	hostile.clear();
+	for (int a = 0; a < 9; ++a) {
+		for (int b = 0; b < 5; ++b) {
+			if (map.tile[a][b].unit != nullptr) {
+				if (map.tile[a][b].unit->player != &player[turn]) {
+					map.tile[a][b].setCol(COLOR_LTRED);
+					hostile.push_back(&map.tile[a][b]);
+				}
+			}
+		}
+	}
+	moveCursor(0, 0);
+}
+
 //Move cursor position
 void Game::moveCursor(int x, int y) {
 
@@ -158,6 +179,9 @@ void Game::moveCursor(int x, int y) {
 	//Move cursor
 	pos.x += x; pos.x %= 9;
 	pos.y += y; pos.y %= 5;
+
+	//Re-highlight enemies in red
+	for (int a = 0; a < hostile.size(); ++a) { hostile[a]->setCol(COLOR_LTRED); }
 
 	//Select tile at cursor
 	highlightTile(pos.x, pos.y, COLOR_AQUA);

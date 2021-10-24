@@ -30,6 +30,7 @@ public:
 	void input();
 	void update();
 	void render(Renderer& rm);
+	void changeTurn(bool t);
 	void moveCursor(int x, int y);
 	void moveArrow(int x, int y);
 	bool canMove(int x, int y);
@@ -42,6 +43,7 @@ public:
 	Map map;
 	std::vector<Tile*> highlighted;
 	std::vector<Tile*> moveable;
+	std::vector<Tile*> hostile;
 	std::vector<Coord> path;
 	Unit* selected;
 	eMode mode;
