@@ -4,6 +4,13 @@
 //Game constructor / destructor
 Game::Game() {
 
+	//Arrow sprites
+	arrow[0].buffer[0].Char.AsciiChar = 'Û';
+	arrow[1].buffer[0].Char.AsciiChar = 'Þ';
+	arrow[2].buffer[0].Char.AsciiChar = 'Ý';
+	arrow[3].buffer[0].Char.AsciiChar = 'Ü';
+	arrow[4].buffer[0].Char.AsciiChar = 'ß';
+
 	//Default units
 	player[0].unit.push_back(*(dynamic_cast<Unit*>(cl.clist[0])));
 	player[1].unit.push_back(*(dynamic_cast<Unit*>(cl.clist[0])));
@@ -25,6 +32,7 @@ Game::Game() {
 	}
 	moveCursor(0, 0);
 	selected = nullptr;
+	mode = MODE_NONE;
 
 }
 Game::~Game() {}
@@ -35,20 +43,63 @@ void Game::input() {
 	//Get keyPress
 	int asciiVal = _getch();
 
-	//Move pointer
-	if (asciiVal == 119 || asciiVal == 87) { moveCursor(0, 4); } //W
-	if (asciiVal == 97 || asciiVal == 65) { moveCursor(8, 0); }  //A
-	if (asciiVal == 115 || asciiVal == 83) { moveCursor(0, 1); } //S
-	if (asciiVal == 100 || asciiVal == 68) { moveCursor(1, 0); } //D
+	//Standard mode
+	if (mode == MODE_NONE) {
 
-	//Select (move unit right)
-	if (asciiVal == 32) {
-		if (map.tile[px][py].unit != nullptr) {
-			if (map.tile[px][py].unit->player == &player[turn]) {
-				map.tile[px][py].unit->setPos(px + 1, py, map);
-				moveCursor(0, 0);
+		//Move pointer
+		if (asciiVal == 119 || asciiVal == 87) { moveCursor(0, 4); }      //W
+		else if (asciiVal == 97 || asciiVal == 65) { moveCursor(8, 0); }  //A
+		else if (asciiVal == 115 || asciiVal == 83) { moveCursor(0, 1); } //S
+		else if (asciiVal == 100 || asciiVal == 68) { moveCursor(1, 0); } //D
+
+		//Select
+		else if (asciiVal == 32) {
+			if (map.tile[px][py].unit != nullptr) {
+				if (map.tile[px][py].unit->player == &player[turn]) {
+					for (int a = 0; a < 9; ++a) {
+						for (int b = 0; b < 5; ++b) {
+							if (map.tile[a][b].border.buffer[0].Attributes == COLOR_GRAY) {
+								map.tile[a][b].setCol(COLOR_AQUA);
+								moveable.push_back(&map.tile[a][b]);
+							}
+						}
+					}
+					if (moveable.size() > 0) {
+						selected = map.tile[px][py].unit;
+						map.tile[px][py].setCol(COLOR_LTWHITE);
+						mode = MODE_MOVE;
+						path.push_back(Coord(px, py));
+					}
+				}
 			}
 		}
+
+	}
+
+	//Move mode
+	else if (mode == MODE_MOVE) {
+
+		//Move arrow
+		if (asciiVal == 119 || asciiVal == 87) { moveArrow(0, -1); }     //W
+		else if (asciiVal == 97 || asciiVal == 65) { moveArrow(-1, 0); } //A
+		else if (asciiVal == 115 || asciiVal == 83) { moveArrow(0, 1); } //S
+		else if (asciiVal == 100 || asciiVal == 68) { moveArrow(1, 0); } //D
+
+		//Select
+		else if (asciiVal == 32) {
+			int a = path.size() - 1;
+			if (path.size() > 0) {
+				selected->setPos(path[a].x, path[a].y, map);
+				px = path[a].x;
+				py = path[a].y;
+			}
+			moveable.clear();
+			selected = nullptr;
+			mode = MODE_NONE;
+			path.clear();
+			moveCursor(0, 0);
+		}
+
 	}
 
 }
@@ -72,6 +123,30 @@ void Game::render(Renderer& rm) {
 	//Units
 	for (int a = 0; a < player[0].unit.size(); ++a) { player[0].unit[a].render(rm); }
 	for (int a = 0; a < player[1].unit.size(); ++a) { player[1].unit[a].render(rm); }
+
+	//Arrows
+	if (path.size() > 1) {
+		int a = path.size() - 1;
+		COORD c = map.tile[path[0].x][path[0].y].border.pos;
+		if (path[0].y > path[1].y) { drawArrow(1, c.X, c.Y, rm); }      //Start up
+		else if (path[0].x > path[1].x) { drawArrow(2, c.X, c.Y, rm); } //Start left
+		else if (path[0].y < path[1].y) { drawArrow(3, c.X, c.Y, rm); } //Start down
+		else if (path[0].x < path[1].x) { drawArrow(4, c.X, c.Y, rm); } //Start right
+		c = map.tile[path[a].x][path[a].y].border.pos;
+		if (path[a].y < path[a - 1].y) { drawArrow(5, c.X, c.Y, rm); }      //End up
+		else if (path[a].x < path[a - 1].x) { drawArrow(6, c.X, c.Y, rm); } //End left
+		else if (path[a].y > path[a - 1].y) { drawArrow(7, c.X, c.Y, rm); } //End down
+		else if (path[a].x > path[a - 1].x) { drawArrow(8, c.X, c.Y, rm); } //End right
+		if (path.size() == 3) {
+			c = map.tile[path[1].x][path[1].y].border.pos;
+			if (path[1].x == path[0].x && path[1].x == path[2].x) { drawArrow(9, c.X, c.Y, rm); }       //Up-down
+			else if (path[1].y == path[0].y && path[1].y == path[2].y) { drawArrow(10, c.X, c.Y, rm); } //Left-right
+			else if ((path[1].x > path[0].x && path[1].y > path[2].y) || (path[1].x > path[2].x && path[1].y > path[0].y)) { drawArrow(11, c.X, c.Y, rm); } //Up-left
+			else if ((path[1].x > path[0].x && path[1].y < path[2].y) || (path[1].x > path[2].x && path[1].y < path[0].y)) { drawArrow(12, c.X, c.Y, rm); } //Down-left
+			else if ((path[1].x < path[0].x && path[1].y < path[2].y) || (path[1].x < path[2].x && path[1].y < path[0].y)) { drawArrow(13, c.X, c.Y, rm); } //Down-right
+			else if ((path[1].x < path[0].x && path[1].y > path[2].y) || (path[1].x < path[2].x && path[1].y > path[0].y)) { drawArrow(14, c.X, c.Y, rm); } //Up-right
+		}
+	}
 
 }
 
@@ -98,8 +173,34 @@ void Game::moveCursor(int x, int y) {
 
 }
 
+//Move movement arrow
+void Game::moveArrow(int x, int y) {
+
+	//Get last arrow path position
+	int _x = path[path.size() - 1].x;
+	int _y = path[path.size() - 1].y;
+
+	//Return if back to start
+	if (_x + x == px && _y + y == py) {
+		path.clear();
+		path.push_back(Coord(px, py));
+		return;
+	}
+
+	//Check if can move to tile
+	for (int a = 0; a < moveable.size(); ++a) {
+		if (&map.tile[_x + x][_y + y] == moveable[a]) { break; }
+		if (a == moveable.size() - 1) { return; }
+	}
+
+	//Add position, remove intermediates if past range
+	path.push_back(Coord(_x + x, _y + y));
+	if (path.size() == 4) { path.erase(path.begin() + 1, path.begin() + 3); }
+
+}
+
 //Check if tile is moveable
-bool Game::moveable(int x, int y) {
+bool Game::canMove(int x, int y) {
 	if (x > -1 && x < 9 && y > -1 && y < 5) {
 		if (map.tile[x][y].unit == nullptr) {
 			return true;
@@ -117,16 +218,137 @@ void Game::highlightTile(int x, int y, eColor col) {
 //Highlight moveable spaces
 void Game::highlightMoveable(int x, int y) {
 	bool u = false; bool l = false; bool r = false; bool d = false;
-	if (moveable(x, y - 1)) { highlightTile(x, y - 1, COLOR_GRAY); u = true; } //UP
-	if (moveable(x - 1, y)) { highlightTile(x - 1, y, COLOR_GRAY); l = true; } //LEFT
-	if (moveable(x + 1, y)) { highlightTile(x + 1, y, COLOR_GRAY); r = true; } //RIGHT
-	if (moveable(x, y + 1)) { highlightTile(x, y + 1, COLOR_GRAY); d = true; } //DOWN
-	if (moveable(x, y - 2) && u) { highlightTile(x, y - 2, COLOR_GRAY); } //UPx2
-	if (moveable(x - 2, y) && l) { highlightTile(x - 2, y, COLOR_GRAY); } //LEFTx2
-	if (moveable(x + 2, y) && r) { highlightTile(x + 2, y, COLOR_GRAY); } //RIGHTx2
-	if (moveable(x, y + 2) && d) { highlightTile(x, y + 2, COLOR_GRAY); } //DOWNx2
-	if (moveable(x - 1, y - 1) && (u || l)) { highlightTile(x - 1, y - 1, COLOR_GRAY); } //UP-LEFT
-	if (moveable(x + 1, y - 1) && (u || r)) { highlightTile(x + 1, y - 1, COLOR_GRAY); } //UP-RIGHT
-	if (moveable(x - 1, y + 1) && (d || l)) { highlightTile(x - 1, y + 1, COLOR_GRAY); } //DOWN-LEFT
-	if (moveable(x + 1, y + 1) && (d || r)) { highlightTile(x + 1, y + 1, COLOR_GRAY); } //DOWN-RIGHT
+	if (canMove(x, y - 1)) { highlightTile(x, y - 1, COLOR_GRAY); u = true; } //Up
+	if (canMove(x - 1, y)) { highlightTile(x - 1, y, COLOR_GRAY); l = true; } //Left
+	if (canMove(x, y + 1)) { highlightTile(x, y + 1, COLOR_GRAY); d = true; } //Down
+	if (canMove(x + 1, y)) { highlightTile(x + 1, y, COLOR_GRAY); r = true; } //Right
+	if (canMove(x, y - 2) && u) { highlightTile(x, y - 2, COLOR_GRAY); } //Up x 2
+	if (canMove(x - 2, y) && l) { highlightTile(x - 2, y, COLOR_GRAY); } //Left x 2
+	if (canMove(x, y + 2) && d) { highlightTile(x, y + 2, COLOR_GRAY); } //Down x 2
+	if (canMove(x + 2, y) && r) { highlightTile(x + 2, y, COLOR_GRAY); } //Right x 2
+	if (canMove(x - 1, y - 1) && (u || l)) { highlightTile(x - 1, y - 1, COLOR_GRAY); } //Up-left
+	if (canMove(x - 1, y + 1) && (d || l)) { highlightTile(x - 1, y + 1, COLOR_GRAY); } //Down-left
+	if (canMove(x + 1, y + 1) && (d || r)) { highlightTile(x + 1, y + 1, COLOR_GRAY); } //Down-right
+	if (canMove(x + 1, y - 1) && (u || r)) { highlightTile(x + 1, y - 1, COLOR_GRAY); } //Up-right
 }
+
+//Draw arrows
+void Game::drawArrow(int a, int x, int y, Renderer& rm) {
+	if (a == 1) { //Start up
+		rm.render(arrow[0], x + 3, y + 1);
+		rm.render(arrow[0], x + 3, y);
+	}
+	else if (a == 2) { // Start left
+		rm.render(arrow[0], x + 1, y + 3);
+		rm.render(arrow[0], x, y + 3);
+	}
+	else if (a == 3) { //Start down
+		rm.render(arrow[0], x + 3, y + 5);
+		rm.render(arrow[0], x + 3, y + 6);
+	}
+	else if (a == 4) { //Start right
+		rm.render(arrow[0], x + 5, y + 3);
+		rm.render(arrow[0], x + 6, y + 3);
+	}
+	else if (a == 5) { //End up
+		rm.render(arrow[0], x + 3, y + 6);
+		rm.render(arrow[0], x + 2, y + 5);
+		rm.render(arrow[0], x + 3, y + 5);
+		rm.render(arrow[0], x + 4, y + 5);
+		rm.render(arrow[1], x + 2, y + 4);
+		rm.render(arrow[0], x + 3, y + 4);
+		rm.render(arrow[2], x + 4, y + 4);
+		rm.render(arrow[0], x + 3, y + 3);
+	}
+	else if (a == 6) { //End left
+		rm.render(arrow[0], x + 6, y + 3);
+		rm.render(arrow[0], x + 5, y + 2);
+		rm.render(arrow[0], x + 5, y + 3);
+		rm.render(arrow[0], x + 5, y + 4);
+		rm.render(arrow[3], x + 4, y + 2);
+		rm.render(arrow[0], x + 4, y + 3);
+		rm.render(arrow[4], x + 4, y + 4);
+		rm.render(arrow[0], x + 3, y + 3);
+	}
+	else if (a == 7) { //End down
+		rm.render(arrow[0], x + 3, y);
+		rm.render(arrow[0], x + 2, y + 1);
+		rm.render(arrow[0], x + 3, y + 1);
+		rm.render(arrow[0], x + 4, y + 1);
+		rm.render(arrow[1], x + 2, y + 2);
+		rm.render(arrow[0], x + 3, y + 2);
+		rm.render(arrow[2], x + 4, y + 2);
+		rm.render(arrow[0], x + 3, y + 3);
+	}
+	else if (a == 8) { //End right
+		rm.render(arrow[0], x, y + 3);
+		rm.render(arrow[0], x + 1, y + 2);
+		rm.render(arrow[0], x + 1, y + 3);
+		rm.render(arrow[0], x + 1, y + 4);
+		rm.render(arrow[3], x + 2, y + 2);
+		rm.render(arrow[0], x + 2, y + 3);
+		rm.render(arrow[4], x + 2, y + 4);
+		rm.render(arrow[0], x + 3, y + 3);
+	}
+	else if (a == 9) { //Up-down
+		rm.render(arrow[0], x + 3, y);
+		rm.render(arrow[0], x + 3, y + 1);
+		rm.render(arrow[0], x + 3, y + 2);
+		rm.render(arrow[0], x + 3, y + 3);
+		rm.render(arrow[0], x + 3, y + 4);
+		rm.render(arrow[0], x + 3, y + 5);
+		rm.render(arrow[0], x + 3, y + 6);
+	}
+	else if (a == 10) { //Left-right
+		rm.render(arrow[0], x, y + 3);
+		rm.render(arrow[0], x + 1, y + 3);
+		rm.render(arrow[0], x + 2, y + 3);
+		rm.render(arrow[0], x + 3, y + 3);
+		rm.render(arrow[0], x + 4, y + 3);
+		rm.render(arrow[0], x + 5, y + 3);
+		rm.render(arrow[0], x + 6, y + 3);
+	}
+	else if (a == 11) { //Up-left
+		rm.render(arrow[0], x, y + 3);
+		rm.render(arrow[0], x + 1, y + 3);
+		rm.render(arrow[0], x + 2, y + 3);
+		rm.render(arrow[0], x + 3, y + 3);
+		rm.render(arrow[0], x + 3, y + 2);
+		rm.render(arrow[0], x + 3, y + 1);
+		rm.render(arrow[0], x + 3, y);
+	}
+	else if (a == 12) { //Down-left
+		rm.render(arrow[0], x, y + 3);
+		rm.render(arrow[0], x + 1, y + 3);
+		rm.render(arrow[0], x + 2, y + 3);
+		rm.render(arrow[0], x + 3, y + 3);
+		rm.render(arrow[0], x + 3, y + 4);
+		rm.render(arrow[0], x + 3, y + 5);
+		rm.render(arrow[0], x + 3, y + 6);
+	}
+	else if (a == 13) { //Down-right
+		rm.render(arrow[0], x + 3, y + 6);
+		rm.render(arrow[0], x + 3, y + 5);
+		rm.render(arrow[0], x + 3, y + 4);
+		rm.render(arrow[0], x + 3, y + 3);
+		rm.render(arrow[0], x + 4, y + 3);
+		rm.render(arrow[0], x + 5, y + 3);
+		rm.render(arrow[0], x + 6, y + 3);
+	}
+	else if (a == 14) { //Up-right
+		rm.render(arrow[0], x + 6, y + 3);
+		rm.render(arrow[0], x + 5, y + 3);
+		rm.render(arrow[0], x + 4, y + 3);
+		rm.render(arrow[0], x + 3, y + 3);
+		rm.render(arrow[0], x + 3, y + 2);
+		rm.render(arrow[0], x + 3, y + 1);
+		rm.render(arrow[0], x + 3, y);
+	}
+}
+
+//Custom co-ord crap
+Coord::Coord(int _x, int _y) {
+	x = _x;
+	y = _y;
+}
+Coord::~Coord() {}

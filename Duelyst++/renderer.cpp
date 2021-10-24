@@ -27,6 +27,16 @@ void Renderer::render(Sprite s) {
 	WriteConsoleOutputA(frameBuffer[currentBuffer], s.buffer, s.spriteSize, s.aniPos, &t);
 }
 
+//Render sprite at position
+void Renderer::render(Sprite s, int x, int y) {
+	SMALL_RECT t;
+	t.Top = y;
+	t.Left = x;
+	t.Bottom = y + s.spriteSize.Y;
+	t.Right = x+ s.spriteSize.X;
+	WriteConsoleOutputA(frameBuffer[currentBuffer], s.buffer, s.spriteSize, s.aniPos, &t);
+}
+
 //Clear screen
 void Renderer::cls() {
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
