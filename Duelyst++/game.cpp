@@ -130,6 +130,11 @@ void Game::input() {
 void Game::update() {
 
 	//Update units
+	bool reloop;
+	do { 
+		reloop = false;
+		for (int a = 0; a < unit.size(); ++a) { unit[a]->update(reloop); }
+	} while (reloop);
 	for (int a = 0; a < unit.size(); ++a) { unit[a]->updateStatSprites(); }
 
 	//Update mana bars

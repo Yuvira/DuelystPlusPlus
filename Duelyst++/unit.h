@@ -41,6 +41,7 @@ public:
 	void render(Renderer& rm);
 	void attack(Unit& u);
 	void setPos(int x, int y, Map& m);
+	void update(bool& r);
 	void updateStatSprites();
 	void updateDetailStats();
 	void generateDetails();

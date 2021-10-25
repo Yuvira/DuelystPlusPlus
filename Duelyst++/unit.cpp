@@ -1,5 +1,5 @@
 //Include
-#include "unit.h"
+#include "game.h"
 
 //Game constructor / destructor
 Unit::Unit(eFaction _faction, eTribe _tribe, int _cost, int _atk, int _hp, std::string path, std::string _name) {
@@ -50,6 +50,15 @@ void Unit::setPos(int x, int y, Map& m) {
 	sHP.pos.X = (_x + 4) - (sHP.size - 1);
 	sHP.pos.Y = _y + 4;
 	m.tile[x][y].unit = this;
+}
+
+//Check if unit has died
+void Unit::update(bool& r) {
+	if (hp < 1) {
+		onDeath();
+		for (int a = 0; a < game->unit.size(); ++a) { game->unit[a]->onDeathAny(*this); }
+		r = true;
+	}
 }
 
 //Update HP & ATK sprites
@@ -140,7 +149,35 @@ void Unit::onSummon() {}
 void Unit::onSummonAny(Unit& u) {}
 
 //When this unit dies
-void Unit::onDeath() {}
+void Unit::onDeath() {
+
+	//Remove tile reference
+	for (int a = 0; a < 9; ++a) {
+		for (int b = 0; b < 5; ++b) {
+			if (game->map.tile[a][b].unit == this) {
+				game->map.tile[a][b].unit = nullptr;
+				for (int c = 0; c < game->hostile.size(); ++c) {
+					if (game->hostile[c] == &game->map.tile[a][b]) {
+						game->hostile.erase(game->hostile.begin() + c);
+						break;
+					}
+				}
+				goto end;
+			}
+		}
+	}
+	end:
+
+	//Move to graveyard
+	for (int a = 0; a < game->unit.size(); ++a) {
+		if (game->unit[a] == this) {
+			game->unit.erase(game->unit.begin() + a);
+			game->grave.push_back(this);
+			break;
+		}
+	}
+
+}
 
 //When any unit dies (Deathwatch)
 void Unit::onDeathAny(Unit& u) {}
