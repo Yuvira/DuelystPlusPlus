@@ -8,6 +8,7 @@ Player::~Player() {}
 //Initialize deck/hand
 void Player::init(CardList& cl, int _mana) {
 	mana = _mana;
+	manaMax = _mana;
 	for (int a = 0; a < 9; ++a) {
 		crystal[a].buffer[0].Char.AsciiChar = '';
 		crystal[a].setCol(COLOR_GRAY);
@@ -23,7 +24,8 @@ void Player::init(CardList& cl, int _mana) {
 //Update mana sprites
 void Player::updateMana(eColor col) {
 	for (int a = 0; a < mana; ++a) { crystal[a].setCol(col); }
-	for (int a = mana; a < 9; ++a) { crystal[a].setCol(COLOR_GRAY); }
+	for (int a = mana; a < manaMax; ++a) { crystal[a].setCol(COLOR_LTWHITE); }
+	for (int a = manaMax; a < 9; ++a) { crystal[a].setCol(COLOR_GRAY); }
 }
 
 //Shuffle deck

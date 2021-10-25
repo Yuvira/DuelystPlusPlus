@@ -215,7 +215,8 @@ void Game::renderSidebar(Renderer& rm) {
 void Game::changeTurn(bool t) {
 	turn = t;
 	if (turn == false) { ++turnCount; }
-	if (turnCount > 1) { player[turn].mana = min(player[turn].mana + 1, 9); }
+	if (turnCount > 1 && player[turn].manaMax < 9) { ++player[turn].manaMax; }
+	player[turn].mana = player[turn].manaMax;
 	if (turn) { light.setCol(COLOR_RED); }
 	else { light.setCol(COLOR_LTBLUE); }
 	for (int a = 0; a < hostile.size(); ++a) { hostile[a]->setCol(COLOR_LTWHITE); }

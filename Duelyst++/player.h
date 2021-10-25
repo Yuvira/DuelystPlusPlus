@@ -15,6 +15,7 @@ public:
 	void updateMana(eColor col);
 	void shuffle();
 	int mana;
+	int manaMax;
 	Sprite crystal[9];
 	Card* general;
 	std::vector<Card*> deck;
