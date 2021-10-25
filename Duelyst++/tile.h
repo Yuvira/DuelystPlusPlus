@@ -32,7 +32,7 @@ class Tile {
 public:
 	Tile();
 	~Tile();
-	void setCol(WORD col);
+	void setCol(eColor col);
 	Sprite border;
 };
 

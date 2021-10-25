@@ -10,7 +10,7 @@ void Player::init(CardList& cl, int _mana) {
 	mana = _mana;
 	for (int a = 0; a < 9; ++a) {
 		crystal[a].buffer[0].Char.AsciiChar = '';
-		crystal[a].buffer[0].Attributes = COLOR_GRAY;
+		crystal[a].setCol(COLOR_GRAY);
 	}
 	general = cl.clist[0];
 	for (int a = 0; a < 20; ++a) { deck.push_back(cl.clist[1]); }
@@ -22,8 +22,8 @@ void Player::init(CardList& cl, int _mana) {
 
 //Update mana sprites
 void Player::updateMana(eColor col) {
-	for (int a = 0; a < mana; ++a) { crystal[a].buffer[0].Attributes = col; }
-	for (int a = mana; a < 9; ++a) { crystal[a].buffer[0].Attributes = COLOR_GRAY; }
+	for (int a = 0; a < mana; ++a) { crystal[a].setCol(col); }
+	for (int a = mana; a < 9; ++a) { crystal[a].setCol(COLOR_GRAY); }
 }
 
 //Shuffle deck

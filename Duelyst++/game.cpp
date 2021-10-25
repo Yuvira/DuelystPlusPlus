@@ -13,10 +13,8 @@ Game::Game() {
 
 	//Turn indicator
 	light.resize(3, 1);
-	for (int a = 0; a < 3; ++a) {
-		light.buffer[a].Char.AsciiChar = c[a + 8];
-		light.buffer[a].Attributes = COLOR_LTBLUE;
-	}
+	for (int a = 0; a < 3; ++a) { light.buffer[a].Char.AsciiChar = c[a + 8]; }
+	light.setCol(COLOR_LTBLUE);
 
 	//Initialize players
 	player[0].init(cl, 2);
@@ -188,10 +186,8 @@ void Game::changeTurn(bool t) {
 	turn = t;
 	if (turn == false) { ++turnCount; }
 	if (turnCount > 1) { player[turn].mana = min(player[turn].mana + 1, 9); }
-	for (int a = 0; a < 3; ++a) {
-		if (turn) { light.buffer[a].Attributes = COLOR_RED; }
-		else { light.buffer[a].Attributes = COLOR_LTBLUE; }
-	}
+	if (turn) { light.setCol(COLOR_RED); }
+	else { light.setCol(COLOR_LTBLUE); }
 	for (int a = 0; a < hostile.size(); ++a) { hostile[a]->setCol(COLOR_LTWHITE); }
 	hostile.clear();
 	for (int a = 0; a < 9; ++a) {

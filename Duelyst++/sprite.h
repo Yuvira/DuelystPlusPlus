@@ -34,6 +34,7 @@ public:
 	~Sprite();
 	void clear();
 	void resize(int sx, int sy);
+	void setCol(eColor col);
 	void createFromFile(std::string filename);
 	char symbol;
 	int size;

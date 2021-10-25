@@ -19,7 +19,7 @@ Sprite::~Sprite() { }
 void Sprite::clear() {
 	for (int a = 0; a < size; ++a) {
 		buffer[a].Char.AsciiChar = ' ';
-		buffer[a].Attributes = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY;
+		buffer[a].Attributes = COLOR_LTWHITE;
 	}
 }
 
@@ -30,6 +30,13 @@ void Sprite::resize(int sx, int sy) {
 	size = sx * sy;
 	buffer = new CHAR_INFO[size];
 	clear();
+}
+
+//Set color
+void Sprite::setCol(eColor col) {
+	for (int a = 0; a < size; ++a) {
+		buffer[a].Attributes = col;
+	}
 }
 
 //Generate sprite from text file
@@ -50,7 +57,7 @@ void Sprite::createFromFile(std::string filename) {
 		buffer = new CHAR_INFO[size];
 		for (int a = 0; a < size; ++a) {
 			buffer[a].Char.AsciiChar = in[a];
-			buffer[a].Attributes = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY;
+			buffer[a].Attributes = COLOR_LTWHITE;
 		}
 		file.close();
 	}

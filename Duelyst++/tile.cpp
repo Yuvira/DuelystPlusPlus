@@ -16,11 +16,7 @@ BoardTile::BoardTile() : Tile() {
 BoardTile::~BoardTile() {}
 
 //Select tile
-void Tile::setCol(WORD col) {
-	for (int a = 0; a < border.size; ++a) { 
-		border.buffer[a].Attributes = col; 
-	}
-}
+void Tile::setCol(eColor col) { border.setCol(col); }
 
 //Set tile feature
 void BoardTile::setFeature(eFeature f) {
@@ -40,10 +36,7 @@ void BoardTile::setFeature(eFeature f) {
 		sprite.buffer[11].Char.AsciiChar = 'Þ';
 		sprite.buffer[13].Char.AsciiChar = 'Ý';
 		sprite.buffer[17].Char.AsciiChar = 'ß';
-		sprite.buffer[7].Attributes = COLOR_LTBLUE;
-		sprite.buffer[11].Attributes = COLOR_LTBLUE;
-		sprite.buffer[13].Attributes = COLOR_LTBLUE;
-		sprite.buffer[17].Attributes = COLOR_LTBLUE;
+		sprite.setCol(COLOR_LTBLUE);
 	}
 
 }

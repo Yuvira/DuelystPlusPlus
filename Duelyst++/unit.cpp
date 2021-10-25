@@ -61,17 +61,13 @@ void Unit::setPos(int x, int y, Map& m) {
 void Unit::updateStatSprites() {
 	std::string s = std::to_string(atk);
 	sATK.resize(s.length(), 1);
-	for (int a = 0; a < s.length(); ++a) {
-		sATK.buffer[a].Char.AsciiChar = s[a];
-		sATK.buffer[a].Attributes = COLOR_GREEN;
-	}
+	for (int a = 0; a < s.length(); ++a) { sATK.buffer[a].Char.AsciiChar = s[a]; }
+	sATK.setCol(COLOR_GREEN);
 	int i = sHP.size;
 	s = std::to_string(hp);
 	sHP.resize(s.length(), 1);
-	for (int a = 0; a < s.length(); ++a) {
-		sHP.buffer[a].Char.AsciiChar = s[a];
-		sHP.buffer[a].Attributes = COLOR_RED;
-	}
+	for (int a = 0; a < s.length(); ++a) { sHP.buffer[a].Char.AsciiChar = s[a]; }
+	sHP.setCol(COLOR_RED);
 	sHP.pos.X += i - s.length();
 }
 
