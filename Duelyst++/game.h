@@ -47,6 +47,7 @@ public:
 	void drawArrow(int a, int x, int y, Renderer& rm);
 	std::vector<Card*> grave;
 	std::vector<Unit*> unit;
+	Sprite light;
 	Sprite board;
 	Sprite chars[8];
 	CardList cl;
@@ -67,6 +68,7 @@ public:
 	int hPos;
 	int sPos;
 	bool turn;
+	int turnCount;
 };
 
 #endif

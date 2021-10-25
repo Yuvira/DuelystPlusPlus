@@ -47,7 +47,7 @@ void Unit::setPos(int x, int y, Map& m) {
 		}
 	}
 	int _x = (x * 7) + 2;
-	int _y = (y * 7) + 2;
+	int _y = (y * 7) + 6;
 	sprite.pos.X = _x;
 	sprite.pos.Y = _y;
 	sATK.pos.X = _x;

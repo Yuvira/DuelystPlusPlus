@@ -8,12 +8,19 @@ Game::Game() {
 	board.createFromFile("resources/board.txt");
 
 	//Character sprites
-	char c[] = { 'Û', 'Þ', 'Ý', 'Ü', 'ß', 'X', '\\', '/' };
+	char c[] = { 'Û', 'Þ', 'Ý', 'Ü', 'ß', 'X', '\\', '/', '®', 'é', '¯' };
 	for (int a = 0; a < 8; ++a) { chars[a].buffer[0].Char.AsciiChar = c[a]; }
 
+	//Turn indicator
+	light.resize(3, 1);
+	for (int a = 0; a < 3; ++a) {
+		light.buffer[a].Char.AsciiChar = c[a + 8];
+		light.buffer[a].Attributes = COLOR_LTBLUE;
+	}
+
 	//Initialize players
-	player[0].init(cl);
-	player[1].init(cl);
+	player[0].init(cl, 2);
+	player[1].init(cl, 3);
 
 	//Default units
 	summon(cl.clist[0], false, 0, 2);
@@ -24,13 +31,14 @@ Game::Game() {
 	//Hand
 	for (int a = 0; a < 7; ++a) {
 		hand[a].border.pos.X = (a * 7) + 1;
-		hand[a].border.pos.Y = 37;
+		hand[a].border.pos.Y = 41;
 	}
 
-	//Misc
+	//Variables
 	pos = Coord(0, 0);
 	hPos = -1;
 	sPos = -1;
+	turnCount = 0;
 	changeTurn(false);
 	moveCursor(0, 0);
 	activeUnit = nullptr;
@@ -80,8 +88,10 @@ void Game::input() {
 
 		//Select card
 		else if (asciiVal == 32) {
-			if (player[turn].hand[hPos]->type == CARD_UNIT) {
-				selectHand();
+			if (hPos < player[turn].hand.size()) {
+				if (player[turn].hand[hPos]->type == CARD_UNIT) {
+					selectHand();
+				}
 			}
 		}
 
@@ -124,6 +134,10 @@ void Game::update() {
 	//Update units
 	for (int a = 0; a < unit.size(); ++a) { unit[a]->updateStatSprites(); }
 
+	//Update mana bars
+	player[0].updateMana(COLOR_LTBLUE);
+	player[1].updateMana(COLOR_RED);
+
 }
 
 //Render objects
@@ -131,6 +145,15 @@ void Game::render(Renderer& rm) {
 
 	//Board
 	rm.render(board);
+
+	//Mana crystals
+	for (int a = 0; a < 9; ++a) {
+		rm.render(player[0].crystal[a], (a * 2) + 2, 2);
+		rm.render(player[1].crystal[a], 62 - (a * 2), 2);
+	}
+
+	//Turn indicator
+	rm.render(light, 31, 2);
 
 	//Tiles
 	for (int a = 0; a < 9; ++a) {
@@ -156,13 +179,19 @@ void Game::render(Renderer& rm) {
 
 	//Hand
 	for (int a = 0; a < 7; ++a) { rm.render(hand[a].border); }
-	for (int a = 0; a < player[turn].hand.size(); ++a) { rm.render(player[turn].hand[a]->sprite, (a * 7) + 9, 38); }
+	for (int a = 0; a < player[turn].hand.size(); ++a) { rm.render(player[turn].hand[a]->sprite, (a * 7) + 9, 42); }
 
 }
 
 //Change turn
 void Game::changeTurn(bool t) {
 	turn = t;
+	if (turn == false) { ++turnCount; }
+	if (turnCount > 1) { player[turn].mana = min(player[turn].mana + 1, 9); }
+	for (int a = 0; a < 3; ++a) {
+		if (turn) { light.buffer[a].Attributes = COLOR_RED; }
+		else { light.buffer[a].Attributes = COLOR_LTBLUE; }
+	}
 	for (int a = 0; a < hostile.size(); ++a) { hostile[a]->setCol(COLOR_LTWHITE); }
 	hostile.clear();
 	for (int a = 0; a < 9; ++a) {

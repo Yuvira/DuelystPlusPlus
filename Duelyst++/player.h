@@ -11,9 +11,12 @@ class Player {
 public:
 	Player();
 	~Player();
-	void init(CardList& cl);
+	void init(CardList& cl, int _mana);
+	void updateMana(eColor col);
 	void shuffle();
 	int mana;
+	Sprite crystal[9];
+	Card* general;
 	std::vector<Card*> deck;
 	std::vector<Card*> hand;
 };

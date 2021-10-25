@@ -6,14 +6,24 @@ Player::Player() {}
 Player::~Player() {}
 
 //Initialize deck/hand
-void Player::init(CardList& cl) {
+void Player::init(CardList& cl, int _mana) {
+	mana = _mana;
+	for (int a = 0; a < 9; ++a) {
+		crystal[a].buffer[0].Char.AsciiChar = '';
+		crystal[a].buffer[0].Attributes = COLOR_GRAY;
+	}
+	general = cl.clist[0];
 	for (int a = 0; a < 20; ++a) { deck.push_back(cl.clist[1]); }
-	for (int a = 0; a < 20; ++a) { deck.push_back(cl.clist[2]); }
-
+	for (int a = 0; a < 19; ++a) { deck.push_back(cl.clist[2]); }
 	shuffle();
-
 	for (int a = 0; a < 5; ++a) { hand.push_back(deck[a]); }
 	deck.erase(deck.begin(), deck.begin() + 5);
+}
+
+//Update mana sprites
+void Player::updateMana(eColor col) {
+	for (int a = 0; a < mana; ++a) { crystal[a].buffer[0].Attributes = col; }
+	for (int a = mana; a < 9; ++a) { crystal[a].buffer[0].Attributes = COLOR_GRAY; }
 }
 
 //Shuffle deck

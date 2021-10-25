@@ -53,9 +53,9 @@ Map::Map() {
 	for (int a = 0; a < 9; ++a) {
 		for (int b = 0; b < 5; ++b) {
 			tile[a][b].border.pos.X = (7 * a) + 1;
-			tile[a][b].border.pos.Y = (7 * b) + 1;
+			tile[a][b].border.pos.Y = (7 * b) + 5;
 			tile[a][b].sprite.pos.X = (7 * a) + 2;
-			tile[a][b].sprite.pos.Y = (7 * b) + 2;
+			tile[a][b].sprite.pos.Y = (7 * b) + 6;
 			tile[a][b].pos = Coord(a, b);
 		}
 	}
