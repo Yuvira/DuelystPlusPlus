@@ -12,6 +12,14 @@ enum eCard {
 	CARD_ARTIFACT
 };
 
+enum eRarity {
+	RARITY_NONE,
+	RARITY_COMMON,
+	RARITY_RARE,
+	RARITY_EPIC,
+	RARITY_LEGENDARY
+};
+
 //Card class
 class Card {
 public:
