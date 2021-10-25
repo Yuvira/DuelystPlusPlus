@@ -32,11 +32,17 @@ class Tile {
 public:
 	Tile();
 	~Tile();
-	void setFeature(eFeature f);
 	void setCol(WORD col);
+	Sprite border;
+};
+
+class BoardTile : public Tile {
+public:
+	BoardTile();
+	~BoardTile();
+	void setFeature(eFeature f);
 	eFeature feature;
 	Unit* unit;
-	Sprite border;
 	Sprite sprite;
 	Coord pos;
 };
@@ -46,7 +52,7 @@ class Map {
 public:
 	Map();
 	~Map();
-	Tile tile[9][5];
+	BoardTile tile[9][5];
 };
 
 #endif

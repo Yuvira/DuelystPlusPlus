@@ -8,7 +8,7 @@ int main() {
 
 	//Setup
 	system("title Duelyst++");
-	system("mode 65,37");
+	system("mode 65,45");
 	srand(time(NULL));
 
 	//Variables

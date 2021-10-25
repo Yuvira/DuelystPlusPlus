@@ -2,13 +2,14 @@
 #include "unit.h"
 
 //Game constructor / destructor
-Unit::Unit(eFaction _faction, eTribe _tribe, int _cost, int _atk, int _hp, std::string path) {
+Unit::Unit(eFaction _faction, eTribe _tribe, int _cost, int _atk, int _hp, std::string path, std::string _name) {
 	type = CARD_UNIT;
 	faction = _faction;
 	tribe = _tribe;
 	cost = _cost;
 	atk = _atk;
 	hp = _hp;
+	name = _name;
 	onSummon = std::bind(&Unit::doNothing, this);
 	onSummonAny = std::bind(&Unit::doNothingU, this, std::placeholders::_1);
 	onDeath = std::bind(&Unit::doNothing, this);
@@ -16,7 +17,7 @@ Unit::Unit(eFaction _faction, eTribe _tribe, int _cost, int _atk, int _hp, std::
 	onAttack = std::bind(&Unit::doNothingU, this, std::placeholders::_1);
 	onAttacked = std::bind(&Unit::doNothingU, this, std::placeholders::_1);
 	if (path == "") { sprite.resize(5, 5); }
-	else { sprite.createFromFile(path); }
+	else { sprite.createFromFile("resources/units/" + path + ".txt"); }
 	updateStatSprites();
 }
 Unit::~Unit() {}

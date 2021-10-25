@@ -13,8 +13,6 @@ public:
 	int mana;
 	std::vector<Card*> deck;
 	std::vector<Card*> hand;
-	std::vector<Card*> grave;
-	std::vector<Unit> unit;
 };
 
 #endif

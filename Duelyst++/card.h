@@ -26,6 +26,7 @@ public:
 	Card();
 	virtual ~Card();
 	eCard type;
+	std::string name;
 	Sprite sprite;
 	Sprite desc;
 };

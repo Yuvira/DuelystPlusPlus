@@ -3,7 +3,8 @@
 
 //Game constructor / destructor
 CardList::CardList() {
-	ulist.push_back(Unit(FACTION_LYONAR, TRIBE_GENERAL, 0, 2, 25, "resources/units/lyonargeneral1.txt"));
-	clist.push_back(&ulist[0]);
+	ulist.push_back(Unit(FACTION_LYONAR, TRIBE_GENERAL, 0, 2, 25, "lyonargeneral1", "Argeon Highmayne"));
+	ulist.push_back(Unit(FACTION_NEUTRAL, TRIBE_GOLEM, 3, 4, 3, "bloodgolem", "Bloodshard Golem"));
+	for (int a = 0; a < ulist.size(); ++a) { clist.push_back(&ulist[a]); }
 }
 CardList::~CardList() {}

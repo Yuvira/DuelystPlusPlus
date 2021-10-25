@@ -38,7 +38,7 @@ enum eTribe {
 //Unit class
 class Unit : public Card {
 public:
-	Unit(eFaction = FACTION_NEUTRAL, eTribe = TRIBE_NONE, int = 0, int = 0, int = 0, std::string = "");
+	Unit(eFaction = FACTION_NEUTRAL, eTribe = TRIBE_NONE, int = 0, int = 0, int = 0, std::string = "", std::string = "???");
 	~Unit();
 	void render(Renderer& rm);
 	void attack(Unit& u);

@@ -4,15 +4,26 @@
 //Tile constructor / destructor
 Tile::Tile() { 
 	border.createFromFile("resources/tile.txt");
-	sprite.resize(5, 5);
-	setFeature(TILE_NONE);
-	setCol(false);
-	unit = nullptr;
+	setCol(COLOR_LTWHITE);
 } 
 Tile::~Tile() {}
 
+BoardTile::BoardTile() : Tile() {
+	sprite.resize(5, 5);
+	setFeature(TILE_NONE);
+	unit = nullptr;
+}
+BoardTile::~BoardTile() {}
+
+//Select tile
+void Tile::setCol(WORD col) {
+	for (int a = 0; a < border.size; ++a) { 
+		border.buffer[a].Attributes = col; 
+	}
+}
+
 //Set tile feature
-void Tile::setFeature(eFeature f) {
+void BoardTile::setFeature(eFeature f) {
 
 	//Return if already set
 	if (feature == f) { return; }
@@ -35,13 +46,6 @@ void Tile::setFeature(eFeature f) {
 		sprite.buffer[17].Attributes = COLOR_LTBLUE;
 	}
 
-}
-
-//Select tile
-void Tile::setCol(WORD col) {
-	for (int a = 0; a < border.size; ++a) { 
-		border.buffer[a].Attributes = col; 
-	}
 }
 
 //Map constructor / destructor

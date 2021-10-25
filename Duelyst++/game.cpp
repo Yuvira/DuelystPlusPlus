@@ -4,6 +4,9 @@
 //Game constructor / destructor
 Game::Game() {
 
+	//Board border
+	board.createFromFile("resources/board.txt");
+
 	//Arrow sprites
 	arrow[0].buffer[0].Char.AsciiChar = 'Û';
 	arrow[1].buffer[0].Char.AsciiChar = 'Þ';
@@ -17,25 +20,23 @@ Game::Game() {
 	sword[2].buffer[0].Char.AsciiChar = '/';
 
 	//Default units
-	player[0].unit.push_back(*(dynamic_cast<Unit*>(cl.clist[0])));
-	player[1].unit.push_back(*(dynamic_cast<Unit*>(cl.clist[0])));
-	player[0].unit[0].setPos(0, 2, map);
-	player[1].unit[0].setPos(8, 2, map);
-	player[0].unit[0].player = &player[0];
-	player[1].unit[0].player = &player[1];
-	player[0].unit[0].game = this;
-	player[1].unit[0].game = this;
+	summon(cl.clist[0], false, 0, 2);
+	summon(cl.clist[0], true, 8, 2);
+	summon(cl.clist[1], false, 1, 2);
+	summon(cl.clist[1], true, 7, 2);
+
+	//Hand
+	for (int a = 0; a < 7; ++a) {
+		hand[a].border.pos.X = (a * 7) + 1;
+		hand[a].border.pos.Y = 37;
+	}
 
 	//Misc
 	pos = Coord(0, 0);
-	for (int a = 0; a < 9; ++a) {
-		for (int b = 0; b < 5; ++b) {
-			map.tile[a][b].setCol(COLOR_LTWHITE);
-		}
-	}
+	hPos = -1;
 	changeTurn(false);
 	moveCursor(0, 0);
-	selected = nullptr;
+	activeUnit = nullptr;
 	attack = nullptr;
 	mode = MODE_NONE;
 
@@ -52,8 +53,8 @@ void Game::input() {
 	if (mode == MODE_NONE) {
 
 		//Move pointer
-		if (asciiVal == 119 || asciiVal == 87) { moveCursor(0, 4); }      //W
-		else if (asciiVal == 97 || asciiVal == 65) { moveCursor(8, 0); }  //A
+		if (asciiVal == 119 || asciiVal == 87) { moveCursor(0, -1); }     //W
+		else if (asciiVal == 97 || asciiVal == 65) { moveCursor(-1, 0); } //A
 		else if (asciiVal == 115 || asciiVal == 83) { moveCursor(0, 1); } //S
 		else if (asciiVal == 100 || asciiVal == 68) { moveCursor(1, 0); } //D
 
@@ -68,6 +69,20 @@ void Game::input() {
 
 		//Change turn
 		else if (asciiVal == 10 || asciiVal == 13) { changeTurn(!turn); }
+
+	}
+
+	//Hand mode
+	else if (mode == MODE_HAND) {
+
+		//Move pointer
+		if (asciiVal == 119 || asciiVal == 87) { moveCursorHand(0, 4); }       //W
+		else if (asciiVal == 97 || asciiVal == 65) { moveCursorHand(-1, -1); } //A
+		else if (asciiVal == 115 || asciiVal == 83) { moveCursorHand(0, 0); }  //S
+		else if (asciiVal == 100 || asciiVal == 68) { moveCursorHand(1, -1); } //D
+
+		//Select card
+		else if (asciiVal == 32) {}
 
 	}
 
@@ -94,13 +109,15 @@ void Game::input() {
 void Game::update() {
 
 	//Update units
-	for (int a = 0; a < player[0].unit.size(); ++a) { player[0].unit[a].updateStatSprites(); }
-	for (int a = 0; a < player[1].unit.size(); ++a) { player[1].unit[a].updateStatSprites(); }
+	for (int a = 0; a < unit.size(); ++a) { unit[a]->updateStatSprites(); }
 
 }
 
 //Render objects
 void Game::render(Renderer& rm) {
+
+	//Board
+	rm.render(board);
 
 	//Tiles
 	for (int a = 0; a < 9; ++a) {
@@ -111,8 +128,7 @@ void Game::render(Renderer& rm) {
 	}
 
 	//Units
-	for (int a = 0; a < player[0].unit.size(); ++a) { player[0].unit[a].render(rm); }
-	for (int a = 0; a < player[1].unit.size(); ++a) { player[1].unit[a].render(rm); }
+	for (int a = 0; a < unit.size(); ++a) { unit[a]->render(rm); }
 
 	//Attack indicators
 	if (attack != nullptr) {
@@ -124,6 +140,9 @@ void Game::render(Renderer& rm) {
 
 	//Arrows
 	else if (path.size() > 1) { drawPath(rm); }
+
+	//Hand
+	for (int a = 0; a < 7; ++a) { rm.render(hand[a].border); }
 
 }
 
@@ -145,8 +164,18 @@ void Game::changeTurn(bool t) {
 	moveCursor(0, 0);
 }
 
+//Summon at position
+void Game::summon(Card* c, bool p, int x, int y) {
+	int i = unit.size();
+	unit.push_back(new Unit);
+	*unit[i] = *(dynamic_cast<Unit*>(c));
+	unit[i]->setPos(x, y, map);
+	unit[i]->player = &player[p];
+	unit[i]->game = this;
+}
+
 //Select unit
-void Game::select(Tile& t) {
+void Game::select(BoardTile& t) {
 	for (int a = 0; a < highlighted.size(); ++a) {
 		highlighted[a]->setCol(COLOR_AQUA);
 		moveable.push_back(highlighted[a]);
@@ -157,7 +186,7 @@ void Game::select(Tile& t) {
 			attackable.push_back(hostile[a]);
 		}
 	}
-	selected = t.unit;
+	activeUnit = t.unit;
 	t.setCol(COLOR_LTWHITE);
 	mode = MODE_MOVE;
 	path.push_back(pos);
@@ -167,12 +196,12 @@ void Game::select(Tile& t) {
 void Game::moveUnit() {
 	int a = path.size() - 1;
 	if (a > 0) {
-		selected->setPos(path[a].x, path[a].y, map);
+		activeUnit->setPos(path[a].x, path[a].y, map);
 		pos = path[a];
 	}
 	moveable.clear();
 	attackable.clear();
-	selected = nullptr;
+	activeUnit = nullptr;
 	mode = MODE_NONE;
 	path.clear();
 	moveCursor(0, 0);
@@ -180,11 +209,12 @@ void Game::moveUnit() {
 
 //Attack unit
 void Game::attackUnit() {
-	selected->attack(*attack->unit);
-	if (canAttack(*attack, map.tile[pos.x][pos.y])) { attack->unit->attack(*selected); }
+	activeUnit->attack(*attack->unit);
+	if (canAttack(*attack, map.tile[pos.x][pos.y])) { attack->unit->attack(*activeUnit); }
+	pos = attack->pos;
 	moveable.clear();
 	attackable.clear();
-	selected = nullptr;
+	activeUnit = nullptr;
 	attack = nullptr;
 	mode = MODE_NONE;
 	path.clear();
@@ -199,21 +229,41 @@ void Game::moveCursor(int x, int y) {
 	highlighted.clear();
 	
 	//Move cursor
-	pos.x += x; pos.x %= 9;
-	pos.y += y; pos.y %= 5;
+	pos.x = (pos.x + x + 9) % 9;
+	if (((y == -1 && pos.y == 0) || (y == 1 && pos.y == 4)) && pos.x < 7) {
+		hPos = pos.x;
+		hand[hPos].setCol(COLOR_AQUA);
+		pos = Coord(-1, -1);
+		mode = MODE_HAND;
+	}
+	else { pos.y = (pos.y + y + 5) % 5; }
 
 	//Re-highlight enemies in red
 	for (int a = 0; a < hostile.size(); ++a) { hostile[a]->setCol(COLOR_LTRED); }
 
 	//Select tile at cursor
-	highlightTile(pos.x, pos.y, COLOR_AQUA);
+	if (mode == MODE_NONE) { highlightTile(pos.x, pos.y, COLOR_AQUA); }
 
-	//Highlight moveable spaces
-	if (map.tile[pos.x][pos.y].unit != nullptr) {
-		if (map.tile[pos.x][pos.y].unit->player == &player[turn]) {
-			highlightMoveable(pos.x, pos.y);
-		}
+}
+
+//Move cursor position
+void Game::moveCursorHand(int x, int y) {
+
+	//Deselect tile
+	hand[hPos].setCol(COLOR_LTWHITE);
+
+	//Move cursor
+	hPos = (hPos + x + 7) % 7;
+	if (y != -1) {
+		pos = Coord(hPos, y);
+		highlightTile(pos.x, pos.y, COLOR_AQUA);
+		hPos = -1;
+		mode = MODE_NONE;
+		return;
 	}
+
+	//Select new tile
+	hand[hPos].setCol(COLOR_AQUA);
 
 }
 
@@ -266,7 +316,7 @@ bool Game::canMove(int x, int y) {
 }
 
 //Check if unit can attack position
-bool Game::canAttack(Tile& t1, Tile& t2) {
+bool Game::canAttack(BoardTile& t1, BoardTile& t2) {
 	if (abs(t1.pos.x - t2.pos.x) < 2 && abs(t1.pos.y - t2.pos.y) < 2) {
 		return true;
 	}
@@ -277,6 +327,13 @@ bool Game::canAttack(Tile& t1, Tile& t2) {
 void Game::highlightTile(int x, int y, eColor col) {
 	map.tile[x][y].setCol(col);
 	highlighted.push_back(&map.tile[x][y]);
+	if (col == COLOR_AQUA) {
+		if (map.tile[pos.x][pos.y].unit != nullptr) {
+			if (map.tile[pos.x][pos.y].unit->player == &player[turn]) {
+				highlightMoveable(pos.x, pos.y);
+			}
+		}
+	}
 }
 
 //Highlight moveable spaces
