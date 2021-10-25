@@ -11,6 +11,11 @@ Game::Game() {
 	arrow[3].buffer[0].Char.AsciiChar = 'Ü';
 	arrow[4].buffer[0].Char.AsciiChar = 'ß';
 
+	//Sword sprites
+	sword[0].buffer[0].Char.AsciiChar = 'X';
+	sword[1].buffer[0].Char.AsciiChar = '\\';
+	sword[2].buffer[0].Char.AsciiChar = '/';
+
 	//Default units
 	player[0].unit.push_back(*(dynamic_cast<Unit*>(cl.clist[0])));
 	player[1].unit.push_back(*(dynamic_cast<Unit*>(cl.clist[0])));
@@ -31,6 +36,7 @@ Game::Game() {
 	changeTurn(false);
 	moveCursor(0, 0);
 	selected = nullptr;
+	attack = nullptr;
 	mode = MODE_NONE;
 
 }
@@ -51,24 +57,11 @@ void Game::input() {
 		else if (asciiVal == 115 || asciiVal == 83) { moveCursor(0, 1); } //S
 		else if (asciiVal == 100 || asciiVal == 68) { moveCursor(1, 0); } //D
 
-		//Select
+		//Select unit
 		else if (asciiVal == 32) {
 			if (map.tile[pos.x][pos.y].unit != nullptr) {
 				if (map.tile[pos.x][pos.y].unit->player == &player[turn]) {
-					for (int a = 0; a < 9; ++a) {
-						for (int b = 0; b < 5; ++b) {
-							if (map.tile[a][b].border.buffer[0].Attributes == COLOR_GRAY) {
-								map.tile[a][b].setCol(COLOR_AQUA);
-								moveable.push_back(&map.tile[a][b]);
-							}
-						}
-					}
-					if (moveable.size() > 0) {
-						selected = map.tile[pos.x][pos.y].unit;
-						map.tile[pos.x][pos.y].setCol(COLOR_LTWHITE);
-						mode = MODE_MOVE;
-						path.push_back(pos);
-					}
+					select(map.tile[pos.x][pos.y]);
 				}
 			}
 		}
@@ -87,18 +80,10 @@ void Game::input() {
 		else if (asciiVal == 115 || asciiVal == 83) { moveArrow(0, 1); } //S
 		else if (asciiVal == 100 || asciiVal == 68) { moveArrow(1, 0); } //D
 
-		//Select
+		//Move unit
 		else if (asciiVal == 32) {
-			int a = path.size() - 1;
-			if (path.size() > 0) {
-				selected->setPos(path[a].x, path[a].y, map);
-				pos = path[a];
-			}
-			moveable.clear();
-			selected = nullptr;
-			mode = MODE_NONE;
-			path.clear();
-			moveCursor(0, 0);
+			if (attack != nullptr) { attackUnit(); }
+			else { moveUnit(); }
 		}
 
 	}
@@ -107,6 +92,10 @@ void Game::input() {
 
 //Update loop
 void Game::update() {
+
+	//Update units
+	for (int a = 0; a < player[0].unit.size(); ++a) { player[0].unit[a].updateStatSprites(); }
+	for (int a = 0; a < player[1].unit.size(); ++a) { player[1].unit[a].updateStatSprites(); }
 
 }
 
@@ -125,29 +114,16 @@ void Game::render(Renderer& rm) {
 	for (int a = 0; a < player[0].unit.size(); ++a) { player[0].unit[a].render(rm); }
 	for (int a = 0; a < player[1].unit.size(); ++a) { player[1].unit[a].render(rm); }
 
-	//Arrows
-	if (path.size() > 1) {
-		int a = path.size() - 1;
-		COORD c = map.tile[path[0].x][path[0].y].border.pos;
-		if (path[0].y > path[1].y) { drawArrow(1, c.X, c.Y, rm); }      //Start up
-		else if (path[0].x > path[1].x) { drawArrow(2, c.X, c.Y, rm); } //Start left
-		else if (path[0].y < path[1].y) { drawArrow(3, c.X, c.Y, rm); } //Start down
-		else if (path[0].x < path[1].x) { drawArrow(4, c.X, c.Y, rm); } //Start right
-		c = map.tile[path[a].x][path[a].y].border.pos;
-		if (path[a].y < path[a - 1].y) { drawArrow(5, c.X, c.Y, rm); }      //End up
-		else if (path[a].x < path[a - 1].x) { drawArrow(6, c.X, c.Y, rm); } //End left
-		else if (path[a].y > path[a - 1].y) { drawArrow(7, c.X, c.Y, rm); } //End down
-		else if (path[a].x > path[a - 1].x) { drawArrow(8, c.X, c.Y, rm); } //End right
-		if (path.size() == 3) {
-			c = map.tile[path[1].x][path[1].y].border.pos;
-			if (path[1].x == path[0].x && path[1].x == path[2].x) { drawArrow(9, c.X, c.Y, rm); }       //Up-down
-			else if (path[1].y == path[0].y && path[1].y == path[2].y) { drawArrow(10, c.X, c.Y, rm); } //Left-right
-			else if ((path[1].x > path[0].x && path[1].y > path[2].y) || (path[1].x > path[2].x && path[1].y > path[0].y)) { drawArrow(11, c.X, c.Y, rm); } //Up-left
-			else if ((path[1].x > path[0].x && path[1].y < path[2].y) || (path[1].x > path[2].x && path[1].y < path[0].y)) { drawArrow(12, c.X, c.Y, rm); } //Down-left
-			else if ((path[1].x < path[0].x && path[1].y < path[2].y) || (path[1].x < path[2].x && path[1].y < path[0].y)) { drawArrow(13, c.X, c.Y, rm); } //Down-right
-			else if ((path[1].x < path[0].x && path[1].y > path[2].y) || (path[1].x < path[2].x && path[1].y > path[0].y)) { drawArrow(14, c.X, c.Y, rm); } //Up-right
-		}
+	//Attack indicators
+	if (attack != nullptr) {
+		COORD c = attack->border.pos;
+		drawSword(c.X, c.Y, rm);
+		c = map.tile[pos.x][pos.y].border.pos;
+		if (canAttack(*attack, map.tile[pos.x][pos.y])) {drawSword(c.X, c.Y, rm);}
 	}
+
+	//Arrows
+	else if (path.size() > 1) { drawPath(rm); }
 
 }
 
@@ -166,6 +142,52 @@ void Game::changeTurn(bool t) {
 			}
 		}
 	}
+	moveCursor(0, 0);
+}
+
+//Select unit
+void Game::select(Tile& t) {
+	for (int a = 0; a < highlighted.size(); ++a) {
+		highlighted[a]->setCol(COLOR_AQUA);
+		moveable.push_back(highlighted[a]);
+	}
+	for (int a = 0; a < hostile.size(); ++a) {
+		if (canAttack(t, *hostile[a])) {
+			hostile[a]->setCol(COLOR_RED);
+			attackable.push_back(hostile[a]);
+		}
+	}
+	selected = t.unit;
+	t.setCol(COLOR_LTWHITE);
+	mode = MODE_MOVE;
+	path.push_back(pos);
+}
+
+//Move selected unit
+void Game::moveUnit() {
+	int a = path.size() - 1;
+	if (a > 0) {
+		selected->setPos(path[a].x, path[a].y, map);
+		pos = path[a];
+	}
+	moveable.clear();
+	attackable.clear();
+	selected = nullptr;
+	mode = MODE_NONE;
+	path.clear();
+	moveCursor(0, 0);
+}
+
+//Attack unit
+void Game::attackUnit() {
+	selected->attack(*attack->unit);
+	if (canAttack(*attack, map.tile[pos.x][pos.y])) { attack->unit->attack(*selected); }
+	moveable.clear();
+	attackable.clear();
+	selected = nullptr;
+	attack = nullptr;
+	mode = MODE_NONE;
+	path.clear();
 	moveCursor(0, 0);
 }
 
@@ -199,25 +221,37 @@ void Game::moveCursor(int x, int y) {
 void Game::moveArrow(int x, int y) {
 
 	//Get last arrow path position
-	int _x = path[path.size() - 1].x;
-	int _y = path[path.size() - 1].y;
+	Coord p;
+	if (attack == nullptr) { p = path[path.size() - 1]; }
+	else { p = attack->pos; }
 
 	//Return if back to start
-	if (_x + x == pos.x && _y + y == pos.y) {
+	if (p.x + x == pos.x && p.y + y == pos.y) {
 		path.clear();
 		path.push_back(pos);
+		attack = nullptr;
 		return;
+	}
+
+	//Check if tile is attackable
+	for (int a = 0; a < attackable.size(); ++a) {
+		if (&map.tile[p.x + x][p.y + y] == attackable[a]) {
+			path.clear();
+			path.push_back(pos);
+			attack = &map.tile[p.x + x][p.y + y];
+		}
 	}
 
 	//Check if can move to tile
 	for (int a = 0; a < moveable.size(); ++a) {
-		if (&map.tile[_x + x][_y + y] == moveable[a]) { break; }
+		if (&map.tile[p.x + x][p.y + y] == moveable[a]) { break; }
 		if (a == moveable.size() - 1) { return; }
 	}
 
 	//Add position, remove intermediates if past range
-	path.push_back(Coord(_x + x, _y + y));
-	if (path.size() == 4) { path.erase(path.begin() + 1, path.begin() + 3); }
+	path.push_back(Coord(p.x + x, p.y + y));
+	if (attack == nullptr && path.size() == 4) { path.erase(path.begin() + 1, path.begin() + 3); }
+	attack = nullptr;
 
 }
 
@@ -227,6 +261,14 @@ bool Game::canMove(int x, int y) {
 		if (map.tile[x][y].unit == nullptr) {
 			return true;
 		}
+	}
+	return false;
+}
+
+//Check if unit can attack position
+bool Game::canAttack(Tile& t1, Tile& t2) {
+	if (abs(t1.pos.x - t2.pos.x) < 2 && abs(t1.pos.y - t2.pos.y) < 2) {
+		return true;
 	}
 	return false;
 }
@@ -252,6 +294,39 @@ void Game::highlightMoveable(int x, int y) {
 	if (canMove(x - 1, y + 1) && (d || l)) { highlightTile(x - 1, y + 1, COLOR_GRAY); } //Down-left
 	if (canMove(x + 1, y + 1) && (d || r)) { highlightTile(x + 1, y + 1, COLOR_GRAY); } //Down-right
 	if (canMove(x + 1, y - 1) && (u || r)) { highlightTile(x + 1, y - 1, COLOR_GRAY); } //Up-right
+}
+
+//Draw arrow path
+void Game::drawPath(Renderer& rm) {
+	int a = path.size() - 1;
+	COORD c = map.tile[path[0].x][path[0].y].border.pos;
+	if (path[0].y > path[1].y) { drawArrow(1, c.X, c.Y, rm); }      //Start up
+	else if (path[0].x > path[1].x) { drawArrow(2, c.X, c.Y, rm); } //Start left
+	else if (path[0].y < path[1].y) { drawArrow(3, c.X, c.Y, rm); } //Start down
+	else if (path[0].x < path[1].x) { drawArrow(4, c.X, c.Y, rm); } //Start right
+	c = map.tile[path[a].x][path[a].y].border.pos;
+	if (path[a].y < path[a - 1].y) { drawArrow(5, c.X, c.Y, rm); }      //End up
+	else if (path[a].x < path[a - 1].x) { drawArrow(6, c.X, c.Y, rm); } //End left
+	else if (path[a].y > path[a - 1].y) { drawArrow(7, c.X, c.Y, rm); } //End down
+	else if (path[a].x > path[a - 1].x) { drawArrow(8, c.X, c.Y, rm); } //End right
+	if (path.size() == 3) {
+		c = map.tile[path[1].x][path[1].y].border.pos;
+		if (path[1].x == path[0].x && path[1].x == path[2].x) { drawArrow(9, c.X, c.Y, rm); }       //Up-down
+		else if (path[1].y == path[0].y && path[1].y == path[2].y) { drawArrow(10, c.X, c.Y, rm); } //Left-right
+		else if ((path[1].x > path[0].x && path[1].y > path[2].y) || (path[1].x > path[2].x && path[1].y > path[0].y)) { drawArrow(11, c.X, c.Y, rm); } //Up-left
+		else if ((path[1].x > path[0].x && path[1].y < path[2].y) || (path[1].x > path[2].x && path[1].y < path[0].y)) { drawArrow(12, c.X, c.Y, rm); } //Down-left
+		else if ((path[1].x < path[0].x && path[1].y < path[2].y) || (path[1].x < path[2].x && path[1].y < path[0].y)) { drawArrow(13, c.X, c.Y, rm); } //Down-right
+		else if ((path[1].x < path[0].x && path[1].y > path[2].y) || (path[1].x < path[2].x && path[1].y > path[0].y)) { drawArrow(14, c.X, c.Y, rm); } //Up-right
+	}
+}
+
+//Draw attack swords
+void Game::drawSword(int x, int y, Renderer& rm) {
+	rm.render(sword[1], x + 2, y + 2);
+	rm.render(sword[2], x + 4, y + 2);
+	rm.render(sword[0], x + 3, y + 3);
+	rm.render(sword[0], x + 2, y + 4);
+	rm.render(sword[0], x + 4, y + 4);
 }
 
 //Draw arrows
@@ -367,10 +442,3 @@ void Game::drawArrow(int a, int x, int y, Renderer& rm) {
 		rm.render(arrow[0], x + 3, y);
 	}
 }
-
-//Custom co-ord crap
-Coord::Coord(int _x, int _y) {
-	x = _x;
-	y = _y;
-}
-Coord::~Coord() {}

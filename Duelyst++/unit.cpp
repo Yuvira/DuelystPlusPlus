@@ -2,17 +2,19 @@
 #include "unit.h"
 
 //Game constructor / destructor
-Unit::Unit(eFaction _faction, eTribe _tribe, int _cost, int _attack, int _health, std::string path) {
+Unit::Unit(eFaction _faction, eTribe _tribe, int _cost, int _atk, int _hp, std::string path) {
 	type = CARD_UNIT;
 	faction = _faction;
 	tribe = _tribe;
 	cost = _cost;
-	attack = _attack;
-	health = _health;
+	atk = _atk;
+	hp = _hp;
 	onSummon = std::bind(&Unit::doNothing, this);
 	onSummonAny = std::bind(&Unit::doNothingU, this, std::placeholders::_1);
 	onDeath = std::bind(&Unit::doNothing, this);
 	onDeathAny = std::bind(&Unit::doNothingU, this, std::placeholders::_1);
+	onAttack = std::bind(&Unit::doNothingU, this, std::placeholders::_1);
+	onAttacked = std::bind(&Unit::doNothingU, this, std::placeholders::_1);
 	if (path == "") { sprite.resize(5, 5); }
 	else { sprite.createFromFile(path); }
 	updateStatSprites();
@@ -24,6 +26,13 @@ void Unit::render(Renderer& rm) {
 	rm.render(sprite);
 	rm.render(sATK);
 	rm.render(sHP);
+}
+
+//Attack enemy
+void Unit::attack(Unit& u) {
+	u.hp -= atk;
+	onAttack(u);
+	u.onAttacked(*this);
 }
 
 //Set sprite position
@@ -49,18 +58,20 @@ void Unit::setPos(int x, int y, Map& m) {
 
 //Update HP & ATK sprites
 void Unit::updateStatSprites() {
-	std::string s = std::to_string(attack);
+	std::string s = std::to_string(atk);
 	sATK.resize(s.length(), 1);
 	for (int a = 0; a < s.length(); ++a) {
 		sATK.buffer[a].Char.AsciiChar = s[a];
 		sATK.buffer[a].Attributes = COLOR_GREEN;
 	}
-	s = std::to_string(health);
+	int i = sHP.size;
+	s = std::to_string(hp);
 	sHP.resize(s.length(), 1);
 	for (int a = 0; a < s.length(); ++a) {
 		sHP.buffer[a].Char.AsciiChar = s[a];
 		sHP.buffer[a].Attributes = COLOR_RED;
 	}
+	sHP.pos.X += i - s.length();
 }
 
 //Do nothing

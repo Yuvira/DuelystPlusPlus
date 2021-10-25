@@ -18,6 +18,15 @@ enum eFeature {
 	TILE_CREEP,
 };
 
+//Custom co-ord because vector of COORD is invalid??
+class Coord {
+public:
+	Coord(int _x = 0, int _y = 0);
+	~Coord();
+	int x;
+	int y;
+};
+
 //Tile class
 class Tile {
 public:
@@ -29,6 +38,7 @@ public:
 	Unit* unit;
 	Sprite border;
 	Sprite sprite;
+	Coord pos;
 };
 
 //Map (tile container)

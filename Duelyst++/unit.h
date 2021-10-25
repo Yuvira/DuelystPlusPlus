@@ -41,6 +41,7 @@ public:
 	Unit(eFaction = FACTION_NEUTRAL, eTribe = TRIBE_NONE, int = 0, int = 0, int = 0, std::string = "");
 	~Unit();
 	void render(Renderer& rm);
+	void attack(Unit& u);
 	void setPos(int x, int y, Map& m);
 	void updateStatSprites();
 	void doNothing();
@@ -48,8 +49,8 @@ public:
 	eFaction faction;
 	eTribe tribe;
 	int cost;
-	int attack;
-	int health;
+	int atk;
+	int hp;
 	Game* game;
 	Player* player;
 	Sprite sHP;
@@ -58,6 +59,8 @@ public:
 	std::function<void(Unit& u)> onSummonAny;
 	std::function<void()> onDeath;
 	std::function<void(Unit& u)> onDeathAny;
+	std::function<void(Unit& u)> onAttack;
+	std::function<void(Unit& u)> onAttacked;
 };
 
 #endif

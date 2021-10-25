@@ -52,6 +52,7 @@ Map::Map() {
 			tile[a][b].border.pos.Y = (7 * b) + 1;
 			tile[a][b].sprite.pos.X = (7 * a) + 2;
 			tile[a][b].sprite.pos.Y = (7 * b) + 2;
+			tile[a][b].pos = Coord(a, b);
 		}
 	}
 	tile[4][0].setFeature(TILE_MANA);
@@ -59,3 +60,10 @@ Map::Map() {
 	tile[4][4].setFeature(TILE_MANA);
 }
 Map::~Map() {}
+
+//Custom co-ord crap
+Coord::Coord(int _x, int _y) {
+	x = _x;
+	y = _y;
+}
+Coord::~Coord() {}
