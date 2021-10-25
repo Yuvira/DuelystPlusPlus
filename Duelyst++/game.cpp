@@ -245,6 +245,9 @@ void Game::summon(Card* c, bool p, int x, int y) {
 //Use active card
 void Game::useCard() {
 
+	//Use mana
+	player[turn].mana -= activeCard->cost;
+
 	//Summon unit
 	if (activeCard->type == CARD_UNIT) {
 		pos = selectable[sPos]->pos;
@@ -287,6 +290,7 @@ void Game::select(BoardTile& t) {
 
 //Select card from hand
 void Game::selectHand() {
+	if (player[turn].hand[hPos]->cost > player[turn].mana) { return; }
 	highlightSelectable(TARGET_NEAR_ALLY, COLOR_GREEN);
 	if (selectable.size() > 0) {
 		sortSelectable();

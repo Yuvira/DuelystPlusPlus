@@ -54,7 +54,6 @@ public:
 	void onAttacked(Unit& u);
 	eFaction faction;
 	eTribe tribe;
-	int cost;
 	int atk;
 	int hp;
 	Game* game;
