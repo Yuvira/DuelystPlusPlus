@@ -7,17 +7,13 @@ Game::Game() {
 	//Board border
 	board.createFromFile("resources/board.txt");
 
-	//Arrow sprites
-	arrow[0].buffer[0].Char.AsciiChar = 'Û';
-	arrow[1].buffer[0].Char.AsciiChar = 'Ş';
-	arrow[2].buffer[0].Char.AsciiChar = 'İ';
-	arrow[3].buffer[0].Char.AsciiChar = 'Ü';
-	arrow[4].buffer[0].Char.AsciiChar = 'ß';
+	//Character sprites
+	char c[] = { 'Û', 'Ş', 'İ', 'Ü', 'ß', 'X', '\\', '/' };
+	for (int a = 0; a < 8; ++a) { chars[a].buffer[0].Char.AsciiChar = c[a]; }
 
-	//Sword sprites
-	sword[0].buffer[0].Char.AsciiChar = 'X';
-	sword[1].buffer[0].Char.AsciiChar = '\\';
-	sword[2].buffer[0].Char.AsciiChar = '/';
+	//Initialize players
+	player[0].init(cl);
+	player[1].init(cl);
 
 	//Default units
 	summon(cl.clist[0], false, 0, 2);
@@ -143,6 +139,7 @@ void Game::render(Renderer& rm) {
 
 	//Hand
 	for (int a = 0; a < 7; ++a) { rm.render(hand[a].border); }
+	for (int a = 0; a < player[turn].hand.size(); ++a) { rm.render(player[turn].hand[a]->sprite, (a * 7) + 9, 38); }
 
 }
 
@@ -379,123 +376,123 @@ void Game::drawPath(Renderer& rm) {
 
 //Draw attack swords
 void Game::drawSword(int x, int y, Renderer& rm) {
-	rm.render(sword[1], x + 2, y + 2);
-	rm.render(sword[2], x + 4, y + 2);
-	rm.render(sword[0], x + 3, y + 3);
-	rm.render(sword[0], x + 2, y + 4);
-	rm.render(sword[0], x + 4, y + 4);
+	rm.render(chars[6], x + 2, y + 2);
+	rm.render(chars[7], x + 4, y + 2);
+	rm.render(chars[5], x + 3, y + 3);
+	rm.render(chars[5], x + 2, y + 4);
+	rm.render(chars[5], x + 4, y + 4);
 }
 
 //Draw arrows
 void Game::drawArrow(int a, int x, int y, Renderer& rm) {
 	if (a == 1) { //Start up
-		rm.render(arrow[0], x + 3, y + 1);
-		rm.render(arrow[0], x + 3, y);
+		rm.render(chars[0], x + 3, y + 1);
+		rm.render(chars[0], x + 3, y);
 	}
 	else if (a == 2) { // Start left
-		rm.render(arrow[0], x + 1, y + 3);
-		rm.render(arrow[0], x, y + 3);
+		rm.render(chars[0], x + 1, y + 3);
+		rm.render(chars[0], x, y + 3);
 	}
 	else if (a == 3) { //Start down
-		rm.render(arrow[0], x + 3, y + 5);
-		rm.render(arrow[0], x + 3, y + 6);
+		rm.render(chars[0], x + 3, y + 5);
+		rm.render(chars[0], x + 3, y + 6);
 	}
 	else if (a == 4) { //Start right
-		rm.render(arrow[0], x + 5, y + 3);
-		rm.render(arrow[0], x + 6, y + 3);
+		rm.render(chars[0], x + 5, y + 3);
+		rm.render(chars[0], x + 6, y + 3);
 	}
 	else if (a == 5) { //End up
-		rm.render(arrow[0], x + 3, y + 6);
-		rm.render(arrow[0], x + 2, y + 5);
-		rm.render(arrow[0], x + 3, y + 5);
-		rm.render(arrow[0], x + 4, y + 5);
-		rm.render(arrow[1], x + 2, y + 4);
-		rm.render(arrow[0], x + 3, y + 4);
-		rm.render(arrow[2], x + 4, y + 4);
-		rm.render(arrow[0], x + 3, y + 3);
+		rm.render(chars[0], x + 3, y + 6);
+		rm.render(chars[0], x + 2, y + 5);
+		rm.render(chars[0], x + 3, y + 5);
+		rm.render(chars[0], x + 4, y + 5);
+		rm.render(chars[1], x + 2, y + 4);
+		rm.render(chars[0], x + 3, y + 4);
+		rm.render(chars[2], x + 4, y + 4);
+		rm.render(chars[0], x + 3, y + 3);
 	}
 	else if (a == 6) { //End left
-		rm.render(arrow[0], x + 6, y + 3);
-		rm.render(arrow[0], x + 5, y + 2);
-		rm.render(arrow[0], x + 5, y + 3);
-		rm.render(arrow[0], x + 5, y + 4);
-		rm.render(arrow[3], x + 4, y + 2);
-		rm.render(arrow[0], x + 4, y + 3);
-		rm.render(arrow[4], x + 4, y + 4);
-		rm.render(arrow[0], x + 3, y + 3);
+		rm.render(chars[0], x + 6, y + 3);
+		rm.render(chars[0], x + 5, y + 2);
+		rm.render(chars[0], x + 5, y + 3);
+		rm.render(chars[0], x + 5, y + 4);
+		rm.render(chars[3], x + 4, y + 2);
+		rm.render(chars[0], x + 4, y + 3);
+		rm.render(chars[4], x + 4, y + 4);
+		rm.render(chars[0], x + 3, y + 3);
 	}
 	else if (a == 7) { //End down
-		rm.render(arrow[0], x + 3, y);
-		rm.render(arrow[0], x + 2, y + 1);
-		rm.render(arrow[0], x + 3, y + 1);
-		rm.render(arrow[0], x + 4, y + 1);
-		rm.render(arrow[1], x + 2, y + 2);
-		rm.render(arrow[0], x + 3, y + 2);
-		rm.render(arrow[2], x + 4, y + 2);
-		rm.render(arrow[0], x + 3, y + 3);
+		rm.render(chars[0], x + 3, y);
+		rm.render(chars[0], x + 2, y + 1);
+		rm.render(chars[0], x + 3, y + 1);
+		rm.render(chars[0], x + 4, y + 1);
+		rm.render(chars[1], x + 2, y + 2);
+		rm.render(chars[0], x + 3, y + 2);
+		rm.render(chars[2], x + 4, y + 2);
+		rm.render(chars[0], x + 3, y + 3);
 	}
 	else if (a == 8) { //End right
-		rm.render(arrow[0], x, y + 3);
-		rm.render(arrow[0], x + 1, y + 2);
-		rm.render(arrow[0], x + 1, y + 3);
-		rm.render(arrow[0], x + 1, y + 4);
-		rm.render(arrow[3], x + 2, y + 2);
-		rm.render(arrow[0], x + 2, y + 3);
-		rm.render(arrow[4], x + 2, y + 4);
-		rm.render(arrow[0], x + 3, y + 3);
+		rm.render(chars[0], x, y + 3);
+		rm.render(chars[0], x + 1, y + 2);
+		rm.render(chars[0], x + 1, y + 3);
+		rm.render(chars[0], x + 1, y + 4);
+		rm.render(chars[3], x + 2, y + 2);
+		rm.render(chars[0], x + 2, y + 3);
+		rm.render(chars[4], x + 2, y + 4);
+		rm.render(chars[0], x + 3, y + 3);
 	}
 	else if (a == 9) { //Up-down
-		rm.render(arrow[0], x + 3, y);
-		rm.render(arrow[0], x + 3, y + 1);
-		rm.render(arrow[0], x + 3, y + 2);
-		rm.render(arrow[0], x + 3, y + 3);
-		rm.render(arrow[0], x + 3, y + 4);
-		rm.render(arrow[0], x + 3, y + 5);
-		rm.render(arrow[0], x + 3, y + 6);
+		rm.render(chars[0], x + 3, y);
+		rm.render(chars[0], x + 3, y + 1);
+		rm.render(chars[0], x + 3, y + 2);
+		rm.render(chars[0], x + 3, y + 3);
+		rm.render(chars[0], x + 3, y + 4);
+		rm.render(chars[0], x + 3, y + 5);
+		rm.render(chars[0], x + 3, y + 6);
 	}
 	else if (a == 10) { //Left-right
-		rm.render(arrow[0], x, y + 3);
-		rm.render(arrow[0], x + 1, y + 3);
-		rm.render(arrow[0], x + 2, y + 3);
-		rm.render(arrow[0], x + 3, y + 3);
-		rm.render(arrow[0], x + 4, y + 3);
-		rm.render(arrow[0], x + 5, y + 3);
-		rm.render(arrow[0], x + 6, y + 3);
+		rm.render(chars[0], x, y + 3);
+		rm.render(chars[0], x + 1, y + 3);
+		rm.render(chars[0], x + 2, y + 3);
+		rm.render(chars[0], x + 3, y + 3);
+		rm.render(chars[0], x + 4, y + 3);
+		rm.render(chars[0], x + 5, y + 3);
+		rm.render(chars[0], x + 6, y + 3);
 	}
 	else if (a == 11) { //Up-left
-		rm.render(arrow[0], x, y + 3);
-		rm.render(arrow[0], x + 1, y + 3);
-		rm.render(arrow[0], x + 2, y + 3);
-		rm.render(arrow[0], x + 3, y + 3);
-		rm.render(arrow[0], x + 3, y + 2);
-		rm.render(arrow[0], x + 3, y + 1);
-		rm.render(arrow[0], x + 3, y);
+		rm.render(chars[0], x, y + 3);
+		rm.render(chars[0], x + 1, y + 3);
+		rm.render(chars[0], x + 2, y + 3);
+		rm.render(chars[0], x + 3, y + 3);
+		rm.render(chars[0], x + 3, y + 2);
+		rm.render(chars[0], x + 3, y + 1);
+		rm.render(chars[0], x + 3, y);
 	}
 	else if (a == 12) { //Down-left
-		rm.render(arrow[0], x, y + 3);
-		rm.render(arrow[0], x + 1, y + 3);
-		rm.render(arrow[0], x + 2, y + 3);
-		rm.render(arrow[0], x + 3, y + 3);
-		rm.render(arrow[0], x + 3, y + 4);
-		rm.render(arrow[0], x + 3, y + 5);
-		rm.render(arrow[0], x + 3, y + 6);
+		rm.render(chars[0], x, y + 3);
+		rm.render(chars[0], x + 1, y + 3);
+		rm.render(chars[0], x + 2, y + 3);
+		rm.render(chars[0], x + 3, y + 3);
+		rm.render(chars[0], x + 3, y + 4);
+		rm.render(chars[0], x + 3, y + 5);
+		rm.render(chars[0], x + 3, y + 6);
 	}
 	else if (a == 13) { //Down-right
-		rm.render(arrow[0], x + 3, y + 6);
-		rm.render(arrow[0], x + 3, y + 5);
-		rm.render(arrow[0], x + 3, y + 4);
-		rm.render(arrow[0], x + 3, y + 3);
-		rm.render(arrow[0], x + 4, y + 3);
-		rm.render(arrow[0], x + 5, y + 3);
-		rm.render(arrow[0], x + 6, y + 3);
+		rm.render(chars[0], x + 3, y + 6);
+		rm.render(chars[0], x + 3, y + 5);
+		rm.render(chars[0], x + 3, y + 4);
+		rm.render(chars[0], x + 3, y + 3);
+		rm.render(chars[0], x + 4, y + 3);
+		rm.render(chars[0], x + 5, y + 3);
+		rm.render(chars[0], x + 6, y + 3);
 	}
 	else if (a == 14) { //Up-right
-		rm.render(arrow[0], x + 6, y + 3);
-		rm.render(arrow[0], x + 5, y + 3);
-		rm.render(arrow[0], x + 4, y + 3);
-		rm.render(arrow[0], x + 3, y + 3);
-		rm.render(arrow[0], x + 3, y + 2);
-		rm.render(arrow[0], x + 3, y + 1);
-		rm.render(arrow[0], x + 3, y);
+		rm.render(chars[0], x + 6, y + 3);
+		rm.render(chars[0], x + 5, y + 3);
+		rm.render(chars[0], x + 4, y + 3);
+		rm.render(chars[0], x + 3, y + 3);
+		rm.render(chars[0], x + 3, y + 2);
+		rm.render(chars[0], x + 3, y + 1);
+		rm.render(chars[0], x + 3, y);
 	}
 }

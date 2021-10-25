@@ -41,8 +41,7 @@ public:
 	std::vector<Card*> grave;
 	std::vector<Unit*> unit;
 	Sprite board;
-	Sprite arrow[5];
-	Sprite sword[3];
+	Sprite chars[8];
 	CardList cl;
 	Player player[2];
 	Map map;
