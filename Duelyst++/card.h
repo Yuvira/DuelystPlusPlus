@@ -12,12 +12,23 @@ enum eCard {
 	CARD_ARTIFACT
 };
 
+//Rarities
 enum eRarity {
 	RARITY_NONE,
 	RARITY_COMMON,
 	RARITY_RARE,
 	RARITY_EPIC,
 	RARITY_LEGENDARY
+};
+
+//Targeting types
+enum eTarget {
+	TARGET_ANY,
+	TARGET_UNIT,
+	TARGET_ALLY,
+	TARGET_ENEMY,
+	TARGET_NEAR_UNIT,
+	TARGET_NEAR_ALLY,
 };
 
 //Card class

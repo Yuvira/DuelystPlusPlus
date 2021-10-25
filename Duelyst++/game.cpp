@@ -30,6 +30,7 @@ Game::Game() {
 	//Misc
 	pos = Coord(0, 0);
 	hPos = -1;
+	sPos = -1;
 	changeTurn(false);
 	moveCursor(0, 0);
 	activeUnit = nullptr;
@@ -78,7 +79,11 @@ void Game::input() {
 		else if (asciiVal == 100 || asciiVal == 68) { moveCursorHand(1, -1); } //D
 
 		//Select card
-		else if (asciiVal == 32) {}
+		else if (asciiVal == 32) {
+			if (player[turn].hand[hPos]->type == CARD_UNIT) {
+				selectHand();
+			}
+		}
 
 	}
 
@@ -96,6 +101,18 @@ void Game::input() {
 			if (attack != nullptr) { attackUnit(); }
 			else { moveUnit(); }
 		}
+
+	}
+
+	//Select mode
+	else if (mode == MODE_SELECT) {
+
+		//Move selection
+		if (asciiVal == 119 || asciiVal == 87 || asciiVal == 97 || asciiVal == 65) { moveSelect(-1); }      //W/A
+		else if (asciiVal == 115 || asciiVal == 83 || asciiVal == 100 || asciiVal == 68) { moveSelect(1); } //S/D
+
+		//Use card at selection
+		else if (asciiVal == 32) { useCard(); }
 
 	}
 
@@ -171,6 +188,31 @@ void Game::summon(Card* c, bool p, int x, int y) {
 	unit[i]->game = this;
 }
 
+//Use active card
+void Game::useCard() {
+
+	//Summon unit
+	if (activeCard->type == CARD_UNIT) {
+		pos = selectable[sPos]->pos;
+		summon(activeCard, turn, pos.x, pos.y);
+		for (int a = 0; a < player[turn].hand.size(); ++a) {
+			if (player[turn].hand[a] == activeCard) {
+				player[turn].hand.erase(player[turn].hand.begin() + a);
+				activeCard = nullptr;
+				break;
+			}
+		}
+		hand[hPos + 1].setCol(COLOR_LTWHITE);
+		hPos = -1;
+		for (int a = 0; a < selectable.size(); ++a) { selectable[a]->setCol(COLOR_LTWHITE); }
+		selectable.clear();
+		sPos = -1;
+		mode = MODE_NONE;
+		moveCursor(0, 0);
+	}
+
+}
+
 //Select unit
 void Game::select(BoardTile& t) {
 	for (int a = 0; a < highlighted.size(); ++a) {
@@ -187,6 +229,18 @@ void Game::select(BoardTile& t) {
 	t.setCol(COLOR_LTWHITE);
 	mode = MODE_MOVE;
 	path.push_back(pos);
+}
+
+//Select card from hand
+void Game::selectHand() {
+	highlightSelectable(TARGET_NEAR_ALLY, COLOR_GREEN);
+	if (selectable.size() > 0) {
+		sortSelectable();
+		activeCard = player[turn].hand[hPos];
+		sPos = 0;
+		selectable[0]->setCol(COLOR_LTGREEN);
+		mode = MODE_SELECT;
+	}
 }
 
 //Move selected unit
@@ -227,9 +281,9 @@ void Game::moveCursor(int x, int y) {
 	
 	//Move cursor
 	pos.x = (pos.x + x + 9) % 9;
-	if (((y == -1 && pos.y == 0) || (y == 1 && pos.y == 4)) && pos.x < 7) {
-		hPos = pos.x;
-		hand[hPos].setCol(COLOR_AQUA);
+	if ((y == -1 && pos.y == 0) || (y == 1 && pos.y == 4)) {
+		hPos = max(min(pos.x - 1, 5), 0);
+		hand[hPos + 1].setCol(COLOR_AQUA);
 		pos = Coord(-1, -1);
 		mode = MODE_HAND;
 	}
@@ -247,12 +301,12 @@ void Game::moveCursor(int x, int y) {
 void Game::moveCursorHand(int x, int y) {
 
 	//Deselect tile
-	hand[hPos].setCol(COLOR_LTWHITE);
+	hand[hPos + 1].setCol(COLOR_LTWHITE);
 
 	//Move cursor
-	hPos = (hPos + x + 7) % 7;
+	hPos = (hPos + x + 6) % 6;
 	if (y != -1) {
-		pos = Coord(hPos, y);
+		pos = Coord(hPos + 1, y);
 		highlightTile(pos.x, pos.y, COLOR_AQUA);
 		hPos = -1;
 		mode = MODE_NONE;
@@ -260,7 +314,7 @@ void Game::moveCursorHand(int x, int y) {
 	}
 
 	//Select new tile
-	hand[hPos].setCol(COLOR_AQUA);
+	hand[hPos + 1].setCol(COLOR_AQUA);
 
 }
 
@@ -302,6 +356,13 @@ void Game::moveArrow(int x, int y) {
 
 }
 
+//Move selected tile
+void Game::moveSelect(int x) {
+	selectable[sPos]->setCol(COLOR_GREEN);
+	sPos = (sPos + x + selectable.size()) % selectable.size();
+	selectable[sPos]->setCol(COLOR_LTGREEN);
+}
+
 //Check if tile is moveable
 bool Game::canMove(int x, int y) {
 	if (x > -1 && x < 9 && y > -1 && y < 5) {
@@ -324,7 +385,7 @@ bool Game::canAttack(BoardTile& t1, BoardTile& t2) {
 void Game::highlightTile(int x, int y, eColor col) {
 	map.tile[x][y].setCol(col);
 	highlighted.push_back(&map.tile[x][y]);
-	if (col == COLOR_AQUA) {
+	if (col == COLOR_AQUA && mode == MODE_NONE) {
 		if (map.tile[pos.x][pos.y].unit != nullptr) {
 			if (map.tile[pos.x][pos.y].unit->player == &player[turn]) {
 				highlightMoveable(pos.x, pos.y);
@@ -348,6 +409,46 @@ void Game::highlightMoveable(int x, int y) {
 	if (canMove(x - 1, y + 1) && (d || l)) { highlightTile(x - 1, y + 1, COLOR_GRAY); } //Down-left
 	if (canMove(x + 1, y + 1) && (d || r)) { highlightTile(x + 1, y + 1, COLOR_GRAY); } //Down-right
 	if (canMove(x + 1, y - 1) && (u || r)) { highlightTile(x + 1, y - 1, COLOR_GRAY); } //Up-right
+}
+
+//Highlight targetable tiles
+void Game::highlightSelectable(eTarget type, eColor col) {
+
+	//Near allies (summon)
+	if (type == TARGET_NEAR_ALLY) {
+		for (int a = 0; a < 9; ++a) {
+			for (int b = 0; b < 5; ++b) {
+				if (map.tile[a][b].unit != nullptr) {
+					if (map.tile[a][b].unit->player == &player[turn]) {
+						for (int c = max(a - 1, 0); c < min(a + 2, 9); ++c) {
+							for (int d = max(b - 1, 0); d < min(b + 2, 5); ++d) {
+								if (map.tile[c][d].unit == nullptr) {
+									if (map.tile[c][d].border.buffer[0].Attributes != col) {
+										map.tile[c][d].setCol(col);
+										selectable.push_back(&map.tile[c][d]);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+}
+
+//Sort selectable tiles by position
+void Game::sortSelectable() {
+	for (int a = 0; a < selectable.size() - 1; ++a) {
+		for (int b = a + 1; b < selectable.size(); ++b) {
+			if (selectable[b]->pos.y < selectable[a]->pos.y || selectable[b]->pos.x < selectable[a]->pos.x) {
+				BoardTile* t = selectable[a];
+				selectable[a] = selectable[b];
+				selectable[b] = t;
+			}
+		}
+	}
 }
 
 //Draw arrow path
