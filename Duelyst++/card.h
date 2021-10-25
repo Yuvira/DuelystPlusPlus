@@ -3,6 +3,8 @@
 #define __CARD_H__
 
 //Include
+#include <algorithm>
+#include <vector>
 #include "tile.h"
 
 //Card types
@@ -35,11 +37,13 @@ enum eTarget {
 class Card {
 public:
 	Card();
-	virtual ~Card();
+	~Card();
+	virtual void drawCard(Renderer& rm, int& y);
 	eCard type;
 	std::string name;
 	Sprite sprite;
-	Sprite desc;
+	int descriptionSize;
+	std::vector<Sprite> description;
 };
 
 #endif

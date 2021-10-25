@@ -3,7 +3,6 @@
 #define __GAME_H__
 
 //Include
-#include <algorithm>
 #include <iostream>
 #include <stdlib.h>
 #include <conio.h>
@@ -25,6 +24,7 @@ public:
 	void input();
 	void update();
 	void render(Renderer& rm);
+	void renderSidebar(Renderer& rm);
 	void changeTurn(bool t);
 	void summon(Card* c, bool p, int x, int y);
 	void useCard();

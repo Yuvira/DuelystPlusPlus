@@ -19,6 +19,7 @@ Unit::Unit(eFaction _faction, eTribe _tribe, int _cost, int _atk, int _hp, std::
 	if (path == "") { sprite.resize(5, 5); }
 	else { sprite.createFromFile("resources/units/" + path + ".txt"); }
 	updateStatSprites();
+	generateDetails();
 }
 Unit::~Unit() {}
 
@@ -69,6 +70,73 @@ void Unit::updateStatSprites() {
 	for (int a = 0; a < s.length(); ++a) { sHP.buffer[a].Char.AsciiChar = s[a]; }
 	sHP.setCol(COLOR_RED);
 	sHP.pos.X += i - s.length();
+}
+
+//Update card stats
+void Unit::updateDetailStats() {
+	eColor col = COLOR_LTBLUE;
+	std::string s = "";
+	if (tribe != TRIBE_GENERAL) { s = "COST:" + std::to_string(cost) + " ATK:" + std::to_string(atk) + " HP:" + std::to_string(hp); }
+	else { s = "ATK:" + std::to_string(atk) + " HP:" + std::to_string(hp); col = COLOR_GREEN; }
+	description[1].createFromString(s);
+	for (int a = 0; a < description[1].size; ++a) {
+		if (s[a] != ':' && s[a] != ' ') { description[1].buffer[a].Attributes = col; }
+		if (s[a] == ' ') {
+			if (col == COLOR_LTBLUE) { col = COLOR_GREEN; }
+			else { col = COLOR_RED; }
+		}
+	}
+}
+
+//Generate sidebar details
+void Unit::generateDetails() {
+	std::string s;
+	Sprite sprite;
+	s.resize(name.size());
+	std::transform(name.begin(), name.end(), s.begin(), ::toupper);
+	s += " - ";
+	switch (tribe) {
+		case TRIBE_NONE:
+			s += "MINION";
+			break;
+		case TRIBE_GENERAL:
+			s += "GENERAL";
+			break;
+		case TRIBE_ARCANYST:
+			s += "ARCANYST";
+			break;
+		case TRIBE_PET:
+			s += "PET";
+			break;
+		case TRIBE_GOLEM:
+			s += "GOLEM";
+			break;
+		case TRIBE_MECH:
+			s += "MECH";
+			break;
+		case TRIBE_DERVISH:
+			s += "DERVISH";
+			break;
+		case TRIBE_VESPYR:
+			s += "VESPYR";
+			break;
+		case TRIBE_STRUCTURE:
+			s += "STRUCTURE";
+			break;
+	}
+	sprite.createFromString(s);
+	for (int a = name.size(); a < sprite.size; ++a) { sprite.buffer[a].Attributes = COLOR_GRAY; }
+	description.push_back(sprite);
+	description.push_back(Sprite());
+	updateDetailStats();
+}
+
+//Draw card data
+void Unit::drawCard(Renderer& rm, int& y) {
+	rm.render(sprite, 66, y);
+	rm.render(description[0], 72, y); ++y;
+	updateDetailStats();
+	rm.render(description[1], 72, y); ++y;
 }
 
 //Do nothing

@@ -179,6 +179,31 @@ void Game::render(Renderer& rm) {
 	for (int a = 0; a < 7; ++a) { rm.render(hand[a].border); }
 	for (int a = 0; a < player[turn].hand.size(); ++a) { rm.render(player[turn].hand[a]->sprite, (a * 7) + 9, 42); }
 
+	//Sidebar
+	renderSidebar(rm);
+
+}
+
+//Render sidebar
+void Game::renderSidebar(Renderer& rm) {
+
+	//Vertical position
+	int y = 1;
+
+	//Unit on board
+	if (mode == MODE_NONE) {
+		if (map.tile[pos.x][pos.y].unit != nullptr) {
+			map.tile[pos.x][pos.y].unit->drawCard(rm, y);
+		}
+	}
+
+	//Unit in hand
+	else if (mode == MODE_HAND || mode == MODE_SELECT) {
+		if (hPos < player[turn].hand.size()) {
+			player[turn].hand[hPos]->drawCard(rm, y);
+		}
+	}
+
 }
 
 //Change turn
@@ -206,8 +231,7 @@ void Game::changeTurn(bool t) {
 //Summon at position
 void Game::summon(Card* c, bool p, int x, int y) {
 	int i = unit.size();
-	unit.push_back(new Unit);
-	*unit[i] = *(dynamic_cast<Unit*>(c));
+	unit.push_back(new Unit(*(dynamic_cast<Unit*>(c))));
 	unit[i]->setPos(x, y, map);
 	unit[i]->player = &player[p];
 	unit[i]->game = this;

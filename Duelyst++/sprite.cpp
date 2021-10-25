@@ -62,3 +62,21 @@ void Sprite::createFromFile(std::string filename) {
 		file.close();
 	}
 }
+
+//Generate text sprite from string
+void Sprite::createFromString(std::string s, bool vertical) {
+	size = s.length();
+	if (vertical) {
+		spriteSize.X = 1;
+		spriteSize.Y = size;
+	}
+	else {
+		spriteSize.X = size;
+		spriteSize.Y = 1;
+	}
+	buffer = new CHAR_INFO[size];
+	for (int a = 0; a < size; ++a) {
+		buffer[a].Char.AsciiChar = s[a];
+		buffer[a].Attributes = COLOR_LTWHITE;
+	}
+}

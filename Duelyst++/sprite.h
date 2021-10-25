@@ -36,6 +36,7 @@ public:
 	void resize(int sx, int sy);
 	void setCol(eColor col);
 	void createFromFile(std::string filename);
+	void createFromString(std::string s, bool = false);
 	char symbol;
 	int size;
 	COORD spriteSize;

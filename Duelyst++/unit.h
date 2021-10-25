@@ -3,7 +3,6 @@
 #define __UNIT_H__
 
 //Include
-#include <vector>
 #include <functional>
 #include "card.h"
 
@@ -44,6 +43,9 @@ public:
 	void attack(Unit& u);
 	void setPos(int x, int y, Map& m);
 	void updateStatSprites();
+	void updateDetailStats();
+	void generateDetails();
+	void drawCard(Renderer& rm, int& y);
 	void doNothing();
 	void doNothingU(Unit& u);
 	eFaction faction;
@@ -55,6 +57,9 @@ public:
 	Player* player;
 	Sprite sHP;
 	Sprite sATK;
+	std::string cardKeywords;
+	std::vector<std::string> effectName;
+	std::vector<std::string> effectDescription;
 	std::function<void()> onSummon;
 	std::function<void(Unit& u)> onSummonAny;
 	std::function<void()> onDeath;
