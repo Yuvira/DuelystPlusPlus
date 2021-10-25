@@ -10,12 +10,6 @@ Unit::Unit(eFaction _faction, eTribe _tribe, int _cost, int _atk, int _hp, std::
 	atk = _atk;
 	hp = _hp;
 	name = _name;
-	onSummon = std::bind(&Unit::doNothing, this);
-	onSummonAny = std::bind(&Unit::doNothingU, this, std::placeholders::_1);
-	onDeath = std::bind(&Unit::doNothing, this);
-	onDeathAny = std::bind(&Unit::doNothingU, this, std::placeholders::_1);
-	onAttack = std::bind(&Unit::doNothingU, this, std::placeholders::_1);
-	onAttacked = std::bind(&Unit::doNothingU, this, std::placeholders::_1);
 	if (path == "") { sprite.resize(5, 5); }
 	else { sprite.createFromFile("resources/units/" + path + ".txt"); }
 	updateStatSprites();
@@ -139,6 +133,20 @@ void Unit::drawCard(Renderer& rm, int& y) {
 	rm.render(description[1], 72, y); ++y;
 }
 
-//Do nothing
-void Unit::doNothing() {}
-void Unit::doNothingU(Unit& u) {}
+//When this unit is summoned (Opening Gambit)
+void Unit::onSummon() {}
+
+//When any unit is summoned
+void Unit::onSummonAny(Unit& u) {}
+
+//When this unit dies
+void Unit::onDeath() {}
+
+//When any unit dies (Deathwatch)
+void Unit::onDeathAny(Unit& u) {}
+
+//When this unit attacks
+void Unit::onAttack(Unit& u) {}
+
+//When this unit is attacked
+void Unit::onAttacked(Unit& u) {}

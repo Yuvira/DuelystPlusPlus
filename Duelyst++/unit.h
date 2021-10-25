@@ -3,7 +3,6 @@
 #define __UNIT_H__
 
 //Include
-#include <functional>
 #include "card.h"
 
 //Definitions
@@ -46,8 +45,12 @@ public:
 	void updateDetailStats();
 	void generateDetails();
 	void drawCard(Renderer& rm, int& y);
-	void doNothing();
-	void doNothingU(Unit& u);
+	void onSummon();
+	void onSummonAny(Unit& u);
+	void onDeath();
+	void onDeathAny(Unit& u);
+	void onAttack(Unit& u);
+	void onAttacked(Unit& u);
 	eFaction faction;
 	eTribe tribe;
 	int cost;
@@ -60,12 +63,6 @@ public:
 	std::string cardKeywords;
 	std::vector<std::string> effectName;
 	std::vector<std::string> effectDescription;
-	std::function<void()> onSummon;
-	std::function<void(Unit& u)> onSummonAny;
-	std::function<void()> onDeath;
-	std::function<void(Unit& u)> onDeathAny;
-	std::function<void(Unit& u)> onAttack;
-	std::function<void(Unit& u)> onAttacked;
 };
 
 #endif
