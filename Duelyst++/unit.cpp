@@ -14,6 +14,9 @@ Unit::Unit(eFaction _faction, eTribe _tribe, int _cost, int _atk, int _hp, std::
 	else { sprite.createFromFile("resources/units/" + path + ".txt"); }
 	updateStatSprites();
 	generateDetails();
+	tile = nullptr;
+	game = nullptr;
+	player = nullptr;
 }
 Unit::~Unit() {}
 
@@ -32,15 +35,8 @@ void Unit::attack(Unit& u) {
 }
 
 //Set sprite position
-void Unit::setPos(int x, int y, Map& m) {
-	for (int a = 0; a < 9; ++a) {
-		for (int b = 0; b < 5; ++b) {
-			if (m.tile[a][b].unit == this) {
-				m.tile[a][b].unit = nullptr;
-				break;
-			}
-		}
-	}
+void Unit::setPos(int x, int y) {
+	if (tile != nullptr) { tile->unit = nullptr; }
 	int _x = (x * 7) + 2;
 	int _y = (y * 7) + 6;
 	sprite.pos.X = _x;
@@ -49,7 +45,8 @@ void Unit::setPos(int x, int y, Map& m) {
 	sATK.pos.Y = _y + 4;
 	sHP.pos.X = (_x + 4) - (sHP.size - 1);
 	sHP.pos.Y = _y + 4;
-	m.tile[x][y].unit = this;
+	tile = &game->map.tile[x][y];
+	tile->unit = this;
 }
 
 //Check if unit has died
@@ -134,7 +131,7 @@ void Unit::generateDetails() {
 }
 
 //Draw card data
-void Unit::drawCard(Renderer& rm, int& y) {
+void Unit::drawDetails(Renderer& rm, int& y) {
 	rm.render(sprite, 66, y);
 	rm.render(description[0], 72, y); ++y;
 	updateDetailStats();
@@ -151,21 +148,13 @@ void Unit::onSummonAny(Unit& u) {}
 void Unit::onDeath() {
 
 	//Remove tile reference
-	for (int a = 0; a < 9; ++a) {
-		for (int b = 0; b < 5; ++b) {
-			if (game->map.tile[a][b].unit == this) {
-				game->map.tile[a][b].unit = nullptr;
-				for (int c = 0; c < game->hostile.size(); ++c) {
-					if (game->hostile[c] == &game->map.tile[a][b]) {
-						game->hostile.erase(game->hostile.begin() + c);
-						break;
-					}
-				}
-				goto end;
-			}
+	tile->unit = nullptr;
+	for (int a = 0; a < game->hostile.size(); ++a) {
+		if (game->hostile[a] == tile) {
+			game->hostile.erase(game->hostile.begin() + a);
+			break;
 		}
 	}
-	end:
 
 	//Move to graveyard
 	for (int a = 0; a < game->unit.size(); ++a) {

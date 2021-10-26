@@ -71,12 +71,12 @@ public:
 	~Unit();
 	void render(Renderer& rm);
 	void attack(Unit& u);
-	void setPos(int x, int y, Map& m);
+	void setPos(int x, int y);
 	void update(bool& r);
 	void updateStatSprites();
 	void updateDetailStats();
 	void generateDetails();
-	void drawCard(Renderer& rm, int& y);
+	void drawDetails(Renderer& rm, int& y);
 	void onSummon();
 	void onSummonAny(Unit& u);
 	void onDeath();
@@ -87,6 +87,7 @@ public:
 	eTribe tribe;
 	int atk;
 	int hp;
+	BoardTile* tile;
 	Game* game;
 	Player* player;
 	Effect skill;

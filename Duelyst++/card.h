@@ -38,7 +38,7 @@ class Card {
 public:
 	Card();
 	~Card();
-	virtual void drawCard(Renderer& rm, int& y);
+	virtual void drawDetails(Renderer& rm, int& y);
 	int cost;
 	eCard type;
 	std::string name;

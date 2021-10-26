@@ -198,14 +198,14 @@ void Game::renderSidebar(Renderer& rm) {
 	//Unit on board
 	if (mode == MODE_NONE) {
 		if (map.tile[pos.x][pos.y].unit != nullptr) {
-			map.tile[pos.x][pos.y].unit->drawCard(rm, y);
+			map.tile[pos.x][pos.y].unit->drawDetails(rm, y);
 		}
 	}
 
 	//Unit in hand
 	else if (mode == MODE_HAND || mode == MODE_SELECT) {
 		if (hPos < player[turn].hand.size()) {
-			player[turn].hand[hPos]->drawCard(rm, y);
+			player[turn].hand[hPos]->drawDetails(rm, y);
 		}
 	}
 
@@ -221,14 +221,10 @@ void Game::changeTurn(bool t) {
 	else { light.setCol(COLOR_LTBLUE); }
 	for (int a = 0; a < hostile.size(); ++a) { hostile[a]->setCol(COLOR_LTWHITE); }
 	hostile.clear();
-	for (int a = 0; a < 9; ++a) {
-		for (int b = 0; b < 5; ++b) {
-			if (map.tile[a][b].unit != nullptr) {
-				if (map.tile[a][b].unit->player != &player[turn]) {
-					map.tile[a][b].setCol(COLOR_LTRED);
-					hostile.push_back(&map.tile[a][b]);
-				}
-			}
+	for (int a = 0; a < unit.size(); ++a) {
+		if (unit[a]->player != &player[turn]) {
+			unit[a]->tile->setCol(COLOR_LTRED);
+			hostile.push_back(unit[a]->tile);
 		}
 	}
 	moveCursor(0, 0);
@@ -238,9 +234,9 @@ void Game::changeTurn(bool t) {
 void Game::summon(Card* c, bool p, int x, int y) {
 	int i = unit.size();
 	unit.push_back(new Unit(*(dynamic_cast<Unit*>(c))));
-	unit[i]->setPos(x, y, map);
 	unit[i]->player = &player[p];
 	unit[i]->game = this;
+	unit[i]->setPos(x, y);
 }
 
 //Use active card
@@ -306,7 +302,7 @@ void Game::selectHand() {
 void Game::moveUnit() {
 	int a = path.size() - 1;
 	if (a > 0) {
-		activeUnit->setPos(path[a].x, path[a].y, map);
+		activeUnit->setPos(path[a].x, path[a].y);
 		pos = path[a];
 	}
 	moveable.clear();
@@ -369,6 +365,7 @@ void Game::moveCursorHand(int x, int y) {
 		highlightTile(pos.x, pos.y, COLOR_AQUA);
 		hPos = -1;
 		mode = MODE_NONE;
+		moveCursor(0, 0);
 		return;
 	}
 
