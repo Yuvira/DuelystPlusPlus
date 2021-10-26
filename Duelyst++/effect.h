@@ -9,12 +9,14 @@
 //Effects
 enum eEffect {
 	EFFECT_NONE,
-	EFFECT_AZURE_HERALD
+	EFFECT_AZURE_HERALD,
+	EFFECT_ARAKI_HEADHUNTER
 };
 
 //Granted stat buffs
 enum eBuff {
-	BUFF_NONE
+	BUFF_NONE,
+	BUFF_ARAKI_HEADHUNTER
 };
 
 //Effect class
@@ -30,13 +32,13 @@ public:
 //Stat buff class
 class Buff {
 public:
-	Buff(eBuff = BUFF_NONE);
+	Buff(eBuff = BUFF_NONE, int = 0, int = 0);
 	~Buff();
-	Sprite sprite[2];
+	void generateSprite(std::string s);
+	Sprite sprite;
 	eBuff buff;
 	int atk;
 	int hp;
-	int count;
 };
 
 //Effect list class
@@ -44,6 +46,8 @@ class EffectList {
 public:
 	EffectList();
 	~EffectList();
+	Effect find(eEffect e);
+	Buff find(eBuff e);
 	std::vector<Effect> elist;
 	std::vector<Buff> blist;
 };

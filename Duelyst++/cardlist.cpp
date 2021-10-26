@@ -7,7 +7,9 @@ CardList::CardList() {
 	ulist.push_back(Unit(FACTION_NEUTRAL, TRIBE_GOLEM, 3, 4, 3, "bloodgolem", "Bloodshard Golem"));
 	ulist.push_back(Unit(FACTION_NEUTRAL, TRIBE_GOLEM, 5, 4, 9, "mossgolem", "Brightmoss Golem"));
 	ulist.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 4, "azureherald", "Azure Herald"));
-	ulist.back().effect.push_back(el.elist[0]);
+	ulist.back().effect.push_back(el.find(EFFECT_AZURE_HERALD));
+	ulist.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 3, "arakiheadhunter", "Araki Headhunter"));
+	ulist.back().effect.push_back(el.find(EFFECT_ARAKI_HEADHUNTER));
 	for (int a = 0; a < glist.size(); ++a) { clist.push_back(&glist[a]); }
 	for (int a = 0; a < ulist.size(); ++a) { clist.push_back(&ulist[a]); }
 }

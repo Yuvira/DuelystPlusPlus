@@ -1,5 +1,5 @@
 //Include
-#include "player.h"
+#include "game.h"
 
 //Game constructor / destructor
 Player::Player() {}
@@ -9,12 +9,13 @@ Player::~Player() {}
 void Player::preset(CardList& cl) {
 	deck.push_back(cl.find("Argeon Highmayne"));
 	for (int a = 0; a < 13; ++a) { deck.push_back(cl.find("Bloodshard Golem")); }
-	for (int a = 0; a < 13; ++a) { deck.push_back(cl.find("Brightmoss Golem")); }
+	for (int a = 0; a < 13; ++a) { deck.push_back(cl.find("Araki Headhunter")); }
 	for (int a = 0; a < 13; ++a) { deck.push_back(cl.find("Azure Herald")); }
 }
 
 //Initialize deck/hand
-void Player::init(int _mana) {
+void Player::init(int _mana, Game* g) {
+	game = g;
 	mana = _mana;
 	manaMax = _mana;
 	for (int a = 0; a < 9; ++a) {
@@ -33,6 +34,21 @@ void Player::updateMana(eColor col) {
 	for (int a = manaMax; a < 9; ++a) { crystal[a].setCol(COLOR_GRAY); }
 }
 
+//Render UI
+void Player::render(Renderer& rm, bool left) {
+
+	//Mana crystals
+	for (int a = 0; a < 9; ++a) { rm.render(crystal[a], left ? (a * 2) + 2 : 62 - (a * 2), 2); }
+
+	//Cards in hand/deck
+	std::string s = std::to_string(hand.size()) + "/6 " + std::to_string(deck.size()) + "/40";
+	if (!left) {s = std::to_string(deck.size()) + "/40 " + std::to_string(hand.size()) + "/6"; }
+	Sprite _s;
+	_s.createFromString(s);
+	rm.render(_s, left ? 20 : 45 - s.length(), 2);
+
+}
+
 //Shuffle deck
 void Player::shuffle() {
 	std::vector<Card*> shuffle;
@@ -43,4 +59,13 @@ void Player::shuffle() {
 	}
 	for (int a = 0; a < shuffle.size(); ++a) { deck.push_back(shuffle[a]); }
 	shuffle.clear();
+}
+
+//Draw card
+void Player::draw() {
+	if (deck.size() > 0) {
+		if (hand.size() < 6) { hand.push_back(deck[0]); }
+		else { game->grave.push_back(deck[0]); }
+		deck.erase(deck.begin());
+	}
 }

@@ -22,7 +22,7 @@ Game::Game() {
 		summon(player[a].deck[0], a, a * 8, 2);
 		player[a].deck.erase(player[a].deck.begin());
 		player[a].general = unit.back();
-		player[a].init(a + 2);
+		player[a].init(a + 2, this);
 	}
 
 	//Hand
@@ -150,11 +150,9 @@ void Game::render(Renderer& rm) {
 	//Board
 	rm.render(board);
 
-	//Mana crystals
-	for (int a = 0; a < 9; ++a) {
-		rm.render(player[0].crystal[a], (a * 2) + 2, 2);
-		rm.render(player[1].crystal[a], 62 - (a * 2), 2);
-	}
+	//Player UI
+	player[0].render(rm, true);
+	player[1].render(rm, false);
 
 	//Turn indicator
 	rm.render(light, 31, 2);
@@ -214,8 +212,9 @@ void Game::renderSidebar(Renderer& rm) {
 
 //Change turn
 void Game::changeTurn(bool t) {
+	if (turnCount > 0) { player[turn].draw(); }
 	turn = t;
-	if (turn == false) { ++turnCount; }
+	if (!turn) { ++turnCount; }
 	if (turnCount > 1 && player[turn].manaMax < 9) { ++player[turn].manaMax; }
 	player[turn].mana = player[turn].manaMax;
 	if (turn) { light.setCol(COLOR_RED); }

@@ -81,6 +81,7 @@ public:
 	void render(Renderer& rm);
 	void attack(Unit& u);
 	void setPos(int x, int y);
+	void addBuff(eBuff b);
 	void update(bool& r);
 	void updateStatSprites();
 	void updateDetailStats();

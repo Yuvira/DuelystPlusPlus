@@ -6,11 +6,10 @@ Effect::Effect(eEffect e) { effect = e; }
 Effect::~Effect() {}
 
 //Buff constructor/deconstructor
-Buff::Buff(eBuff b) {
+Buff::Buff(eBuff b, int _atk, int _hp) {
 	buff = b;
-	atk = 0;
-	hp = 0;
-	count = 0;
+	atk = _atk;
+	hp = _hp;
 }
 Buff::~Buff() {}
 
@@ -19,7 +18,7 @@ void Effect::generateSprite(std::string s) {
 	std::vector<Coord> c;
 	std::vector<std::string> v;
 	v.push_back("");
-	for (int a = 0; a < s.size(); ++a) {
+	for (int a = 0; a < s.length(); ++a) {
 		if (s[a] == '|') { v.push_back(""); }
 		else if (s[a] == '{') { c.push_back(Coord()); c.back().x = a; }
 		else if (s[a] == '}') { c.back().y = a; }
@@ -44,9 +43,34 @@ void Effect::generateSprite(std::string s) {
 	}
 }
 
+//Generate buff sprite
+void Buff::generateSprite(std::string s) { sprite.createFromString(s); }
+
 //Effect list constructor/deconstructor
 EffectList::EffectList() {
 	elist.push_back(Effect(EFFECT_AZURE_HERALD));
-	elist[0].generateSprite("{Opening Gambit}: Restore 3 Health to your|General.");
+	elist.back().generateSprite("{Opening Gambit}: Restore 3 Health to your|General.");
+	elist.push_back(Effect(EFFECT_ARAKI_HEADHUNTER));
+	elist.back().generateSprite("Whenever you summon a minion with|Opening Gambit from your action bar,|gain +2 Attack.");
+	blist.push_back(Buff(BUFF_ARAKI_HEADHUNTER, 2, 0));
+	blist.back().generateSprite("Headhunter");
 }
 EffectList::~EffectList() {}
+
+//Find effect by enum
+Effect EffectList::find(eEffect e) {
+	for (int a = 0; a < elist.size(); ++a) {
+		if (elist[a].effect == e) {
+			return elist[a];
+		}
+	}
+}
+
+//Find buff by enum
+Buff EffectList::find(eBuff b) {
+	for (int a = 0; a < blist.size(); ++a) {
+		if (blist[a].buff == b) {
+			return blist[a];
+		}
+	}
+}

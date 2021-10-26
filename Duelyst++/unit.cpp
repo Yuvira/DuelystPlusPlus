@@ -48,6 +48,25 @@ void Unit::setPos(int x, int y) {
 	tile->unit = this;
 }
 
+//Add buff to list
+void Unit::addBuff(eBuff b) {
+	Buff _b = game->cl.el.find(b);
+	for (int a = 0; a < buff.size(); ++a) {
+		if (buff[a].buff == b) {
+			buff[a].atk += _b.atk;
+			buff[a].hp += _b.hp;
+			atk += _b.atk;
+			hp += _b.hp;
+			hpMax += _b.hp;
+			return;
+		}
+	}
+	buff.push_back(_b);
+	atk += _b.atk;
+	hp += _b.hp;
+	hpMax += _b.hp;
+}
+
 //Check if unit has died
 void Unit::update(bool& r) {
 	if (hp < 1) {
@@ -92,33 +111,33 @@ void Unit::generateDetails() {
 	s.resize(name.size());
 	std::transform(name.begin(), name.end(), s.begin(), ::toupper);
 	switch (tribe) {
-		case TRIBE_NONE:
-			s += " - MINION";
-			break;
-		case TRIBE_GENERAL:
-			s += " - GENERAL";
-			break;
-		case TRIBE_ARCANYST:
-			s += " - ARCANYST";
-			break;
-		case TRIBE_PET:
-			s += " - PET";
-			break;
-		case TRIBE_GOLEM:
-			s += " - GOLEM";
-			break;
-		case TRIBE_MECH:
-			s += " - MECH";
-			break;
-		case TRIBE_DERVISH:
-			s += " - DERVISH";
-			break;
-		case TRIBE_VESPYR:
-			s += " - VESPYR";
-			break;
-		case TRIBE_STRUCTURE:
-			s += " - STRUCTURE";
-			break;
+	case TRIBE_NONE:
+		s += " - MINION";
+		break;
+	case TRIBE_GENERAL:
+		s += " - GENERAL";
+		break;
+	case TRIBE_ARCANYST:
+		s += " - ARCANYST";
+		break;
+	case TRIBE_PET:
+		s += " - PET";
+		break;
+	case TRIBE_GOLEM:
+		s += " - GOLEM";
+		break;
+	case TRIBE_MECH:
+		s += " - MECH";
+		break;
+	case TRIBE_DERVISH:
+		s += " - DERVISH";
+		break;
+	case TRIBE_VESPYR:
+		s += " - VESPYR";
+		break;
+	case TRIBE_STRUCTURE:
+		s += " - STRUCTURE";
+		break;
 	}
 	header[0].createFromString(s);
 	for (int a = name.size(); a < header[0].size; ++a) { header[0].buffer[a].Attributes = COLOR_GRAY; }
@@ -135,6 +154,16 @@ void Unit::drawDetails(Renderer& rm, int& y) {
 		for (int b = 0; b < effect[a].sprite.size(); ++b) { rm.render(effect[a].sprite[b], 72, y); ++y; }
 		++y;
 	}
+	for (int a = 0; a < buff.size(); ++a) {
+		rm.render(buff[a].sprite, 72, y); ++y;
+		Sprite s = Sprite();
+		if (buff[a].hp == 0 && buff[a].atk != 0) { s.createFromString((buff[a].atk > 0 ? "+" : "-") + std::to_string(abs(buff[a].atk)) + " Attack"); }
+		else if (buff[a].atk == 0 && buff[a].hp != 0) { s.createFromString((buff[a].hp > 0 ? "+" : "-") + std::to_string(abs(buff[a].hp)) + " Health"); }
+		else if (buff[a].atk != 0 && buff[a].hp != 0) { s.createFromString((buff[a].atk > 0 ? "+" : "-") + std::to_string(buff[a].atk) + (buff[a].hp > 0 ? "+" : "-") + std::to_string(abs(buff[a].hp))); }
+		else { s.createFromString("+0/+0"); }
+		s.setCol(COLOR_GRAY);
+		rm.render(s, 72, y); y += 2;
+	}
 }
 
 //When a unit is summoned
@@ -144,9 +173,28 @@ void Unit::onSummon(Unit& u) {
 	if (&u == this) {
 		for (int a = 0; a < effect.size(); ++a) {
 			switch (effect[a].effect) {
-				case EFFECT_AZURE_HERALD:
-					player->general->hp = min(player->general->hp + 3, player->general->hpMax);
-					break;
+			case EFFECT_AZURE_HERALD:
+				player->general->hp = min(player->general->hp + 3, player->general->hpMax);
+				break;
+			}
+		}
+	}
+
+	//When something else is summoned
+	else {
+		for (int a = 0; a < effect.size(); ++a) {
+			switch (effect[a].effect) {
+			case EFFECT_ARAKI_HEADHUNTER:
+				if (u.player == player) {
+					for (int b = 0; b < u.effect.size(); ++b) {
+						switch (u.effect[b].effect) {
+						case EFFECT_AZURE_HERALD:
+							addBuff(BUFF_ARAKI_HEADHUNTER);
+							break;
+						}
+					}
+				}
+				break;
 			}
 		}
 	}
