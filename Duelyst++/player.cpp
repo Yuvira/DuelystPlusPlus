@@ -5,17 +5,22 @@
 Player::Player() {}
 Player::~Player() {}
 
+//Preset deck
+void Player::preset(CardList& cl) {
+	deck.push_back(cl.find("Argeon Highmayne"));
+	for (int a = 0; a < 13; ++a) { deck.push_back(cl.find("Bloodshard Golem")); }
+	for (int a = 0; a < 13; ++a) { deck.push_back(cl.find("Brightmoss Golem")); }
+	for (int a = 0; a < 13; ++a) { deck.push_back(cl.find("Azure Herald")); }
+}
+
 //Initialize deck/hand
-void Player::init(CardList& cl, int _mana) {
+void Player::init(int _mana) {
 	mana = _mana;
 	manaMax = _mana;
 	for (int a = 0; a < 9; ++a) {
 		crystal[a].buffer[0].Char.AsciiChar = '';
 		crystal[a].setCol(COLOR_GRAY);
 	}
-	general = cl.clist[0];
-	for (int a = 0; a < 20; ++a) { deck.push_back(cl.clist[1]); }
-	for (int a = 0; a < 19; ++a) { deck.push_back(cl.clist[2]); }
 	shuffle();
 	for (int a = 0; a < 5; ++a) { hand.push_back(deck[a]); }
 	deck.erase(deck.begin(), deck.begin() + 5);

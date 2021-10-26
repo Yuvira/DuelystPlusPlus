@@ -70,8 +70,7 @@ public:
 	eCard type;
 	std::string name;
 	Sprite sprite;
-	int descriptionSize;
-	std::vector<Sprite> description;
+	Sprite header[2];
 };
 
 //Unit class
@@ -94,6 +93,7 @@ public:
 	eTribe tribe;
 	int atk;
 	int hp;
+	int hpMax;
 	BoardTile* tile;
 	Game* game;
 	Player* player;
@@ -101,9 +101,6 @@ public:
 	std::vector<Buff> buff;
 	Sprite sHP;
 	Sprite sATK;
-	std::string cardKeywords;
-	std::vector<std::string> effectName;
-	std::vector<std::string> effectDescription;
 };
 
 //Card list class
@@ -111,6 +108,8 @@ class CardList {
 public:
 	CardList();
 	~CardList();
+	Card* find(std::string s);
+	EffectList el;
 	std::vector<Card*> clist;
 	std::vector<Unit> glist;
 	std::vector<Unit> ulist;

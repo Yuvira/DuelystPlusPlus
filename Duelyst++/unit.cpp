@@ -9,6 +9,7 @@ Unit::Unit(eFaction _faction, eTribe _tribe, int _cost, int _atk, int _hp, std::
 	cost = _cost;
 	atk = _atk;
 	hp = _hp;
+	hpMax = _hp;
 	name = _name;
 	if (path == "") { sprite.resize(5, 5); }
 	else { sprite.createFromFile("resources/units/" + path + ".txt"); }
@@ -75,9 +76,9 @@ void Unit::updateDetailStats() {
 	std::string s = "";
 	if (tribe != TRIBE_GENERAL) { s = "COST:" + std::to_string(cost) + " ATK:" + std::to_string(atk) + " HP:" + std::to_string(hp); }
 	else { s = "ATK:" + std::to_string(atk) + " HP:" + std::to_string(hp); col = COLOR_GREEN; }
-	description[1].createFromString(s);
-	for (int a = 0; a < description[1].size; ++a) {
-		if (s[a] != ':' && s[a] != ' ') { description[1].buffer[a].Attributes = col; }
+	header[1].createFromString(s);
+	for (int a = 0; a < header[1].size; ++a) {
+		if (s[a] != ':' && s[a] != ' ') { header[1].buffer[a].Attributes = col; }
 		if (s[a] == ' ') {
 			if (col == COLOR_LTBLUE) { col = COLOR_GREEN; }
 			else { col = COLOR_RED; }
@@ -88,7 +89,6 @@ void Unit::updateDetailStats() {
 //Generate sidebar details
 void Unit::generateDetails() {
 	std::string s;
-	Sprite sprite;
 	s.resize(name.size());
 	std::transform(name.begin(), name.end(), s.begin(), ::toupper);
 	switch (tribe) {
@@ -120,23 +120,38 @@ void Unit::generateDetails() {
 			s += " - STRUCTURE";
 			break;
 	}
-	sprite.createFromString(s);
-	for (int a = name.size(); a < sprite.size; ++a) { sprite.buffer[a].Attributes = COLOR_GRAY; }
-	description.push_back(sprite);
-	description.push_back(Sprite());
+	header[0].createFromString(s);
+	for (int a = name.size(); a < header[0].size; ++a) { header[0].buffer[a].Attributes = COLOR_GRAY; }
 	updateDetailStats();
 }
 
 //Draw card data
 void Unit::drawDetails(Renderer& rm, int& y) {
 	rm.render(sprite, 66, y);
-	rm.render(description[0], 72, y); ++y;
+	rm.render(header[0], 72, y); ++y;
 	updateDetailStats();
-	rm.render(description[1], 72, y); ++y;
+	rm.render(header[1], 72, y); y+= 2;
+	for (int a = 0; a < effect.size(); ++a) {
+		for (int b = 0; b < effect[a].sprite.size(); ++b) { rm.render(effect[a].sprite[b], 72, y); ++y; }
+		++y;
+	}
 }
 
 //When a unit is summoned
-void Unit::onSummon(Unit& u) {}
+void Unit::onSummon(Unit& u) {
+
+	//When this is summoned (Opening Gambit)
+	if (&u == this) {
+		for (int a = 0; a < effect.size(); ++a) {
+			switch (effect[a].effect) {
+				case EFFECT_AZURE_HERALD:
+					player->general->hp = min(player->general->hp + 3, player->general->hpMax);
+					break;
+			}
+		}
+	}
+
+}
 
 //When a unit dies
 void Unit::onDeath(Unit& u) {

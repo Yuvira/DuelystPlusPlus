@@ -8,7 +8,8 @@
 
 //Effects
 enum eEffect {
-	EFFECT_NONE
+	EFFECT_NONE,
+	EFFECT_AZURE_HERALD
 };
 
 //Granted stat buffs
@@ -19,18 +20,19 @@ enum eBuff {
 //Effect class
 class Effect {
 public:
-	Effect();
+	Effect(eEffect = EFFECT_NONE);
 	~Effect();
-	Sprite sprite;
+	void generateSprite(std::string s);
+	std::vector<Sprite> sprite;
 	eEffect effect;
 };
 
 //Stat buff class
 class Buff {
 public:
-	Buff();
+	Buff(eBuff = BUFF_NONE);
 	~Buff();
-	Sprite sprite;
+	Sprite sprite[2];
 	eBuff buff;
 	int atk;
 	int hp;

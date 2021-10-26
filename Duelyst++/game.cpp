@@ -17,12 +17,13 @@ Game::Game() {
 	light.setCol(COLOR_LTBLUE);
 
 	//Initialize players
-	player[0].init(cl, 2);
-	player[1].init(cl, 3);
-
-	//Default units
-	summon(player[0].general, false, 0, 2);
-	summon(player[1].general, true, 8, 2);
+	for (int a = 0; a < 2; ++a) {
+		player[a].preset(cl);
+		summon(player[a].deck[0], a, a * 8, 2);
+		player[a].deck.erase(player[a].deck.begin());
+		player[a].general = unit.back();
+		player[a].init(a + 2);
+	}
 
 	//Hand
 	for (int a = 0; a < 7; ++a) {
@@ -232,11 +233,11 @@ void Game::changeTurn(bool t) {
 
 //Summon at position
 void Game::summon(Card* c, bool p, int x, int y) {
-	int i = unit.size();
 	unit.push_back(new Unit(*(dynamic_cast<Unit*>(c))));
-	unit[i]->player = &player[p];
-	unit[i]->game = this;
-	unit[i]->setPos(x, y);
+	unit.back()->player = &player[p];
+	unit.back()->game = this;
+	unit.back()->setPos(x, y);
+	for (int a = 0; a < unit.size(); ++a) { unit[a]->onSummon(*unit.back()); }
 }
 
 //Use active card
@@ -299,10 +300,9 @@ void Game::selectHand() {
 
 //Move selected unit
 void Game::moveUnit() {
-	int a = path.size() - 1;
-	if (a > 0) {
-		activeUnit->setPos(path[a].x, path[a].y);
-		pos = path[a];
+	if (path.size() > 1) {
+		activeUnit->setPos(path.back().x, path.back().y);
+		pos = path.back();
 	}
 	moveable.clear();
 	attackable.clear();
