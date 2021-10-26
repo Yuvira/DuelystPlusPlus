@@ -97,34 +97,33 @@ void Unit::generateDetails() {
 	Sprite sprite;
 	s.resize(name.size());
 	std::transform(name.begin(), name.end(), s.begin(), ::toupper);
-	s += " - ";
 	switch (tribe) {
 		case TRIBE_NONE:
-			s += "MINION";
+			s += " - MINION";
 			break;
 		case TRIBE_GENERAL:
-			s += "GENERAL";
+			s += " - GENERAL";
 			break;
 		case TRIBE_ARCANYST:
-			s += "ARCANYST";
+			s += " - ARCANYST";
 			break;
 		case TRIBE_PET:
-			s += "PET";
+			s += " - PET";
 			break;
 		case TRIBE_GOLEM:
-			s += "GOLEM";
+			s += " - GOLEM";
 			break;
 		case TRIBE_MECH:
-			s += "MECH";
+			s += " - MECH";
 			break;
 		case TRIBE_DERVISH:
-			s += "DERVISH";
+			s += " - DERVISH";
 			break;
 		case TRIBE_VESPYR:
-			s += "VESPYR";
+			s += " - VESPYR";
 			break;
 		case TRIBE_STRUCTURE:
-			s += "STRUCTURE";
+			s += " - STRUCTURE";
 			break;
 	}
 	sprite.createFromString(s);
@@ -187,6 +186,10 @@ void Unit::onAttack(Unit& u) {}
 
 //When this unit is attacked
 void Unit::onAttacked(Unit& u) {}
+
+//Effect constructor/deconstructor
+Effect::Effect() { effect = EFFECT_NONE; }
+Effect::~Effect() {}
 
 //Buff constructor/deconstructor
 Buff::Buff() {
