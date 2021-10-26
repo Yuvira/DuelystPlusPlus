@@ -30,8 +30,6 @@ void Unit::render(Renderer& rm) {
 //Attack enemy
 void Unit::attack(Unit& u) {
 	u.hp -= atk;
-	onAttack(u);
-	u.onAttacked(*this);
 }
 
 //Set sprite position
@@ -52,8 +50,7 @@ void Unit::setPos(int x, int y) {
 //Check if unit has died
 void Unit::update(bool& r) {
 	if (hp < 1) {
-		onDeath();
-		for (int a = 0; a < game->unit.size(); ++a) { game->unit[a]->onDeathAny(*this); }
+		for (int a = 0; a < game->unit.size(); ++a) { game->unit[a]->onDeath(*this); }
 		r = true;
 	}
 }
@@ -138,43 +135,39 @@ void Unit::drawDetails(Renderer& rm, int& y) {
 	rm.render(description[1], 72, y); ++y;
 }
 
-//When this unit is summoned (Opening Gambit)
-void Unit::onSummon() {}
+//When a unit is summoned
+void Unit::onSummon(Unit& u) {}
 
-//When any unit is summoned
-void Unit::onSummonAny(Unit& u) {}
+//When a unit dies
+void Unit::onDeath(Unit& u) {
 
-//When this unit dies
-void Unit::onDeath() {
+	//When this unit dies
+	if (&u == this) {
 
-	//Remove tile reference
-	tile->unit = nullptr;
-	for (int a = 0; a < game->hostile.size(); ++a) {
-		if (game->hostile[a] == tile) {
-			game->hostile.erase(game->hostile.begin() + a);
-			break;
+		//Remove tile reference
+		tile->unit = nullptr;
+		for (int a = 0; a < game->hostile.size(); ++a) {
+			if (game->hostile[a] == tile) {
+				game->hostile.erase(game->hostile.begin() + a);
+				break;
+			}
 		}
-	}
 
-	//Move to graveyard
-	for (int a = 0; a < game->unit.size(); ++a) {
-		if (game->unit[a] == this) {
-			game->unit.erase(game->unit.begin() + a);
-			game->grave.push_back(this);
-			break;
+		//Move to graveyard
+		for (int a = 0; a < game->unit.size(); ++a) {
+			if (game->unit[a] == this) {
+				game->unit.erase(game->unit.begin() + a);
+				game->grave.push_back(this);
+				break;
+			}
 		}
+
 	}
 
 }
 
-//When any unit dies (Deathwatch)
-void Unit::onDeathAny(Unit& u) {}
-
-//When this unit attacks
-void Unit::onAttack(Unit& u) {}
-
-//When this unit is attacked
-void Unit::onAttacked(Unit& u) {}
+//When a unit attacks
+void Unit::onAttack(Unit& u1, Unit& u2) {}
 
 //Effect constructor/deconstructor
 Effect::Effect() { effect = EFFECT_NONE; }

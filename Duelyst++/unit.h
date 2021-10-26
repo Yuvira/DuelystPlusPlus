@@ -77,12 +77,9 @@ public:
 	void updateDetailStats();
 	void generateDetails();
 	void drawDetails(Renderer& rm, int& y);
-	void onSummon();
-	void onSummonAny(Unit& u);
-	void onDeath();
-	void onDeathAny(Unit& u);
-	void onAttack(Unit& u);
-	void onAttacked(Unit& u);
+	void onSummon(Unit& u);
+	void onDeath(Unit& u);
+	void onAttack(Unit& u1, Unit& u2);
 	eFaction faction;
 	eTribe tribe;
 	int atk;
