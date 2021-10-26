@@ -187,3 +187,12 @@ void Unit::onAttack(Unit& u) {}
 
 //When this unit is attacked
 void Unit::onAttacked(Unit& u) {}
+
+//Buff constructor/deconstructor
+Buff::Buff() {
+	buff = BUFF_NONE;
+	atk = 0;
+	hp = 0;
+	count = 0;
+}
+Buff::~Buff() {}

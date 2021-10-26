@@ -33,6 +33,32 @@ enum eTribe {
 	TRIBE_STRUCTURE
 };
 
+//Innate skills
+enum eSkill {
+	SKILL_NONE
+};
+
+//Granted effects
+enum eEffect {
+	EFFECT_NONE
+};
+
+//Granted stat buffs
+enum eBuff {
+	BUFF_NONE
+};
+
+//Stat buff container
+class Buff {
+public:
+	Buff();
+	~Buff();
+	eBuff buff;
+	int atk;
+	int hp;
+	int count;
+};
+
 //Unit class
 class Unit : public Card {
 public:
@@ -58,6 +84,9 @@ public:
 	int hp;
 	Game* game;
 	Player* player;
+	eSkill skill;
+	std::vector<eEffect> effect;
+	std::vector<Buff> buff;
 	Sprite sHP;
 	Sprite sATK;
 	std::string cardKeywords;
