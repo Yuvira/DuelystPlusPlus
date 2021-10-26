@@ -4,8 +4,11 @@
 
 //Include
 #include <algorithm>
-#include <vector>
-#include "tile.h"
+#include "effect.h"
+
+//Definitions
+class Game;
+class Player;
 
 //Card types
 enum eCard {
@@ -33,18 +36,84 @@ enum eTarget {
 	TARGET_NEAR_ALLY,
 };
 
+//Factions
+enum eFaction {
+	FACTION_NEUTRAL,
+	FACTION_LYONAR,
+	FACTION_SONGHAI,
+	FACTION_VETRUVIAN,
+	FACTION_ABYSSIAN,
+	FACTION_MAGMAR,
+	FACTION_VANAR
+};
+
+//Tribes
+enum eTribe {
+	TRIBE_NONE,
+	TRIBE_GENERAL,
+	TRIBE_ARCANYST,
+	TRIBE_PET,
+	TRIBE_GOLEM,
+	TRIBE_MECH,
+	TRIBE_DERVISH,
+	TRIBE_VESPYR,
+	TRIBE_STRUCTURE
+};
+
 //Card class
 class Card {
 public:
-	Card();
-	~Card();
-	virtual void drawDetails(Renderer& rm, int& y);
+	Card() {}
+	~Card() {}
+	virtual void drawDetails(Renderer& rm, int& y) {}
 	int cost;
 	eCard type;
 	std::string name;
 	Sprite sprite;
 	int descriptionSize;
 	std::vector<Sprite> description;
+};
+
+//Unit class
+class Unit : public Card {
+public:
+	Unit(eFaction = FACTION_NEUTRAL, eTribe = TRIBE_NONE, int = 0, int = 0, int = 0, std::string = "", std::string = "???");
+	~Unit();
+	void render(Renderer& rm);
+	void attack(Unit& u);
+	void setPos(int x, int y);
+	void update(bool& r);
+	void updateStatSprites();
+	void updateDetailStats();
+	void generateDetails();
+	void drawDetails(Renderer& rm, int& y);
+	void onSummon(Unit& u);
+	void onDeath(Unit& u);
+	void onAttack(Unit& u1, Unit& u2);
+	eFaction faction;
+	eTribe tribe;
+	int atk;
+	int hp;
+	BoardTile* tile;
+	Game* game;
+	Player* player;
+	std::vector<Effect> effect;
+	std::vector<Buff> buff;
+	Sprite sHP;
+	Sprite sATK;
+	std::string cardKeywords;
+	std::vector<std::string> effectName;
+	std::vector<std::string> effectDescription;
+};
+
+//Card list class
+class CardList {
+public:
+	CardList();
+	~CardList();
+	std::vector<Card*> clist;
+	std::vector<Unit> glist;
+	std::vector<Unit> ulist;
 };
 
 #endif

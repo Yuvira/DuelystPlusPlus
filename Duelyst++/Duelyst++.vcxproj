@@ -115,7 +115,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="card.cpp" />
+    <ClCompile Include="effect.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="player.cpp" />
@@ -127,12 +127,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="card.h" />
+    <ClInclude Include="effect.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="sprite.h" />
     <ClInclude Include="tile.h" />
-    <ClInclude Include="unit.h" />
-    <ClInclude Include="cardlist.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="player.h" />

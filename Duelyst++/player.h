@@ -4,7 +4,7 @@
 
 //Include
 #include <cstdlib>
-#include "cardlist.h"
+#include "card.h"
 
 //Player class
 class Player {

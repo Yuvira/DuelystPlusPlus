@@ -21,10 +21,8 @@ Game::Game() {
 	player[1].init(cl, 3);
 
 	//Default units
-	summon(cl.clist[0], false, 0, 2);
-	summon(cl.clist[0], true, 8, 2);
-	summon(cl.clist[1], false, 1, 2);
-	summon(cl.clist[1], true, 7, 2);
+	summon(player[0].general, false, 0, 2);
+	summon(player[1].general, true, 8, 2);
 
 	//Hand
 	for (int a = 0; a < 7; ++a) {

@@ -30,9 +30,6 @@
     <ClCompile Include="player.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="card.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="unit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -40,6 +37,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="cardlist.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="effect.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -56,13 +56,10 @@
     <ClInclude Include="card.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="unit.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="tile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="cardlist.h">
+    <ClInclude Include="effect.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
