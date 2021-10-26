@@ -116,8 +116,10 @@ void Game::input() {
 	else if (mode == MODE_SELECT) {
 
 		//Move selection
-		if (asciiVal == 119 || asciiVal == 87 || asciiVal == 97 || asciiVal == 65) { moveSelect(-1); }      //W/A
-		else if (asciiVal == 115 || asciiVal == 83 || asciiVal == 100 || asciiVal == 68) { moveSelect(1); } //S/D
+		if (asciiVal == 119 || asciiVal == 87) { moveSelect(0, -1); }     //W
+		else if (asciiVal == 97 || asciiVal == 65) { moveSelect(-1, 0); } //A
+		else if (asciiVal == 115 || asciiVal == 83) { moveSelect(0, 1); } //S
+		else if (asciiVal == 100 || asciiVal == 68) { moveSelect(1, 0); } //D
 
 		//Use card at selection
 		else if (asciiVal == 32) { useCard(); }
@@ -290,7 +292,6 @@ void Game::selectHand() {
 	if (player[turn].hand[hPos]->cost > player[turn].mana) { return; }
 	highlightSelectable(TARGET_NEAR_ALLY, COLOR_GREEN);
 	if (selectable.size() > 0) {
-		sortSelectable();
 		activeCard = player[turn].hand[hPos];
 		sPos = 0;
 		selectable[0]->setCol(COLOR_LTGREEN);
@@ -413,9 +414,39 @@ void Game::moveArrow(int x, int y) {
 }
 
 //Move selected tile
-void Game::moveSelect(int x) {
+void Game::moveSelect(int x, int y) {
 	selectable[sPos]->setCol(COLOR_GREEN);
-	sPos = (sPos + x + selectable.size()) % selectable.size();
+	int _x = selectable[sPos]->pos.x + x;
+	int _y = selectable[sPos]->pos.y + y;
+	if (x != 0) {
+		for (int a = 0; x > 0 ? a < 9 : a > -9; a += x) {
+			for (int b = 0; b < 3; b > 0 ? b *= -1 : b = (b - 1) * -1) {
+				int __x = (_x + a + 9) % 9;
+				int __y = (_y + b + 5) % 5;
+				for (int c = 0; c < selectable.size(); ++c) {
+					if (&map.tile[__x][__y] == selectable[c]) {
+						sPos = c;
+						goto end;
+					}
+				}
+			}
+		}
+	}
+	else if (y != 0) {
+		for (int a = 0; y > 0 ? a < 5 : a > -5; a += y) {
+			for (int b = 0; b < 5; b > 0 ? b *= -1 : b = (b - 1) * -1) {
+				int __x = (_x + b + 9) % 9;
+				int __y = (_y + a + 5) % 5;
+				for (int c = 0; c < selectable.size(); ++c) {
+					if (&map.tile[__x][__y] == selectable[c]) {
+						sPos = c;
+						goto end;
+					}
+				}
+			}
+		}
+	}
+	end:
 	selectable[sPos]->setCol(COLOR_LTGREEN);
 }
 
@@ -492,19 +523,6 @@ void Game::highlightSelectable(eTarget type, eColor col) {
 		}
 	}
 
-}
-
-//Sort selectable tiles by position
-void Game::sortSelectable() {
-	for (int a = 0; a < selectable.size() - 1; ++a) {
-		for (int b = a + 1; b < selectable.size(); ++b) {
-			if (selectable[b]->pos.y < selectable[a]->pos.y || selectable[b]->pos.x < selectable[a]->pos.x) {
-				BoardTile* t = selectable[a];
-				selectable[a] = selectable[b];
-				selectable[b] = t;
-			}
-		}
-	}
 }
 
 //Draw arrow path
