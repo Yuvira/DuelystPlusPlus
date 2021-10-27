@@ -155,6 +155,44 @@ void Game::update() {
 	player[0].updateMana(COLOR_LTBLUE);
 	player[1].updateMana(COLOR_RED);
 
+	//Clear tile highlights
+	for (int a = 0; a < 9; ++a) {
+		for (int b = 0; b < 5; ++b) {
+			map.tile[a][b].setCol(COLOR_LTWHITE);
+		}
+	}
+
+	//Re-highlight hostiles
+	hostile.clear();
+	for (int b = 0; b < unit.size(); ++b) {
+		if (unit[b]->player != &player[turn]) {
+			hostile.push_back(unit[b]->tile);
+		}
+	}
+	for (int a = 0; a < hostile.size(); ++a) { hostile[a]->setCol(COLOR_LTRED); }
+
+	//Highlight moveable spaces
+	if (mode == MODE_MOVE) {
+		for (int a = 0; a < highlighted.size(); ++a) { highlighted[a]->setCol(COLOR_AQUA); }
+		for (int a = 0; a < hostile.size(); ++a) {
+			if (canAttack(*activeUnit->tile, *hostile[a])) {
+				hostile[a]->setCol(COLOR_RED);
+			}
+		}
+	}
+
+	//Highlight selectable spaces
+	else if (mode == MODE_SELECT) {
+		for (int a = 0; a < selectable.size(); ++a) { selectable[a]->setCol(COLOR_GREEN); }
+		selectable[sPos]->setCol(COLOR_LTGREEN);
+	}
+
+	//Highlight cursor position
+	else if (mode == MODE_NONE) {
+		highlighted.clear();
+		highlightTile(pos.x, pos.y, COLOR_AQUA);
+	}
+
 }
 
 //Render objects
@@ -240,7 +278,6 @@ void Game::changeTurn(bool t) {
 			hostile.push_back(unit[a]->tile);
 		}
 	}
-	moveCursor(0, 0);
 }
 
 //Summon at position
@@ -275,7 +312,6 @@ void Game::useCard() {
 				break;
 			}
 		}
-		if (!callback.unit) { moveCursor(0, 0); }
 	}
 
 }
@@ -284,28 +320,21 @@ void Game::useCard() {
 void Game::useEffect() {
 	BoardTile* t = selectable[sPos];
 	pos = t->pos;
-	for (int a = 0; a < selectable.size(); ++a) { selectable[a]->setCol(COLOR_LTWHITE); }
 	selectable.clear();
 	sPos = -1;
 	mode = MODE_NONE;
 	callback.unit->callback(t);
-	if (!callback.unit) { moveCursor(0, 0); }
 }
 
 //Select unit
 void Game::select(BoardTile& t) {
-	for (int a = 0; a < highlighted.size(); ++a) {
-		highlighted[a]->setCol(COLOR_AQUA);
-		moveable.push_back(highlighted[a]);
-	}
+	for (int a = 0; a < highlighted.size(); ++a) { moveable.push_back(highlighted[a]); }
 	for (int a = 0; a < hostile.size(); ++a) {
 		if (canAttack(t, *hostile[a])) {
-			hostile[a]->setCol(COLOR_RED);
 			attackable.push_back(hostile[a]);
 		}
 	}
 	activeUnit = t.unit;
-	t.setCol(COLOR_LTWHITE);
 	mode = MODE_MOVE;
 	path.push_back(pos);
 }
@@ -321,7 +350,6 @@ void Game::moveUnit() {
 	activeUnit = nullptr;
 	mode = MODE_NONE;
 	path.clear();
-	moveCursor(0, 0);
 }
 
 //Attack unit
@@ -335,15 +363,10 @@ void Game::attackUnit() {
 	attack = nullptr;
 	mode = MODE_NONE;
 	path.clear();
-	moveCursor(0, 0);
 }
 
 //Move cursor position
 void Game::moveCursor(int x, int y) {
-
-	//Clear selected tiles
-	for (int a = 0; a < highlighted.size(); ++a) { highlighted[a]->setCol(COLOR_LTWHITE); }
-	highlighted.clear();
 	
 	//Move cursor
 	pos.x = (pos.x + x + 9) % 9;
@@ -354,12 +377,6 @@ void Game::moveCursor(int x, int y) {
 		mode = MODE_HAND;
 	}
 	else { pos.y = (pos.y + y + 5) % 5; }
-
-	//Re-highlight enemies in red
-	for (int a = 0; a < hostile.size(); ++a) { hostile[a]->setCol(COLOR_LTRED); }
-
-	//Select tile at cursor
-	if (mode == MODE_NONE) { highlightTile(pos.x, pos.y, COLOR_AQUA); }
 
 }
 
@@ -373,10 +390,8 @@ void Game::moveCursorHand(int x, int y) {
 	hPos = (hPos + x + 6) % 6;
 	if (y != -1) {
 		pos = Coord(hPos + 1, y);
-		highlightTile(pos.x, pos.y, COLOR_AQUA);
 		hPos = -1;
 		mode = MODE_NONE;
-		moveCursor(0, 0);
 		return;
 	}
 
@@ -425,7 +440,6 @@ void Game::moveArrow(int x, int y) {
 
 //Move selected tile
 void Game::moveSelect(int x, int y) {
-	selectable[sPos]->setCol(COLOR_GREEN);
 	int _x = selectable[sPos]->pos.x + x;
 	int _y = selectable[sPos]->pos.y + y;
 	if (x != 0) {
@@ -550,7 +564,6 @@ void Game::highlightSelectable(eTarget type, Unit* u) {
 	//If selectable tiles found, highlight first and switch to select mode
 	if (selectable.size() > 0) {
 		sPos = 0;
-		selectable[0]->setCol(COLOR_LTGREEN);
 		mode = MODE_SELECT;
 	}
 
