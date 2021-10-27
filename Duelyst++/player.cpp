@@ -7,12 +7,12 @@ Player::~Player() {}
 
 //Preset deck
 void Player::preset(CardList& cl) {
-	deck.push_back(cl.find("Argeon Highmayne"));
-	for (int a = 0; a < 7; ++a) { deck.push_back(cl.find("Ghost Lynx")); }
-	for (int a = 0; a < 8; ++a) { deck.push_back(cl.find("Araki Headhunter")); }
-	for (int a = 0; a < 8; ++a) { deck.push_back(cl.find("Azure Herald")); }
-	for (int a = 0; a < 8; ++a) { deck.push_back(cl.find("Aethermaster")); }
-	for (int a = 0; a < 8; ++a) { deck.push_back(cl.find("Dragonlark")); }
+	deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Argeon Highmayne")))));
+	for (int a = 0; a < 7; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Ghost Lynx"))))); }
+	for (int a = 0; a < 8; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Araki Headhunter"))))); }
+	for (int a = 0; a < 8; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Azure Herald"))))); }
+	for (int a = 0; a < 8; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Aethermaster"))))); }
+	for (int a = 0; a < 8; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Dragonlark"))))); }
 }
 
 //Initialize deck/hand

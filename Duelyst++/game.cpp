@@ -306,7 +306,7 @@ void Game::changeTurn(bool t) {
 
 //Summon at position
 void Game::summon(Card* c, bool p, int x, int y) {
-	unit.push_back(new Unit(*(dynamic_cast<Unit*>(c))));
+	unit.push_back(dynamic_cast<Unit*>(c));
 	unit.back()->player = &player[p];
 	unit.back()->game = this;
 	unit.back()->setPos(x, y);
