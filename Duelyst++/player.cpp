@@ -18,9 +18,10 @@ void Player::init(int _mana, Game* g) {
 	game = g;
 	mana = _mana;
 	manaMax = _mana;
+	replaces = 1;
 	for (int a = 0; a < 9; ++a) {
-		crystal[a].buffer[0].Char.AsciiChar = '';
-		crystal[a].setCol(COLOR_GRAY);
+		uiCrystal[a].buffer[0].Char.AsciiChar = '';
+		uiCrystal[a].setCol(COLOR_GRAY);
 	}
 	shuffle();
 	for (int a = 0; a < 5; ++a) { hand.push_back(deck[a]); }
@@ -29,16 +30,16 @@ void Player::init(int _mana, Game* g) {
 
 //Update mana sprites
 void Player::updateMana(eColor col) {
-	for (int a = 0; a < mana; ++a) { crystal[a].setCol(col); }
-	for (int a = mana; a < manaMax; ++a) { crystal[a].setCol(COLOR_LTWHITE); }
-	for (int a = manaMax; a < 9; ++a) { crystal[a].setCol(COLOR_GRAY); }
+	for (int a = 0; a < mana; ++a) { uiCrystal[a].setCol(col); }
+	for (int a = mana; a < manaMax; ++a) { uiCrystal[a].setCol(COLOR_LTWHITE); }
+	for (int a = manaMax; a < 9; ++a) { uiCrystal[a].setCol(COLOR_GRAY); }
 }
 
 //Render UI
 void Player::render(Renderer& rm, bool left) {
 
 	//Mana crystals
-	for (int a = 0; a < 9; ++a) { rm.render(crystal[a], left ? (a * 2) + 2 : 62 - (a * 2), 2); }
+	for (int a = 0; a < 9; ++a) { rm.render(uiCrystal[a], left ? (a * 2) + 2 : 62 - (a * 2), 2); }
 
 	//Cards in hand/deck
 	std::string s = std::to_string(hand.size()) + "/6 " + std::to_string(deck.size()) + "/40";
@@ -46,6 +47,12 @@ void Player::render(Renderer& rm, bool left) {
 	Sprite _s;
 	_s.createFromString(s);
 	rm.render(_s, left ? 20 : 45 - s.length(), 2);
+
+	//Replace
+	if (&game->player[game->turn] == this) {
+		uiReplace.buffer[0].Char.AsciiChar = std::to_string(replaces)[0];
+		rm.render(uiReplace, 4, 44);
+	}
 
 }
 
@@ -67,5 +74,17 @@ void Player::draw() {
 		if (hand.size() < 6) { hand.push_back(deck[0]); }
 		else { game->grave.push_back(deck[0]); }
 		deck.erase(deck.begin());
+	}
+}
+
+//Replace card
+void Player::replace(int i) {
+	if (replaces > 0 && hand.size() > i) {
+		deck.push_back(hand[i]);
+		hand.erase(hand.begin() + i);
+		shuffle();
+		hand.insert(hand.begin() + i, deck[0]);
+		deck.erase(deck.begin());
+		--replaces;
 	}
 }

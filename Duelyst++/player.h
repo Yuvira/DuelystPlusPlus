@@ -17,9 +17,12 @@ public:
 	void render(Renderer& rm, bool left);
 	void shuffle();
 	void draw();
+	void replace(int i);
 	int mana;
 	int manaMax;
-	Sprite crystal[9];
+	int replaces;
+	Sprite uiReplace;
+	Sprite uiCrystal[9];
 	Unit* general;
 	Game* game;
 	std::vector<Card*> deck;

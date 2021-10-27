@@ -97,6 +97,9 @@ void Game::input() {
 		else if (asciiVal == 115 || asciiVal == 83) { moveCursorHand(0, 0); }  //S
 		else if (asciiVal == 100 || asciiVal == 68) { moveCursorHand(1, -1); } //D
 
+		//Replace card
+		else if (asciiVal == 114 || asciiVal == 82) { player[turn].replace(hPos); }
+
 		//Select card
 		else if (asciiVal == 32) {
 			if (hPos < player[turn].hand.size()) {
@@ -216,10 +219,6 @@ void Game::render(Renderer& rm) {
 	//Board
 	rm.render(board);
 
-	//Player UI
-	player[0].render(rm, true);
-	player[1].render(rm, false);
-
 	//Turn indicator
 	rm.render(light, 31, 2);
 
@@ -256,6 +255,10 @@ void Game::render(Renderer& rm) {
 		rm.render(player[turn].hand[a]->sprite, (a * 7) + 9, 42);
 	}
 
+	//Player UI
+	player[0].render(rm, true);
+	player[1].render(rm, false);
+
 	//Sidebar
 	renderSidebar(rm);
 
@@ -286,6 +289,7 @@ void Game::renderSidebar(Renderer& rm) {
 //Change turn
 void Game::changeTurn(bool t) {
 	if (turnCount > 0) { player[turn].draw(); }
+	player[turn].replaces = 1;
 	turn = t;
 	if (!turn) { ++turnCount; }
 	if (turnCount > 1 && player[turn].manaMax < 9) { ++player[turn].manaMax; }
