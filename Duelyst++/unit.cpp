@@ -33,7 +33,7 @@ void Unit::render(Renderer& rm) {
 
 //Draw card data
 void Unit::drawDetails(Renderer& rm, int& y) {
-	if (attacked) { sprite.setCol(COLOR_LTWHITE); }
+	sprite.setCol(COLOR_LTWHITE);
 	rm.render(sprite, 66, y);
 	rm.render(header[0], 72, y); ++y;
 	updateDetailStats();
