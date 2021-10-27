@@ -360,16 +360,18 @@ void Game::select(BoardTile& t) {
 
 //Move selected unit
 void Game::moveUnit() {
-	if (selectable[sPos] != &map.tile[pos.x][pos.y]) {
-		activeUnit->setPos(selectable[sPos]->pos.x, selectable[sPos]->pos.y);
-		activeUnit->moved = true;
-		pos = selectable[sPos]->pos;
+	if (selectable[sPos]->unit == nullptr) {
+		if (selectable[sPos] != &map.tile[pos.x][pos.y]) {
+			activeUnit->setPos(selectable[sPos]->pos.x, selectable[sPos]->pos.y);
+			activeUnit->moved = true;
+			pos = selectable[sPos]->pos;
+		}
+		moveable.clear();
+		attackable.clear();
+		selectable.clear();
+		activeUnit = nullptr;
+		mode = MODE_NONE;
 	}
-	moveable.clear();
-	attackable.clear();
-	selectable.clear();
-	activeUnit = nullptr;
-	mode = MODE_NONE;
 }
 
 //Attack unit
@@ -457,9 +459,8 @@ void Game::moveSelect(int x, int y) {
 //Check if tile is moveable
 bool Game::canMove(int x, int y) {
 	if (x > -1 && x < 9 && y > -1 && y < 5) {
-		if (map.tile[x][y].unit == nullptr) {
-			return true;
-		}
+		if (map.tile[x][y].unit == nullptr) { return true; }
+		else if (map.tile[x][y].unit->player == map.tile[pos.x][pos.y].unit->player) { return true; }
 	}
 	return false;
 }
