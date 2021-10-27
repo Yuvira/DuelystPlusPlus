@@ -90,6 +90,7 @@ public:
 	void updateDetailStats();
 	void generateDetails();
 	void drawDetails(Renderer& rm, int& y);
+	bool isFlying();
 	void onSummon(Unit& u);
 	void onDeath(Unit& u);
 	void onAttack(Unit& u1, Unit& u2);

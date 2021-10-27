@@ -28,7 +28,7 @@ void Skill::generateSprite(std::string s) {
 	for (int a = 0; a < s.length(); ++a) {
 		if (s[a] == '|') { v.push_back(""); }
 		else if (s[a] == '{') { c.push_back(Coord()); c.back().x = a; }
-		else if (s[a] == '}') { c.back().y = a; }
+		else if (s[a] == '}') { c.back().y = a - 1; }
 		else { v.back() += s[a]; }
 	}
 	for (int a = 0; a < v.size(); ++a) {
@@ -69,18 +69,20 @@ void Buff::generateSprite(std::string s) { sprite.createFromString(s); }
 
 //Effect list constructor/deconstructor
 EffectList::EffectList() {
-	slist.push_back(Skill(SKILL_AZURE_HERALD));
-	slist.back().generateSprite("{Opening Gambit}: Restore 3 Health to your|General");
-	slist.push_back(Skill(SKILL_ARAKI_HEADHUNTER));
-	slist.back().generateSprite("Whenever you summon a minion with|Opening Gambit from your action bar,|gain +2 Attack");
-	blist.push_back(Buff(BUFF_ARAKI_HEADHUNTER, 2, 0));
-	blist.back().generateSprite("Headhunter");
-	slist.push_back(Skill(SKILL_GHOST_LYNX));
-	slist.back().generateSprite("{Opening Gambit}: Teleport a nearby|minion to a random space");
+	slist.push_back(Skill(SKILL_FLYING));
+	slist.back().generateSprite("{Flying}");
 	slist.push_back(Skill(SKILL_AETHERMASTER));
 	slist.back().generateSprite("You may replace an additional card|each turn");
 	elist.push_back(Effect(EFFECT_AETHERMASTER));
 	elist.back().generateSprite("Aethermaster|You may replace 1 extra card(s) per turn");
+	slist.push_back(Skill(SKILL_ARAKI_HEADHUNTER));
+	slist.back().generateSprite("Whenever you summon a minion with|Opening Gambit from your action bar,|gain +2 Attack");
+	blist.push_back(Buff(BUFF_ARAKI_HEADHUNTER, 2, 0));
+	blist.back().generateSprite("Headhunter");
+	slist.push_back(Skill(SKILL_AZURE_HERALD));
+	slist.back().generateSprite("{Opening Gambit}: Restore 3 Health to your|General");
+	slist.push_back(Skill(SKILL_GHOST_LYNX));
+	slist.back().generateSprite("{Opening Gambit}: Teleport a nearby|minion to a random space");
 }
 EffectList::~EffectList() {}
 

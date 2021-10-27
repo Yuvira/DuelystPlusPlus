@@ -209,6 +209,15 @@ void Unit::generateDetails() {
 	updateDetailStats();
 }
 
+//Is unit flying
+bool Unit::isFlying() {
+	switch (skill.skill) {
+	case SKILL_FLYING:
+		return true;
+	}
+	return false;
+}
+
 //When a unit is summoned
 void Unit::onSummon(Unit& u) {
 

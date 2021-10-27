@@ -366,7 +366,7 @@ void Game::select(BoardTile& t) {
 
 //Move selected unit
 void Game::moveUnit() {
-	if (selectable[sPos]->unit == nullptr) {
+	if (selectable[sPos]->unit == nullptr || selectable[sPos] == &map.tile[pos.x][pos.y]) {
 		if (selectable[sPos] != &map.tile[pos.x][pos.y]) {
 			activeUnit->setPos(selectable[sPos]->pos.x, selectable[sPos]->pos.y);
 			activeUnit->moved = true;
@@ -494,19 +494,32 @@ void Game::highlightTile(int x, int y, eColor col) {
 
 //Highlight moveable spaces
 void Game::highlightMoveable(int x, int y) {
-	bool u = false; bool l = false; bool r = false; bool d = false;
-	if (canMove(x, y - 1)) { highlightTile(x, y - 1, COLOR_GRAY); u = true; } //Up
-	if (canMove(x - 1, y)) { highlightTile(x - 1, y, COLOR_GRAY); l = true; } //Left
-	if (canMove(x, y + 1)) { highlightTile(x, y + 1, COLOR_GRAY); d = true; } //Down
-	if (canMove(x + 1, y)) { highlightTile(x + 1, y, COLOR_GRAY); r = true; } //Right
-	if (canMove(x, y - 2) && u) { highlightTile(x, y - 2, COLOR_GRAY); } //Up x 2
-	if (canMove(x - 2, y) && l) { highlightTile(x - 2, y, COLOR_GRAY); } //Left x 2
-	if (canMove(x, y + 2) && d) { highlightTile(x, y + 2, COLOR_GRAY); } //Down x 2
-	if (canMove(x + 2, y) && r) { highlightTile(x + 2, y, COLOR_GRAY); } //Right x 2
-	if (canMove(x - 1, y - 1) && (u || l)) { highlightTile(x - 1, y - 1, COLOR_GRAY); } //Up-left
-	if (canMove(x - 1, y + 1) && (d || l)) { highlightTile(x - 1, y + 1, COLOR_GRAY); } //Down-left
-	if (canMove(x + 1, y + 1) && (d || r)) { highlightTile(x + 1, y + 1, COLOR_GRAY); } //Down-right
-	if (canMove(x + 1, y - 1) && (u || r)) { highlightTile(x + 1, y - 1, COLOR_GRAY); } //Up-right
+	if (map.tile[pos.x][pos.y].unit->isFlying()) {
+		for (int a = 0; a < 9; ++a) {
+			for (int b = 0; b < 5; ++b) {
+				if (a != pos.x || b != pos.y) {
+					if (canMove(a, b)) {
+						highlightTile(a, b, COLOR_GRAY);
+					}
+				}
+			}
+		}
+	}
+	else {
+		bool u = false; bool l = false; bool r = false; bool d = false;
+		if (canMove(x, y - 1)) { highlightTile(x, y - 1, COLOR_GRAY); u = true; } //Up
+		if (canMove(x - 1, y)) { highlightTile(x - 1, y, COLOR_GRAY); l = true; } //Left
+		if (canMove(x, y + 1)) { highlightTile(x, y + 1, COLOR_GRAY); d = true; } //Down
+		if (canMove(x + 1, y)) { highlightTile(x + 1, y, COLOR_GRAY); r = true; } //Right
+		if (canMove(x, y - 2) && u) { highlightTile(x, y - 2, COLOR_GRAY); } //Up x 2
+		if (canMove(x - 2, y) && l) { highlightTile(x - 2, y, COLOR_GRAY); } //Left x 2
+		if (canMove(x, y + 2) && d) { highlightTile(x, y + 2, COLOR_GRAY); } //Down x 2
+		if (canMove(x + 2, y) && r) { highlightTile(x + 2, y, COLOR_GRAY); } //Right x 2
+		if (canMove(x - 1, y - 1) && (u || l)) { highlightTile(x - 1, y - 1, COLOR_GRAY); } //Up-left
+		if (canMove(x - 1, y + 1) && (d || l)) { highlightTile(x - 1, y + 1, COLOR_GRAY); } //Down-left
+		if (canMove(x + 1, y + 1) && (d || r)) { highlightTile(x + 1, y + 1, COLOR_GRAY); } //Down-right
+		if (canMove(x + 1, y - 1) && (u || r)) { highlightTile(x + 1, y - 1, COLOR_GRAY); } //Up-right
+	}
 }
 
 //Highlight targetable tiles
@@ -569,9 +582,14 @@ void Game::createPath() {
 bool Game::addToPaths(int x, int y, int l, int c) {
 	if (x > -1 && x < 9 && y > -1 && y < 5) {
 		for (int a = 0; a < pathList.size(); ++a) { if (pathList[a].pos.x == x && pathList[a].pos.y == y) { return false; } }
+		if (map.tile[pos.x][pos.y].unit->isFlying()) {
+			pathList.push_back(PathCoord(Coord(x, y), l, c));
+			if (selectable[sPos]->pos.x == x && selectable[sPos]->pos.y == y) { return true; }
+			return false;
+		}
 		for (int a = 0; a < moveable.size(); ++a) {
 			if (moveable[a] == &map.tile[x][y]) {
-				pathList.push_back(PathCoord(Coord(map.tile[x][y].pos.x, map.tile[x][y].pos.y), l, c));
+				pathList.push_back(PathCoord(Coord(x, y), l, c));
 				if (selectable[sPos] == moveable[a]) { return true; }
 				return false;
 			}
@@ -618,14 +636,16 @@ void Game::drawPath(Renderer& rm) {
 		else if (path[a].x < path[a - 1].x) { drawArrow(6, c.X, c.Y, rm); } //End left
 		else if (path[a].y > path[a - 1].y) { drawArrow(7, c.X, c.Y, rm); } //End down
 		else if (path[a].x > path[a - 1].x) { drawArrow(8, c.X, c.Y, rm); } //End right
-		if (path.size() == 3) {
-			c = map.tile[path[1].x][path[1].y].border.pos;
-			if (path[1].x == path[0].x && path[1].x == path[2].x) { drawArrow(9, c.X, c.Y, rm); }       //Up-down
-			else if (path[1].y == path[0].y && path[1].y == path[2].y) { drawArrow(10, c.X, c.Y, rm); } //Left-right
-			else if ((path[1].x > path[0].x && path[1].y > path[2].y) || (path[1].x > path[2].x && path[1].y > path[0].y)) { drawArrow(11, c.X, c.Y, rm); } //Up-left
-			else if ((path[1].x > path[0].x && path[1].y < path[2].y) || (path[1].x > path[2].x && path[1].y < path[0].y)) { drawArrow(12, c.X, c.Y, rm); } //Down-left
-			else if ((path[1].x < path[0].x && path[1].y < path[2].y) || (path[1].x < path[2].x && path[1].y < path[0].y)) { drawArrow(13, c.X, c.Y, rm); } //Down-right
-			else if ((path[1].x < path[0].x && path[1].y > path[2].y) || (path[1].x < path[2].x && path[1].y > path[0].y)) { drawArrow(14, c.X, c.Y, rm); } //Up-right
+		if (a > 1) {
+			for (int b = 1; b < a; ++b) {
+				c = map.tile[path[b].x][path[b].y].border.pos;
+				if (path[b].x == path[b - 1].x && path[b].x == path[b + 1].x) { drawArrow(9, c.X, c.Y, rm); }       //Up-down
+				else if (path[b].y == path[b - 1].y && path[b].y == path[b + 1].y) { drawArrow(10, c.X, c.Y, rm); } //Left-right
+				else if ((path[b].x > path[b - 1].x && path[b].y > path[b + 1].y) || (path[b].x > path[b + 1].x && path[b].y > path[b - 1].y)) { drawArrow(11, c.X, c.Y, rm); } //Up-left
+				else if ((path[b].x > path[b - 1].x && path[b].y < path[b + 1].y) || (path[b].x > path[b + 1].x && path[b].y < path[b - 1].y)) { drawArrow(12, c.X, c.Y, rm); } //Down-left
+				else if ((path[b].x < path[b - 1].x && path[b].y < path[b + 1].y) || (path[b].x < path[b + 1].x && path[b].y < path[b - 1].y)) { drawArrow(13, c.X, c.Y, rm); } //Down-right
+				else if ((path[b].x < path[b - 1].x && path[b].y > path[b + 1].y) || (path[b].x < path[b + 1].x && path[b].y > path[b - 1].y)) { drawArrow(14, c.X, c.Y, rm); } //Up-right
+			}
 		}
 	}
 }
