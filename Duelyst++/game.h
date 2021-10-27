@@ -16,6 +16,15 @@ enum eMode {
 	MODE_SELECT
 };
 
+//Unit effect callback class
+class Callback {
+public:
+	Callback(Unit* = nullptr, eEffect = EFFECT_NONE);
+	~Callback();
+	Unit* unit;
+	eEffect effect;
+};
+
 //Game class
 class Game {
 public:
@@ -28,8 +37,8 @@ public:
 	void changeTurn(bool t);
 	void summon(Card* c, bool p, int x, int y);
 	void useCard();
+	void useEffect();
 	void select(BoardTile& t);
-	void selectHand();
 	void attackUnit();
 	void moveUnit();
 	void moveCursor(int x, int y);
@@ -40,7 +49,7 @@ public:
 	bool canAttack(BoardTile& t1, BoardTile& t2);
 	void highlightTile(int x, int y, eColor col);
 	void highlightMoveable(int x, int y);
-	void highlightSelectable(eTarget type, eColor col);
+	void highlightSelectable(eTarget type, Unit* = nullptr);
 	void drawPath(Renderer& rm);
 	void drawSword(int x, int y, Renderer& rm);
 	void drawArrow(int a, int x, int y, Renderer& rm);
@@ -53,6 +62,7 @@ public:
 	Player player[2];
 	Map map;
 	Tile hand[7];
+	Callback callback;
 	std::vector<BoardTile*> highlighted;
 	std::vector<BoardTile*> moveable;
 	std::vector<BoardTile*> hostile;

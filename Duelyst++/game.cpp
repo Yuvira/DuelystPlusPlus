@@ -1,6 +1,13 @@
 //Include
 #include "game.h"
 
+//Callback stuff
+Callback::Callback(Unit* u, eEffect e) {
+	unit = u;
+	effect = e;
+}
+Callback::~Callback() {}
+
 //Game constructor / destructor
 Game::Game() {
 
@@ -87,7 +94,10 @@ void Game::input() {
 		else if (asciiVal == 32) {
 			if (hPos < player[turn].hand.size()) {
 				if (player[turn].hand[hPos]->type == CARD_UNIT) {
-					selectHand();
+					if (player[turn].hand[hPos]->cost <= player[turn].mana) {
+						highlightSelectable(TARGET_NEAR_ALLY);
+						if (selectable.size() > 0) { activeCard = player[turn].hand[hPos]; }
+					}
 				}
 			}
 		}
@@ -121,7 +131,10 @@ void Game::input() {
 		else if (asciiVal == 100 || asciiVal == 68) { moveSelect(1, 0); } //D
 
 		//Use card at selection
-		else if (asciiVal == 32) { useCard(); }
+		else if (asciiVal == 32) {
+			if (callback.unit) { useEffect(); }
+			else { useCard(); }
+		}
 
 	}
 
@@ -248,6 +261,12 @@ void Game::useCard() {
 	//Summon unit
 	if (activeCard->type == CARD_UNIT) {
 		pos = selectable[sPos]->pos;
+		hand[hPos + 1].setCol(COLOR_LTWHITE);
+		hPos = -1;
+		for (int a = 0; a < selectable.size(); ++a) { selectable[a]->setCol(COLOR_LTWHITE); }
+		selectable.clear();
+		sPos = -1;
+		mode = MODE_NONE;
 		summon(activeCard, turn, pos.x, pos.y);
 		for (int a = 0; a < player[turn].hand.size(); ++a) {
 			if (player[turn].hand[a] == activeCard) {
@@ -256,15 +275,21 @@ void Game::useCard() {
 				break;
 			}
 		}
-		hand[hPos + 1].setCol(COLOR_LTWHITE);
-		hPos = -1;
-		for (int a = 0; a < selectable.size(); ++a) { selectable[a]->setCol(COLOR_LTWHITE); }
-		selectable.clear();
-		sPos = -1;
-		mode = MODE_NONE;
-		moveCursor(0, 0);
+		if (!callback.unit) { moveCursor(0, 0); }
 	}
 
+}
+
+//Use active effect
+void Game::useEffect() {
+	BoardTile* t = selectable[sPos];
+	pos = t->pos;
+	for (int a = 0; a < selectable.size(); ++a) { selectable[a]->setCol(COLOR_LTWHITE); }
+	selectable.clear();
+	sPos = -1;
+	mode = MODE_NONE;
+	callback.unit->callback(t);
+	if (!callback.unit) { moveCursor(0, 0); }
 }
 
 //Select unit
@@ -283,18 +308,6 @@ void Game::select(BoardTile& t) {
 	t.setCol(COLOR_LTWHITE);
 	mode = MODE_MOVE;
 	path.push_back(pos);
-}
-
-//Select card from hand
-void Game::selectHand() {
-	if (player[turn].hand[hPos]->cost > player[turn].mana) { return; }
-	highlightSelectable(TARGET_NEAR_ALLY, COLOR_GREEN);
-	if (selectable.size() > 0) {
-		activeCard = player[turn].hand[hPos];
-		sPos = 0;
-		selectable[0]->setCol(COLOR_LTGREEN);
-		mode = MODE_SELECT;
-	}
 }
 
 //Move selected unit
@@ -496,7 +509,7 @@ void Game::highlightMoveable(int x, int y) {
 }
 
 //Highlight targetable tiles
-void Game::highlightSelectable(eTarget type, eColor col) {
+void Game::highlightSelectable(eTarget type, Unit* u) {
 
 	//Near allies (summon)
 	if (type == TARGET_NEAR_ALLY) {
@@ -507,8 +520,8 @@ void Game::highlightSelectable(eTarget type, eColor col) {
 						for (int c = max(a - 1, 0); c < min(a + 2, 9); ++c) {
 							for (int d = max(b - 1, 0); d < min(b + 2, 5); ++d) {
 								if (map.tile[c][d].unit == nullptr) {
-									if (map.tile[c][d].border.buffer[0].Attributes != col) {
-										map.tile[c][d].setCol(col);
+									if (map.tile[c][d].border.buffer[0].Attributes != COLOR_GREEN) {
+										map.tile[c][d].setCol(COLOR_GREEN);
 										selectable.push_back(&map.tile[c][d]);
 									}
 								}
@@ -518,6 +531,27 @@ void Game::highlightSelectable(eTarget type, eColor col) {
 				}
 			}
 		}
+	}
+
+	//Near unit
+	else if (type == TARGET_MINION_NEAR_UNIT && u) {
+		for (int a = max(u->tile->pos.x - 1, 0); a < min(u->tile->pos.x + 2, 9); ++a) {
+			for (int b = max(u->tile->pos.y - 1, 0); b < min(u->tile->pos.y + 2, 5); ++b) {
+				if (map.tile[a][b].unit != nullptr && map.tile[a][b].unit != u && map.tile[a][b].unit->tribe != TRIBE_GENERAL) {
+					if (map.tile[a][b].border.buffer[0].Attributes != COLOR_GREEN) {
+						map.tile[a][b].setCol(COLOR_GREEN);
+						selectable.push_back(&map.tile[a][b]);
+					}
+				}
+			}
+		}
+	}
+
+	//If selectable tiles found, highlight first and switch to select mode
+	if (selectable.size() > 0) {
+		sPos = 0;
+		selectable[0]->setCol(COLOR_LTGREEN);
+		mode = MODE_SELECT;
 	}
 
 }

@@ -8,7 +8,7 @@ Player::~Player() {}
 //Preset deck
 void Player::preset(CardList& cl) {
 	deck.push_back(cl.find("Argeon Highmayne"));
-	for (int a = 0; a < 13; ++a) { deck.push_back(cl.find("Bloodshard Golem")); }
+	for (int a = 0; a < 13; ++a) { deck.push_back(cl.find("Ghost Lynx")); }
 	for (int a = 0; a < 13; ++a) { deck.push_back(cl.find("Araki Headhunter")); }
 	for (int a = 0; a < 13; ++a) { deck.push_back(cl.find("Azure Herald")); }
 }

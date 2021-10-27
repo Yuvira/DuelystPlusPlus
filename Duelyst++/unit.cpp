@@ -176,6 +176,10 @@ void Unit::onSummon(Unit& u) {
 			case EFFECT_AZURE_HERALD:
 				player->general->hp = min(player->general->hp + 3, player->general->hpMax);
 				break;
+			case EFFECT_GHOST_LYNX:
+				game->highlightSelectable(TARGET_MINION_NEAR_UNIT, this);
+				game->callback = Callback(this, EFFECT_GHOST_LYNX);
+				break;
 			}
 		}
 	}
@@ -231,3 +235,22 @@ void Unit::onDeath(Unit& u) {
 
 //When a unit attacks
 void Unit::onAttack(Unit& u1, Unit& u2) {}
+
+//Effect callback
+void Unit::callback(BoardTile* t) {
+	switch (game->callback.effect) {
+	case EFFECT_GHOST_LYNX:
+		std::vector<BoardTile*> v;
+		for (int a = 0; a < 9; ++a) {
+			for (int b = 0; b < 5; ++b) {
+				if (!game->map.tile[a][b].unit) {
+					v.push_back(&game->map.tile[a][b]);
+				}
+			}
+		}
+		int i = rand() % v.size();
+		t->unit->setPos(v[i]->pos.x, v[i]->pos.y);
+		break;
+	}
+	game->callback = Callback();
+}

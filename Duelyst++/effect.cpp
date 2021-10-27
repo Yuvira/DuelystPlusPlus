@@ -54,6 +54,8 @@ EffectList::EffectList() {
 	elist.back().generateSprite("Whenever you summon a minion with|Opening Gambit from your action bar,|gain +2 Attack.");
 	blist.push_back(Buff(BUFF_ARAKI_HEADHUNTER, 2, 0));
 	blist.back().generateSprite("Headhunter");
+	elist.push_back(Effect(EFFECT_GHOST_LYNX));
+	elist.back().generateSprite("{Opening Gambit}: Teleport a nearby|minion to a random space.");
 }
 EffectList::~EffectList() {}
 

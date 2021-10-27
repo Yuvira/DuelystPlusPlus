@@ -33,6 +33,7 @@ enum eTarget {
 	TARGET_ALLY,
 	TARGET_ENEMY,
 	TARGET_NEAR_UNIT,
+	TARGET_MINION_NEAR_UNIT,
 	TARGET_NEAR_ALLY,
 };
 
@@ -90,6 +91,7 @@ public:
 	void onSummon(Unit& u);
 	void onDeath(Unit& u);
 	void onAttack(Unit& u1, Unit& u2);
+	void callback(BoardTile* t);
 	eFaction faction;
 	eTribe tribe;
 	int atk;
