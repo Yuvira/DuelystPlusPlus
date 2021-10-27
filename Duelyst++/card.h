@@ -67,7 +67,10 @@ public:
 	Card() {}
 	~Card() {}
 	virtual void drawDetails(Renderer& rm, int& y) {}
+	virtual bool onReplace() { return true; }
 	int cost;
+	Game* game;
+	Player* player;
 	eCard type;
 	std::string name;
 	Sprite sprite;
@@ -94,6 +97,7 @@ public:
 	void onSummon(Unit& u);
 	void onDeath(Unit& u);
 	void onAttack(Unit& u1, Unit& u2);
+	bool onReplace();
 	void onTurnEnd(Player& p);
 	void onTurnStart(Player& p);
 	void callback(BoardTile* t);
@@ -105,8 +109,6 @@ public:
 	bool moved;
 	bool attacked;
 	BoardTile* tile;
-	Game* game;
-	Player* player;
 	Skill skill;
 	std::vector<Effect> effect;
 	std::vector<Buff> buff;

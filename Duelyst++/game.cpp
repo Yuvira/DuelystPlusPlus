@@ -33,11 +33,11 @@ Game::Game() {
 
 	//Initialize players
 	for (int a = 0; a < 2; ++a) {
-		player[a].preset(cl);
+		player[a].preset(cl, this);
 		summon(player[a].deck[0], a, a * 8, 2);
 		player[a].deck.erase(player[a].deck.begin());
 		player[a].general = unit.back();
-		player[a].init(a + 2, this);
+		player[a].init(a + 2);
 	}
 
 	//Hand
@@ -307,8 +307,6 @@ void Game::changeTurn(bool t) {
 //Summon at position
 void Game::summon(Card* c, bool p, int x, int y) {
 	unit.push_back(dynamic_cast<Unit*>(c));
-	unit.back()->player = &player[p];
-	unit.back()->game = this;
 	unit.back()->setPos(x, y);
 	for (int a = 0; a < unit.size(); ++a) { unit[a]->onSummon(*unit.back()); }
 }

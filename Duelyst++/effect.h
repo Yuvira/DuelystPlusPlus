@@ -12,6 +12,7 @@ enum eSkill {
 	SKILL_FLYING,
 	SKILL_AETHERMASTER,
 	SKILL_ARAKI_HEADHUNTER,
+	SKILL_ASTRAL_CRUSADER,
 	SKILL_AZURE_HERALD,
 	SKILL_GHOST_LYNX
 };
@@ -25,7 +26,8 @@ enum eEffect {
 //Granted stat buffs
 enum eBuff {
 	BUFF_NONE,
-	BUFF_ARAKI_HEADHUNTER
+	BUFF_ARAKI_HEADHUNTER,
+	BUFF_ASTRAL_CRUSADER
 };
 
 //Skill class
@@ -52,11 +54,12 @@ public:
 //Stat buff class
 class Buff {
 public:
-	Buff(eBuff = BUFF_NONE, int = 0, int = 0);
+	Buff(eBuff = BUFF_NONE, int = 0, int = 0, int = 0);
 	~Buff();
 	void generateSprite(std::string s);
 	Sprite sprite;
 	eBuff buff;
+	int cost;
 	int atk;
 	int hp;
 };

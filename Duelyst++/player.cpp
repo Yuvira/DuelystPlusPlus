@@ -6,18 +6,20 @@ Player::Player() {}
 Player::~Player() {}
 
 //Preset deck
-void Player::preset(CardList& cl) {
+void Player::preset(CardList& cl, Game* g) {
+	game = g;
 	deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Argeon Highmayne")))));
-	for (int a = 0; a < 7; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Ghost Lynx"))))); }
-	for (int a = 0; a < 8; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Araki Headhunter"))))); }
-	for (int a = 0; a < 8; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Azure Herald"))))); }
-	for (int a = 0; a < 8; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Aethermaster"))))); }
-	for (int a = 0; a < 8; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Dragonlark"))))); }
+	for (int a = 0; a < 5; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Astral Crusader"))))); }
+	for (int a = 0; a < 3; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Araki Headhunter"))))); }
+	for (int a = 0; a < 3; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Azure Herald"))))); }
+	for (int a = 0; a < deck.size(); ++a) {
+		deck[a]->game = game;
+		deck[a]->player = this;
+	}
 }
 
 //Initialize deck/hand
-void Player::init(int _mana, Game* g) {
-	game = g;
+void Player::init(int _mana) {
 	mana = _mana;
 	manaMax = _mana;
 	replaces = 1;
@@ -82,9 +84,11 @@ void Player::draw() {
 //Replace card
 void Player::replace(int i) {
 	if (replaces > 0 && hand.size() > i) {
-		deck.push_back(hand[i]);
-		hand.erase(hand.begin() + i);
-		shuffle();
+		if (hand[i]->onReplace()) {
+			deck.push_back(hand[i]);
+			hand.erase(hand.begin() + i);
+			shuffle();
+		}
 		hand.insert(hand.begin() + i, deck[0]);
 		deck.erase(deck.begin());
 		--replaces;

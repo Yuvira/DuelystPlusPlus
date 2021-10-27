@@ -8,6 +8,8 @@ CardList::CardList() {
 	ulist.back().skill = el.find(SKILL_AETHERMASTER);
 	ulist.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 3, "arakiheadhunter", "Araki Headhunter"));
 	ulist.back().skill = el.find(SKILL_ARAKI_HEADHUNTER);
+	ulist.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 7, 7, 6, "astralcrusader", "Astral Crusader"));
+	ulist.back().skill = el.find(SKILL_ASTRAL_CRUSADER);
 	ulist.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 4, "azureherald", "Azure Herald"));
 	ulist.back().skill = el.find(SKILL_AZURE_HERALD);
 	ulist.push_back(Unit(FACTION_NEUTRAL, TRIBE_GOLEM, 3, 4, 3, "bloodgolem", "Bloodshard Golem"));

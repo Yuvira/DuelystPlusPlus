@@ -13,8 +13,9 @@ Effect::Effect(eEffect e) {
 Effect::~Effect() {}
 
 //Buff constructor/deconstructor
-Buff::Buff(eBuff b, int _atk, int _hp) {
+Buff::Buff(eBuff b, int _cost, int _atk, int _hp) {
 	buff = b;
+	cost = _cost;
 	atk = _atk;
 	hp = _hp;
 }
@@ -77,8 +78,12 @@ EffectList::EffectList() {
 	elist.back().generateSprite("Aethermaster|You may replace 1 extra card(s) per turn");
 	slist.push_back(Skill(SKILL_ARAKI_HEADHUNTER));
 	slist.back().generateSprite("Whenever you summon a minion with|Opening Gambit from your action bar,|gain +2 Attack");
-	blist.push_back(Buff(BUFF_ARAKI_HEADHUNTER, 2, 0));
+	blist.push_back(Buff(BUFF_ARAKI_HEADHUNTER, 0, 2, 0));
 	blist.back().generateSprite("Headhunter");
+	slist.push_back(Skill(SKILL_ASTRAL_CRUSADER));
+	slist.back().generateSprite("Whenever you replace this card, it|costs 3 less and gains +3/+3");
+	blist.push_back(Buff(BUFF_ASTRAL_CRUSADER, -3, 3, 3));
+	blist.back().generateSprite("Astral Crusader");
 	slist.push_back(Skill(SKILL_AZURE_HERALD));
 	slist.back().generateSprite("{Opening Gambit}: Restore 3 Health to your|General");
 	slist.push_back(Skill(SKILL_GHOST_LYNX));

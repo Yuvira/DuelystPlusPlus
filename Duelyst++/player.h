@@ -11,8 +11,8 @@ class Player {
 public:
 	Player();
 	~Player();
-	void preset(CardList& cl);
-	void init(int _mana, Game* g);
+	void preset(CardList& cl, Game* g);
+	void init(int _mana);
 	void updateMana(eColor col);
 	void render(Renderer& rm, bool left);
 	void shuffle();

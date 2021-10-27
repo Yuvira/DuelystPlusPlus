@@ -55,13 +55,19 @@ void Unit::drawDetails(Renderer& rm, int& y) {
 	}
 	for (int a = 0; a < buff.size(); ++a) {
 		rm.render(buff[a].sprite, 72, y); ++y;
-		Sprite s = Sprite();
-		if (buff[a].hp == 0 && buff[a].atk != 0) { s.createFromString((buff[a].atk > 0 ? "+" : "-") + std::to_string(abs(buff[a].atk)) + " Attack"); }
-		else if (buff[a].atk == 0 && buff[a].hp != 0) { s.createFromString((buff[a].hp > 0 ? "+" : "-") + std::to_string(abs(buff[a].hp)) + " Health"); }
-		else if (buff[a].atk != 0 && buff[a].hp != 0) { s.createFromString((buff[a].atk > 0 ? "+" : "-") + std::to_string(buff[a].atk) + (buff[a].hp > 0 ? "+" : "-") + std::to_string(abs(buff[a].hp))); }
-		else { s.createFromString("+0/+0"); }
-		s.setCol(COLOR_GRAY);
-		rm.render(s, 72, y); y += 2;
+		std::string s = "";
+		if (buff[a].hp == 0 && buff[a].atk != 0) { s += (buff[a].atk > 0 ? "+" : "-") + std::to_string(abs(buff[a].atk)) + " Attack"; }
+		else if (buff[a].atk == 0 && buff[a].hp != 0) { s += (buff[a].hp > 0 ? "+" : "-") + std::to_string(abs(buff[a].hp)) + " Health"; }
+		else if (buff[a].atk != 0 && buff[a].hp != 0) { s += (buff[a].atk > 0 ? "+" : "-") + std::to_string(buff[a].atk) + (buff[a].hp > 0 ? "/+" : "/-") + std::to_string(abs(buff[a].hp)); }
+		else { s += "+0/+0"; }
+		if (buff[a].cost != 0) {
+			if (s != "") { s += ", "; }
+			s += (buff[a].cost > 0 ? "+" : "-") + std::to_string(abs(buff[a].cost)) + " Cost";
+		}
+		Sprite _s = Sprite();
+		_s.createFromString(s);
+		_s.setCol(COLOR_GRAY);
+		rm.render(_s, 72, y); y += 2;
 	}
 }
 
@@ -94,8 +100,10 @@ void Unit::addBuff(eBuff b) {
 	Buff _b = game->cl.el.find(b);
 	for (int a = 0; a < buff.size(); ++a) {
 		if (buff[a].buff == b) {
+			buff[a].cost += _b.cost;
 			buff[a].atk += _b.atk;
 			buff[a].hp += _b.hp;
+			cost = max(_b.cost, 0);
 			atk += _b.atk;
 			hp += _b.hp;
 			hpMax += _b.hp;
@@ -103,6 +111,7 @@ void Unit::addBuff(eBuff b) {
 		}
 	}
 	buff.push_back(_b);
+	cost = max(cost + _b.cost, 0);
 	atk += _b.atk;
 	hp += _b.hp;
 	hpMax += _b.hp;
@@ -296,6 +305,16 @@ void Unit::onDeath(Unit& u) {
 
 //When a unit attacks
 void Unit::onAttack(Unit& u1, Unit& u2) {}
+
+//When this card is replaced
+bool Unit::onReplace() {
+	switch (skill.skill) {
+	case SKILL_ASTRAL_CRUSADER:
+		addBuff(BUFF_ASTRAL_CRUSADER);
+		return true;
+	}
+	return true;
+}
 
 //When a player's turn ends
 void Unit::onTurnEnd(Player& p) {
