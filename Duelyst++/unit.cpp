@@ -178,7 +178,7 @@ void Unit::onSummon(Unit& u) {
 				break;
 			case EFFECT_GHOST_LYNX:
 				game->highlightSelectable(TARGET_MINION_NEAR_UNIT, this);
-				game->callback = Callback(this, EFFECT_GHOST_LYNX);
+				if (game->selectable.size() > 0) { game->callback = Callback(this, EFFECT_GHOST_LYNX); }
 				break;
 			}
 		}
