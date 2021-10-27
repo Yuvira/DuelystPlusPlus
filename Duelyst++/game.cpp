@@ -300,6 +300,8 @@ void Game::changeTurn(bool t) {
 		unit[a]->moved = false;
 		unit[a]->attacked = false;
 	}
+	for (int a = 0; a < unit.size(); ++a) { unit[a]->onTurnEnd(player[!t]); }
+	for (int a = 0; a < unit.size(); ++a) { unit[a]->onTurnStart(player[t]); }
 }
 
 //Summon at position

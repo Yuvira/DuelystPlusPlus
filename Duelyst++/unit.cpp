@@ -40,10 +40,15 @@ void Unit::drawDetails(Renderer& rm, int& y) {
 	rm.render(header[1], 72, y); y+= 2;
 	for (int a = 0; a < skill.sprite.size(); ++a) {
 		rm.render(skill.sprite[a], 72, y);
+		if (a == skill.sprite.size() - 1) { ++y; }
 		++y;
 	}
-	++y;
 	for (int a = 0; a < effect.size(); ++a) {
+		switch (effect[a].effect) {
+		case EFFECT_AETHERMASTER:
+			effect[a].sprite[1].buffer[16].Char.AsciiChar = std::to_string(effect[a].count)[0];
+			break;
+		}
 		rm.render(effect[a].sprite[0], 72, y);
 		rm.render(effect[a].sprite[1], 72, y + 1);
 		y += 3;
@@ -101,6 +106,30 @@ void Unit::addBuff(eBuff b) {
 	atk += _b.atk;
 	hp += _b.hp;
 	hpMax += _b.hp;
+}
+
+//Add effect to list
+void Unit::addEffect(eEffect e) {
+	Effect _e = game->cl.el.find(e);
+	for (int a = 0; a < effect.size(); ++a) {
+		if (effect[a].effect == e) {
+			effect[a].count += _e.count;
+			return;
+		}
+	}
+	effect.push_back(_e);
+}
+
+//Remove effect from list
+void Unit::removeEffect(eEffect e) {
+	Effect _e = game->cl.el.find(e);
+	for (int a = 0; a < effect.size(); ++a) {
+		if (effect[a].effect == e) {
+			effect[a].count -= _e.count;
+			if (effect[a].count == 0) { effect.erase(effect.begin() + a); }
+			return;
+		}
+	}
 }
 
 //Check if unit has died
@@ -188,6 +217,10 @@ void Unit::onSummon(Unit& u) {
 		moved = true;
 		attacked = true;
 		switch (skill.skill) {
+		case SKILL_AETHERMASTER:
+			++player->replaces;
+			player->general->addEffect(EFFECT_AETHERMASTER);
+			break;
 		case SKILL_AZURE_HERALD:
 			player->general->hp = min(player->general->hp + 3, player->general->hpMax);
 			break;
@@ -240,12 +273,39 @@ void Unit::onDeath(Unit& u) {
 			}
 		}
 
+		//Remove effects
+		switch (skill.skill) {
+		case SKILL_AETHERMASTER:
+			player->replaces = max(player->replaces - 1, 0);
+			player->general->removeEffect(EFFECT_AETHERMASTER);
+			break;
+		}
+
 	}
 
 }
 
 //When a unit attacks
 void Unit::onAttack(Unit& u1, Unit& u2) {}
+
+//When a player's turn ends
+void Unit::onTurnEnd(Player& p) {
+
+	//When this unit's player ends turn
+	if (&p == player) {
+		for (int a = 0; a < effect.size(); ++a) {
+			switch (effect[a].effect) {
+			case EFFECT_AETHERMASTER:
+				player->replaces += effect[a].count;
+				break;
+			}
+		}
+	}
+
+}
+
+//When a player's turn starts
+void Unit::onTurnStart(Player& p) {}
 
 //Effect callback
 void Unit::callback(BoardTile* t) {

@@ -9,14 +9,16 @@
 //Skills
 enum eSkill {
 	SKILL_NONE,
-	SKILL_AZURE_HERALD,
+	SKILL_AETHERMASTER,
 	SKILL_ARAKI_HEADHUNTER,
+	SKILL_AZURE_HERALD,
 	SKILL_GHOST_LYNX
 };
 
 //Effects
 enum eEffect {
-	EFFECT_NONE
+	EFFECT_NONE,
+	EFFECT_AETHERMASTER
 };
 
 //Granted stat buffs
@@ -43,6 +45,7 @@ public:
 	void generateSprite(std::string s);
 	Sprite sprite[2];
 	eEffect effect;
+	int count;
 };
 
 //Stat buff class

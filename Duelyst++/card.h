@@ -83,6 +83,8 @@ public:
 	void attack(Unit& u, bool counter);
 	void setPos(int x, int y);
 	void addBuff(eBuff b);
+	void addEffect(eEffect e);
+	void removeEffect(eEffect e);
 	void update(bool& r);
 	void updateStatSprites();
 	void updateDetailStats();
@@ -91,6 +93,8 @@ public:
 	void onSummon(Unit& u);
 	void onDeath(Unit& u);
 	void onAttack(Unit& u1, Unit& u2);
+	void onTurnEnd(Player& p);
+	void onTurnStart(Player& p);
 	void callback(BoardTile* t);
 	eFaction faction;
 	eTribe tribe;
