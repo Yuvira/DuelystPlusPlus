@@ -174,6 +174,7 @@ void Game::update() {
 	//Highlight moveable spaces
 	if (mode == MODE_MOVE) {
 		for (int a = 0; a < highlighted.size(); ++a) { highlighted[a]->setCol(COLOR_AQUA); }
+		map.tile[pos.x][pos.y].setCol(COLOR_LTWHITE);
 		for (int a = 0; a < hostile.size(); ++a) {
 			if (canAttack(*activeUnit->tile, *hostile[a])) {
 				hostile[a]->setCol(COLOR_RED);
@@ -270,13 +271,9 @@ void Game::changeTurn(bool t) {
 	player[turn].mana = player[turn].manaMax;
 	if (turn) { light.setCol(COLOR_RED); }
 	else { light.setCol(COLOR_LTBLUE); }
-	for (int a = 0; a < hostile.size(); ++a) { hostile[a]->setCol(COLOR_LTWHITE); }
-	hostile.clear();
 	for (int a = 0; a < unit.size(); ++a) {
-		if (unit[a]->player != &player[turn]) {
-			unit[a]->tile->setCol(COLOR_LTRED);
-			hostile.push_back(unit[a]->tile);
-		}
+		unit[a]->moved = false;
+		unit[a]->attacked = false;
 	}
 }
 
@@ -334,15 +331,19 @@ void Game::select(BoardTile& t) {
 			attackable.push_back(hostile[a]);
 		}
 	}
-	activeUnit = t.unit;
-	mode = MODE_MOVE;
-	path.push_back(pos);
+	if (moveable.size() > 1 || attackable.size() > 0) {
+		activeUnit = t.unit;
+		mode = MODE_MOVE;
+		path.push_back(pos);
+	}
+	else { moveable.clear(); }
 }
 
 //Move selected unit
 void Game::moveUnit() {
 	if (path.size() > 1) {
 		activeUnit->setPos(path.back().x, path.back().y);
+		activeUnit->moved = true;
 		pos = path.back();
 	}
 	moveable.clear();
@@ -354,8 +355,8 @@ void Game::moveUnit() {
 
 //Attack unit
 void Game::attackUnit() {
-	activeUnit->attack(*attack->unit);
-	if (canAttack(*attack, map.tile[pos.x][pos.y])) { attack->unit->attack(*activeUnit); }
+	activeUnit->attack(*attack->unit, false);
+	if (canAttack(*attack, map.tile[pos.x][pos.y])) { attack->unit->attack(*activeUnit, true); }
 	pos = attack->pos;
 	moveable.clear();
 	attackable.clear();
@@ -497,7 +498,7 @@ void Game::highlightTile(int x, int y, eColor col) {
 	map.tile[x][y].setCol(col);
 	highlighted.push_back(&map.tile[x][y]);
 	if (col == COLOR_AQUA && mode == MODE_NONE) {
-		if (map.tile[pos.x][pos.y].unit != nullptr) {
+		if (map.tile[pos.x][pos.y].unit != nullptr && !map.tile[pos.x][pos.y].unit->moved) {
 			if (map.tile[pos.x][pos.y].unit->player == &player[turn]) {
 				highlightMoveable(pos.x, pos.y);
 			}

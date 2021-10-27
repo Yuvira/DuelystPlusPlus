@@ -11,6 +11,8 @@ Unit::Unit(eFaction _faction, eTribe _tribe, int _cost, int _atk, int _hp, std::
 	hp = _hp;
 	hpMax = _hp;
 	name = _name;
+	moved = false;
+	attacked = false;
 	if (path == "") { sprite.resize(5, 5); }
 	else { sprite.createFromFile("resources/units/" + path + ".txt"); }
 	updateStatSprites();
@@ -23,14 +25,42 @@ Unit::~Unit() {}
 
 //Render sprite
 void Unit::render(Renderer& rm) {
+	attacked ? sprite.setCol(COLOR_GRAY) : sprite.setCol(COLOR_LTWHITE);
 	rm.render(sprite);
 	rm.render(sATK);
 	rm.render(sHP);
 }
 
+//Draw card data
+void Unit::drawDetails(Renderer& rm, int& y) {
+	if (attacked) { sprite.setCol(COLOR_LTWHITE); }
+	rm.render(sprite, 66, y);
+	rm.render(header[0], 72, y); ++y;
+	updateDetailStats();
+	rm.render(header[1], 72, y); y+= 2;
+	for (int a = 0; a < effect.size(); ++a) {
+		for (int b = 0; b < effect[a].sprite.size(); ++b) { rm.render(effect[a].sprite[b], 72, y); ++y; }
+		++y;
+	}
+	for (int a = 0; a < buff.size(); ++a) {
+		rm.render(buff[a].sprite, 72, y); ++y;
+		Sprite s = Sprite();
+		if (buff[a].hp == 0 && buff[a].atk != 0) { s.createFromString((buff[a].atk > 0 ? "+" : "-") + std::to_string(abs(buff[a].atk)) + " Attack"); }
+		else if (buff[a].atk == 0 && buff[a].hp != 0) { s.createFromString((buff[a].hp > 0 ? "+" : "-") + std::to_string(abs(buff[a].hp)) + " Health"); }
+		else if (buff[a].atk != 0 && buff[a].hp != 0) { s.createFromString((buff[a].atk > 0 ? "+" : "-") + std::to_string(buff[a].atk) + (buff[a].hp > 0 ? "+" : "-") + std::to_string(abs(buff[a].hp))); }
+		else { s.createFromString("+0/+0"); }
+		s.setCol(COLOR_GRAY);
+		rm.render(s, 72, y); y += 2;
+	}
+}
+
 //Attack enemy
-void Unit::attack(Unit& u) {
+void Unit::attack(Unit& u, bool counter) {
 	u.hp -= atk;
+	if (!counter) {
+		moved = true;
+		attacked = true;
+	}
 }
 
 //Set sprite position
@@ -144,33 +174,13 @@ void Unit::generateDetails() {
 	updateDetailStats();
 }
 
-//Draw card data
-void Unit::drawDetails(Renderer& rm, int& y) {
-	rm.render(sprite, 66, y);
-	rm.render(header[0], 72, y); ++y;
-	updateDetailStats();
-	rm.render(header[1], 72, y); y+= 2;
-	for (int a = 0; a < effect.size(); ++a) {
-		for (int b = 0; b < effect[a].sprite.size(); ++b) { rm.render(effect[a].sprite[b], 72, y); ++y; }
-		++y;
-	}
-	for (int a = 0; a < buff.size(); ++a) {
-		rm.render(buff[a].sprite, 72, y); ++y;
-		Sprite s = Sprite();
-		if (buff[a].hp == 0 && buff[a].atk != 0) { s.createFromString((buff[a].atk > 0 ? "+" : "-") + std::to_string(abs(buff[a].atk)) + " Attack"); }
-		else if (buff[a].atk == 0 && buff[a].hp != 0) { s.createFromString((buff[a].hp > 0 ? "+" : "-") + std::to_string(abs(buff[a].hp)) + " Health"); }
-		else if (buff[a].atk != 0 && buff[a].hp != 0) { s.createFromString((buff[a].atk > 0 ? "+" : "-") + std::to_string(buff[a].atk) + (buff[a].hp > 0 ? "+" : "-") + std::to_string(abs(buff[a].hp))); }
-		else { s.createFromString("+0/+0"); }
-		s.setCol(COLOR_GRAY);
-		rm.render(s, 72, y); y += 2;
-	}
-}
-
 //When a unit is summoned
 void Unit::onSummon(Unit& u) {
 
 	//When this is summoned (Opening Gambit)
 	if (&u == this) {
+		moved = true;
+		attacked = true;
 		for (int a = 0; a < effect.size(); ++a) {
 			switch (effect[a].effect) {
 			case EFFECT_AZURE_HERALD:

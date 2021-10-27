@@ -80,7 +80,7 @@ public:
 	Unit(eFaction = FACTION_NEUTRAL, eTribe = TRIBE_NONE, int = 0, int = 0, int = 0, std::string = "", std::string = "???");
 	~Unit();
 	void render(Renderer& rm);
-	void attack(Unit& u);
+	void attack(Unit& u, bool counter);
 	void setPos(int x, int y);
 	void addBuff(eBuff b);
 	void update(bool& r);
@@ -97,6 +97,8 @@ public:
 	int atk;
 	int hp;
 	int hpMax;
+	bool moved;
+	bool attacked;
 	BoardTile* tile;
 	Game* game;
 	Player* player;
