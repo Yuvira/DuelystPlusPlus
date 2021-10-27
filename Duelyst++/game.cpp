@@ -2,9 +2,9 @@
 #include "game.h"
 
 //Callback stuff
-Callback::Callback(Unit* u, eEffect e) {
+Callback::Callback(Unit* u, eSkill s) {
 	unit = u;
-	effect = e;
+	skill = s;
 }
 Callback::~Callback() {}
 

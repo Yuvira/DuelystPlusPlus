@@ -6,12 +6,17 @@
 #include <vector>
 #include "tile.h"
 
+//Skills
+enum eSkill {
+	SKILL_NONE,
+	SKILL_AZURE_HERALD,
+	SKILL_ARAKI_HEADHUNTER,
+	SKILL_GHOST_LYNX
+};
+
 //Effects
 enum eEffect {
-	EFFECT_NONE,
-	EFFECT_AZURE_HERALD,
-	EFFECT_ARAKI_HEADHUNTER,
-	EFFECT_GHOST_LYNX
+	EFFECT_NONE
 };
 
 //Granted stat buffs
@@ -20,13 +25,23 @@ enum eBuff {
 	BUFF_ARAKI_HEADHUNTER
 };
 
+//Skill class
+class Skill {
+public:
+	Skill(eSkill = SKILL_NONE);
+	~Skill();
+	void generateSprite(std::string s);
+	std::vector<Sprite> sprite;
+	eSkill skill;
+};
+
 //Effect class
 class Effect {
 public:
 	Effect(eEffect = EFFECT_NONE);
 	~Effect();
 	void generateSprite(std::string s);
-	std::vector<Sprite> sprite;
+	Sprite sprite[2];
 	eEffect effect;
 };
 
@@ -47,8 +62,10 @@ class EffectList {
 public:
 	EffectList();
 	~EffectList();
+	Skill find(eSkill s);
 	Effect find(eEffect e);
-	Buff find(eBuff e);
+	Buff find(eBuff b);
+	std::vector<Skill> slist;
 	std::vector<Effect> elist;
 	std::vector<Buff> blist;
 };

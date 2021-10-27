@@ -2,6 +2,10 @@
 #include "effect.h"
 
 //Effect constructor/deconstructor
+Skill::Skill(eSkill s) { skill = s; }
+Skill::~Skill() {}
+
+//Effect constructor/deconstructor
 Effect::Effect(eEffect e) { effect = e; }
 Effect::~Effect() {}
 
@@ -13,8 +17,8 @@ Buff::Buff(eBuff b, int _atk, int _hp) {
 }
 Buff::~Buff() {}
 
-//Generate effect sprite
-void Effect::generateSprite(std::string s) {
+//Generate skill sprite
+void Skill::generateSprite(std::string s) {
 	std::vector<Coord> c;
 	std::vector<std::string> v;
 	v.push_back("");
@@ -43,21 +47,44 @@ void Effect::generateSprite(std::string s) {
 	}
 }
 
+//Generate effect sprite
+void Effect::generateSprite(std::string s) {
+	std::string _s;
+	for (int a = 0; a < s.length(); ++a) {
+		if (s[a] == '|') {
+			sprite[0].createFromString(_s);
+			_s = "";
+		}
+		else { _s += s[a]; }
+	}
+	sprite[1].createFromString(_s);
+	sprite[1].setCol(COLOR_GRAY);
+}
+
 //Generate buff sprite
 void Buff::generateSprite(std::string s) { sprite.createFromString(s); }
 
 //Effect list constructor/deconstructor
 EffectList::EffectList() {
-	elist.push_back(Effect(EFFECT_AZURE_HERALD));
-	elist.back().generateSprite("{Opening Gambit}: Restore 3 Health to your|General.");
-	elist.push_back(Effect(EFFECT_ARAKI_HEADHUNTER));
-	elist.back().generateSprite("Whenever you summon a minion with|Opening Gambit from your action bar,|gain +2 Attack.");
+	slist.push_back(Skill(SKILL_AZURE_HERALD));
+	slist.back().generateSprite("{Opening Gambit}: Restore 3 Health to your|General.");
+	slist.push_back(Skill(SKILL_ARAKI_HEADHUNTER));
+	slist.back().generateSprite("Whenever you summon a minion with|Opening Gambit from your action bar,|gain +2 Attack.");
 	blist.push_back(Buff(BUFF_ARAKI_HEADHUNTER, 2, 0));
 	blist.back().generateSprite("Headhunter");
-	elist.push_back(Effect(EFFECT_GHOST_LYNX));
-	elist.back().generateSprite("{Opening Gambit}: Teleport a nearby|minion to a random space.");
+	slist.push_back(Skill(SKILL_GHOST_LYNX));
+	slist.back().generateSprite("{Opening Gambit}: Teleport a nearby|minion to a random space.");
 }
 EffectList::~EffectList() {}
+
+//Find skill by enum
+Skill EffectList::find(eSkill s) {
+	for (int a = 0; a < slist.size(); ++a) {
+		if (slist[a].skill == s) {
+			return slist[a];
+		}
+	}
+}
 
 //Find effect by enum
 Effect EffectList::find(eEffect e) {

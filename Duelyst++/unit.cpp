@@ -38,9 +38,15 @@ void Unit::drawDetails(Renderer& rm, int& y) {
 	rm.render(header[0], 72, y); ++y;
 	updateDetailStats();
 	rm.render(header[1], 72, y); y+= 2;
-	for (int a = 0; a < effect.size(); ++a) {
-		for (int b = 0; b < effect[a].sprite.size(); ++b) { rm.render(effect[a].sprite[b], 72, y); ++y; }
+	for (int a = 0; a < skill.sprite.size(); ++a) {
+		rm.render(skill.sprite[a], 72, y);
 		++y;
+	}
+	++y;
+	for (int a = 0; a < effect.size(); ++a) {
+		rm.render(effect[a].sprite[0], 72, y);
+		rm.render(effect[a].sprite[1], 72, y + 1);
+		y += 3;
 	}
 	for (int a = 0; a < buff.size(); ++a) {
 		rm.render(buff[a].sprite, 72, y); ++y;
@@ -181,35 +187,30 @@ void Unit::onSummon(Unit& u) {
 	if (&u == this) {
 		moved = true;
 		attacked = true;
-		for (int a = 0; a < effect.size(); ++a) {
-			switch (effect[a].effect) {
-			case EFFECT_AZURE_HERALD:
-				player->general->hp = min(player->general->hp + 3, player->general->hpMax);
-				break;
-			case EFFECT_GHOST_LYNX:
-				game->highlightSelectable(TARGET_MINION_NEAR_UNIT, this);
-				if (game->selectable.size() > 0) { game->callback = Callback(this, EFFECT_GHOST_LYNX); }
-				break;
-			}
+		switch (skill.skill) {
+		case SKILL_AZURE_HERALD:
+			player->general->hp = min(player->general->hp + 3, player->general->hpMax);
+			break;
+		case SKILL_GHOST_LYNX:
+			game->highlightSelectable(TARGET_MINION_NEAR_UNIT, this);
+			if (game->selectable.size() > 0) { game->callback = Callback(this, SKILL_GHOST_LYNX); }
+			break;
 		}
 	}
 
 	//When something else is summoned
 	else {
-		for (int a = 0; a < effect.size(); ++a) {
-			switch (effect[a].effect) {
-			case EFFECT_ARAKI_HEADHUNTER:
-				if (u.player == player) {
-					for (int b = 0; b < u.effect.size(); ++b) {
-						switch (u.effect[b].effect) {
-						case EFFECT_AZURE_HERALD:
-							addBuff(BUFF_ARAKI_HEADHUNTER);
-							break;
-						}
-					}
+		switch (skill.skill) {
+		case SKILL_ARAKI_HEADHUNTER:
+			if (u.player == player) {
+				switch (u.skill.skill) {
+				case SKILL_AZURE_HERALD:
+				case SKILL_GHOST_LYNX:
+					addBuff(BUFF_ARAKI_HEADHUNTER);
+					break;
 				}
-				break;
 			}
+			break;
 		}
 	}
 
@@ -248,8 +249,8 @@ void Unit::onAttack(Unit& u1, Unit& u2) {}
 
 //Effect callback
 void Unit::callback(BoardTile* t) {
-	switch (game->callback.effect) {
-	case EFFECT_GHOST_LYNX:
+	switch (game->callback.skill) {
+	case SKILL_GHOST_LYNX:
 		std::vector<BoardTile*> v;
 		for (int a = 0; a < 9; ++a) {
 			for (int b = 0; b < 5; ++b) {

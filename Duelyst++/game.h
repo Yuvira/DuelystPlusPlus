@@ -19,10 +19,10 @@ enum eMode {
 //Unit effect callback class
 class Callback {
 public:
-	Callback(Unit* = nullptr, eEffect = EFFECT_NONE);
+	Callback(Unit* = nullptr, eSkill = SKILL_NONE);
 	~Callback();
 	Unit* unit;
-	eEffect effect;
+	eSkill skill;
 };
 
 //Pathing coords

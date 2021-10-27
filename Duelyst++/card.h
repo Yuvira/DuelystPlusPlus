@@ -102,6 +102,7 @@ public:
 	BoardTile* tile;
 	Game* game;
 	Player* player;
+	Skill skill;
 	std::vector<Effect> effect;
 	std::vector<Buff> buff;
 	Sprite sHP;
