@@ -8,6 +8,14 @@ Callback::Callback(Unit* u, eEffect e) {
 }
 Callback::~Callback() {}
 
+//Path co-ordinate constructor / destructor
+PathCoord::PathCoord(Coord _pos, int _last, int _count) {
+	pos = _pos;
+	last = _last;
+	count = _count;
+}
+PathCoord::~PathCoord() {}
+
 //Game constructor / destructor
 Game::Game() {
 
@@ -46,7 +54,6 @@ Game::Game() {
 	changeTurn(false);
 	moveCursor(0, 0);
 	activeUnit = nullptr;
-	attack = nullptr;
 	mode = MODE_NONE;
 
 }
@@ -108,15 +115,21 @@ void Game::input() {
 	else if (mode == MODE_MOVE) {
 
 		//Move arrow
-		if (asciiVal == 119 || asciiVal == 87) { moveArrow(0, -1); }     //W
-		else if (asciiVal == 97 || asciiVal == 65) { moveArrow(-1, 0); } //A
-		else if (asciiVal == 115 || asciiVal == 83) { moveArrow(0, 1); } //S
-		else if (asciiVal == 100 || asciiVal == 68) { moveArrow(1, 0); } //D
+		if (asciiVal == 119 || asciiVal == 87) { moveSelect(0, -1); }     //W
+		else if (asciiVal == 97 || asciiVal == 65) { moveSelect(-1, 0); } //A
+		else if (asciiVal == 115 || asciiVal == 83) { moveSelect(0, 1); } //S
+		else if (asciiVal == 100 || asciiVal == 68) { moveSelect(1, 0); } //D
 
 		//Move unit
 		else if (asciiVal == 32) {
-			if (attack != nullptr) { attackUnit(); }
-			else { moveUnit(); }
+			for (int a = 0; a < attackable.size(); ++a) {
+				if (attackable[a] == selectable[sPos]) {
+					attackUnit();
+					goto end;
+				}
+			}
+			moveUnit();
+			end:;
 		}
 
 	}
@@ -171,8 +184,9 @@ void Game::update() {
 	}
 	for (int a = 0; a < hostile.size(); ++a) { hostile[a]->setCol(COLOR_LTRED); }
 
-	//Highlight moveable spaces
+	//Highlight moveable spaces and create move path
 	if (mode == MODE_MOVE) {
+		generatePaths();
 		for (int a = 0; a < highlighted.size(); ++a) { highlighted[a]->setCol(COLOR_AQUA); }
 		map.tile[pos.x][pos.y].setCol(COLOR_LTWHITE);
 		for (int a = 0; a < hostile.size(); ++a) {
@@ -220,20 +234,27 @@ void Game::render(Renderer& rm) {
 	//Units
 	for (int a = 0; a < unit.size(); ++a) { unit[a]->render(rm); }
 
-	//Attack indicators
-	if (attack != nullptr) {
-		COORD c = attack->border.pos;
-		drawSword(c.X, c.Y, rm);
-		c = map.tile[pos.x][pos.y].border.pos;
-		if (canAttack(*attack, map.tile[pos.x][pos.y])) {drawSword(c.X, c.Y, rm);}
+	//Move mode indicators
+	if (mode == MODE_MOVE) {
+		for (int a = 0; a < attackable.size(); ++a) {
+			if (attackable[a] == selectable[sPos]) {
+				COORD c = selectable[sPos]->border.pos;
+				drawSword(c.X, c.Y, rm);
+				c = map.tile[pos.x][pos.y].border.pos;
+				if (canAttack(*selectable[sPos], map.tile[pos.x][pos.y])) { drawSword(c.X, c.Y, rm); }
+				goto end;
+			}
+		}
+		drawPath(rm);
+		end:;
 	}
-
-	//Arrows
-	else if (path.size() > 1) { drawPath(rm); }
 
 	//Hand
 	for (int a = 0; a < 7; ++a) { rm.render(hand[a].border); }
-	for (int a = 0; a < player[turn].hand.size(); ++a) { rm.render(player[turn].hand[a]->sprite, (a * 7) + 9, 42); }
+	for (int a = 0; a < player[turn].hand.size(); ++a) {
+		player[turn].hand[a]->sprite.setCol(COLOR_LTWHITE);
+		rm.render(player[turn].hand[a]->sprite, (a * 7) + 9, 42);
+	}
 
 	//Sidebar
 	renderSidebar(rm);
@@ -296,19 +317,13 @@ void Game::useCard() {
 	if (activeCard->type == CARD_UNIT) {
 		pos = selectable[sPos]->pos;
 		hand[hPos + 1].setCol(COLOR_LTWHITE);
-		hPos = -1;
-		for (int a = 0; a < selectable.size(); ++a) { selectable[a]->setCol(COLOR_LTWHITE); }
 		selectable.clear();
 		sPos = -1;
 		mode = MODE_NONE;
 		summon(activeCard, turn, pos.x, pos.y);
-		for (int a = 0; a < player[turn].hand.size(); ++a) {
-			if (player[turn].hand[a] == activeCard) {
-				player[turn].hand.erase(player[turn].hand.begin() + a);
-				activeCard = nullptr;
-				break;
-			}
-		}
+		player[turn].hand.erase(player[turn].hand.begin() + hPos);
+		activeCard = nullptr;
+		hPos = -1;
 	}
 
 }
@@ -326,44 +341,47 @@ void Game::useEffect() {
 //Select unit
 void Game::select(BoardTile& t) {
 	for (int a = 0; a < highlighted.size(); ++a) { moveable.push_back(highlighted[a]); }
-	for (int a = 0; a < hostile.size(); ++a) {
-		if (canAttack(t, *hostile[a])) {
-			attackable.push_back(hostile[a]);
+	if (!t.unit->attacked) {
+		for (int a = 0; a < hostile.size(); ++a) {
+			if (canAttack(t, *hostile[a])) {
+				attackable.push_back(hostile[a]);
+			}
 		}
 	}
 	if (moveable.size() > 1 || attackable.size() > 0) {
+		selectable.insert(selectable.end(), moveable.begin(), moveable.end());
+		selectable.insert(selectable.end(), attackable.begin(), attackable.end());
 		activeUnit = t.unit;
+		sPos = 0;
 		mode = MODE_MOVE;
-		path.push_back(pos);
 	}
 	else { moveable.clear(); }
 }
 
 //Move selected unit
 void Game::moveUnit() {
-	if (path.size() > 1) {
-		activeUnit->setPos(path.back().x, path.back().y);
+	if (selectable[sPos] != &map.tile[pos.x][pos.y]) {
+		activeUnit->setPos(selectable[sPos]->pos.x, selectable[sPos]->pos.y);
 		activeUnit->moved = true;
-		pos = path.back();
+		pos = selectable[sPos]->pos;
 	}
 	moveable.clear();
 	attackable.clear();
+	selectable.clear();
 	activeUnit = nullptr;
 	mode = MODE_NONE;
-	path.clear();
 }
 
 //Attack unit
 void Game::attackUnit() {
-	activeUnit->attack(*attack->unit, false);
-	if (canAttack(*attack, map.tile[pos.x][pos.y])) { attack->unit->attack(*activeUnit, true); }
-	pos = attack->pos;
+	activeUnit->attack(*selectable[sPos]->unit, false);
+	if (canAttack(*selectable[sPos], map.tile[pos.x][pos.y])) { selectable[sPos]->unit->attack(*activeUnit, true); }
+	pos = selectable[sPos]->pos;
 	moveable.clear();
 	attackable.clear();
+	selectable.clear();
 	activeUnit = nullptr;
-	attack = nullptr;
 	mode = MODE_NONE;
-	path.clear();
 }
 
 //Move cursor position
@@ -401,44 +419,6 @@ void Game::moveCursorHand(int x, int y) {
 
 }
 
-//Move movement arrow
-void Game::moveArrow(int x, int y) {
-
-	//Get last arrow path position
-	Coord p;
-	if (attack == nullptr) { p = path[path.size() - 1]; }
-	else { p = attack->pos; }
-
-	//Return if back to start
-	if (p.x + x == pos.x && p.y + y == pos.y) {
-		path.clear();
-		path.push_back(pos);
-		attack = nullptr;
-		return;
-	}
-
-	//Check if tile is attackable
-	for (int a = 0; a < attackable.size(); ++a) {
-		if (&map.tile[p.x + x][p.y + y] == attackable[a]) {
-			path.clear();
-			path.push_back(pos);
-			attack = &map.tile[p.x + x][p.y + y];
-		}
-	}
-
-	//Check if can move to tile
-	for (int a = 0; a < moveable.size(); ++a) {
-		if (&map.tile[p.x + x][p.y + y] == moveable[a]) { break; }
-		if (a == moveable.size() - 1) { return; }
-	}
-
-	//Add position, remove intermediates if past range
-	path.push_back(Coord(p.x + x, p.y + y));
-	if (attack == nullptr && path.size() == 4) { path.erase(path.begin() + 1, path.begin() + 3); }
-	attack = nullptr;
-
-}
-
 //Move selected tile
 void Game::moveSelect(int x, int y) {
 	int _x = selectable[sPos]->pos.x + x;
@@ -471,8 +451,7 @@ void Game::moveSelect(int x, int y) {
 			}
 		}
 	}
-	end:
-	selectable[sPos]->setCol(COLOR_LTGREEN);
+	end:;
 }
 
 //Check if tile is moveable
@@ -570,27 +549,77 @@ void Game::highlightSelectable(eTarget type, Unit* u) {
 
 }
 
+//Get final path from list
+void Game::createPath() {
+	int i = pathList.size() - 1;
+	for (int a = 0; a < pathList.back().count + 1; ++a) {
+		path.insert(path.begin(), pathList[i].pos);
+		i = pathList[i].last;
+	}
+}
+
+//Add position to path list
+bool Game::addToPaths(int x, int y, int l, int c) {
+	if (x > -1 && x < 9 && y > -1 && y < 5) {
+		for (int a = 0; a < pathList.size(); ++a) { if (pathList[a].pos.x == x && pathList[a].pos.y == y) { return false; } }
+		for (int a = 0; a < moveable.size(); ++a) {
+			if (moveable[a] == &map.tile[x][y]) {
+				pathList.push_back(PathCoord(Coord(map.tile[x][y].pos.x, map.tile[x][y].pos.y), l, c));
+				if (selectable[sPos] == moveable[a]) { return true; }
+				return false;
+			}
+		}
+	}
+	return false;
+}
+
+//Generate paths to target
+void Game::generatePaths() {
+	path.clear();
+	if (selectable[sPos] != &map.tile[pos.x][pos.y]) {
+		for (int a = 0; a < attackable.size(); ++a) { if (attackable[a] == selectable[sPos]) { return; } }
+		pathList.push_back(PathCoord(pos, 0, 0));
+		int count = 0;
+		while (true) {
+			for (int a = 0; a < pathList.size(); ++a) {
+				if (pathList[a].count == count) {
+					if (addToPaths(pathList[a].pos.x, pathList[a].pos.y - 1, a, pathList[a].count + 1)) { goto end; }
+					if (addToPaths(pathList[a].pos.x, pathList[a].pos.y + 1, a, pathList[a].count + 1)) { goto end; }
+					if (addToPaths(pathList[a].pos.x - 1, pathList[a].pos.y, a, pathList[a].count + 1)) { goto end; }
+					if (addToPaths(pathList[a].pos.x + 1, pathList[a].pos.y, a, pathList[a].count + 1)) { goto end; }
+				}
+			}
+			++count;
+		}
+		end:;
+		createPath();
+		pathList.clear();
+	}
+}
+
 //Draw arrow path
 void Game::drawPath(Renderer& rm) {
 	int a = path.size() - 1;
-	COORD c = map.tile[path[0].x][path[0].y].border.pos;
-	if (path[0].y > path[1].y) { drawArrow(1, c.X, c.Y, rm); }      //Start up
-	else if (path[0].x > path[1].x) { drawArrow(2, c.X, c.Y, rm); } //Start left
-	else if (path[0].y < path[1].y) { drawArrow(3, c.X, c.Y, rm); } //Start down
-	else if (path[0].x < path[1].x) { drawArrow(4, c.X, c.Y, rm); } //Start right
-	c = map.tile[path[a].x][path[a].y].border.pos;
-	if (path[a].y < path[a - 1].y) { drawArrow(5, c.X, c.Y, rm); }      //End up
-	else if (path[a].x < path[a - 1].x) { drawArrow(6, c.X, c.Y, rm); } //End left
-	else if (path[a].y > path[a - 1].y) { drawArrow(7, c.X, c.Y, rm); } //End down
-	else if (path[a].x > path[a - 1].x) { drawArrow(8, c.X, c.Y, rm); } //End right
-	if (path.size() == 3) {
-		c = map.tile[path[1].x][path[1].y].border.pos;
-		if (path[1].x == path[0].x && path[1].x == path[2].x) { drawArrow(9, c.X, c.Y, rm); }       //Up-down
-		else if (path[1].y == path[0].y && path[1].y == path[2].y) { drawArrow(10, c.X, c.Y, rm); } //Left-right
-		else if ((path[1].x > path[0].x && path[1].y > path[2].y) || (path[1].x > path[2].x && path[1].y > path[0].y)) { drawArrow(11, c.X, c.Y, rm); } //Up-left
-		else if ((path[1].x > path[0].x && path[1].y < path[2].y) || (path[1].x > path[2].x && path[1].y < path[0].y)) { drawArrow(12, c.X, c.Y, rm); } //Down-left
-		else if ((path[1].x < path[0].x && path[1].y < path[2].y) || (path[1].x < path[2].x && path[1].y < path[0].y)) { drawArrow(13, c.X, c.Y, rm); } //Down-right
-		else if ((path[1].x < path[0].x && path[1].y > path[2].y) || (path[1].x < path[2].x && path[1].y > path[0].y)) { drawArrow(14, c.X, c.Y, rm); } //Up-right
+	if (a > 0) {
+		COORD c = map.tile[path[0].x][path[0].y].border.pos;
+		if (path[0].y > path[1].y) { drawArrow(1, c.X, c.Y, rm); }      //Start up
+		else if (path[0].x > path[1].x) { drawArrow(2, c.X, c.Y, rm); } //Start left
+		else if (path[0].y < path[1].y) { drawArrow(3, c.X, c.Y, rm); } //Start down
+		else if (path[0].x < path[1].x) { drawArrow(4, c.X, c.Y, rm); } //Start right
+		c = map.tile[path[a].x][path[a].y].border.pos;
+		if (path[a].y < path[a - 1].y) { drawArrow(5, c.X, c.Y, rm); }      //End up
+		else if (path[a].x < path[a - 1].x) { drawArrow(6, c.X, c.Y, rm); } //End left
+		else if (path[a].y > path[a - 1].y) { drawArrow(7, c.X, c.Y, rm); } //End down
+		else if (path[a].x > path[a - 1].x) { drawArrow(8, c.X, c.Y, rm); } //End right
+		if (path.size() == 3) {
+			c = map.tile[path[1].x][path[1].y].border.pos;
+			if (path[1].x == path[0].x && path[1].x == path[2].x) { drawArrow(9, c.X, c.Y, rm); }       //Up-down
+			else if (path[1].y == path[0].y && path[1].y == path[2].y) { drawArrow(10, c.X, c.Y, rm); } //Left-right
+			else if ((path[1].x > path[0].x && path[1].y > path[2].y) || (path[1].x > path[2].x && path[1].y > path[0].y)) { drawArrow(11, c.X, c.Y, rm); } //Up-left
+			else if ((path[1].x > path[0].x && path[1].y < path[2].y) || (path[1].x > path[2].x && path[1].y < path[0].y)) { drawArrow(12, c.X, c.Y, rm); } //Down-left
+			else if ((path[1].x < path[0].x && path[1].y < path[2].y) || (path[1].x < path[2].x && path[1].y < path[0].y)) { drawArrow(13, c.X, c.Y, rm); } //Down-right
+			else if ((path[1].x < path[0].x && path[1].y > path[2].y) || (path[1].x < path[2].x && path[1].y > path[0].y)) { drawArrow(14, c.X, c.Y, rm); } //Up-right
+		}
 	}
 }
 

@@ -25,6 +25,16 @@ public:
 	eEffect effect;
 };
 
+//Pathing coords
+class PathCoord {
+public:
+	PathCoord(Coord = Coord(), int = 0, int = 0);
+	~PathCoord();
+	Coord pos;
+	int last;
+	int count;
+};
+
 //Game class
 class Game {
 public:
@@ -43,13 +53,15 @@ public:
 	void moveUnit();
 	void moveCursor(int x, int y);
 	void moveCursorHand(int x, int y);
-	void moveArrow(int x, int y);
 	void moveSelect(int x, int y);
 	bool canMove(int x, int y);
 	bool canAttack(BoardTile& t1, BoardTile& t2);
 	void highlightTile(int x, int y, eColor col);
 	void highlightMoveable(int x, int y);
 	void highlightSelectable(eTarget type, Unit* = nullptr);
+	void createPath();
+	bool addToPaths(int x, int y, int l, int c);
+	void generatePaths();
 	void drawPath(Renderer& rm);
 	void drawSword(int x, int y, Renderer& rm);
 	void drawArrow(int a, int x, int y, Renderer& rm);
@@ -68,8 +80,8 @@ public:
 	std::vector<BoardTile*> hostile;
 	std::vector<BoardTile*> attackable;
 	std::vector<BoardTile*> selectable;
+	std::vector<PathCoord> pathList;
 	std::vector<Coord> path;
-	BoardTile* attack;
 	Unit* activeUnit;
 	Card* activeCard;
 	eMode mode;
