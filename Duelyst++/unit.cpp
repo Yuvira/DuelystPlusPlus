@@ -60,7 +60,7 @@ void Unit::drawDetails(Renderer& rm, int& y) {
 		if (buff[a].hp == 0 && buff[a].atk != 0) { s += (buff[a].atk > 0 ? "+" : "-") + std::to_string(abs(buff[a].atk)) + " Attack"; }
 		else if (buff[a].atk == 0 && buff[a].hp != 0) { s += (buff[a].hp > 0 ? "+" : "-") + std::to_string(abs(buff[a].hp)) + " Health"; }
 		else if (buff[a].atk != 0 && buff[a].hp != 0) { s += (buff[a].atk > 0 ? "+" : "-") + std::to_string(buff[a].atk) + (buff[a].hp > 0 ? "/+" : "/-") + std::to_string(abs(buff[a].hp)); }
-		else { s += "+0/+0"; }
+		else if (buff[a].cost == 0) { s += "+0/+0"; }
 		if (buff[a].cost != 0) {
 			if (s != "") { s += ", "; }
 			s += (buff[a].cost > 0 ? "+" : "-") + std::to_string(abs(buff[a].cost)) + " Cost";
@@ -92,21 +92,28 @@ void Unit::addBuff(eBuff b) {
 	Buff _b = game->cl.el.find(b);
 	for (int a = 0; a < buff.size(); ++a) {
 		if (buff[a].buff == b) {
+			if (!_b.stacking) { return; }
 			buff[a].cost += _b.cost;
 			buff[a].atk += _b.atk;
 			buff[a].hp += _b.hp;
-			cost = max(cost + _b.cost, 0);
-			atk += _b.atk;
-			hp += _b.hp;
-			hpMax += _b.hp;
+			updateStatBuffs();
 			return;
 		}
 	}
 	buff.push_back(_b);
-	cost = max(cost + _b.cost, 0);
-	atk += _b.atk;
-	hp += _b.hp;
-	hpMax += _b.hp;
+	updateStatBuffs();
+}
+
+//Remove buff from list
+void Unit::removeBuff(eBuff b) {
+	Buff _b = game->cl.el.find(b);
+	for (int a = 0; a < buff.size(); ++a) {
+		if (buff[a].buff == b) {
+			buff.erase(buff.begin() + a);
+			break;
+		}
+	}
+	updateStatBuffs();
 }
 
 //Add effect to list
@@ -128,7 +135,7 @@ void Unit::removeEffect(eEffect e) {
 		if (effect[a].effect == e) {
 			effect[a].count -= _e.count;
 			if (effect[a].count == 0) { effect.erase(effect.begin() + a); }
-			return;
+			break;
 		}
 	}
 }
@@ -137,9 +144,29 @@ void Unit::removeEffect(eEffect e) {
 void Unit::update(bool& r) {
 	if (hp < 1) {
 		for (int a = 0; a < game->unit.size(); ++a) { game->unit[a]->onDeath(*this); }
+		game->player[0].onDeath(*this);
+		game->player[1].onDeath(*this);
 		dead = true;
 		r = true;
 	}
+}
+
+//Update attack/health/cost when buffs change
+void Unit::updateStatBuffs() {
+	int _cost = 0;
+	int _atk = 0;
+	int _hp = 0;
+	int hpDelta = hp - hpMax;
+	for (int a = 0; a < buff.size(); ++a) {
+		_cost += buff[a].cost;
+		_atk += buff[a].atk;
+		_hp += buff[a].hp;
+	}
+	Unit* o = dynamic_cast<Unit*>(original);
+	cost = max(o->cost + _cost, 0);
+	atk = max(o->atk + _atk, 0);
+	hpMax = o->hpMax + _hp;
+	hp = hpMax + hpDelta;
 }
 
 //Update HP & ATK sprites
@@ -232,67 +259,73 @@ void Unit::attack(Unit& u, bool counter) {
 		moved = true;
 		attacked = true;
 	}
+	u.hp -= atk;
 	switch (skill.skill) {
 	case SKILL_BLUETIP_SCORPION:
-		u.tribe == TRIBE_GENERAL ? u.hp -= atk : u.hp -= atk * 2;
-		return;
+		if (u.tribe != TRIBE_GENERAL) { u.hp -= atk; }
+		break;
 	}
-	u.hp -= atk;
+	game->sendOnDamage(*this, u);
 }
 
 //When a unit is summoned
 void Unit::onSummon(Unit& u) {
 
-	//When this is summoned (Opening Gambit)
-	if (&u == this) {
-		moved = true;
-		attacked = true;
-		switch (skill.skill) {
-		case SKILL_AETHERMASTER:
-			++player->replaces;
-			player->general->addEffect(EFFECT_AETHERMASTER);
-			break;
-		case SKILL_AZURE_HERALD:
-			player->general->hp = min(player->general->hp + 3, player->general->hpMax);
-			break;
-		case SKILL_BLAZE_HOUND:
-			game->player[0].draw();
-			game->player[1].draw();
-			break;
-		case SKILL_BLISTERING_SKORN:
-			for (int a = 0; a < game->unit.size(); ++a) {
-				--game->unit[a]->hp;
-				game->sendOnDamage(*this, *game->unit[a]);
-			}
-			break;
-		case SKILL_BLOODTEAR_ALCHEMIST:
-			game->highlightSelectable(TARGET_ENEMY, this);
-			if (game->selectable.size() > 0) { game->callback = Callback(this, SKILL_BLOODTEAR_ALCHEMIST); }
-			break;
-		case SKILL_GHOST_LYNX:
-			game->highlightSelectable(TARGET_MINION_NEAR_UNIT, this);
-			if (game->selectable.size() > 0) { game->callback = Callback(this, SKILL_GHOST_LYNX); }
-			break;
-		}
-	}
+	//If on board
+	if (tile != nullptr) {
 
-	//When something else is summoned
-	else {
-		switch (skill.skill) {
-		case SKILL_ARAKI_HEADHUNTER:
-			if (u.player == player) {
-				switch (u.skill.skill) {
-				case SKILL_AZURE_HERALD:
-				case SKILL_BLAZE_HOUND:
-				case SKILL_BLISTERING_SKORN:
-				case SKILL_BLOODTEAR_ALCHEMIST:
-				case SKILL_GHOST_LYNX:
-					addBuff(BUFF_ARAKI_HEADHUNTER);
-					break;
+		//When this is summoned (Opening Gambit)
+		if (&u == this) {
+			moved = true;
+			attacked = true;
+			switch (skill.skill) {
+			case SKILL_AETHERMASTER:
+				++player->replaces;
+				player->general->addEffect(EFFECT_AETHERMASTER);
+				break;
+			case SKILL_AZURE_HERALD:
+				player->general->hp = min(player->general->hp + 3, player->general->hpMax);
+				break;
+			case SKILL_BLAZE_HOUND:
+				game->player[0].draw();
+				game->player[1].draw();
+				break;
+			case SKILL_BLISTERING_SKORN:
+				for (int a = 0; a < game->unit.size(); ++a) {
+					--game->unit[a]->hp;
+					game->sendOnDamage(*this, *game->unit[a]);
 				}
+				break;
+			case SKILL_BLOODTEAR_ALCHEMIST:
+				game->highlightSelectable(TARGET_ENEMY, this);
+				if (game->selectable.size() > 0) { game->callback = Callback(this, SKILL_BLOODTEAR_ALCHEMIST); }
+				break;
+			case SKILL_GHOST_LYNX:
+				game->highlightSelectable(TARGET_MINION_NEAR_UNIT, this);
+				if (game->selectable.size() > 0) { game->callback = Callback(this, SKILL_GHOST_LYNX); }
+				break;
 			}
-			break;
 		}
+
+		//When something else is summoned
+		else {
+			switch (skill.skill) {
+			case SKILL_ARAKI_HEADHUNTER:
+				if (u.player == player) {
+					switch (u.skill.skill) {
+					case SKILL_AZURE_HERALD:
+					case SKILL_BLAZE_HOUND:
+					case SKILL_BLISTERING_SKORN:
+					case SKILL_BLOODTEAR_ALCHEMIST:
+					case SKILL_GHOST_LYNX:
+						addBuff(BUFF_ARAKI_HEADHUNTER);
+						break;
+					}
+				}
+				break;
+			}
+		}
+
 	}
 
 }
@@ -300,25 +333,30 @@ void Unit::onSummon(Unit& u) {
 //When a unit dies
 void Unit::onDeath(Unit& u) {
 
-	//When this unit dies (Dying Wish)
-	if (&u == this) {
-		switch (skill.skill) {
-		case SKILL_AETHERMASTER:
-			player->replaces = max(player->replaces - 1, 0);
-			player->general->removeEffect(EFFECT_AETHERMASTER);
-			break;
-		case SKILL_AZURE_HORN_SHAMAN:
-			for (int a = max(tile->pos.x - 1, 0); a < min(tile->pos.x + 2, 9); ++a) {
-				for (int b = max(tile->pos.y - 1, 0); b < min(tile->pos.y + 2, 5); ++b) {
-					if (game->map.tile[a][b].unit != nullptr && game->map.tile[a][b].unit->player == player) {
-						if (game->map.tile[a][b].unit != player->general) {
-							game->map.tile[a][b].unit->addBuff(BUFF_AZURE_HORN_SHAMAN);
+	//If on board
+	if (tile != nullptr) {
+
+		//When this unit dies (Dying Wish)
+		if (&u == this) {
+			switch (skill.skill) {
+			case SKILL_AETHERMASTER:
+				player->replaces = max(player->replaces - 1, 0);
+				player->general->removeEffect(EFFECT_AETHERMASTER);
+				break;
+			case SKILL_AZURE_HORN_SHAMAN:
+				for (int a = max(tile->pos.x - 1, 0); a < min(tile->pos.x + 2, 9); ++a) {
+					for (int b = max(tile->pos.y - 1, 0); b < min(tile->pos.y + 2, 5); ++b) {
+						if (game->map.tile[a][b].unit != nullptr && game->map.tile[a][b].unit->player == player) {
+							if (game->map.tile[a][b].unit != player->general) {
+								game->map.tile[a][b].unit->addBuff(BUFF_AZURE_HORN_SHAMAN);
+							}
 						}
 					}
 				}
+				break;
 			}
-			break;
 		}
+
 	}
 
 }
@@ -326,8 +364,23 @@ void Unit::onDeath(Unit& u) {
 //When a unit attacks
 void Unit::onAttack(Unit& u1, Unit& u2) {}
 
-//When this is damaged
-void Unit::onDamage(Unit& u1, Unit& u2) {}
+//When a unit is damaged
+void Unit::onDamage(Unit& u1, Unit& u2) {
+
+	//If in hand/deck
+	if (tile == nullptr) {
+		switch (skill.skill) {
+		case SKILL_CHAKKRAM:
+			if (&u2 == player->general) {
+				if (&game->player[game->turn] != player) {
+					addBuff(BUFF_CHAKKRAM);
+				}
+			}
+			break;
+		}
+	}
+
+}
 
 //When this card is replaced
 bool Unit::onReplace() {
@@ -342,26 +395,40 @@ bool Unit::onReplace() {
 //When a player's turn ends
 void Unit::onTurnEnd(Player& p) {
 
-	//When this unit's player ends turn
-	if (&p == player) {
-		switch (skill.skill) {
-		case SKILL_BASTION:
-			for (int a = 0; a < game->unit.size(); ++a) {
-				if (game->unit[a]->player == player && game->unit[a] != this) {
-					if (game->unit[a] != player->general) {
-						game->unit[a]->addBuff(BUFF_BASTION);
+	//If on board
+	if (tile != nullptr) {
+
+		//When this unit's player ends turn
+		if (&p == player) {
+			switch (skill.skill) {
+			case SKILL_BASTION:
+				for (int a = 0; a < game->unit.size(); ++a) {
+					if (game->unit[a]->player == player && game->unit[a] != this) {
+						if (game->unit[a] != player->general) {
+							game->unit[a]->addBuff(BUFF_BASTION);
+						}
 					}
 				}
-			}
-			break;
-		}
-		for (int a = 0; a < effect.size(); ++a) {
-			switch (effect[a].effect) {
-			case EFFECT_AETHERMASTER:
-				player->replaces += effect[a].count;
 				break;
 			}
+			for (int a = 0; a < effect.size(); ++a) {
+				switch (effect[a].effect) {
+				case EFFECT_AETHERMASTER:
+					player->replaces += effect[a].count;
+					break;
+				}
+			}
 		}
+
+	}
+
+	//Anywhere
+	switch (skill.skill) {
+	case SKILL_CHAKKRAM:
+		if (&p == player) {
+		removeBuff(BUFF_CHAKKRAM);
+		}
+		break;
 	}
 
 }

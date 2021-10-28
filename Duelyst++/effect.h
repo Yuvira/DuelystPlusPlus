@@ -20,6 +20,7 @@ enum eSkill {
 	SKILL_BLISTERING_SKORN,
 	SKILL_BLOODTEAR_ALCHEMIST,
 	SKILL_BLUETIP_SCORPION,
+	SKILL_CHAKKRAM,
 	SKILL_GHOST_LYNX
 };
 
@@ -35,7 +36,8 @@ enum eBuff {
 	BUFF_ARAKI_HEADHUNTER,
 	BUFF_ASTRAL_CRUSADER,
 	BUFF_AZURE_HORN_SHAMAN,
-	BUFF_BASTION
+	BUFF_BASTION,
+	BUFF_CHAKKRAM
 };
 
 //Skill class
@@ -62,7 +64,7 @@ public:
 //Stat buff class
 class Buff {
 public:
-	Buff(eBuff = BUFF_NONE, int = 0, int = 0, int = 0);
+	Buff(eBuff = BUFF_NONE, int = 0, int = 0, int = 0, bool = true);
 	~Buff();
 	void generateSprite(std::string s);
 	Sprite sprite;
@@ -70,6 +72,7 @@ public:
 	int cost;
 	int atk;
 	int hp;
+	bool stacking;
 };
 
 //Effect list class

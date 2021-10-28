@@ -67,7 +67,13 @@ public:
 	Card() {}
 	~Card() {}
 	virtual void drawDetails(Renderer& rm, int& y) {}
+	virtual void onSummon(Unit& u) {}
+	virtual void onDeath(Unit& u) {}
+	virtual void onAttack(Unit& u1, Unit& u2) {}
+	virtual void onDamage(Unit& u1, Unit& u2) {}
 	virtual bool onReplace() { return true; }
+	virtual void onTurnEnd(Player& p) {}
+	virtual void onTurnStart(Player& p) {}
 	int cost;
 	Game* game;
 	Player* player;
@@ -86,9 +92,11 @@ public:
 	void render(Renderer& rm);
 	void setPos(int x, int y);
 	void addBuff(eBuff b);
+	void removeBuff(eBuff b);
 	void addEffect(eEffect e);
 	void removeEffect(eEffect e);
 	void update(bool& r);
+	void updateStatBuffs();
 	void updateStatSprites();
 	void updateDetailStats();
 	void generateDetails();

@@ -172,6 +172,7 @@ void Game::update() {
 	for (int a = 0; a < unit.size(); ++a) {
 		if (unit[a]->dead) {
 			unit[a]->tile->unit = nullptr;
+			unit[a]->tile = nullptr;
 			grave.push_back(unit[a]);
 			unit.erase(unit.begin() + a);
 			--a;
@@ -313,7 +314,11 @@ void Game::changeTurn(bool t) {
 		unit[a]->attacked = false;
 	}
 	for (int a = 0; a < unit.size(); ++a) { unit[a]->onTurnEnd(player[!t]); }
+	player[0].onTurnEnd(player[!t]);
+	player[1].onTurnEnd(player[!t]);
 	for (int a = 0; a < unit.size(); ++a) { unit[a]->onTurnStart(player[t]); }
+	player[0].onTurnStart(player[t]);
+	player[1].onTurnStart(player[t]);
 }
 
 //Summon at position
@@ -321,6 +326,8 @@ void Game::summon(Card* c, bool p, int x, int y) {
 	unit.push_back(dynamic_cast<Unit*>(c));
 	unit.back()->setPos(x, y);
 	for (int a = 0; a < unit.size(); ++a) { unit[a]->onSummon(*unit.back()); }
+	player[0].onSummon(*unit.back());
+	player[1].onSummon(*unit.back());
 }
 
 //Use active card
@@ -474,9 +481,9 @@ void Game::moveSelect(int x, int y) {
 
 //Send onDamage to all units
 void Game::sendOnDamage(Unit& u1, Unit& u2) {
-	for (int a = 0; a < unit.size(); ++a) {
-		unit[a]->onDamage(u1, u2);
-	}
+	for (int a = 0; a < unit.size(); ++a) { unit[a]->onDamage(u1, u2); }
+	player[0].onDamage(u1, u2);
+	player[1].onDamage(u1, u2);
 }
 
 //Check if tile is moveable
