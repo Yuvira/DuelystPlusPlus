@@ -3,7 +3,6 @@
 #define __EFFECT_H__
 
 //Include
-#include <vector>
 #include "tile.h"
 
 //Skills
@@ -21,6 +20,7 @@ enum eSkill {
 	SKILL_BLOODTEAR_ALCHEMIST,
 	SKILL_BLUETIP_SCORPION,
 	SKILL_CHAKKRAM,
+	SKILL_CHAOS_ELEMENTAL,
 	SKILL_GHOST_LYNX
 };
 

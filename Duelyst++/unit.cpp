@@ -367,8 +367,20 @@ void Unit::onAttack(Unit& u1, Unit& u2) {}
 //When a unit is damaged
 void Unit::onDamage(Unit& u1, Unit& u2) {
 
+	//If on board
+	if (tile != nullptr) {
+		switch (skill.skill) {
+		case SKILL_CHAOS_ELEMENTAL:
+			if (&u2 == this) {
+				BoardTile* t = game->map.getRandom();
+				if (t != nullptr) { setPos(t->pos.x, t->pos.y); }
+			}
+			break;
+		}
+	}
+
 	//If in hand/deck
-	if (tile == nullptr) {
+	else {
 		switch (skill.skill) {
 		case SKILL_CHAKKRAM:
 			if (&u2 == player->general) {
@@ -446,16 +458,8 @@ void Unit::callback(BoardTile* t) {
 		}
 		break;
 	case SKILL_GHOST_LYNX:
-		std::vector<BoardTile*> v;
-		for (int a = 0; a < 9; ++a) {
-			for (int b = 0; b < 5; ++b) {
-				if (game->map.tile[a][b].unit == nullptr) {
-					v.push_back(&game->map.tile[a][b]);
-				}
-			}
-		}
-		int i = rand() % v.size();
-		t->unit->setPos(v[i]->pos.x, v[i]->pos.y);
+		BoardTile* t2 = game->map.getRandom();
+		if (t2 != nullptr) { t->unit->setPos(t2->pos.x, t2->pos.y); }
 		break;
 	}
 	game->callback = Callback();

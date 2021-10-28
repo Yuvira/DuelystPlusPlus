@@ -58,6 +58,23 @@ Map::Map() {
 }
 Map::~Map() {}
 
+//Get random empty tile
+BoardTile* Map::getRandom() {
+	std::vector<BoardTile*> v;
+	for (int a = 0; a < 9; ++a) {
+		for (int b = 0; b < 5; ++b) {
+			if (tile[a][b].unit == nullptr) {
+				v.push_back(&tile[a][b]);
+			}
+		}
+	}
+	if (v.size() > 0) {
+		int i = rand() % v.size();
+		return v[i];
+	}
+	return nullptr;
+}
+
 //Custom co-ord crap
 Coord::Coord(int _x, int _y) {
 	x = _x;

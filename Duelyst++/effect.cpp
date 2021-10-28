@@ -107,6 +107,8 @@ EffectList::EffectList() {
 	slist.back().generateSprite("Costs 2 less if your General took|damage on your opponent's|last turn");
 	blist.push_back(Buff(BUFF_CHAKKRAM, -2, 0, 0, false));
 	blist.back().generateSprite("Chakkram");
+	slist.push_back(Skill(SKILL_CHAOS_ELEMENTAL));
+	slist.back().generateSprite("Whenever this minion takes damage,|it randomly teleports");
 	slist.push_back(Skill(SKILL_GHOST_LYNX));
 	slist.back().generateSprite("{Opening Gambit}: Teleport a nearby|minion to a random space");
 }

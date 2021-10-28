@@ -3,6 +3,7 @@
 #define __TILE_H__
 
 //Include
+#include <vector>
 #include "renderer.h"
 
 //Definition
@@ -52,6 +53,7 @@ class Map {
 public:
 	Map();
 	~Map();
+	BoardTile* getRandom();
 	BoardTile tile[9][5];
 };
 
