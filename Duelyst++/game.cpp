@@ -163,9 +163,21 @@ void Game::update() {
 	bool reloop;
 	do { 
 		reloop = false;
-		for (int a = 0; a < unit.size(); ++a) { unit[a]->update(reloop); }
+		for (int a = 0; a < unit.size(); ++a) {
+			if (!unit[a]->dead) {
+				unit[a]->update(reloop);
+			}
+		}
 	} while (reloop);
-	for (int a = 0; a < unit.size(); ++a) { unit[a]->updateStatSprites(); }
+	for (int a = 0; a < unit.size(); ++a) {
+		if (unit[a]->dead) {
+			unit[a]->tile->unit = nullptr;
+			grave.push_back(unit[a]);
+			unit.erase(unit.begin() + a);
+			--a;
+		}
+		else { unit[a]->updateStatSprites(); }
+	}
 
 	//Update mana bars
 	player[0].updateMana(COLOR_LTBLUE);

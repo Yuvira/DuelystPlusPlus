@@ -106,6 +106,7 @@ public:
 	int atk;
 	int hp;
 	int hpMax;
+	bool dead;
 	bool moved;
 	bool attacked;
 	BoardTile* tile;

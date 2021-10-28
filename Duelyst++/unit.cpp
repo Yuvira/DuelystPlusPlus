@@ -11,6 +11,7 @@ Unit::Unit(eFaction _faction, eTribe _tribe, int _cost, int _atk, int _hp, std::
 	hp = _hp;
 	hpMax = _hp;
 	name = _name;
+	dead = false;
 	moved = false;
 	attacked = false;
 	if (path == "") { sprite.resize(5, 5); }
@@ -145,6 +146,7 @@ void Unit::removeEffect(eEffect e) {
 void Unit::update(bool& r) {
 	if (hp < 1) {
 		for (int a = 0; a < game->unit.size(); ++a) { game->unit[a]->onDeath(*this); }
+		dead = true;
 		r = true;
 	}
 }
@@ -270,26 +272,8 @@ void Unit::onSummon(Unit& u) {
 //When a unit dies
 void Unit::onDeath(Unit& u) {
 
-	//When this unit dies
+	//When this unit dies (Dying Wish)
 	if (&u == this) {
-
-		//Remove tile reference
-		tile->unit = nullptr;
-		for (int a = 0; a < game->hostile.size(); ++a) {
-			if (game->hostile[a] == tile) {
-				game->hostile.erase(game->hostile.begin() + a);
-				break;
-			}
-		}
-
-		//Move to graveyard
-		for (int a = 0; a < game->unit.size(); ++a) {
-			if (game->unit[a] == this) {
-				game->unit.erase(game->unit.begin() + a);
-				game->grave.push_back(this);
-				break;
-			}
-		}
 
 		//Remove effects
 		switch (skill.skill) {
