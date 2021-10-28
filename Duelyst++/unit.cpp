@@ -254,6 +254,12 @@ void Unit::onSummon(Unit& u) {
 			game->player[0].draw();
 			game->player[1].draw();
 			break;
+		case SKILL_BLISTERING_SKORN:
+			for (int a = 0; a < game->unit.size(); ++a) {
+				--game->unit[a]->hp;
+				//onDamaged?
+			}
+			break;
 		case SKILL_GHOST_LYNX:
 			game->highlightSelectable(TARGET_MINION_NEAR_UNIT, this);
 			if (game->selectable.size() > 0) { game->callback = Callback(this, SKILL_GHOST_LYNX); }

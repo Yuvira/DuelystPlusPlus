@@ -96,6 +96,8 @@ EffectList::EffectList() {
 	blist.back().generateSprite("Bastion");
 	slist.push_back(Skill(SKILL_BLAZE_HOUND));
 	slist.back().generateSprite("{Opening Gambit}: Both players draw|a card");
+	slist.push_back(Skill(SKILL_BLISTERING_SKORN));
+	slist.back().generateSprite("{Opening Gambit}: Deal 1 damage to|everything (including itself)");
 	slist.push_back(Skill(SKILL_GHOST_LYNX));
 	slist.back().generateSprite("{Opening Gambit}: Teleport a nearby|minion to a random space");
 }

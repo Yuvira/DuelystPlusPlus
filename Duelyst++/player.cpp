@@ -10,8 +10,8 @@ void Player::preset(CardList& cl, Game* g) {
 	game = g;
 	deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Argeon Highmayne")))));
 	for (int a = 0; a < 13; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Bastion"))))); }
-	for (int a = 0; a < 13; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Blaze Hound"))))); }
-	for (int a = 0; a < 13; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Araki Headhunter"))))); }
+	for (int a = 0; a < 13; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Azure Horn Shaman"))))); }
+	for (int a = 0; a < 13; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Blistering Skorn"))))); }
 	for (int a = 0; a < deck.size(); ++a) {
 		deck[a]->game = game;
 		deck[a]->player = this;
