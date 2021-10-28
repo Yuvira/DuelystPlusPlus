@@ -104,7 +104,7 @@ void Unit::addBuff(eBuff b) {
 			buff[a].cost += _b.cost;
 			buff[a].atk += _b.atk;
 			buff[a].hp += _b.hp;
-			cost = max(_b.cost, 0);
+			cost = max(cost + _b.cost, 0);
 			atk += _b.atk;
 			hp += _b.hp;
 			hpMax += _b.hp;
@@ -220,6 +220,12 @@ void Unit::generateDetails() {
 	updateDetailStats();
 }
 
+//Can unit move
+bool Unit::isMoveable() {
+	if (tribe == TRIBE_STRUCTURE) { return false; }
+	return true;
+}
+
 //Is unit flying
 bool Unit::isFlying() {
 	switch (skill.skill) {
@@ -289,6 +295,7 @@ void Unit::onDeath(Unit& u) {
 					}
 				}
 			}
+			break;
 		}
 	}
 
@@ -312,6 +319,17 @@ void Unit::onTurnEnd(Player& p) {
 
 	//When this unit's player ends turn
 	if (&p == player) {
+		switch (skill.skill) {
+		case SKILL_BASTION:
+			for (int a = 0; a < game->unit.size(); ++a) {
+				if (game->unit[a]->player == player && game->unit[a] != this) {
+					if (game->unit[a] != player->general) {
+						game->unit[a]->addBuff(BUFF_BASTION);
+					}
+				}
+			}
+			break;
+		}
 		for (int a = 0; a < effect.size(); ++a) {
 			switch (effect[a].effect) {
 			case EFFECT_AETHERMASTER:
