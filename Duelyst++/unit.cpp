@@ -72,15 +72,6 @@ void Unit::drawDetails(Renderer& rm, int& y) {
 	}
 }
 
-//Attack enemy
-void Unit::attack(Unit& u, bool counter) {
-	u.hp -= atk;
-	if (!counter) {
-		moved = true;
-		attacked = true;
-	}
-}
-
 //Set sprite position
 void Unit::setPos(int x, int y) {
 	if (tile != nullptr) { tile->unit = nullptr; }
@@ -233,6 +224,20 @@ bool Unit::isFlying() {
 		return true;
 	}
 	return false;
+}
+
+//Attack enemy
+void Unit::attack(Unit& u, bool counter) {
+	if (!counter) {
+		moved = true;
+		attacked = true;
+	}
+	switch (skill.skill) {
+	case SKILL_BLUETIP_SCORPION:
+		u.tribe == TRIBE_GENERAL ? u.hp -= atk : u.hp -= atk * 2;
+		return;
+	}
+	u.hp -= atk;
 }
 
 //When a unit is summoned

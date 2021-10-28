@@ -84,7 +84,6 @@ public:
 	Unit(eFaction = FACTION_NEUTRAL, eTribe = TRIBE_NONE, int = 0, int = 0, int = 0, std::string = "", std::string = "???");
 	~Unit();
 	void render(Renderer& rm);
-	void attack(Unit& u, bool counter);
 	void setPos(int x, int y);
 	void addBuff(eBuff b);
 	void addEffect(eEffect e);
@@ -96,6 +95,7 @@ public:
 	void drawDetails(Renderer& rm, int& y);
 	bool isMoveable();
 	bool isFlying();
+	void attack(Unit& u, bool counter);
 	void onSummon(Unit& u);
 	void onDeath(Unit& u);
 	void onAttack(Unit& u1, Unit& u2);
