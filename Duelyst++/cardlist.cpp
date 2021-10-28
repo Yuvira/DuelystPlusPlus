@@ -21,6 +21,8 @@ CardList::CardList() {
 	ulist.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 4, 4, 5, "blisteringskorn", "Blistering Skorn"));
 	ulist.back().skill = el.find(SKILL_BLISTERING_SKORN);
 	ulist.push_back(Unit(FACTION_NEUTRAL, TRIBE_GOLEM, 3, 4, 3, "bloodgolem", "Bloodshard Golem"));
+	ulist.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "bloodalchemist", "Bloodtear Alchemist"));
+	ulist.back().skill = el.find(SKILL_BLOODTEAR_ALCHEMIST);
 	ulist.push_back(Unit(FACTION_NEUTRAL, TRIBE_GOLEM, 5, 4, 9, "mossgolem", "Brightmoss Golem"));
 	ulist.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "dragonlark", "Dragonlark"));
 	ulist.back().skill = el.find(SKILL_FLYING);

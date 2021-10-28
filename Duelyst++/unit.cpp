@@ -257,10 +257,12 @@ void Unit::onSummon(Unit& u) {
 		case SKILL_BLISTERING_SKORN:
 			for (int a = 0; a < game->unit.size(); ++a) {
 				--game->unit[a]->hp;
-				for (int b = 0; b < game->unit.size(); ++b) {
-					game->unit[b]->onDamage(*this, *game->unit[a]);
-				}
+				game->sendOnDamage(*this, *game->unit[a]);
 			}
+			break;
+		case SKILL_BLOODTEAR_ALCHEMIST:
+			game->highlightSelectable(TARGET_ENEMY, this);
+			if (game->selectable.size() > 0) { game->callback = Callback(this, SKILL_BLOODTEAR_ALCHEMIST); }
 			break;
 		case SKILL_GHOST_LYNX:
 			game->highlightSelectable(TARGET_MINION_NEAR_UNIT, this);
@@ -277,6 +279,8 @@ void Unit::onSummon(Unit& u) {
 				switch (u.skill.skill) {
 				case SKILL_AZURE_HERALD:
 				case SKILL_BLAZE_HOUND:
+				case SKILL_BLISTERING_SKORN:
+				case SKILL_BLOODTEAR_ALCHEMIST:
 				case SKILL_GHOST_LYNX:
 					addBuff(BUFF_ARAKI_HEADHUNTER);
 					break;
@@ -363,11 +367,17 @@ void Unit::onTurnStart(Player& p) {}
 //Effect callback
 void Unit::callback(BoardTile* t) {
 	switch (game->callback.skill) {
+	case SKILL_BLOODTEAR_ALCHEMIST:
+		if (t->unit != nullptr) {
+			--t->unit->hp;
+			game->sendOnDamage(*this, *t->unit);
+		}
+		break;
 	case SKILL_GHOST_LYNX:
 		std::vector<BoardTile*> v;
 		for (int a = 0; a < 9; ++a) {
 			for (int b = 0; b < 5; ++b) {
-				if (!game->map.tile[a][b].unit) {
+				if (game->map.tile[a][b].unit == nullptr) {
 					v.push_back(&game->map.tile[a][b]);
 				}
 			}

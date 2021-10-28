@@ -472,6 +472,13 @@ void Game::moveSelect(int x, int y) {
 	end:;
 }
 
+//Send onDamage to all units
+void Game::sendOnDamage(Unit& u1, Unit& u2) {
+	for (int a = 0; a < unit.size(); ++a) {
+		unit[a]->onDamage(u1, u2);
+	}
+}
+
 //Check if tile is moveable
 bool Game::canMove(int x, int y) {
 	if (x > -1 && x < 9 && y > -1 && y < 5) {
@@ -541,6 +548,15 @@ void Game::highlightMoveable(int x, int y) {
 //Highlight targetable tiles
 void Game::highlightSelectable(eTarget type, Unit* u) {
 
+	//Enemies
+	if (type == TARGET_ENEMY) {
+		for (int a = 0; a < unit.size(); ++a) {
+			if (unit[a]->player != &player[turn]) {
+				selectable.push_back(unit[a]->tile);
+			}
+		}
+	}
+
 	//Near allies (summon)
 	if (type == TARGET_NEAR_ALLY) {
 		for (int a = 0; a < 9; ++a) {
@@ -551,7 +567,6 @@ void Game::highlightSelectable(eTarget type, Unit* u) {
 							for (int d = max(b - 1, 0); d < min(b + 2, 5); ++d) {
 								if (map.tile[c][d].unit == nullptr) {
 									if (map.tile[c][d].border.buffer[0].Attributes != COLOR_GREEN) {
-										map.tile[c][d].setCol(COLOR_GREEN);
 										selectable.push_back(&map.tile[c][d]);
 									}
 								}
@@ -563,15 +578,12 @@ void Game::highlightSelectable(eTarget type, Unit* u) {
 		}
 	}
 
-	//Near unit
+	//Minons near unit
 	else if (type == TARGET_MINION_NEAR_UNIT && u) {
 		for (int a = max(u->tile->pos.x - 1, 0); a < min(u->tile->pos.x + 2, 9); ++a) {
 			for (int b = max(u->tile->pos.y - 1, 0); b < min(u->tile->pos.y + 2, 5); ++b) {
 				if (map.tile[a][b].unit != nullptr && map.tile[a][b].unit != u && map.tile[a][b].unit->tribe != TRIBE_GENERAL) {
-					if (map.tile[a][b].border.buffer[0].Attributes != COLOR_GREEN) {
-						map.tile[a][b].setCol(COLOR_GREEN);
-						selectable.push_back(&map.tile[a][b]);
-					}
+					selectable.push_back(&map.tile[a][b]);
 				}
 			}
 		}
