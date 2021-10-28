@@ -71,6 +71,7 @@ public:
 	int cost;
 	Game* game;
 	Player* player;
+	Card* original;
 	eCard type;
 	std::string name;
 	Sprite sprite;

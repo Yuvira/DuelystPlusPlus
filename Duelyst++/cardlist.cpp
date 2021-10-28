@@ -22,6 +22,7 @@ CardList::CardList() {
 	ulist.back().skill = el.find(SKILL_GHOST_LYNX);
 	for (int a = 0; a < glist.size(); ++a) { clist.push_back(&glist[a]); }
 	for (int a = 0; a < ulist.size(); ++a) { clist.push_back(&ulist[a]); }
+	for (int a = 0; a < clist.size(); ++a) { clist[a]->original = clist[a]; }
 }
 CardList::~CardList() {}
 
