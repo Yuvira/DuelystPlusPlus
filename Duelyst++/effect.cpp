@@ -86,6 +86,10 @@ EffectList::EffectList() {
 	blist.back().generateSprite("Astral Crusader");
 	slist.push_back(Skill(SKILL_AZURE_HERALD));
 	slist.back().generateSprite("{Opening Gambit}: Restore 3 Health to your|General");
+	slist.push_back(Skill(SKILL_AZURE_HORN_SHAMAN));
+	slist.back().generateSprite("{Dying Wish}: Give +4 Health to friendly|minions around it");
+	blist.push_back(Buff(BUFF_AZURE_HORN_SHAMAN, 0, 0, 4));
+	blist.back().generateSprite("Azure Horn Shaman");
 	slist.push_back(Skill(SKILL_GHOST_LYNX));
 	slist.back().generateSprite("{Opening Gambit}: Teleport a nearby|minion to a random space");
 }

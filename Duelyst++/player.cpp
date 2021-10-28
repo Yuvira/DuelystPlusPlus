@@ -9,9 +9,9 @@ Player::~Player() {}
 void Player::preset(CardList& cl, Game* g) {
 	game = g;
 	deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Argeon Highmayne")))));
-	for (int a = 0; a < 5; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Astral Crusader"))))); }
-	for (int a = 0; a < 3; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Araki Headhunter"))))); }
-	for (int a = 0; a < 3; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Azure Herald"))))); }
+	for (int a = 0; a < 13; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Azure Horn Shaman"))))); }
+	for (int a = 0; a < 13; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Azure Herald"))))); }
+	for (int a = 0; a < 13; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Araki Headhunter"))))); }
 	for (int a = 0; a < deck.size(); ++a) {
 		deck[a]->game = game;
 		deck[a]->player = this;

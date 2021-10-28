@@ -274,15 +274,22 @@ void Unit::onDeath(Unit& u) {
 
 	//When this unit dies (Dying Wish)
 	if (&u == this) {
-
-		//Remove effects
 		switch (skill.skill) {
 		case SKILL_AETHERMASTER:
 			player->replaces = max(player->replaces - 1, 0);
 			player->general->removeEffect(EFFECT_AETHERMASTER);
 			break;
+		case SKILL_AZURE_HORN_SHAMAN:
+			for (int a = max(tile->pos.x - 1, 0); a < min(tile->pos.x + 2, 9); ++a) {
+				for (int b = max(tile->pos.y - 1, 0); b < min(tile->pos.y + 2, 5); ++b) {
+					if (game->map.tile[a][b].unit != nullptr && game->map.tile[a][b].unit->player == player) {
+						if (game->map.tile[a][b].unit != player->general) {
+							game->map.tile[a][b].unit->addBuff(BUFF_AZURE_HORN_SHAMAN);
+						}
+					}
+				}
+			}
 		}
-
 	}
 
 }

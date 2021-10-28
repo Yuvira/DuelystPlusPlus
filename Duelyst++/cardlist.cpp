@@ -12,6 +12,8 @@ CardList::CardList() {
 	ulist.back().skill = el.find(SKILL_ASTRAL_CRUSADER);
 	ulist.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 4, "azureherald", "Azure Herald"));
 	ulist.back().skill = el.find(SKILL_AZURE_HERALD);
+	ulist.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 4, "azureshaman", "Azure Horn Shaman"));
+	ulist.back().skill = el.find(SKILL_AZURE_HORN_SHAMAN);
 	ulist.push_back(Unit(FACTION_NEUTRAL, TRIBE_GOLEM, 3, 4, 3, "bloodgolem", "Bloodshard Golem"));
 	ulist.push_back(Unit(FACTION_NEUTRAL, TRIBE_GOLEM, 5, 4, 9, "mossgolem", "Brightmoss Golem"));
 	ulist.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "dragonlark", "Dragonlark"));
