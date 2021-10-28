@@ -257,7 +257,9 @@ void Unit::onSummon(Unit& u) {
 		case SKILL_BLISTERING_SKORN:
 			for (int a = 0; a < game->unit.size(); ++a) {
 				--game->unit[a]->hp;
-				//onDamaged?
+				for (int b = 0; b < game->unit.size(); ++b) {
+					game->unit[b]->onDamage(*this, *game->unit[a]);
+				}
 			}
 			break;
 		case SKILL_GHOST_LYNX:
@@ -314,6 +316,9 @@ void Unit::onDeath(Unit& u) {
 
 //When a unit attacks
 void Unit::onAttack(Unit& u1, Unit& u2) {}
+
+//When this is damaged
+void Unit::onDamage(Unit& u1, Unit& u2) {}
 
 //When this card is replaced
 bool Unit::onReplace() {

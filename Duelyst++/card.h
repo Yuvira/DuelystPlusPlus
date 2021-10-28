@@ -99,6 +99,7 @@ public:
 	void onSummon(Unit& u);
 	void onDeath(Unit& u);
 	void onAttack(Unit& u1, Unit& u2);
+	void onDamage(Unit& u1, Unit& u2);
 	bool onReplace();
 	void onTurnEnd(Player& p);
 	void onTurnStart(Player& p);
