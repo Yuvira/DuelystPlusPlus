@@ -250,6 +250,10 @@ void Unit::onSummon(Unit& u) {
 		case SKILL_AZURE_HERALD:
 			player->general->hp = min(player->general->hp + 3, player->general->hpMax);
 			break;
+		case SKILL_BLAZE_HOUND:
+			game->player[0].draw();
+			game->player[1].draw();
+			break;
 		case SKILL_GHOST_LYNX:
 			game->highlightSelectable(TARGET_MINION_NEAR_UNIT, this);
 			if (game->selectable.size() > 0) { game->callback = Callback(this, SKILL_GHOST_LYNX); }
@@ -264,6 +268,7 @@ void Unit::onSummon(Unit& u) {
 			if (u.player == player) {
 				switch (u.skill.skill) {
 				case SKILL_AZURE_HERALD:
+				case SKILL_BLAZE_HOUND:
 				case SKILL_GHOST_LYNX:
 					addBuff(BUFF_ARAKI_HEADHUNTER);
 					break;

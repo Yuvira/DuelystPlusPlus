@@ -94,6 +94,7 @@ public:
 	void updateDetailStats();
 	void generateDetails();
 	void drawDetails(Renderer& rm, int& y);
+	bool isMoveable();
 	bool isFlying();
 	void onSummon(Unit& u);
 	void onDeath(Unit& u);

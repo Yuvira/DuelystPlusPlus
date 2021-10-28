@@ -90,6 +90,12 @@ EffectList::EffectList() {
 	slist.back().generateSprite("{Dying Wish}: Give +4 Health to friendly|minions around it");
 	blist.push_back(Buff(BUFF_AZURE_HORN_SHAMAN, 0, 0, 4));
 	blist.back().generateSprite("Azure Horn Shaman");
+	slist.push_back(Skill(SKILL_BASTION));
+	slist.back().generateSprite("At the end of your turn, give other|friendly minions +1 Health");
+	blist.push_back(Buff(BUFF_BASTION, 0, 0, 1));
+	blist.back().generateSprite("Bastion");
+	slist.push_back(Skill(SKILL_BLAZE_HOUND));
+	slist.back().generateSprite("{Opening Gambit}: Both players draw|a card");
 	slist.push_back(Skill(SKILL_GHOST_LYNX));
 	slist.back().generateSprite("{Opening Gambit}: Teleport a nearby|minion to a random space");
 }

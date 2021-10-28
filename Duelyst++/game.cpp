@@ -483,8 +483,12 @@ bool Game::canMove(int x, int y) {
 
 //Check if unit can attack position
 bool Game::canAttack(BoardTile& t1, BoardTile& t2) {
-	if (abs(t1.pos.x - t2.pos.x) < 2 && abs(t1.pos.y - t2.pos.y) < 2) {
-		return true;
+	if (t1.unit != nullptr && t2.unit != nullptr) {
+		if (t1.unit->atk > 0) {
+			if (abs(t1.pos.x - t2.pos.x) < 2 && abs(t1.pos.y - t2.pos.y) < 2) {
+				return true;
+			}
+		}
 	}
 	return false;
 }
@@ -494,9 +498,11 @@ void Game::highlightTile(int x, int y, eColor col) {
 	map.tile[x][y].setCol(col);
 	highlighted.push_back(&map.tile[x][y]);
 	if (col == COLOR_AQUA && mode == MODE_NONE) {
-		if (map.tile[pos.x][pos.y].unit != nullptr && !map.tile[pos.x][pos.y].unit->moved) {
-			if (map.tile[pos.x][pos.y].unit->player == &player[turn]) {
-				highlightMoveable(pos.x, pos.y);
+		if (map.tile[pos.x][pos.y].unit != nullptr) {
+			if (!map.tile[pos.x][pos.y].unit->moved && map.tile[pos.x][pos.y].unit->isMoveable()) {
+				if (map.tile[pos.x][pos.y].unit->player == &player[turn]) {
+					highlightMoveable(pos.x, pos.y);
+				}
 			}
 		}
 	}
