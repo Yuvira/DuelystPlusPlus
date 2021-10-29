@@ -18,12 +18,12 @@ public:
 	void shuffle();
 	void draw();
 	void replace(int i);
-	void onSummon(Unit& u);
-	void onDeath(Unit& u);
-	void onAttack(Unit& u1, Unit& u2);
-	void onDamage(Unit& u1, Unit& u2);
-	void onTurnEnd(Player& p);
-	void onTurnStart(Player& p);
+	void onSummon(Unit* u);
+	void onDeath(Unit* u);
+	void onAttack(Unit* u1, Unit* u2);
+	void onDamage(Unit* u1, Unit* u2);
+	void onTurnEnd(Player* p);
+	void onTurnStart(Player* p);
 	int mana;
 	int manaMax;
 	int replaces;

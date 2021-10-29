@@ -206,7 +206,7 @@ void Game::update() {
 		for (int a = 0; a < highlighted.size(); ++a) { highlighted[a]->setCol(COLOR_AQUA); }
 		map.tile[pos.x][pos.y].setCol(COLOR_LTWHITE);
 		for (int a = 0; a < hostile.size(); ++a) {
-			if (canAttack(*activeUnit->tile, *hostile[a])) {
+			if (activeUnit->canAttack(hostile[a]->unit)) {
 				hostile[a]->setCol(COLOR_RED);
 			}
 		}
@@ -252,8 +252,8 @@ void Game::render(Renderer& rm) {
 			if (attackable[a] == selectable[sPos]) {
 				COORD c = selectable[sPos]->border.pos;
 				drawSword(c.X, c.Y, rm);
-				c = map.tile[pos.x][pos.y].border.pos;
-				if (canAttack(*selectable[sPos], map.tile[pos.x][pos.y])) { drawSword(c.X, c.Y, rm); }
+				c = activeUnit->tile->border.pos;
+				if (selectable[sPos]->unit->canAttack(activeUnit)) { drawSword(c.X, c.Y, rm); }
 				goto end;
 			}
 		}
@@ -313,21 +313,21 @@ void Game::changeTurn(bool t) {
 		unit[a]->moved = false;
 		unit[a]->attacked = false;
 	}
-	for (int a = 0; a < unit.size(); ++a) { unit[a]->onTurnEnd(player[!t]); }
-	player[0].onTurnEnd(player[!t]);
-	player[1].onTurnEnd(player[!t]);
-	for (int a = 0; a < unit.size(); ++a) { unit[a]->onTurnStart(player[t]); }
-	player[0].onTurnStart(player[t]);
-	player[1].onTurnStart(player[t]);
+	for (int a = 0; a < unit.size(); ++a) { unit[a]->onTurnEnd(&player[!t]); }
+	player[0].onTurnEnd(&player[!t]);
+	player[1].onTurnEnd(&player[!t]);
+	for (int a = 0; a < unit.size(); ++a) { unit[a]->onTurnStart(&player[t]); }
+	player[0].onTurnStart(&player[t]);
+	player[1].onTurnStart(&player[t]);
 }
 
 //Summon at position
 void Game::summon(Card* c, bool p, int x, int y) {
 	unit.push_back(dynamic_cast<Unit*>(c));
 	unit.back()->setPos(x, y);
-	for (int a = 0; a < unit.size(); ++a) { unit[a]->onSummon(*unit.back()); }
-	player[0].onSummon(*unit.back());
-	player[1].onSummon(*unit.back());
+	for (int a = 0; a < unit.size(); ++a) { unit[a]->onSummon(unit.back()); }
+	player[0].onSummon(unit.back());
+	player[1].onSummon(unit.back());
 }
 
 //Use active card
@@ -343,8 +343,8 @@ void Game::useCard() {
 		selectable.clear();
 		sPos = -1;
 		mode = MODE_NONE;
-		summon(activeCard, turn, pos.x, pos.y);
 		player[turn].hand.erase(player[turn].hand.begin() + hPos);
+		summon(activeCard, turn, pos.x, pos.y);
 		activeCard = nullptr;
 		hPos = -1;
 	}
@@ -366,7 +366,7 @@ void Game::select(BoardTile& t) {
 	for (int a = 0; a < highlighted.size(); ++a) { moveable.push_back(highlighted[a]); }
 	if (!t.unit->attacked) {
 		for (int a = 0; a < hostile.size(); ++a) {
-			if (canAttack(t, *hostile[a])) {
+			if (t.unit->canAttack(hostile[a]->unit)) {
 				attackable.push_back(hostile[a]);
 			}
 		}
@@ -399,8 +399,7 @@ void Game::moveUnit() {
 
 //Attack unit
 void Game::attackUnit() {
-	activeUnit->attack(*selectable[sPos]->unit, false);
-	if (canAttack(*selectable[sPos], map.tile[pos.x][pos.y])) { selectable[sPos]->unit->attack(*activeUnit, true); }
+	activeUnit->attack(selectable[sPos]->unit, false);
 	pos = selectable[sPos]->pos;
 	moveable.clear();
 	attackable.clear();
@@ -480,7 +479,7 @@ void Game::moveSelect(int x, int y) {
 }
 
 //Send onDamage to all units
-void Game::sendOnDamage(Unit& u1, Unit& u2) {
+void Game::sendOnDamage(Unit* u1, Unit* u2) {
 	for (int a = 0; a < unit.size(); ++a) { unit[a]->onDamage(u1, u2); }
 	player[0].onDamage(u1, u2);
 	player[1].onDamage(u1, u2);
@@ -491,18 +490,6 @@ bool Game::canMove(int x, int y) {
 	if (x > -1 && x < 9 && y > -1 && y < 5) {
 		if (map.tile[x][y].unit == nullptr) { return true; }
 		else if (map.tile[x][y].unit->player == map.tile[pos.x][pos.y].unit->player) { return true; }
-	}
-	return false;
-}
-
-//Check if unit can attack position
-bool Game::canAttack(BoardTile& t1, BoardTile& t2) {
-	if (t1.unit != nullptr && t2.unit != nullptr) {
-		if (t1.unit->atk > 0) {
-			if (abs(t1.pos.x - t2.pos.x) < 2 && abs(t1.pos.y - t2.pos.y) < 2) {
-				return true;
-			}
-		}
 	}
 	return false;
 }

@@ -54,9 +54,8 @@ public:
 	void moveCursor(int x, int y);
 	void moveCursorHand(int x, int y);
 	void moveSelect(int x, int y);
-	void sendOnDamage(Unit& u1, Unit& u2);
+	void sendOnDamage(Unit* u1, Unit* u2);
 	bool canMove(int x, int y);
-	bool canAttack(BoardTile& t1, BoardTile& t2);
 	void highlightTile(int x, int y, eColor col);
 	void highlightMoveable(int x, int y);
 	void highlightSelectable(eTarget type, Unit* = nullptr);

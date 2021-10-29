@@ -143,9 +143,9 @@ void Unit::removeEffect(eEffect e) {
 //Check if unit has died
 void Unit::update(bool& r) {
 	if (hp < 1) {
-		for (int a = 0; a < game->unit.size(); ++a) { game->unit[a]->onDeath(*this); }
-		game->player[0].onDeath(*this);
-		game->player[1].onDeath(*this);
+		for (int a = 0; a < game->unit.size(); ++a) { game->unit[a]->onDeath(this); }
+		game->player[0].onDeath(this);
+		game->player[1].onDeath(this);
 		dead = true;
 		r = true;
 	}
@@ -238,6 +238,18 @@ void Unit::generateDetails() {
 	updateDetailStats();
 }
 
+//Can unit attack target
+bool Unit::canAttack(Unit* u) {
+	if (u != nullptr) {
+		if (atk > 0) {
+			if (abs(tile->pos.x - u->tile->pos.x) < 2 && abs(tile->pos.y - u->tile->pos.y) < 2) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 //Can unit move
 bool Unit::isMoveable() {
 	if (tribe == TRIBE_STRUCTURE) { return false; }
@@ -254,28 +266,29 @@ bool Unit::isFlying() {
 }
 
 //Attack enemy
-void Unit::attack(Unit& u, bool counter) {
+void Unit::attack(Unit* u, bool counter) {
+	u->hp -= atk;
+	switch (skill.skill) {
+	case SKILL_BLUETIP_SCORPION:
+		if (u->tribe != TRIBE_GENERAL) { u->hp -= atk; }
+		break;
+	}
 	if (!counter) {
 		moved = true;
 		attacked = true;
+		if (u->canAttack(this)) { u->attack(this, true); }
 	}
-	u.hp -= atk;
-	switch (skill.skill) {
-	case SKILL_BLUETIP_SCORPION:
-		if (u.tribe != TRIBE_GENERAL) { u.hp -= atk; }
-		break;
-	}
-	game->sendOnDamage(*this, u);
+	game->sendOnDamage(this, u);
 }
 
 //When a unit is summoned
-void Unit::onSummon(Unit& u) {
+void Unit::onSummon(Unit* u) {
 
 	//If on board
 	if (tile != nullptr) {
 
 		//When this is summoned (Opening Gambit)
-		if (&u == this) {
+		if (u == this) {
 			moved = true;
 			attacked = true;
 			switch (skill.skill) {
@@ -293,7 +306,7 @@ void Unit::onSummon(Unit& u) {
 			case SKILL_BLISTERING_SKORN:
 				for (int a = 0; a < game->unit.size(); ++a) {
 					--game->unit[a]->hp;
-					game->sendOnDamage(*this, *game->unit[a]);
+					game->sendOnDamage(this, game->unit[a]);
 				}
 				break;
 			case SKILL_BLOODTEAR_ALCHEMIST:
@@ -311,8 +324,8 @@ void Unit::onSummon(Unit& u) {
 		else {
 			switch (skill.skill) {
 			case SKILL_ARAKI_HEADHUNTER:
-				if (u.player == player) {
-					switch (u.skill.skill) {
+				if (u->player == player) {
+					switch (u->skill.skill) {
 					case SKILL_AZURE_HERALD:
 					case SKILL_BLAZE_HOUND:
 					case SKILL_BLISTERING_SKORN:
@@ -331,13 +344,13 @@ void Unit::onSummon(Unit& u) {
 }
 
 //When a unit dies
-void Unit::onDeath(Unit& u) {
+void Unit::onDeath(Unit* u) {
 
 	//If on board
 	if (tile != nullptr) {
 
 		//When this unit dies (Dying Wish)
-		if (&u == this) {
+		if (u == this) {
 			switch (skill.skill) {
 			case SKILL_AETHERMASTER:
 				player->replaces = max(player->replaces - 1, 0);
@@ -362,16 +375,16 @@ void Unit::onDeath(Unit& u) {
 }
 
 //When a unit attacks
-void Unit::onAttack(Unit& u1, Unit& u2) {}
+void Unit::onAttack(Unit* u1, Unit* u2) {}
 
 //When a unit is damaged
-void Unit::onDamage(Unit& u1, Unit& u2) {
+void Unit::onDamage(Unit* u1, Unit* u2) {
 
 	//If on board
 	if (tile != nullptr) {
 		switch (skill.skill) {
 		case SKILL_CHAOS_ELEMENTAL:
-			if (&u2 == this) {
+			if (u2 == this) {
 				BoardTile* t = game->map.getRandom();
 				if (t != nullptr) { setPos(t->pos.x, t->pos.y); }
 			}
@@ -383,7 +396,7 @@ void Unit::onDamage(Unit& u1, Unit& u2) {
 	else {
 		switch (skill.skill) {
 		case SKILL_CHAKKRAM:
-			if (&u2 == player->general) {
+			if (u2 == player->general) {
 				if (&game->player[game->turn] != player) {
 					addBuff(BUFF_CHAKKRAM);
 				}
@@ -405,13 +418,13 @@ bool Unit::onReplace() {
 }
 
 //When a player's turn ends
-void Unit::onTurnEnd(Player& p) {
+void Unit::onTurnEnd(Player* p) {
 
 	//If on board
 	if (tile != nullptr) {
 
 		//When this unit's player ends turn
-		if (&p == player) {
+		if (p == player) {
 			switch (skill.skill) {
 			case SKILL_BASTION:
 				for (int a = 0; a < game->unit.size(); ++a) {
@@ -437,7 +450,7 @@ void Unit::onTurnEnd(Player& p) {
 	//Anywhere
 	switch (skill.skill) {
 	case SKILL_CHAKKRAM:
-		if (&p == player) {
+		if (p == player) {
 		removeBuff(BUFF_CHAKKRAM);
 		}
 		break;
@@ -446,7 +459,7 @@ void Unit::onTurnEnd(Player& p) {
 }
 
 //When a player's turn starts
-void Unit::onTurnStart(Player& p) {}
+void Unit::onTurnStart(Player* p) {}
 
 //Effect callback
 void Unit::callback(BoardTile* t) {
@@ -454,7 +467,7 @@ void Unit::callback(BoardTile* t) {
 	case SKILL_BLOODTEAR_ALCHEMIST:
 		if (t->unit != nullptr) {
 			--t->unit->hp;
-			game->sendOnDamage(*this, *t->unit);
+			game->sendOnDamage(this, t->unit);
 		}
 		break;
 	case SKILL_GHOST_LYNX:

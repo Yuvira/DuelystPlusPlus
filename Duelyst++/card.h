@@ -67,18 +67,19 @@ public:
 	Card() {}
 	~Card() {}
 	virtual void drawDetails(Renderer& rm, int& y) {}
-	virtual void onSummon(Unit& u) {}
-	virtual void onDeath(Unit& u) {}
-	virtual void onAttack(Unit& u1, Unit& u2) {}
-	virtual void onDamage(Unit& u1, Unit& u2) {}
+	virtual void onSummon(Unit* u) {}
+	virtual void onDeath(Unit* u) {}
+	virtual void onAttack(Unit* u1, Unit* u2) {}
+	virtual void onDamage(Unit* u1, Unit* u2) {}
 	virtual bool onReplace() { return true; }
-	virtual void onTurnEnd(Player& p) {}
-	virtual void onTurnStart(Player& p) {}
+	virtual void onTurnEnd(Player* p) {}
+	virtual void onTurnStart(Player* p) {}
+	eFaction faction;
+	eCard type;
 	int cost;
 	Game* game;
 	Player* player;
 	Card* original;
-	eCard type;
 	std::string name;
 	Sprite sprite;
 	Sprite header[2];
@@ -101,18 +102,18 @@ public:
 	void updateDetailStats();
 	void generateDetails();
 	void drawDetails(Renderer& rm, int& y);
+	bool canAttack(Unit* u);
 	bool isMoveable();
 	bool isFlying();
-	void attack(Unit& u, bool counter);
-	void onSummon(Unit& u);
-	void onDeath(Unit& u);
-	void onAttack(Unit& u1, Unit& u2);
-	void onDamage(Unit& u1, Unit& u2);
+	void attack(Unit* u, bool counter);
+	void onSummon(Unit* u);
+	void onDeath(Unit* u);
+	void onAttack(Unit* u1, Unit* u2);
+	void onDamage(Unit* u1, Unit* u2);
 	bool onReplace();
-	void onTurnEnd(Player& p);
-	void onTurnStart(Player& p);
+	void onTurnEnd(Player* p);
+	void onTurnStart(Player* p);
 	void callback(BoardTile* t);
-	eFaction faction;
 	eTribe tribe;
 	int atk;
 	int hp;
