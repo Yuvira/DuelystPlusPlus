@@ -651,17 +651,13 @@ void Game::highlightSelectable(eTarget type, Unit* u) {
 
 	//Near allies (summon)
 	case TARGET_NEAR_ALLY:
-		for (int a = 0; a < 9; ++a) {
-			for (int b = 0; b < 5; ++b) {
-				if (map.tile[a][b].unit != nullptr) {
-					if (map.tile[a][b].unit->player == &player[turn]) {
-						for (int c = max(a - 1, 0); c < min(a + 2, 9); ++c) {
-							for (int d = max(b - 1, 0); d < min(b + 2, 5); ++d) {
-								if (map.tile[c][d].unit == nullptr) {
-									if (map.tile[c][d].border.buffer[0].Attributes != COLOR_GREEN) {
-										selectable.push_back(&map.tile[c][d]);
-									}
-								}
+		for (int a = 0; a < unit.size(); ++a) {
+			if (unit[a]->player == &player[turn]) {
+				for (int b = max(unit[a]->tile->pos.x - 1, 0); b < min(unit[a]->tile->pos.x + 2, 9); ++b) {
+					for (int c = max(unit[a]->tile->pos.y - 1, 0); c < min(unit[a]->tile->pos.y + 2, 5); ++c) {
+						if (map.tile[b][c].unit == nullptr) {
+							if (map.tile[b][c].border.buffer[0].Attributes != COLOR_GREEN) {
+								selectable.push_back(&map.tile[b][c]);
 							}
 						}
 					}
