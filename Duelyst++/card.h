@@ -29,6 +29,7 @@ enum eRarity {
 //Targeting types
 enum eTarget {
 	TARGET_ANY,
+	TARGET_TILE,
 	TARGET_UNIT,
 	TARGET_MINION,
 	TARGET_GENERAL,

@@ -620,6 +620,17 @@ void Game::highlightSelectable(eTarget type, Unit* u) {
 	//Target type
 	switch (type) {
 
+	//Empty tile
+	case TARGET_TILE:
+		for (int a = 0; a < 9; ++a) {
+			for (int b = 0; b < 5; ++b) {
+				if (map.tile[a][b].unit == nullptr) {
+					selectable.push_back(&map.tile[a][b]);
+				}
+			}
+		}
+		break;
+
 	//Any minion
 	case TARGET_MINION:
 		for (int a = 0; a < unit.size(); ++a) {
@@ -642,6 +653,17 @@ void Game::highlightSelectable(eTarget type, Unit* u) {
 	case TARGET_ALLY_MINON:
 		for (int a = 0; a < unit.size(); ++a) {
 			if (unit[a]->player == &player[turn]) {
+				if (unit[a]->tribe != TRIBE_GENERAL) {
+					selectable.push_back(unit[a]->tile);
+				}
+			}
+		}
+		break;
+
+	//Enemy minions
+	case TARGET_ENEMY_MINION:
+		for (int a = 0; a < unit.size(); ++a) {
+			if (unit[a]->player != &player[turn]) {
 				if (unit[a]->tribe != TRIBE_GENERAL) {
 					selectable.push_back(unit[a]->tile);
 				}

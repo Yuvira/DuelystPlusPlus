@@ -69,11 +69,32 @@ void Spell::onUse(BoardTile* t) {
 			game->lateCallback.push_back(Callback(nullptr, this, t->unit->tile, SKILL_NONE));
 		}
 		break;
+	case SPELL_DAEMONIC_LURE:
+		game->highlightSelectable(TARGET_TILE);
+		if (game->selectable.size() > 0) {
+			game->callback = Callback(nullptr, this, nullptr, SKILL_NONE);
+			token = t->unit;
+		}
+		else {
+			--t->unit->hp;
+			game->sendOnDamage(nullptr, t->unit);
+		}
+		break;
 	}
 }
 
 //Immediate callback
-void Spell::callback(BoardTile* t) {}
+void Spell::callback(BoardTile* t) {
+	switch (spell.spell) {
+	case SPELL_DAEMONIC_LURE:
+		Unit* u = dynamic_cast<Unit*>(token);
+		u->setPos(t->pos.x, t->pos.y);
+		--u->hp;
+		game->sendOnDamage(nullptr, u);
+		break;
+	}
+	game->callback = Callback();
+}
 
 //Late callback
 void Spell::lateCallback() {

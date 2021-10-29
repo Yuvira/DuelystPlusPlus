@@ -140,6 +140,8 @@ EffectList::EffectList() {
 	spellList.back().generateSprite("Destroy a friendly minion. At the end|of your turn, re-summon it on|the same space and give it +1/+1");
 	buffList.push_back(Buff(BUFF_CONSUMING_REBIRTH, 0, 1, 1, true));
 	buffList.back().generateSprite("Consuming Rebirth");
+	spellList.push_back(SpellEffect(SPELL_DAEMONIC_LURE));
+	spellList.back().generateSprite("Deal 1 damage to an enemy minion and|teleport it anywhere");
 
 }
 EffectList::~EffectList() {}

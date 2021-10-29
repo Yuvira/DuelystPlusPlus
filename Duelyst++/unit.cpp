@@ -310,7 +310,7 @@ void Unit::onSummon(Unit* u) {
 				}
 				break;
 			case SKILL_BLOODTEAR_ALCHEMIST:
-				game->highlightSelectable(TARGET_ENEMY, this);
+				game->highlightSelectable(TARGET_ENEMY);
 				if (game->selectable.size() > 0) { game->callback = Callback(this, nullptr, nullptr, SKILL_BLOODTEAR_ALCHEMIST); }
 				break;
 			case SKILL_GHOST_LYNX:
