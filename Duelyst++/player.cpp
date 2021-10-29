@@ -13,6 +13,7 @@ void Player::preset(CardList& cl, Game* g) {
 	for (int a = 0; a < 2; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Blistering Skorn"))))); }
 	for (int a = 0; a < 2; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Chakkram"))))); }
 	for (int a = 0; a < 2; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Chaos Elemental"))))); }
+	for (int a = 0; a < 2; ++a) { deck.push_back(new Spell(*(dynamic_cast<Spell*>(cl.find("Breath of The Unborn"))))); }
 	for (int a = 0; a < deck.size(); ++a) {
 		deck[a]->game = game;
 		deck[a]->player = this;

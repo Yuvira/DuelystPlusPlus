@@ -30,11 +30,19 @@ enum eRarity {
 enum eTarget {
 	TARGET_ANY,
 	TARGET_UNIT,
+	TARGET_MINION,
+	TARGET_GENERAL,
 	TARGET_ALLY,
+	TARGET_ALLY_MINON,
+	TARGET_ALLY_GENERAL,
 	TARGET_ENEMY,
+	TARGET_ENEMY_MINION,
+	TARGET_ENEMY_GENERAL,
+	TARGET_NEAR_ANY,
 	TARGET_NEAR_UNIT,
 	TARGET_MINION_NEAR_UNIT,
 	TARGET_NEAR_ALLY,
+	TARGET_NEAR_ENEMY
 };
 
 //Factions
@@ -99,8 +107,8 @@ public:
 	void update(bool& r);
 	void updateStatBuffs();
 	void updateStatSprites();
-	void updateDetailStats();
 	void generateDetails();
+	void updateDetailStats();
 	void drawDetails(Renderer& rm, int& y);
 	bool canAttack(Unit* u);
 	bool isMoveable();
@@ -129,6 +137,21 @@ public:
 	Sprite sATK;
 };
 
+//Spell class
+class Spell : public Card {
+public:
+	Spell(eFaction = FACTION_NEUTRAL,  eTarget = TARGET_ANY, int = 0, std::string = "", std::string = "???");
+	~Spell();
+	void generateDetails();
+	void updateDetailStats();
+	void drawDetails(Renderer& rm, int& y);
+	void onUse(BoardTile* t);
+	void callback(BoardTile* t);
+	void lateCallback();
+	eTarget target;
+	SpellEffect spell;
+};
+
 //Card list class
 class CardList {
 public:
@@ -136,9 +159,10 @@ public:
 	~CardList();
 	Card* find(std::string s);
 	EffectList el;
-	std::vector<Card*> clist;
-	std::vector<Unit> glist;
-	std::vector<Unit> ulist;
+	std::vector<Card*> cList;
+	std::vector<Unit> gList;
+	std::vector<Unit> uList;
+	std::vector<Spell> sList;
 };
 
 #endif

@@ -103,12 +103,7 @@ void Game::input() {
 		//Select card
 		else if (asciiVal == 32) {
 			if (hPos < player[turn].hand.size()) {
-				if (player[turn].hand[hPos]->type == CARD_UNIT) {
-					if (player[turn].hand[hPos]->cost <= player[turn].mana) {
-						highlightSelectable(TARGET_NEAR_ALLY);
-						if (selectable.size() > 0) { activeCard = player[turn].hand[hPos]; }
-					}
-				}
+				selectCard();
 			}
 		}
 
@@ -349,6 +344,20 @@ void Game::useCard() {
 		hPos = -1;
 	}
 
+	//Use spell
+	else if (activeCard->type == CARD_SPELL) {
+		pos = selectable[sPos]->pos;
+		hand[hPos + 1].setCol(COLOR_LTWHITE);
+		selectable.clear();
+		sPos = -1;
+		mode = MODE_NONE;
+		player[turn].hand.erase(player[turn].hand.begin() + hPos);
+		grave.push_back(activeCard);
+		dynamic_cast<Spell*>(activeCard)->onUse(&map.tile[pos.x][pos.y]);
+		activeCard = nullptr;
+		hPos = -1;
+	}
+
 }
 
 //Use active effect
@@ -379,6 +388,27 @@ void Game::select(BoardTile& t) {
 		mode = MODE_MOVE;
 	}
 	else { moveable.clear(); }
+}
+
+//Select card in hand
+void Game::selectCard() {
+
+	//Unit card
+	if (player[turn].hand[hPos]->type == CARD_UNIT) {
+		if (player[turn].hand[hPos]->cost <= player[turn].mana) {
+			highlightSelectable(TARGET_NEAR_ALLY);
+			if (selectable.size() > 0) { activeCard = player[turn].hand[hPos]; }
+		}
+	}
+
+	//Spell card
+	if (player[turn].hand[hPos]->type == CARD_SPELL) {
+		if (player[turn].hand[hPos]->cost <= player[turn].mana) {
+			highlightSelectable(dynamic_cast<Spell*>(player[turn].hand[hPos])->target);
+			if (selectable.size() > 0) { activeCard = player[turn].hand[hPos]; }
+		}
+	}
+
 }
 
 //Move selected unit
@@ -542,17 +572,29 @@ void Game::highlightMoveable(int x, int y) {
 //Highlight targetable tiles
 void Game::highlightSelectable(eTarget type, Unit* u) {
 
+	//Target type
+	switch (type) {
+
+	//Any minion
+	case TARGET_MINION:
+		for (int a = 0; a < unit.size(); ++a) {
+			if (unit[a]->tribe != TRIBE_GENERAL) {
+				selectable.push_back(unit[a]->tile);
+			}
+		}
+		break;
+
 	//Enemies
-	if (type == TARGET_ENEMY) {
+	case TARGET_ENEMY:
 		for (int a = 0; a < unit.size(); ++a) {
 			if (unit[a]->player != &player[turn]) {
 				selectable.push_back(unit[a]->tile);
 			}
 		}
-	}
+		break;
 
 	//Near allies (summon)
-	if (type == TARGET_NEAR_ALLY) {
+	case TARGET_NEAR_ALLY:
 		for (int a = 0; a < 9; ++a) {
 			for (int b = 0; b < 5; ++b) {
 				if (map.tile[a][b].unit != nullptr) {
@@ -570,17 +612,21 @@ void Game::highlightSelectable(eTarget type, Unit* u) {
 				}
 			}
 		}
-	}
+		break;
 
 	//Minons near unit
-	else if (type == TARGET_MINION_NEAR_UNIT && u) {
-		for (int a = max(u->tile->pos.x - 1, 0); a < min(u->tile->pos.x + 2, 9); ++a) {
-			for (int b = max(u->tile->pos.y - 1, 0); b < min(u->tile->pos.y + 2, 5); ++b) {
-				if (map.tile[a][b].unit != nullptr && map.tile[a][b].unit != u && map.tile[a][b].unit->tribe != TRIBE_GENERAL) {
-					selectable.push_back(&map.tile[a][b]);
+	case TARGET_MINION_NEAR_UNIT:
+		if (u != nullptr) {
+			for (int a = max(u->tile->pos.x - 1, 0); a < min(u->tile->pos.x + 2, 9); ++a) {
+				for (int b = max(u->tile->pos.y - 1, 0); b < min(u->tile->pos.y + 2, 5); ++b) {
+					if (map.tile[a][b].unit != nullptr && map.tile[a][b].unit != u && map.tile[a][b].unit->tribe != TRIBE_GENERAL) {
+						selectable.push_back(&map.tile[a][b]);
+					}
 				}
 			}
 		}
+		break;
+
 	}
 
 	//If selectable tiles found, highlight first and switch to select mode

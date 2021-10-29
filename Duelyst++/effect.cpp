@@ -1,7 +1,7 @@
 //Include
 #include "effect.h"
 
-//Effect constructor/deconstructor
+//Skill constructor/deconstructor
 Skill::Skill(eSkill s) { skill = s; }
 Skill::~Skill() {}
 
@@ -21,6 +21,10 @@ Buff::Buff(eBuff b, int _cost, int _atk, int _hp, bool stack) {
 	stacking = stack;
 }
 Buff::~Buff() {}
+
+//Spell constructor/deconstructor
+SpellEffect::SpellEffect(eSpell s) { spell = s; }
+SpellEffect::~SpellEffect() {}
 
 //Generate skill sprite
 void Skill::generateSprite(std::string s) {
@@ -69,74 +73,105 @@ void Effect::generateSprite(std::string s) {
 //Generate buff sprite
 void Buff::generateSprite(std::string s) { sprite.createFromString(s); }
 
+//Generate spell sprite
+void SpellEffect::generateSprite(std::string s) {
+	std::vector<std::string> v;
+	v.push_back("");
+	for (int a = 0; a < s.length(); ++a) {
+		if (s[a] == '|') { v.push_back(""); }
+		else { v.back() += s[a]; }
+	}
+	for (int a = 0; a < v.size(); ++a) {
+		sprite.push_back(Sprite());
+		sprite.back().createFromString(v[a]);
+		sprite.back().setCol(COLOR_GRAY);
+	}
+}
+
 //Effect list constructor/deconstructor
 EffectList::EffectList() {
-	slist.push_back(Skill(SKILL_FLYING));
-	slist.back().generateSprite("{Flying}");
-	slist.push_back(Skill(SKILL_AETHERMASTER));
-	slist.back().generateSprite("You may replace an additional card|each turn");
-	elist.push_back(Effect(EFFECT_AETHERMASTER));
-	elist.back().generateSprite("Aethermaster|You may replace 1 extra card(s) per turn");
-	slist.push_back(Skill(SKILL_ARAKI_HEADHUNTER));
-	slist.back().generateSprite("Whenever you summon a minion with|Opening Gambit from your action bar,|gain +2 Attack");
-	blist.push_back(Buff(BUFF_ARAKI_HEADHUNTER, 0, 2, 0, true));
-	blist.back().generateSprite("Headhunter");
-	slist.push_back(Skill(SKILL_ASTRAL_CRUSADER));
-	slist.back().generateSprite("Whenever you replace this card, it|costs 3 less and gains +3/+3");
-	blist.push_back(Buff(BUFF_ASTRAL_CRUSADER, -3, 3, 3, true));
-	blist.back().generateSprite("Astral Crusader");
-	slist.push_back(Skill(SKILL_AZURE_HERALD));
-	slist.back().generateSprite("{Opening Gambit}: Restore 3 Health to your|General");
-	slist.push_back(Skill(SKILL_AZURE_HORN_SHAMAN));
-	slist.back().generateSprite("{Dying Wish}: Give +4 Health to friendly|minions around it");
-	blist.push_back(Buff(BUFF_AZURE_HORN_SHAMAN, 0, 0, 4, true));
-	blist.back().generateSprite("Azure Horn Shaman");
-	slist.push_back(Skill(SKILL_BASTION));
-	slist.back().generateSprite("At the end of your turn, give other|friendly minions +1 Health");
-	blist.push_back(Buff(BUFF_BASTION, 0, 0, 1, true));
-	blist.back().generateSprite("Bastion");
-	slist.push_back(Skill(SKILL_BLAZE_HOUND));
-	slist.back().generateSprite("{Opening Gambit}: Both players draw|a card");
-	slist.push_back(Skill(SKILL_BLISTERING_SKORN));
-	slist.back().generateSprite("{Opening Gambit}: Deal 1 damage to|everything (including itself)");
-	slist.push_back(Skill(SKILL_BLOODTEAR_ALCHEMIST));
-	slist.back().generateSprite("{Opening Gambit}: Deal 1 damage to|an enemy");
-	slist.push_back(Skill(SKILL_BLUETIP_SCORPION));
-	slist.back().generateSprite("Deals double damage to minions");
-	slist.push_back(Skill(SKILL_CHAKKRAM));
-	slist.back().generateSprite("Costs 2 less if your General took|damage on your opponent's|last turn");
-	blist.push_back(Buff(BUFF_CHAKKRAM, -2, 0, 0, false));
-	blist.back().generateSprite("Chakkram");
-	slist.push_back(Skill(SKILL_CHAOS_ELEMENTAL));
-	slist.back().generateSprite("Whenever this minion takes damage,|it randomly teleports");
-	slist.push_back(Skill(SKILL_GHOST_LYNX));
-	slist.back().generateSprite("{Opening Gambit}: Teleport a nearby|minion to a random space");
+
+	//Unit skills
+	skillList.push_back(Skill(SKILL_FLYING));
+	skillList.back().generateSprite("{Flying}");
+	skillList.push_back(Skill(SKILL_AETHERMASTER));
+	skillList.back().generateSprite("You may replace an additional card|each turn");
+	effectList.push_back(Effect(EFFECT_AETHERMASTER));
+	effectList.back().generateSprite("Aethermaster|You may replace 1 extra card(s) per turn");
+	skillList.push_back(Skill(SKILL_ARAKI_HEADHUNTER));
+	skillList.back().generateSprite("Whenever you summon a minion with|Opening Gambit from your action bar,|gain +2 Attack");
+	buffList.push_back(Buff(BUFF_ARAKI_HEADHUNTER, 0, 2, 0, true));
+	buffList.back().generateSprite("Headhunter");
+	skillList.push_back(Skill(SKILL_ASTRAL_CRUSADER));
+	skillList.back().generateSprite("Whenever you replace this card, it|costs 3 less and gains +3/+3");
+	buffList.push_back(Buff(BUFF_ASTRAL_CRUSADER, -3, 3, 3, true));
+	buffList.back().generateSprite("Astral Crusader");
+	skillList.push_back(Skill(SKILL_AZURE_HERALD));
+	skillList.back().generateSprite("{Opening Gambit}: Restore 3 Health to your|General");
+	skillList.push_back(Skill(SKILL_AZURE_HORN_SHAMAN));
+	skillList.back().generateSprite("{Dying Wish}: Give +4 Health to friendly|minions around it");
+	buffList.push_back(Buff(BUFF_AZURE_HORN_SHAMAN, 0, 0, 4, true));
+	buffList.back().generateSprite("Azure Horn Shaman");
+	skillList.push_back(Skill(SKILL_BASTION));
+	skillList.back().generateSprite("At the end of your turn, give other|friendly minions +1 Health");
+	buffList.push_back(Buff(BUFF_BASTION, 0, 0, 1, true));
+	buffList.back().generateSprite("Bastion");
+	skillList.push_back(Skill(SKILL_BLAZE_HOUND));
+	skillList.back().generateSprite("{Opening Gambit}: Both players draw|a card");
+	skillList.push_back(Skill(SKILL_BLISTERING_SKORN));
+	skillList.back().generateSprite("{Opening Gambit}: Deal 1 damage to|everything (including itself)");
+	skillList.push_back(Skill(SKILL_BLOODTEAR_ALCHEMIST));
+	skillList.back().generateSprite("{Opening Gambit}: Deal 1 damage to|an enemy");
+	skillList.push_back(Skill(SKILL_BLUETIP_SCORPION));
+	skillList.back().generateSprite("Deals double damage to minions");
+	skillList.push_back(Skill(SKILL_CHAKKRAM));
+	skillList.back().generateSprite("Costs 2 less if your General took|damage on your opponent's|last turn");
+	buffList.push_back(Buff(BUFF_CHAKKRAM, -2, 0, 0, false));
+	buffList.back().generateSprite("Chakkram");
+	skillList.push_back(Skill(SKILL_CHAOS_ELEMENTAL));
+	skillList.back().generateSprite("Whenever this minion takes damage,|it randomly teleports");
+	skillList.push_back(Skill(SKILL_GHOST_LYNX));
+	skillList.back().generateSprite("{Opening Gambit}: Teleport a nearby|minion to a random space");
+
+	//Spell effects
+	spellList.push_back(SpellEffect(SPELL_BREATH_OF_THE_UNBORN));
+	spellList.back().generateSprite("Deal 2 damage to all enemy|minions. Fully heal all friendly|minions");
+
 }
 EffectList::~EffectList() {}
 
 //Find skill by enum
 Skill EffectList::find(eSkill s) {
-	for (int a = 0; a < slist.size(); ++a) {
-		if (slist[a].skill == s) {
-			return slist[a];
+	for (int a = 0; a < skillList.size(); ++a) {
+		if (skillList[a].skill == s) {
+			return skillList[a];
 		}
 	}
 }
 
 //Find effect by enum
 Effect EffectList::find(eEffect e) {
-	for (int a = 0; a < elist.size(); ++a) {
-		if (elist[a].effect == e) {
-			return elist[a];
+	for (int a = 0; a < effectList.size(); ++a) {
+		if (effectList[a].effect == e) {
+			return effectList[a];
 		}
 	}
 }
 
 //Find buff by enum
 Buff EffectList::find(eBuff b) {
-	for (int a = 0; a < blist.size(); ++a) {
-		if (blist[a].buff == b) {
-			return blist[a];
+	for (int a = 0; a < buffList.size(); ++a) {
+		if (buffList[a].buff == b) {
+			return buffList[a];
+		}
+	}
+}
+
+//Find spell by enum
+SpellEffect EffectList::find(eSpell s) {
+	for (int a = 0; a < spellList.size(); ++a) {
+		if (spellList[a].spell == s) {
+			return spellList[a];
 		}
 	}
 }

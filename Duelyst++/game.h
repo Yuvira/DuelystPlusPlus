@@ -49,6 +49,7 @@ public:
 	void useCard();
 	void useEffect();
 	void select(BoardTile& t);
+	void selectCard();
 	void attackUnit();
 	void moveUnit();
 	void moveCursor(int x, int y);

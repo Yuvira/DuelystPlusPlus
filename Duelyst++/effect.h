@@ -40,6 +40,12 @@ enum eBuff {
 	BUFF_CHAKKRAM
 };
 
+//Spell effects
+enum eSpell {
+	SPELL_NONE,
+	SPELL_BREATH_OF_THE_UNBORN
+};
+
 //Skill class
 class Skill {
 public:
@@ -75,6 +81,16 @@ public:
 	bool stacking;
 };
 
+//Spell class
+class SpellEffect {
+public:
+	SpellEffect(eSpell = SPELL_NONE);
+	~SpellEffect();
+	void generateSprite(std::string s);
+	std::vector<Sprite> sprite;
+	eSpell spell;
+};
+
 //Effect list class
 class EffectList {
 public:
@@ -83,9 +99,11 @@ public:
 	Skill find(eSkill s);
 	Effect find(eEffect e);
 	Buff find(eBuff b);
-	std::vector<Skill> slist;
-	std::vector<Effect> elist;
-	std::vector<Buff> blist;
+	SpellEffect find(eSpell s);
+	std::vector<Skill> skillList;
+	std::vector<Effect> effectList;
+	std::vector<Buff> buffList;
+	std::vector<SpellEffect> spellList;
 };
 
 #endif

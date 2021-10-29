@@ -183,22 +183,6 @@ void Unit::updateStatSprites() {
 	sHP.pos.X += i - s.length();
 }
 
-//Update card stats
-void Unit::updateDetailStats() {
-	eColor col = COLOR_LTBLUE;
-	std::string s = "";
-	if (tribe != TRIBE_GENERAL) { s = "COST:" + std::to_string(cost) + " ATK:" + std::to_string(atk) + " HP:" + std::to_string(hp); }
-	else { s = "ATK:" + std::to_string(atk) + " HP:" + std::to_string(hp); col = COLOR_GREEN; }
-	header[1].createFromString(s);
-	for (int a = 0; a < header[1].size; ++a) {
-		if (s[a] != ':' && s[a] != ' ') { header[1].buffer[a].Attributes = col; }
-		if (s[a] == ' ') {
-			if (col == COLOR_LTBLUE) { col = COLOR_GREEN; }
-			else { col = COLOR_RED; }
-		}
-	}
-}
-
 //Generate sidebar details
 void Unit::generateDetails() {
 	std::string s;
@@ -236,6 +220,22 @@ void Unit::generateDetails() {
 	header[0].createFromString(s);
 	for (int a = name.size(); a < header[0].size; ++a) { header[0].buffer[a].Attributes = COLOR_GRAY; }
 	updateDetailStats();
+}
+
+//Update card stats
+void Unit::updateDetailStats() {
+	eColor col = COLOR_LTBLUE;
+	std::string s = "";
+	if (tribe != TRIBE_GENERAL) { s = "COST:" + std::to_string(cost) + " ATK:" + std::to_string(atk) + " HP:" + std::to_string(hp); }
+	else { s = "ATK:" + std::to_string(atk) + " HP:" + std::to_string(hp); col = COLOR_GREEN; }
+	header[1].createFromString(s);
+	for (int a = 0; a < header[1].size; ++a) {
+		if (s[a] != ':' && s[a] != ' ') { header[1].buffer[a].Attributes = col; }
+		if (s[a] == ' ') {
+			if (col == COLOR_LTBLUE) { col = COLOR_GREEN; }
+			else { col = COLOR_RED; }
+		}
+	}
 }
 
 //Can unit attack target
