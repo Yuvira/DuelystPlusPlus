@@ -19,9 +19,11 @@ enum eMode {
 //Unit effect callback class
 class Callback {
 public:
-	Callback(Unit* = nullptr, eSkill = SKILL_NONE);
+	Callback(Unit* = nullptr, Spell* = nullptr, BoardTile* = nullptr, eSkill = SKILL_NONE);
 	~Callback();
 	Unit* unit;
+	Spell* spell;
+	BoardTile* tile;
 	eSkill skill;
 };
 
@@ -45,7 +47,8 @@ public:
 	void render(Renderer& rm);
 	void renderSidebar(Renderer& rm);
 	void changeTurn(bool t);
-	void summon(Card* c, bool p, int x, int y);
+	void setContext(Card* c, Player* p);
+	void summon(Card* c, int x, int y);
 	void useCard();
 	void useEffect();
 	void select(BoardTile& t);
@@ -76,6 +79,7 @@ public:
 	Map map;
 	Tile hand[7];
 	Callback callback;
+	std::vector<Callback> lateCallback;
 	std::vector<BoardTile*> highlighted;
 	std::vector<BoardTile*> moveable;
 	std::vector<BoardTile*> hostile;
@@ -90,6 +94,7 @@ public:
 	int hPos;
 	int sPos;
 	bool turn;
+	bool endTurn;
 	int turnCount;
 };
 

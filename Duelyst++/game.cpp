@@ -2,9 +2,11 @@
 #include "game.h"
 
 //Callback stuff
-Callback::Callback(Unit* u, eSkill s) {
+Callback::Callback(Unit* u, Spell* s, BoardTile* t, eSkill es) {
 	unit = u;
-	skill = s;
+	spell = s;
+	tile = t;
+	skill = es;
 }
 Callback::~Callback() {}
 
@@ -34,7 +36,7 @@ Game::Game() {
 	//Initialize players
 	for (int a = 0; a < 2; ++a) {
 		player[a].preset(cl, this);
-		summon(player[a].deck[0], a, a * 8, 2);
+		summon(player[a].deck[0], a * 8, 2);
 		player[a].deck.erase(player[a].deck.begin());
 		player[a].general = unit.back();
 		player[a].init(a + 2);
@@ -51,6 +53,7 @@ Game::Game() {
 	hPos = -1;
 	sPos = -1;
 	turnCount = 0;
+	endTurn = false;
 	changeTurn(false);
 	moveCursor(0, 0);
 	activeUnit = nullptr;
@@ -143,8 +146,12 @@ void Game::input() {
 
 		//Use card at selection
 		else if (asciiVal == 32) {
-			if (callback.unit) { useEffect(); }
+			if (callback.unit || callback.spell) { useEffect(); }
 			else { useCard(); }
+			if (endTurn) {
+				update();
+				changeTurn(!turn);
+			}
 		}
 
 	}
@@ -296,28 +303,62 @@ void Game::renderSidebar(Renderer& rm) {
 
 //Change turn
 void Game::changeTurn(bool t) {
+
+	//Indicate turn is ending
+	endTurn = true;
+
+	//Do late callbacks
+	while (lateCallback.size() > 0) {
+		if (lateCallback[0].spell != nullptr) { lateCallback[0].spell->lateCallback(); }
+		lateCallback.erase(lateCallback.begin());
+		if (selectable.size() > 0) { return; }
+	}
+
+	//Draw and reset replace
 	if (turnCount > 0) { player[turn].draw(); }
 	player[turn].replaces = 1;
+
+	//Change turn
 	turn = t;
 	if (!turn) { ++turnCount; }
+
+	//Refresh mana
 	if (turnCount > 1 && player[turn].manaMax < 9) { ++player[turn].manaMax; }
 	player[turn].mana = player[turn].manaMax;
+
+	//Set turn indicator
 	if (turn) { light.setCol(COLOR_RED); }
 	else { light.setCol(COLOR_LTBLUE); }
+
+	//Refresh units
 	for (int a = 0; a < unit.size(); ++a) {
 		unit[a]->moved = false;
 		unit[a]->attacked = false;
 	}
+
+	//End turn
 	for (int a = 0; a < unit.size(); ++a) { unit[a]->onTurnEnd(&player[!t]); }
 	player[0].onTurnEnd(&player[!t]);
 	player[1].onTurnEnd(&player[!t]);
+
+	//Start turn
 	for (int a = 0; a < unit.size(); ++a) { unit[a]->onTurnStart(&player[t]); }
 	player[0].onTurnStart(&player[t]);
 	player[1].onTurnStart(&player[t]);
+
+	//Turn has ended
+	endTurn = false;
+
+}
+
+//Set game context for new token cards
+void Game::setContext(Card* c, Player* p) {
+	c->game = this;
+	c->player = p;
 }
 
 //Summon at position
-void Game::summon(Card* c, bool p, int x, int y) {
+void Game::summon(Card* c, int x, int y) {
 	unit.push_back(dynamic_cast<Unit*>(c));
 	unit.back()->setPos(x, y);
 	for (int a = 0; a < unit.size(); ++a) { unit[a]->onSummon(unit.back()); }
@@ -339,7 +380,7 @@ void Game::useCard() {
 		sPos = -1;
 		mode = MODE_NONE;
 		player[turn].hand.erase(player[turn].hand.begin() + hPos);
-		summon(activeCard, turn, pos.x, pos.y);
+		summon(activeCard, pos.x, pos.y);
 		activeCard = nullptr;
 		hPos = -1;
 	}
@@ -367,7 +408,8 @@ void Game::useEffect() {
 	selectable.clear();
 	sPos = -1;
 	mode = MODE_NONE;
-	callback.unit->callback(t);
+	if (callback.unit != nullptr) { callback.unit->callback(t); }
+	else if (callback.spell != nullptr) { callback.spell->callback(t); }
 }
 
 //Select unit
@@ -572,6 +614,9 @@ void Game::highlightMoveable(int x, int y) {
 //Highlight targetable tiles
 void Game::highlightSelectable(eTarget type, Unit* u) {
 
+	//Clear
+	selectable.clear();
+
 	//Target type
 	switch (type) {
 
@@ -589,6 +634,17 @@ void Game::highlightSelectable(eTarget type, Unit* u) {
 		for (int a = 0; a < unit.size(); ++a) {
 			if (unit[a]->player != &player[turn]) {
 				selectable.push_back(unit[a]->tile);
+			}
+		}
+		break;
+
+	//Allied minions
+	case TARGET_ALLY_MINON:
+		for (int a = 0; a < unit.size(); ++a) {
+			if (unit[a]->player == &player[turn]) {
+				if (unit[a]->tribe != TRIBE_GENERAL) {
+					selectable.push_back(unit[a]->tile);
+				}
 			}
 		}
 		break;

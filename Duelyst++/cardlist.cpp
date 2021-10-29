@@ -44,6 +44,8 @@ CardList::CardList() {
 	//Spells
 	sList.push_back(Spell(FACTION_ABYSSIAN, TARGET_MINION, 4, "breathofunborn", "Breath of The Unborn"));
 	sList.back().spell = el.find(SPELL_BREATH_OF_THE_UNBORN);
+	sList.push_back(Spell(FACTION_ABYSSIAN, TARGET_ALLY_MINON, 2, "consumingrebirth", "Consuming Rebirth"));
+	sList.back().spell = el.find(SPELL_CONSUMING_REBIRTH);
 	for (int a = 0; a < sList.size(); ++a) { cList.push_back(&sList[a]); }
 
 	//Set original references

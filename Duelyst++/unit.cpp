@@ -311,11 +311,11 @@ void Unit::onSummon(Unit* u) {
 				break;
 			case SKILL_BLOODTEAR_ALCHEMIST:
 				game->highlightSelectable(TARGET_ENEMY, this);
-				if (game->selectable.size() > 0) { game->callback = Callback(this, SKILL_BLOODTEAR_ALCHEMIST); }
+				if (game->selectable.size() > 0) { game->callback = Callback(this, nullptr, nullptr, SKILL_BLOODTEAR_ALCHEMIST); }
 				break;
 			case SKILL_GHOST_LYNX:
 				game->highlightSelectable(TARGET_MINION_NEAR_UNIT, this);
-				if (game->selectable.size() > 0) { game->callback = Callback(this, SKILL_GHOST_LYNX); }
+				if (game->selectable.size() > 0) { game->callback = Callback(this, nullptr, nullptr, SKILL_GHOST_LYNX); }
 				break;
 			}
 		}

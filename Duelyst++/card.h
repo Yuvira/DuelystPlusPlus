@@ -72,7 +72,7 @@ enum eTribe {
 //Card class
 class Card {
 public:
-	Card() {}
+	Card() { token = nullptr; }
 	~Card() {}
 	virtual void drawDetails(Renderer& rm, int& y) {}
 	virtual void onSummon(Unit* u) {}
@@ -88,6 +88,7 @@ public:
 	Game* game;
 	Player* player;
 	Card* original;
+	Card* token;
 	std::string name;
 	Sprite sprite;
 	Sprite header[2];

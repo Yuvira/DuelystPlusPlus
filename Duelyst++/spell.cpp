@@ -62,6 +62,13 @@ void Spell::onUse(BoardTile* t) {
 			}
 		}
 		break;
+	case SPELL_CONSUMING_REBIRTH:
+		if (t->unit != nullptr) {
+			token = t->unit->original;
+			t->unit->hp = -999;
+			game->lateCallback.push_back(Callback(nullptr, this, t->unit->tile, SKILL_NONE));
+		}
+		break;
 	}
 }
 
@@ -69,4 +76,15 @@ void Spell::onUse(BoardTile* t) {
 void Spell::callback(BoardTile* t) {}
 
 //Late callback
-void Spell::lateCallback() {}
+void Spell::lateCallback() {
+	switch (spell.spell) {
+	case SPELL_CONSUMING_REBIRTH:
+		if (game->lateCallback[0].tile->unit == nullptr) {
+			Unit* t = new Unit(*(dynamic_cast<Unit*>(token)));
+			game->setContext(t, player);
+			game->summon(t, game->lateCallback[0].tile->pos.x, game->lateCallback[0].tile->pos.y);
+			game->unit.back()->addBuff(BUFF_CONSUMING_REBIRTH);
+		}
+		break;
+	}
+}

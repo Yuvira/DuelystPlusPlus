@@ -136,6 +136,10 @@ EffectList::EffectList() {
 	//Spell effects
 	spellList.push_back(SpellEffect(SPELL_BREATH_OF_THE_UNBORN));
 	spellList.back().generateSprite("Deal 2 damage to all enemy|minions. Fully heal all friendly|minions");
+	spellList.push_back(SpellEffect(SPELL_CONSUMING_REBIRTH));
+	spellList.back().generateSprite("Destroy a friendly minion. At the end|of your turn, re-summon it on|the same space and give it +1/+1");
+	buffList.push_back(Buff(BUFF_CONSUMING_REBIRTH, 0, 1, 1, true));
+	buffList.back().generateSprite("Consuming Rebirth");
 
 }
 EffectList::~EffectList() {}
