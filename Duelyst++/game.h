@@ -48,7 +48,7 @@ public:
 	void renderSidebar(Renderer& rm);
 	void changeTurn(bool t);
 	void setContext(Card* c, Player* p);
-	void summon(Card* c, int x, int y);
+	void summon(Card* c, int x, int y, bool actionBar);
 	void useCard();
 	void useEffect();
 	void select(BoardTile& t);

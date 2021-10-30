@@ -136,7 +136,7 @@ void Spell::onUse(BoardTile* t) {
 				t->unit->dead = true;
 				Unit* u2 = new Unit(*(dynamic_cast<Unit*>(token)));
 				game->setContext(u2, player);
-				game->summon(u2, t->pos.x, t->pos.y);
+				game->summon(u2, t->pos.x, t->pos.y, false);
 				game->sendOnDamage(nullptr, u1);
 				game->sendOnDeath(u1);
 			}
@@ -180,7 +180,7 @@ void Spell::lateCallback() {
 		if (game->lateCallback[0].tile->unit == nullptr) {
 			Unit* t = new Unit(*(dynamic_cast<Unit*>(token)));
 			game->setContext(t, player);
-			game->summon(t, game->lateCallback[0].tile->pos.x, game->lateCallback[0].tile->pos.y);
+			game->summon(t, game->lateCallback[0].tile->pos.x, game->lateCallback[0].tile->pos.y, false);
 			game->unit.back()->addBuff(BUFF_CONSUMING_REBIRTH);
 		}
 		break;

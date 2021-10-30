@@ -98,9 +98,9 @@ void Player::replace(int i) {
 }
 
 //onAction calls to hand/deck
-void Player::onSummon(Unit* u) {
-	for (int a = 0; a < hand.size(); ++a) { hand[a]->onSummon(u); }
-	for (int a = 0; a < deck.size(); ++a) { deck[a]->onSummon(u); }
+void Player::onSummon(Unit* u, bool actionBar) {
+	for (int a = 0; a < hand.size(); ++a) { hand[a]->onSummon(u, actionBar); }
+	for (int a = 0; a < deck.size(); ++a) { deck[a]->onSummon(u, actionBar); }
 }
 void Player::onDeath(Unit* u) {
 	for (int a = 0; a < hand.size(); ++a) { hand[a]->onDeath(u); }

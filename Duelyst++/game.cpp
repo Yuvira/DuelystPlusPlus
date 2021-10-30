@@ -36,7 +36,7 @@ Game::Game() {
 	//Initialize players
 	for (int a = 0; a < 2; ++a) {
 		player[a].preset(cl, this);
-		summon(player[a].deck[0], a * 8, 2);
+		summon(player[a].deck[0], a * 8, 2, false);
 		player[a].deck.erase(player[a].deck.begin());
 		player[a].general = unit.back();
 		player[a].init(a + 2);
@@ -358,12 +358,12 @@ void Game::setContext(Card* c, Player* p) {
 }
 
 //Summon at position
-void Game::summon(Card* c, int x, int y) {
+void Game::summon(Card* c, int x, int y, bool actionBar) {
 	unit.push_back(dynamic_cast<Unit*>(c));
 	unit.back()->setPos(x, y);
-	for (int a = 0; a < unit.size(); ++a) { unit[a]->onSummon(unit.back()); }
-	player[0].onSummon(unit.back());
-	player[1].onSummon(unit.back());
+	for (int a = 0; a < unit.size(); ++a) { unit[a]->onSummon(unit.back(), actionBar); }
+	player[0].onSummon(unit.back(), actionBar);
+	player[1].onSummon(unit.back(), actionBar);
 }
 
 //Use active card
@@ -380,7 +380,7 @@ void Game::useCard() {
 		sPos = -1;
 		mode = MODE_NONE;
 		player[turn].hand.erase(player[turn].hand.begin() + hPos);
-		summon(activeCard, pos.x, pos.y);
+		summon(activeCard, pos.x, pos.y, true);
 		activeCard = nullptr;
 		hPos = -1;
 	}

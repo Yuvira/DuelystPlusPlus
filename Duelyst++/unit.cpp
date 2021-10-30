@@ -280,7 +280,7 @@ void Unit::attack(Unit* u, bool counter) {
 }
 
 //When a unit is summoned
-void Unit::onSummon(Unit* u) {
+void Unit::onSummon(Unit* u, bool actionBar) {
 
 	//If on board
 	if (tile != nullptr) {
@@ -361,7 +361,7 @@ void Unit::onSummon(Unit* u) {
 					case SKILL_BLISTERING_SKORN:
 					case SKILL_BLOODTEAR_ALCHEMIST:
 					case SKILL_GHOST_LYNX:
-						addBuff(BUFF_ARAKI_HEADHUNTER);
+						if (actionBar) { addBuff(BUFF_ARAKI_HEADHUNTER); }
 						break;
 					}
 				}

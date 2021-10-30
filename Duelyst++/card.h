@@ -76,7 +76,7 @@ public:
 	Card() { token = nullptr; }
 	~Card() {}
 	virtual void drawDetails(Renderer& rm, int& y) {}
-	virtual void onSummon(Unit* u) {}
+	virtual void onSummon(Unit* u, bool actionBar) {}
 	virtual void onDeath(Unit* u) {}
 	virtual void onAttack(Unit* u1, Unit* u2) {}
 	virtual void onDamage(Unit* u1, Unit* u2) {}
@@ -116,7 +116,7 @@ public:
 	bool isMoveable();
 	bool isFlying();
 	void attack(Unit* u, bool counter);
-	void onSummon(Unit* u);
+	void onSummon(Unit* u, bool actionBar);
 	void onDeath(Unit* u);
 	void onAttack(Unit* u1, Unit* u2);
 	void onDamage(Unit* u1, Unit* u2);
