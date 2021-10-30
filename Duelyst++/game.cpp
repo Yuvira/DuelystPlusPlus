@@ -173,7 +173,7 @@ void Game::update() {
 	} while (reloop);
 	for (int a = 0; a < unit.size(); ++a) {
 		if (unit[a]->dead) {
-			unit[a]->tile->unit = nullptr;
+			if (unit[a] == unit[a]->tile->unit) { unit[a]->tile->unit = nullptr; }
 			unit[a]->tile = nullptr;
 			grave.push_back(unit[a]);
 			unit.erase(unit.begin() + a);
@@ -548,6 +548,13 @@ void Game::moveSelect(int x, int y) {
 		}
 	}
 	end:;
+}
+
+//Send onDeath to all units
+void Game::sendOnDeath(Unit* u) {
+	for (int a = 0; a < unit.size(); ++a) { unit[a]->onDeath(u); }
+	player[0].onDeath(u);
+	player[1].onDeath(u);
 }
 
 //Send onDamage to all units

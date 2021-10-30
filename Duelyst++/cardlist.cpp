@@ -6,7 +6,6 @@ CardList::CardList() {
 
 	//Generals
 	gList.push_back(Unit(FACTION_LYONAR, TRIBE_GENERAL, 0, 2, 25, "lyonargeneral1", "Argeon Highmayne"));
-	for (int a = 0; a < gList.size(); ++a) { cList.push_back(&gList[a]); }
 
 	//Units
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_ARCANYST, 2, 1, 3, "aethermaster", "Aethermaster"));
@@ -39,7 +38,7 @@ CardList::CardList() {
 	uList.back().skill = el.find(SKILL_FLYING);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 1, "ghostlynx", "Ghost Lynx"));
 	uList.back().skill = el.find(SKILL_GHOST_LYNX);
-	for (int a = 0; a < uList.size(); ++a) { cList.push_back(&uList[a]); }
+	uList.push_back(Unit(FACTION_ABYSSIAN, TRIBE_NONE, 1, 1, 1, "wraithling", "Wraithling"));
 
 	//Spells
 	sList.push_back(Spell(FACTION_ABYSSIAN, TARGET_MINION, 4, "breathofunborn", "Breath of The Unborn"));
@@ -50,10 +49,19 @@ CardList::CardList() {
 	sList.back().spell = el.find(SPELL_DAEMONIC_LURE);
 	sList.push_back(Spell(FACTION_ABYSSIAN, TARGET_ENEMY_GENERAL, 4, "darkseed", "Dark Seed"));
 	sList.back().spell = el.find(SPELL_DARK_SEED);
+	sList.push_back(Spell(FACTION_ABYSSIAN, TARGET_ENEMY_MINION, 5, "darktransformation", "Dark Transformation"));
+	sList.back().spell = el.find(SPELL_DARK_TRANSFORMATION);
+
+	//Generate card list
+	for (int a = 0; a < gList.size(); ++a) { cList.push_back(&gList[a]); }
+	for (int a = 0; a < uList.size(); ++a) { cList.push_back(&uList[a]); }
 	for (int a = 0; a < sList.size(); ++a) { cList.push_back(&sList[a]); }
 
 	//Set original references
 	for (int a = 0; a < cList.size(); ++a) { cList[a]->original = cList[a]; }
+
+	//Add tokens
+	find("Dark Transformation")->token = find("Wraithling");
 
 }
 CardList::~CardList() {}

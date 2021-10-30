@@ -143,9 +143,7 @@ void Unit::removeEffect(eEffect e) {
 //Check if unit has died
 void Unit::update(bool& r) {
 	if (hp < 1) {
-		for (int a = 0; a < game->unit.size(); ++a) { game->unit[a]->onDeath(this); }
-		game->player[0].onDeath(this);
-		game->player[1].onDeath(this);
+		game->sendOnDeath(this);
 		dead = true;
 		r = true;
 	}

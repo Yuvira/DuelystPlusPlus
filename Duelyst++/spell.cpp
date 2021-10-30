@@ -86,6 +86,17 @@ void Spell::onUse(BoardTile* t) {
 			game->sendOnDamage(nullptr, t->unit);
 		}
 		break;
+	case SPELL_DARK_TRANSFORMATION:
+		Unit* u1 = t->unit;
+		if (u1 != nullptr) {
+			t->unit->dead = true;
+			Unit* u2 = new Unit(*(dynamic_cast<Unit*>(token)));
+			game->setContext(u2, player);
+			game->summon(u2, t->pos.x, t->pos.y);
+			game->sendOnDamage(nullptr, u1);
+			game->sendOnDeath(u1);
+		}
+		break;
 	}
 }
 

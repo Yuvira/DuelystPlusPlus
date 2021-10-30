@@ -144,6 +144,8 @@ EffectList::EffectList() {
 	spellList.back().generateSprite("Deal 1 damage to an enemy minion and|teleport it anywhere");
 	spellList.push_back(SpellEffect(SPELL_DARK_SEED));
 	spellList.back().generateSprite("Deal 1 damage to the enemy general|for each card in the opponent's|action bar");
+	spellList.push_back(SpellEffect(SPELL_DARK_TRANSFORMATION));
+	spellList.back().generateSprite("Destroy an enemy minion and summon|a 1/1 Wraithling on that space");
 
 }
 EffectList::~EffectList() {}

@@ -58,6 +58,7 @@ public:
 	void moveCursor(int x, int y);
 	void moveCursorHand(int x, int y);
 	void moveSelect(int x, int y);
+	void sendOnDeath(Unit* u);
 	void sendOnDamage(Unit* u1, Unit* u2);
 	bool canMove(int x, int y);
 	void highlightTile(int x, int y, eColor col);
