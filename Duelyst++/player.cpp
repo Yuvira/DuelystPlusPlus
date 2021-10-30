@@ -12,7 +12,7 @@ void Player::preset(CardList& cl, Game* g) {
 	for (int a = 0; a < 3; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Bloodtear Alchemist"))))); }
 	for (int a = 0; a < 3; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Araki Headhunter"))))); }
 	for (int a = 0; a < 3; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Azure Horn Shaman"))))); }
-	for (int a = 0; a < 3; ++a) { deck.push_back(new Spell(*(dynamic_cast<Spell*>(cl.find("Consuming Rebirth"))))); }
+	for (int a = 0; a < 3; ++a) { deck.push_back(new Spell(*(dynamic_cast<Spell*>(cl.find("Darkfire Sacrifice"))))); }
 	for (int a = 0; a < 3; ++a) { deck.push_back(new Spell(*(dynamic_cast<Spell*>(cl.find("Dark Transformation"))))); }
 	for (int a = 0; a < deck.size(); ++a) {
 		deck[a]->game = game;

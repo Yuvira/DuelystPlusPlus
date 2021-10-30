@@ -285,10 +285,14 @@ void Unit::onSummon(Unit* u) {
 	//If on board
 	if (tile != nullptr) {
 
-		//When this is summoned (Opening Gambit)
+		//When this is summoned
 		if (u == this) {
+
+			//Exhaust
 			moved = true;
 			attacked = true;
+
+			//Skills (Opening Gambit)
 			switch (skill.skill) {
 			case SKILL_AETHERMASTER:
 				++player->replaces;
@@ -316,6 +320,26 @@ void Unit::onSummon(Unit* u) {
 				if (game->selectable.size() > 0) { game->callback = Callback(this, nullptr, nullptr, SKILL_GHOST_LYNX); }
 				break;
 			}
+
+			//Buffs
+			for (int a = 0; a < buff.size(); ++a) {
+				switch (buff[a].buff) {
+				case BUFF_DARKFIRE_SACRIFICE:
+					removeBuff(BUFF_DARKFIRE_SACRIFICE);
+					for (int b = 0; b < player->hand.size(); ++b) {
+						if (player->hand[b]->type == CARD_UNIT) {
+							dynamic_cast<Unit*>(player->hand[b])->removeBuff(BUFF_DARKFIRE_SACRIFICE);
+						}
+					}
+					for (int b = 0; b < player->deck.size(); ++b) {
+						if (player->deck[b]->type == CARD_UNIT) {
+							dynamic_cast<Unit*>(player->deck[b])->removeBuff(BUFF_DARKFIRE_SACRIFICE);
+						}
+					}
+					break;
+				}
+			}
+
 		}
 
 		//When something else is summoned

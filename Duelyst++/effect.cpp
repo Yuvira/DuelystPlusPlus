@@ -146,6 +146,10 @@ EffectList::EffectList() {
 	spellList.back().generateSprite("Deal 1 damage to the enemy general|for each card in the opponent's|action bar");
 	spellList.push_back(SpellEffect(SPELL_DARK_TRANSFORMATION));
 	spellList.back().generateSprite("Destroy an enemy minion and summon|a 1/1 Wraithling on that space");
+	spellList.push_back(SpellEffect(SPELL_DARKFIRE_SACRIFICE));
+	spellList.back().generateSprite("Destroy a friendly minion. Your next|minion costs 2 less");
+	buffList.push_back(Buff(BUFF_DARKFIRE_SACRIFICE, -2, 0, 0, true));
+	buffList.back().generateSprite("Darkfire Sacrifice");
 
 }
 EffectList::~EffectList() {}

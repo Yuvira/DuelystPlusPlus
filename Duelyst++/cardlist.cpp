@@ -51,6 +51,8 @@ CardList::CardList() {
 	sList.back().spell = el.find(SPELL_DARK_SEED);
 	sList.push_back(Spell(FACTION_ABYSSIAN, TARGET_ENEMY_MINION, 5, "darktransformation", "Dark Transformation"));
 	sList.back().spell = el.find(SPELL_DARK_TRANSFORMATION);
+	sList.push_back(Spell(FACTION_ABYSSIAN, TARGET_ALLY_MINON, 0, "darkfiresacrifice", "Darkfire Sacrifice"));
+	sList.back().spell = el.find(SPELL_DARKFIRE_SACRIFICE);
 
 	//Generate card list
 	for (int a = 0; a < gList.size(); ++a) { cList.push_back(&gList[a]); }

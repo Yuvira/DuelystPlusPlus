@@ -87,14 +87,31 @@ void Spell::onUse(BoardTile* t) {
 		}
 		break;
 	case SPELL_DARK_TRANSFORMATION:
-		Unit* u1 = t->unit;
-		if (u1 != nullptr) {
-			t->unit->dead = true;
-			Unit* u2 = new Unit(*(dynamic_cast<Unit*>(token)));
-			game->setContext(u2, player);
-			game->summon(u2, t->pos.x, t->pos.y);
-			game->sendOnDamage(nullptr, u1);
-			game->sendOnDeath(u1);
+		if (true) { //Need this to initialize variable
+			Unit* u1 = t->unit;
+			if (u1 != nullptr) {
+				t->unit->dead = true;
+				Unit* u2 = new Unit(*(dynamic_cast<Unit*>(token)));
+				game->setContext(u2, player);
+				game->summon(u2, t->pos.x, t->pos.y);
+				game->sendOnDamage(nullptr, u1);
+				game->sendOnDeath(u1);
+			}
+		}
+		break;
+	case SPELL_DARKFIRE_SACRIFICE:
+		if (t->unit != nullptr) {
+			t->unit->hp = -999;
+			for (int a = 0; a < player->hand.size(); ++a) {
+				if (player->hand[a]->type == CARD_UNIT) {
+					dynamic_cast<Unit*>(player->hand[a])->addBuff(BUFF_DARKFIRE_SACRIFICE);
+				}
+			}
+			for (int a = 0; a < player->deck.size(); ++a) {
+				if (player->deck[a]->type == CARD_UNIT) {
+					dynamic_cast<Unit*>(player->deck[a])->addBuff(BUFF_DARKFIRE_SACRIFICE);
+				}
+			}
 		}
 		break;
 	}
