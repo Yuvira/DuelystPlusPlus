@@ -8,6 +8,8 @@ CardList::CardList() {
 	gList.push_back(Unit(FACTION_LYONAR, TRIBE_GENERAL, 0, 2, 25, "lyonargeneral1", "Argeon Highmayne"));
 
 	//Units
+	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_ARCANYST, 3, 3, 1, "abjudicator", "Abjudicator"));
+	uList.back().skill = el.find(SKILL_ABJUDICATOR);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_ARCANYST, 2, 1, 3, "aethermaster", "Aethermaster"));
 	uList.back().skill = el.find(SKILL_AETHERMASTER);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 3, "arakiheadhunter", "Araki Headhunter"));

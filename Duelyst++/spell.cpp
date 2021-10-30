@@ -16,6 +16,40 @@ Spell::Spell(eFaction _faction,  eTarget _target, int _cost, std::string path, s
 }
 Spell::~Spell() {}
 
+//Add buff
+void Spell::addBuff(eBuff b) {
+	Buff _b = game->cl.el.find(b);
+	for (int a = 0; a < buff.size(); ++a) {
+		if (buff[a].buff == b) {
+			if (!_b.stacking) { return; }
+			buff[a].cost += _b.cost;
+			updateStatBuffs();
+			return;
+		}
+	}
+	buff.push_back(_b);
+	updateStatBuffs();
+}
+
+//Remove buff
+void Spell::removeBuff(eBuff b) {
+	Buff _b = game->cl.el.find(b);
+	for (int a = 0; a < buff.size(); ++a) {
+		if (buff[a].buff == b) {
+			buff.erase(buff.begin() + a);
+			break;
+		}
+	}
+	updateStatBuffs();
+}
+
+void Spell::updateStatBuffs() {
+	int _cost = 0;
+	for (int a = 0; a < buff.size(); ++a) { _cost += buff[a].cost; }
+	Spell* o = dynamic_cast<Spell*>(original);
+	cost = max(o->cost + _cost, 0);
+}
+
 //Generate sidebar details
 void Spell::generateDetails() {
 	std::string s;
@@ -45,6 +79,15 @@ void Spell::drawDetails(Renderer& rm, int& y) {
 		rm.render(spell.sprite[a], 72, y);
 		if (a == spell.sprite.size() - 1) { ++y; }
 		++y;
+	}
+	for (int a = 0; a < buff.size(); ++a) {
+		rm.render(buff[a].sprite, 72, y); ++y;
+		std::string s = "";
+		if (buff[a].cost != 0) { s += (buff[a].cost > 0 ? "+" : "-") + std::to_string(abs(buff[a].cost)) + " Cost"; }
+		Sprite _s = Sprite();
+		_s.createFromString(s);
+		_s.setCol(COLOR_GRAY);
+		rm.render(_s, 72, y); y += 2;
 	}
 }
 

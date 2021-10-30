@@ -94,6 +94,10 @@ EffectList::EffectList() {
 	//Unit skills
 	skillList.push_back(Skill(SKILL_FLYING));
 	skillList.back().generateSprite("{Flying}");
+	skillList.push_back(Skill(SKILL_ABJUDICATOR));
+	skillList.back().generateSprite("{Opening Gambit}: Lower the cost of|all spells in your action bar by 1");
+	buffList.push_back(Buff(BUFF_ABJUDICATOR, -1, 0, 0, true));
+	buffList.back().generateSprite("Abjudicator");
 	skillList.push_back(Skill(SKILL_AETHERMASTER));
 	skillList.back().generateSprite("You may replace an additional card|each turn");
 	effectList.push_back(Effect(EFFECT_AETHERMASTER));

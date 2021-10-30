@@ -16,7 +16,7 @@ int main() {
 	Game game;
 
 	//Mode
-	bool doGame = false;
+	bool doGame = true;
 
 	//Loop
 	while (true) {

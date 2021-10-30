@@ -32,46 +32,6 @@ void Unit::render(Renderer& rm) {
 	rm.render(sHP);
 }
 
-//Draw card data
-void Unit::drawDetails(Renderer& rm, int& y) {
-	sprite.setCol(COLOR_LTWHITE);
-	rm.render(sprite, 66, y);
-	rm.render(header[0], 72, y); ++y;
-	updateDetailStats();
-	rm.render(header[1], 72, y); y+= 2;
-	for (int a = 0; a < skill.sprite.size(); ++a) {
-		rm.render(skill.sprite[a], 72, y);
-		if (a == skill.sprite.size() - 1) { ++y; }
-		++y;
-	}
-	for (int a = 0; a < effect.size(); ++a) {
-		switch (effect[a].effect) {
-		case EFFECT_AETHERMASTER:
-			effect[a].sprite[1].buffer[16].Char.AsciiChar = std::to_string(effect[a].count)[0];
-			break;
-		}
-		rm.render(effect[a].sprite[0], 72, y);
-		rm.render(effect[a].sprite[1], 72, y + 1);
-		y += 3;
-	}
-	for (int a = 0; a < buff.size(); ++a) {
-		rm.render(buff[a].sprite, 72, y); ++y;
-		std::string s = "";
-		if (buff[a].hp == 0 && buff[a].atk != 0) { s += (buff[a].atk > 0 ? "+" : "-") + std::to_string(abs(buff[a].atk)) + " Attack"; }
-		else if (buff[a].atk == 0 && buff[a].hp != 0) { s += (buff[a].hp > 0 ? "+" : "-") + std::to_string(abs(buff[a].hp)) + " Health"; }
-		else if (buff[a].atk != 0 && buff[a].hp != 0) { s += (buff[a].atk > 0 ? "+" : "-") + std::to_string(buff[a].atk) + (buff[a].hp > 0 ? "/+" : "/-") + std::to_string(abs(buff[a].hp)); }
-		else if (buff[a].cost == 0) { s += "+0/+0"; }
-		if (buff[a].cost != 0) {
-			if (s != "") { s += ", "; }
-			s += (buff[a].cost > 0 ? "+" : "-") + std::to_string(abs(buff[a].cost)) + " Cost";
-		}
-		Sprite _s = Sprite();
-		_s.createFromString(s);
-		_s.setCol(COLOR_GRAY);
-		rm.render(_s, 72, y); y += 2;
-	}
-}
-
 //Set sprite position
 void Unit::setPos(int x, int y) {
 	if (tile != nullptr) { tile->unit = nullptr; }
@@ -236,6 +196,46 @@ void Unit::updateDetailStats() {
 	}
 }
 
+//Draw card data
+void Unit::drawDetails(Renderer& rm, int& y) {
+	sprite.setCol(COLOR_LTWHITE);
+	rm.render(sprite, 66, y);
+	rm.render(header[0], 72, y); ++y;
+	updateDetailStats();
+	rm.render(header[1], 72, y); y+= 2;
+	for (int a = 0; a < skill.sprite.size(); ++a) {
+		rm.render(skill.sprite[a], 72, y);
+		if (a == skill.sprite.size() - 1) { ++y; }
+		++y;
+	}
+	for (int a = 0; a < effect.size(); ++a) {
+		switch (effect[a].effect) {
+		case EFFECT_AETHERMASTER:
+			effect[a].sprite[1].buffer[16].Char.AsciiChar = std::to_string(effect[a].count)[0];
+			break;
+		}
+		rm.render(effect[a].sprite[0], 72, y);
+		rm.render(effect[a].sprite[1], 72, y + 1);
+		y += 3;
+	}
+	for (int a = 0; a < buff.size(); ++a) {
+		rm.render(buff[a].sprite, 72, y); ++y;
+		std::string s = "";
+		if (buff[a].hp == 0 && buff[a].atk != 0) { s += (buff[a].atk > 0 ? "+" : "-") + std::to_string(abs(buff[a].atk)) + " Attack"; }
+		else if (buff[a].atk == 0 && buff[a].hp != 0) { s += (buff[a].hp > 0 ? "+" : "-") + std::to_string(abs(buff[a].hp)) + " Health"; }
+		else if (buff[a].atk != 0 && buff[a].hp != 0) { s += (buff[a].atk > 0 ? "+" : "-") + std::to_string(buff[a].atk) + (buff[a].hp > 0 ? "/+" : "/-") + std::to_string(abs(buff[a].hp)); }
+		else if (buff[a].cost == 0) { s += "+0/+0"; }
+		if (buff[a].cost != 0) {
+			if (s != "") { s += ", "; }
+			s += (buff[a].cost > 0 ? "+" : "-") + std::to_string(abs(buff[a].cost)) + " Cost";
+		}
+		Sprite _s = Sprite();
+		_s.createFromString(s);
+		_s.setCol(COLOR_GRAY);
+		rm.render(_s, 72, y); y += 2;
+	}
+}
+
 //Can unit attack target
 bool Unit::canAttack(Unit* u) {
 	if (u != nullptr) {
@@ -294,6 +294,13 @@ void Unit::onSummon(Unit* u) {
 
 			//Skills (Opening Gambit)
 			switch (skill.skill) {
+			case SKILL_ABJUDICATOR:
+				for (int a = 0; a < player->hand.size(); ++a) {
+					if (player->hand[a]->type == CARD_SPELL) {
+						dynamic_cast<Spell*>(player->hand[a])->addBuff(BUFF_ABJUDICATOR);
+					}
+				}
+				break;
 			case SKILL_AETHERMASTER:
 				++player->replaces;
 				player->general->addEffect(EFFECT_AETHERMASTER);
@@ -348,6 +355,7 @@ void Unit::onSummon(Unit* u) {
 			case SKILL_ARAKI_HEADHUNTER:
 				if (u->player == player) {
 					switch (u->skill.skill) {
+					case SKILL_ABJUDICATOR:
 					case SKILL_AZURE_HERALD:
 					case SKILL_BLAZE_HOUND:
 					case SKILL_BLISTERING_SKORN:

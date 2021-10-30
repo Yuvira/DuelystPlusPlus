@@ -144,6 +144,9 @@ class Spell : public Card {
 public:
 	Spell(eFaction = FACTION_NEUTRAL,  eTarget = TARGET_ANY, int = 0, std::string = "", std::string = "???");
 	~Spell();
+	void addBuff(eBuff b);
+	void removeBuff(eBuff b);
+	void updateStatBuffs();
 	void generateDetails();
 	void updateDetailStats();
 	void drawDetails(Renderer& rm, int& y);
@@ -152,6 +155,7 @@ public:
 	void lateCallback();
 	eTarget target;
 	SpellEffect spell;
+	std::vector<Buff> buff;
 };
 
 //Card list class
