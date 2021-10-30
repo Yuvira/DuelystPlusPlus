@@ -1,6 +1,6 @@
 //Include
 #include <ctime>
-#include "game.h"
+#include "collection.h"
 
 //Main
 int main() {
@@ -12,21 +12,32 @@ int main() {
 
 	//Variables
 	Renderer rm;
+	Collection collection;
 	Game game;
 
-	//Game
+	//Mode
+	bool doGame = false;
+
+	//Loop
 	while (true) {
 
-		//Update game
-		game.update();
+		//Game
+		if (doGame) {
+			game.update();
+			rm.cls();
+			game.render(rm);
+			rm.swapBuffer();
+			game.input();
+		}
 
-		//Render
-		rm.cls();
-		game.render(rm);
-		rm.swapBuffer();
-
-		//Get input
-		game.input();
+		//Collection
+		else {
+			collection.update();
+			rm.cls();
+			collection.render(rm);
+			rm.swapBuffer();
+			collection.input();
+		}
 
 	}
 
