@@ -142,6 +142,8 @@ EffectList::EffectList() {
 	buffList.back().generateSprite("Consuming Rebirth");
 	spellList.push_back(SpellEffect(SPELL_DAEMONIC_LURE));
 	spellList.back().generateSprite("Deal 1 damage to an enemy minion and|teleport it anywhere");
+	spellList.push_back(SpellEffect(SPELL_DARK_SEED));
+	spellList.back().generateSprite("Deal 1 damage to the enemy general|for each card in the opponent's|action bar");
 
 }
 EffectList::~EffectList() {}

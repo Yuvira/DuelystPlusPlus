@@ -48,6 +48,8 @@ CardList::CardList() {
 	sList.back().spell = el.find(SPELL_CONSUMING_REBIRTH);
 	sList.push_back(Spell(FACTION_ABYSSIAN, TARGET_ENEMY_MINION, 2, "daemoniclure", "Daemonic Lure"));
 	sList.back().spell = el.find(SPELL_DAEMONIC_LURE);
+	sList.push_back(Spell(FACTION_ABYSSIAN, TARGET_ENEMY_GENERAL, 4, "darkseed", "Dark Seed"));
+	sList.back().spell = el.find(SPELL_DARK_SEED);
 	for (int a = 0; a < sList.size(); ++a) { cList.push_back(&sList[a]); }
 
 	//Set original references

@@ -80,6 +80,12 @@ void Spell::onUse(BoardTile* t) {
 			game->sendOnDamage(nullptr, t->unit);
 		}
 		break;
+	case SPELL_DARK_SEED:
+		if (t->unit != nullptr) {
+			t->unit->hp -= player == &game->player[0] ? game->player[1].hand.size() : game->player[0].hand.size();
+			game->sendOnDamage(nullptr, t->unit);
+		}
+		break;
 	}
 }
 

@@ -671,6 +671,15 @@ void Game::highlightSelectable(eTarget type, Unit* u) {
 		}
 		break;
 
+	//Enemey general
+	case TARGET_ENEMY_GENERAL:
+		for (int a = 0; a < unit.size(); ++a) {
+			if (unit[a] == player[!turn].general) {
+				selectable.push_back(unit[a]->tile);
+			}
+		}
+		break;
+
 	//Near allies (summon)
 	case TARGET_NEAR_ALLY:
 		for (int a = 0; a < unit.size(); ++a) {
