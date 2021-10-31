@@ -24,6 +24,9 @@ Game::Game() {
 	//Board border
 	board.createFromFile("resources/board.txt");
 
+	//Event manager context
+	em.game = this;
+
 	//Character sprites
 	char c[] = { 'Û', 'Þ', 'Ý', 'Ü', 'ß', 'X', '\\', '/', '®', 'é', '¯' };
 	for (int a = 0; a < 8; ++a) { chars[a].buffer[0].Char.AsciiChar = c[a]; }
@@ -336,15 +339,9 @@ void Game::changeTurn(bool t) {
 		unit[a]->attacked = false;
 	}
 
-	//End turn
-	for (int a = 0; a < unit.size(); ++a) { unit[a]->onTurnEnd(&player[!t]); }
-	player[0].onTurnEnd(&player[!t]);
-	player[1].onTurnEnd(&player[!t]);
-
-	//Start turn
-	for (int a = 0; a < unit.size(); ++a) { unit[a]->onTurnStart(&player[t]); }
-	player[0].onTurnStart(&player[t]);
-	player[1].onTurnStart(&player[t]);
+	//End old turn, start new turn
+	em.sendOnTurnEnd(&player[!t]);
+	em.sendOnTurnStart(&player[t]);
 
 	//Turn has ended
 	endTurn = false;
@@ -361,9 +358,7 @@ void Game::setContext(Card* c, Player* p) {
 void Game::summon(Card* c, int x, int y, bool actionBar) {
 	unit.push_back(dynamic_cast<Unit*>(c));
 	unit.back()->setPos(x, y);
-	for (int a = 0; a < unit.size(); ++a) { unit[a]->onSummon(unit.back(), actionBar); }
-	player[0].onSummon(unit.back(), actionBar);
-	player[1].onSummon(unit.back(), actionBar);
+	em.sendOnSummon(unit.back(), actionBar);
 }
 
 //Use active card
@@ -548,20 +543,6 @@ void Game::moveSelect(int x, int y) {
 		}
 	}
 	end:;
-}
-
-//Send onDeath to all units
-void Game::sendOnDeath(Unit* u) {
-	for (int a = 0; a < unit.size(); ++a) { unit[a]->onDeath(u); }
-	player[0].onDeath(u);
-	player[1].onDeath(u);
-}
-
-//Send onDamage to all units
-void Game::sendOnDamage(Unit* u1, Unit* u2) {
-	for (int a = 0; a < unit.size(); ++a) { unit[a]->onDamage(u1, u2); }
-	player[0].onDamage(u1, u2);
-	player[1].onDamage(u1, u2);
 }
 
 //Check if tile is moveable

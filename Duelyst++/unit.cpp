@@ -103,7 +103,7 @@ void Unit::removeEffect(eEffect e) {
 //Check if unit has died
 void Unit::update(bool& r) {
 	if (hp < 1) {
-		game->sendOnDeath(this);
+		game->em.sendOnDeath(this);
 		dead = true;
 		r = true;
 	}
@@ -282,7 +282,7 @@ void Unit::attack(Unit* u, bool counter) {
 		attacked = true;
 		if (u->canAttack(this)) { u->attack(this, true); }
 	}
-	game->sendOnDamage(this, u);
+	game->em.sendOnDamage(this, u);
 }
 
 //When a unit is summoned
@@ -318,6 +318,7 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 							Spell* s = new Spell(*(dynamic_cast<Spell*>(game->grave[a]->original)));
 							game->setContext(s, player);
 							player->hand.push_back(s);
+							//onDraw
 							break;
 						}
 					}
@@ -325,15 +326,17 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 				break;
 			case SKILL_AZURE_HERALD:
 				player->general->hp = min(player->general->hp + 3, player->general->hpMax);
+				//onHeal
 				break;
 			case SKILL_BLAZE_HOUND:
 				game->player[0].draw();
 				game->player[1].draw();
+				//onDraw
 				break;
 			case SKILL_BLISTERING_SKORN:
 				for (int a = 0; a < game->unit.size(); ++a) {
 					--game->unit[a]->hp;
-					game->sendOnDamage(this, game->unit[a]);
+					game->em.sendOnDamage(this, game->unit[a]);
 				}
 				break;
 			case SKILL_BLOODTEAR_ALCHEMIST:
@@ -436,6 +439,7 @@ void Unit::onDamage(Unit* u1, Unit* u2) {
 			if (u2 == this) {
 				BoardTile* t = game->map.getRandom();
 				if (t != nullptr) { setPos(t->pos.x, t->pos.y); }
+				//onMove
 			}
 			break;
 		}
@@ -474,6 +478,8 @@ void Unit::onTurnEnd(Player* p) {
 
 		//When this unit's player ends turn
 		if (p == player) {
+
+			//Skills
 			switch (skill.skill) {
 			case SKILL_BASTION:
 				for (int a = 0; a < game->unit.size(); ++a) {
@@ -485,6 +491,8 @@ void Unit::onTurnEnd(Player* p) {
 				}
 				break;
 			}
+
+			//Buffs
 			for (int a = 0; a < effect.size(); ++a) {
 				switch (effect[a].effect) {
 				case EFFECT_AETHERMASTER:
@@ -492,6 +500,7 @@ void Unit::onTurnEnd(Player* p) {
 					break;
 				}
 			}
+
 		}
 
 	}
@@ -499,9 +508,7 @@ void Unit::onTurnEnd(Player* p) {
 	//Anywhere
 	switch (skill.skill) {
 	case SKILL_CHAKKRAM:
-		if (p == player) {
-		removeBuff(BUFF_CHAKKRAM);
-		}
+		if (p == player) { removeBuff(BUFF_CHAKKRAM); }
 		break;
 	}
 
@@ -516,12 +523,13 @@ void Unit::callback(BoardTile* t) {
 	case SKILL_BLOODTEAR_ALCHEMIST:
 		if (t->unit != nullptr) {
 			--t->unit->hp;
-			game->sendOnDamage(this, t->unit);
+			game->em.sendOnDamage(this, t->unit);
 		}
 		break;
 	case SKILL_GHOST_LYNX:
 		BoardTile* t2 = game->map.getRandom();
 		if (t2 != nullptr) { t->unit->setPos(t2->pos.x, t2->pos.y); }
+		//onMove
 		break;
 	}
 	game->callback = Callback();

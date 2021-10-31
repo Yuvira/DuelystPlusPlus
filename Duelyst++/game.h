@@ -6,7 +6,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include <conio.h>
-#include "player.h"
+#include "eventmanager.h"
 
 //Input mode
 enum eMode {
@@ -58,8 +58,6 @@ public:
 	void moveCursor(int x, int y);
 	void moveCursorHand(int x, int y);
 	void moveSelect(int x, int y);
-	void sendOnDeath(Unit* u);
-	void sendOnDamage(Unit* u1, Unit* u2);
 	bool canMove(int x, int y);
 	void highlightTile(int x, int y, eColor col);
 	void highlightMoveable(int x, int y);
@@ -76,6 +74,7 @@ public:
 	Sprite board;
 	Sprite chars[8];
 	CardList cl;
+	EventManager em;
 	Player player[2];
 	Map map;
 	Tile hand[7];

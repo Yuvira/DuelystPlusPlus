@@ -48,6 +48,9 @@
     <ClCompile Include="collection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="eventmanager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="renderer.h">
@@ -69,6 +72,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="collection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="eventmanager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

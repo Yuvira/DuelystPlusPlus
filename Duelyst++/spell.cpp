@@ -106,7 +106,8 @@ void Spell::onUse(BoardTile* t) {
 				if (game->unit[a]->player == player) { game->unit[a]->hp = game->unit[a]->hpMax; }
 				else {
 					game->unit[a]->hp -= 2;
-					game->sendOnDamage(nullptr, game->unit[a]);
+					game->em.sendOnDamage(nullptr, game->unit[a]);
+					//onHeal
 				}
 			}
 		}
@@ -116,6 +117,7 @@ void Spell::onUse(BoardTile* t) {
 			token = t->unit->original;
 			t->unit->hp = -999;
 			game->lateCallback.push_back(Callback(nullptr, this, t->unit->tile, SKILL_NONE));
+			game->em.sendOnDamage(nullptr, t->unit);
 		}
 		break;
 	case SPELL_DAEMONIC_LURE:
@@ -126,13 +128,13 @@ void Spell::onUse(BoardTile* t) {
 		}
 		else {
 			--t->unit->hp;
-			game->sendOnDamage(nullptr, t->unit);
+			game->em.sendOnDamage(nullptr, t->unit);
 		}
 		break;
 	case SPELL_DARK_SEED:
 		if (t->unit != nullptr) {
 			t->unit->hp -= player == &game->player[0] ? game->player[1].hand.size() : game->player[0].hand.size();
-			game->sendOnDamage(nullptr, t->unit);
+			game->em.sendOnDamage(nullptr, t->unit);
 		}
 		break;
 	case SPELL_DARK_TRANSFORMATION:
@@ -143,8 +145,8 @@ void Spell::onUse(BoardTile* t) {
 				Unit* u2 = new Unit(*(dynamic_cast<Unit*>(token)));
 				game->setContext(u2, player);
 				game->summon(u2, t->pos.x, t->pos.y, false);
-				game->sendOnDamage(nullptr, u1);
-				game->sendOnDeath(u1);
+				game->em.sendOnDamage(nullptr, u1);
+				game->em.sendOnDeath(u1);
 			}
 		}
 		break;
@@ -161,6 +163,7 @@ void Spell::onUse(BoardTile* t) {
 					dynamic_cast<Unit*>(player->deck[a])->addBuff(BUFF_DARKFIRE_SACRIFICE);
 				}
 			}
+			game->em.sendOnDamage(nullptr, t->unit);
 		}
 		break;
 	}
@@ -173,7 +176,8 @@ void Spell::callback(BoardTile* t) {
 		Unit* u = dynamic_cast<Unit*>(token);
 		u->setPos(t->pos.x, t->pos.y);
 		--u->hp;
-		game->sendOnDamage(nullptr, u);
+		game->em.sendOnDamage(nullptr, u);
+		//onMove
 		break;
 	}
 	game->callback = Callback();
