@@ -89,6 +89,12 @@ void Spell::drawDetails(Renderer& rm, int& y) {
 		_s.setCol(COLOR_GRAY);
 		rm.render(_s, 72, y); y += 2;
 	}
+	if (token != nullptr) {
+		if (y < 7) { y = 7; }
+		rm.render(divider, 66, y);
+		y += 2;
+		token->drawDetails(rm, y);
+	}
 }
 
 //On card use

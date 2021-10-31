@@ -73,7 +73,10 @@ enum eTribe {
 //Card class
 class Card {
 public:
-	Card() { token = nullptr; }
+	Card() {
+		token = nullptr;
+		divider.createFromString("컴TOKEN컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴");
+	}
 	~Card() {}
 	virtual void drawDetails(Renderer& rm, int& y) {}
 	virtual void onSummon(Unit* u, bool actionBar) {}
@@ -93,6 +96,7 @@ public:
 	std::string name;
 	Sprite sprite;
 	Sprite header[2];
+	Sprite divider;
 };
 
 //Unit class
