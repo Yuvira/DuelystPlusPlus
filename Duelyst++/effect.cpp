@@ -132,6 +132,8 @@ EffectList::EffectList() {
 	skillList.back().generateSprite("{Opening Gambit}: Deal 1 damage to|an enemy");
 	skillList.push_back(Skill(SKILL_BLUETIP_SCORPION));
 	skillList.back().generateSprite("Deals double damage to minions");
+	skillList.push_back(Skill(SKILL_CAPTAIN_HANK_HART));
+	skillList.back().generateSprite("{Ranged}|Whenever this deals damage, restore|that much health to it");
 	skillList.push_back(Skill(SKILL_CHAKKRAM));
 	skillList.back().generateSprite("Costs 2 less if your General took|damage on your opponent's|last turn");
 	buffList.push_back(Buff(BUFF_CHAKKRAM, -2, 0, 0, false));

@@ -255,9 +255,8 @@ void Unit::drawDetails(Renderer& rm, int& y) {
 bool Unit::canAttack(Unit* u) {
 	if (u != nullptr) {
 		if (atk > 0) {
-			if (abs(tile->pos.x - u->tile->pos.x) < 2 && abs(tile->pos.y - u->tile->pos.y) < 2) {
-				return true;
-			}
+			if (isRanged()) { return true; }
+			else if (abs(tile->pos.x - u->tile->pos.x) < 2 && abs(tile->pos.y - u->tile->pos.y) < 2) { return true; }
 		}
 	}
 	return false;
@@ -278,20 +277,31 @@ bool Unit::isFlying() {
 	return false;
 }
 
+//Is unit ranged
+bool Unit::isRanged() {
+	switch (skill.skill) {
+	case SKILL_CAPTAIN_HANK_HART:
+		return true;
+	}
+	return false;
+}
+
 //Attack enemy
 void Unit::attack(Unit* u, bool counter) {
-	u->hp -= atk;
+	int damage = atk;
 	switch (skill.skill) {
 	case SKILL_BLUETIP_SCORPION:
-		if (u->tribe != TRIBE_GENERAL) { u->hp -= atk; }
+		if (u->tribe != TRIBE_GENERAL) { damage += atk; }
 		break;
 	}
+	u->hp -= damage;
+	game->em.sendOnAttack(this, u);
+	game->em.sendOnDamage(this, u, damage);
 	if (!counter) {
 		moved = true;
 		attacked = true;
 		if (u->canAttack(this)) { u->attack(this, true); }
 	}
-	game->em.sendOnDamage(this, u);
 }
 
 //When a unit is summoned
@@ -350,7 +360,7 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 			case SKILL_BLISTERING_SKORN:
 				for (int a = 0; a < game->unit.size(); ++a) {
 					--game->unit[a]->hp;
-					game->em.sendOnDamage(this, game->unit[a]);
+					game->em.sendOnDamage(this, game->unit[a], 1);
 				}
 				break;
 			case SKILL_BLOODTEAR_ALCHEMIST:
@@ -456,22 +466,36 @@ void Unit::onDeath(Unit* u) {
 }
 
 //When a unit attacks
-void Unit::onAttack(Unit* u1, Unit* u2) {}
+void Unit::onAttack(Unit* u1, Unit* u2) {
+
+}
 
 //When a unit is damaged
-void Unit::onDamage(Unit* u1, Unit* u2) {
+void Unit::onDamage(Unit* u1, Unit* u2, int damage) {
 
 	//If on board
 	if (tile != nullptr) {
-		switch (skill.skill) {
-		case SKILL_CHAOS_ELEMENTAL:
-			if (u2 == this) {
-				BoardTile* t = game->map.getRandom();
-				if (t != nullptr) { setPos(t->pos.x, t->pos.y); }
-				//onMove
+
+		//If this dealt damage
+		if (u1 == this) {
+			switch (skill.skill) {
+			case SKILL_CAPTAIN_HANK_HART:
+				if (hp > 0) { hp = min(hp + damage, hpMax); }
+				break;
 			}
-			break;
 		}
+
+		//If this was damaged
+		if (u2 == this) {
+			switch (skill.skill) {
+			case SKILL_CHAOS_ELEMENTAL:
+					BoardTile* t = game->map.getRandom();
+					if (t != nullptr) { setPos(t->pos.x, t->pos.y); }
+					//onMove
+				break;
+			}
+		}
+
 	}
 
 	//If in hand/deck
@@ -582,7 +606,7 @@ void Unit::callback(BoardTile* t) {
 	case SKILL_BLOODTEAR_ALCHEMIST:
 		if (t->unit != nullptr) {
 			--t->unit->hp;
-			game->em.sendOnDamage(this, t->unit);
+			game->em.sendOnDamage(this, t->unit, 1);
 		}
 		break;
 	case SKILL_GHOST_LYNX:

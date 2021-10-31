@@ -82,7 +82,7 @@ public:
 	virtual void onSummon(Unit* u, bool actionBar) {}
 	virtual void onDeath(Unit* u) {}
 	virtual void onAttack(Unit* u1, Unit* u2) {}
-	virtual void onDamage(Unit* u1, Unit* u2) {}
+	virtual void onDamage(Unit* u1, Unit* u2, int damage) {}
 	virtual void onDraw(Card* c, bool fromDeck) {}
 	virtual bool onReplace() { return true; }
 	virtual void onTurnEnd(Player* p) {}
@@ -120,11 +120,12 @@ public:
 	bool canAttack(Unit* u);
 	bool isMoveable();
 	bool isFlying();
+	bool isRanged();
 	void attack(Unit* u, bool counter);
 	void onSummon(Unit* u, bool actionBar);
 	void onDeath(Unit* u);
 	void onAttack(Unit* u1, Unit* u2);
-	void onDamage(Unit* u1, Unit* u2);
+	void onDamage(Unit* u1, Unit* u2, int damage);
 	void onDraw(Card* c, bool fromDeck);
 	bool onReplace();
 	void onTurnEnd(Player* p);

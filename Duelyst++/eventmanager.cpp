@@ -32,12 +32,12 @@ void EventManager::sendOnAttack(Unit* u1, Unit* u2) {
 }
 
 //Send onDamage events
-void EventManager::sendOnDamage(Unit* u1, Unit* u2) {
-	for (int a = 0; a < game->unit.size(); ++a) { game->unit[a]->onDamage(u1, u2); }
-	for (int a = 0; a < game->player[0].hand.size(); ++a) { game->player[0].hand[a]->onDamage(u1, u2); }
-	for (int a = 0; a < game->player[0].deck.size(); ++a) { game->player[0].deck[a]->onDamage(u1, u2); }
-	for (int a = 0; a < game->player[1].hand.size(); ++a) { game->player[1].hand[a]->onDamage(u1, u2); }
-	for (int a = 0; a < game->player[1].deck.size(); ++a) { game->player[1].deck[a]->onDamage(u1, u2); }
+void EventManager::sendOnDamage(Unit* u1, Unit* u2, int damage) {
+	for (int a = 0; a < game->unit.size(); ++a) { game->unit[a]->onDamage(u1, u2, damage); }
+	for (int a = 0; a < game->player[0].hand.size(); ++a) { game->player[0].hand[a]->onDamage(u1, u2, damage); }
+	for (int a = 0; a < game->player[0].deck.size(); ++a) { game->player[0].deck[a]->onDamage(u1, u2, damage); }
+	for (int a = 0; a < game->player[1].hand.size(); ++a) { game->player[1].hand[a]->onDamage(u1, u2, damage); }
+	for (int a = 0; a < game->player[1].deck.size(); ++a) { game->player[1].deck[a]->onDamage(u1, u2, damage); }
 }
 
 //Send onDraw events
