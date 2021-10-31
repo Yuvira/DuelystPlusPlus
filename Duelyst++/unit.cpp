@@ -305,6 +305,18 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 				++player->replaces;
 				player->general->addEffect(EFFECT_AETHERMASTER);
 				break;
+			case SKILL_ALCUIN_LOREMASTER:
+				if (player->hand.size() < 6) {
+					for (int a = game->grave.size() - 1; a > -1; --a) {
+						if (game->grave[a]->type == CARD_SPELL) {
+							Spell* s = new Spell(*(dynamic_cast<Spell*>(game->grave[a]->original)));
+							game->setContext(s, player);
+							player->hand.push_back(s);
+							break;
+						}
+					}
+				}
+				break;
 			case SKILL_AZURE_HERALD:
 				player->general->hp = min(player->general->hp + 3, player->general->hpMax);
 				break;
@@ -356,6 +368,7 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 				if (u->player == player) {
 					switch (u->skill.skill) {
 					case SKILL_ABJUDICATOR:
+					case SKILL_ALCUIN_LOREMASTER:
 					case SKILL_AZURE_HERALD:
 					case SKILL_BLAZE_HOUND:
 					case SKILL_BLISTERING_SKORN:

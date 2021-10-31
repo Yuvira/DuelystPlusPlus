@@ -12,6 +12,8 @@ CardList::CardList() {
 	uList.back().skill = el.find(SKILL_ABJUDICATOR);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_ARCANYST, 2, 1, 3, "aethermaster", "Aethermaster"));
 	uList.back().skill = el.find(SKILL_AETHERMASTER);
+	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_ARCANYST, 3, 3, 1, "loremaster", "Alcuin Loremaster"));
+	uList.back().skill = el.find(SKILL_ALCUIN_LOREMASTER);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 3, "arakiheadhunter", "Araki Headhunter"));
 	uList.back().skill = el.find(SKILL_ARAKI_HEADHUNTER);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 7, 7, 6, "astralcrusader", "Astral Crusader"));

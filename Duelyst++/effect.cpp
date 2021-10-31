@@ -102,6 +102,8 @@ EffectList::EffectList() {
 	skillList.back().generateSprite("You may replace an additional card|each turn");
 	effectList.push_back(Effect(EFFECT_AETHERMASTER));
 	effectList.back().generateSprite("Aethermaster|You may replace 1 extra card(s) per turn");
+	skillList.push_back(Skill(SKILL_ALCUIN_LOREMASTER));
+	skillList.back().generateSprite("{Opening Gambit}: Put a copy of the|most recently cast spell into your|action bar");
 	skillList.push_back(Skill(SKILL_ARAKI_HEADHUNTER));
 	skillList.back().generateSprite("Whenever you summon a minion with|Opening Gambit from your action bar,|gain +2 Attack");
 	buffList.push_back(Buff(BUFF_ARAKI_HEADHUNTER, 0, 2, 0, true));
