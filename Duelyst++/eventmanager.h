@@ -17,6 +17,7 @@ public:
 	void sendOnDeath(Unit* u);
 	void sendOnAttack(Unit* u1, Unit* u2);
 	void sendOnDamage(Unit* u1, Unit* u2);
+	void sendOnDraw(Card* c, bool fromDeck);
 	void sendOnTurnEnd(Player* p);
 	void sendOnTurnStart(Player* p);
 	Game* game;

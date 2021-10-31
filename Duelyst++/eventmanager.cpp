@@ -40,6 +40,15 @@ void EventManager::sendOnDamage(Unit* u1, Unit* u2) {
 	for (int a = 0; a < game->player[1].deck.size(); ++a) { game->player[1].deck[a]->onDamage(u1, u2); }
 }
 
+//Send onDraw events
+void EventManager::sendOnDraw(Card* c, bool fromDeck) {
+	for (int a = 0; a < game->unit.size(); ++a) { game->unit[a]->onDraw(c, fromDeck); }
+	for (int a = 0; a < game->player[0].hand.size(); ++a) { game->player[0].hand[a]->onDraw(c, fromDeck); }
+	for (int a = 0; a < game->player[0].deck.size(); ++a) { game->player[0].deck[a]->onDraw(c, fromDeck); }
+	for (int a = 0; a < game->player[1].hand.size(); ++a) { game->player[1].hand[a]->onDraw(c, fromDeck); }
+	for (int a = 0; a < game->player[1].deck.size(); ++a) { game->player[1].deck[a]->onDraw(c, fromDeck); }
+}
+
 //Send onTurnEnd events
 void EventManager::sendOnTurnEnd(Player* p) {
 	for (int a = 0; a < game->unit.size(); ++a) { game->unit[a]->onTurnEnd(p); }

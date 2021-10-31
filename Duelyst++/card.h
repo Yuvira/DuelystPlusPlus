@@ -83,6 +83,7 @@ public:
 	virtual void onDeath(Unit* u) {}
 	virtual void onAttack(Unit* u1, Unit* u2) {}
 	virtual void onDamage(Unit* u1, Unit* u2) {}
+	virtual void onDraw(Card* c, bool fromDeck) {}
 	virtual bool onReplace() { return true; }
 	virtual void onTurnEnd(Player* p) {}
 	virtual void onTurnStart(Player* p) {}
@@ -107,9 +108,9 @@ public:
 	void render(Renderer& rm);
 	void setPos(int x, int y);
 	void addBuff(eBuff b);
-	void removeBuff(eBuff b);
+	void removeBuff(eBuff b, bool allStacks);
 	void addEffect(eEffect e);
-	void removeEffect(eEffect e);
+	void removeEffect(eEffect e, bool allStacks);
 	void update(bool& r);
 	void updateStatBuffs();
 	void updateStatSprites();
@@ -124,6 +125,7 @@ public:
 	void onDeath(Unit* u);
 	void onAttack(Unit* u1, Unit* u2);
 	void onDamage(Unit* u1, Unit* u2);
+	void onDraw(Card* c, bool fromDeck);
 	bool onReplace();
 	void onTurnEnd(Player* p);
 	void onTurnStart(Player* p);
@@ -149,7 +151,7 @@ public:
 	Spell(eFaction = FACTION_NEUTRAL,  eTarget = TARGET_ANY, int = 0, std::string = "", std::string = "???");
 	~Spell();
 	void addBuff(eBuff b);
-	void removeBuff(eBuff b);
+	void removeBuff(eBuff b, bool allStacks);
 	void updateStatBuffs();
 	void generateDetails();
 	void updateDetailStats();

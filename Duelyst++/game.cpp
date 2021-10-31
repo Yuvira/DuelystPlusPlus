@@ -36,6 +36,10 @@ Game::Game() {
 	for (int a = 0; a < 3; ++a) { light.buffer[a].Char.AsciiChar = c[a + 8]; }
 	light.setCol(COLOR_LTBLUE);
 
+	//Set opponents
+	player[0].enemy = &player[1];
+	player[1].enemy = &player[0];
+
 	//Initialize players
 	for (int a = 0; a < 2; ++a) {
 		player[a].preset(cl, this);
@@ -317,7 +321,7 @@ void Game::changeTurn(bool t) {
 		if (selectable.size() > 0) { return; }
 	}
 
-	//Draw and reset replace
+	//Draw and reset replaces
 	if (turnCount > 0) { player[turn].draw(); }
 	player[turn].replaces = 1;
 

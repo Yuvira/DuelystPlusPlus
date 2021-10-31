@@ -108,6 +108,12 @@ EffectList::EffectList() {
 	skillList.back().generateSprite("Whenever you summon a minion with|Opening Gambit from your action bar,|gain +2 Attack");
 	buffList.push_back(Buff(BUFF_ARAKI_HEADHUNTER, 0, 2, 0, true));
 	buffList.back().generateSprite("Headhunter");
+	skillList.push_back(Skill(SKILL_ARCHON_SPELLBINDER));
+	skillList.back().generateSprite("Your opponent's non-Bloodborn spells|cost 1 more to cast");
+	effectList.push_back(Effect(EFFECT_ARCHON_SPELLBINDER));
+	effectList.back().generateSprite("Spellbound|Your non-Bloodborn spells cost 1 more");
+	buffList.push_back(Buff(BUFF_ARCHON_SPELLBINDER, 1, 0, 0, true));
+	buffList.back().generateSprite("Spellbound");
 	skillList.push_back(Skill(SKILL_ASTRAL_CRUSADER));
 	skillList.back().generateSprite("Whenever you replace this card, it|costs 3 less and gains +3/+3");
 	buffList.push_back(Buff(BUFF_ASTRAL_CRUSADER, -3, 3, 3, true));
@@ -154,6 +160,8 @@ EffectList::EffectList() {
 	spellList.back().generateSprite("Destroy an enemy minion and summon|a 1/1 Wraithling on that space");
 	spellList.push_back(SpellEffect(SPELL_DARKFIRE_SACRIFICE));
 	spellList.back().generateSprite("Destroy a friendly minion. Your next|minion costs 2 less");
+	effectList.push_back(Effect(EFFECT_DARKFIRE_SACRIFICE));
+	effectList.back().generateSprite("Darkfire Sacrifice|Your next minion costs 2 less");
 	buffList.push_back(Buff(BUFF_DARKFIRE_SACRIFICE, -2, 0, 0, true));
 	buffList.back().generateSprite("Darkfire Sacrifice");
 

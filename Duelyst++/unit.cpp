@@ -65,11 +65,17 @@ void Unit::addBuff(eBuff b) {
 }
 
 //Remove buff from list
-void Unit::removeBuff(eBuff b) {
+void Unit::removeBuff(eBuff b, bool allStacks) {
 	Buff _b = game->cl.el.find(b);
 	for (int a = 0; a < buff.size(); ++a) {
 		if (buff[a].buff == b) {
-			buff.erase(buff.begin() + a);
+			if (allStacks) { buff.erase(buff.begin() + a); }
+			else {
+				buff[a].cost -= _b.cost;
+				buff[a].atk -= _b.atk;
+				buff[a].hp -= _b.hp;
+				if (buff[a].cost == 0 && buff[a].atk == 0 && buff[a].hp == 0) { buff.erase(buff.begin() + a); }
+			}
 			break;
 		}
 	}
@@ -89,12 +95,15 @@ void Unit::addEffect(eEffect e) {
 }
 
 //Remove effect from list
-void Unit::removeEffect(eEffect e) {
+void Unit::removeEffect(eEffect e, bool allStacks) {
 	Effect _e = game->cl.el.find(e);
 	for (int a = 0; a < effect.size(); ++a) {
 		if (effect[a].effect == e) {
-			effect[a].count -= _e.count;
-			if (effect[a].count == 0) { effect.erase(effect.begin() + a); }
+			if (allStacks) { effect.erase(effect.begin() + a); }
+			else {
+				effect[a].count -= _e.count;
+				if (effect[a].count == 0) { effect.erase(effect.begin() + a); }
+			}
 			break;
 		}
 	}
@@ -213,6 +222,12 @@ void Unit::drawDetails(Renderer& rm, int& y) {
 		case EFFECT_AETHERMASTER:
 			effect[a].sprite[1].buffer[16].Char.AsciiChar = std::to_string(effect[a].count)[0];
 			break;
+		case EFFECT_ARCHON_SPELLBINDER:
+			effect[a].sprite[1].buffer[31].Char.AsciiChar = std::to_string(effect[a].count)[0];
+			break;
+		case EFFECT_DARKFIRE_SACRIFICE:
+			effect[a].sprite[1].buffer[23].Char.AsciiChar = std::to_string(effect[a].count * 2)[0];
+			break;
 		}
 		rm.render(effect[a].sprite[0], 72, y);
 		rm.render(effect[a].sprite[1], 72, y + 1);
@@ -308,19 +323,27 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 				}
 				break;
 			case SKILL_AETHERMASTER:
-				++player->replaces;
 				player->general->addEffect(EFFECT_AETHERMASTER);
+				++player->replaces;
 				break;
 			case SKILL_ALCUIN_LOREMASTER:
-				if (player->hand.size() < 6) {
-					for (int a = game->grave.size() - 1; a > -1; --a) {
-						if (game->grave[a]->type == CARD_SPELL) {
-							Spell* s = new Spell(*(dynamic_cast<Spell*>(game->grave[a]->original)));
-							game->setContext(s, player);
-							player->hand.push_back(s);
-							//onDraw
-							break;
-						}
+				for (int a = game->grave.size() - 1; a > -1; --a) {
+					if (game->grave[a]->type == CARD_SPELL) {
+						player->addToHand(game->grave[a]->original, true);
+						break;
+					}
+				}
+				break;
+			case SKILL_ARCHON_SPELLBINDER:
+				player->enemy->general->addEffect(EFFECT_ARCHON_SPELLBINDER);
+				for (int a = 0; a < player->enemy->hand.size(); ++a) {
+					if (player->enemy->hand[a]->type == CARD_SPELL) {
+						dynamic_cast<Spell*>(player->enemy->hand[a])->addBuff(BUFF_ARCHON_SPELLBINDER);
+					}
+				}
+				for (int a = 0; a < player->enemy->deck.size(); ++a) {
+					if (player->enemy->deck[a]->type == CARD_SPELL) {
+						dynamic_cast<Spell*>(player->enemy->deck[a])->addBuff(BUFF_ARCHON_SPELLBINDER);
 					}
 				}
 				break;
@@ -331,7 +354,6 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 			case SKILL_BLAZE_HOUND:
 				game->player[0].draw();
 				game->player[1].draw();
-				//onDraw
 				break;
 			case SKILL_BLISTERING_SKORN:
 				for (int a = 0; a < game->unit.size(); ++a) {
@@ -349,29 +371,12 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 				break;
 			}
 
-			//Buffs
-			for (int a = 0; a < buff.size(); ++a) {
-				switch (buff[a].buff) {
-				case BUFF_DARKFIRE_SACRIFICE:
-					removeBuff(BUFF_DARKFIRE_SACRIFICE);
-					for (int b = 0; b < player->hand.size(); ++b) {
-						if (player->hand[b]->type == CARD_UNIT) {
-							dynamic_cast<Unit*>(player->hand[b])->removeBuff(BUFF_DARKFIRE_SACRIFICE);
-						}
-					}
-					for (int b = 0; b < player->deck.size(); ++b) {
-						if (player->deck[b]->type == CARD_UNIT) {
-							dynamic_cast<Unit*>(player->deck[b])->removeBuff(BUFF_DARKFIRE_SACRIFICE);
-						}
-					}
-					break;
-				}
-			}
-
 		}
 
 		//When something else is summoned
 		else {
+
+			//Skills
 			switch (skill.skill) {
 			case SKILL_ARAKI_HEADHUNTER:
 				if (u->player == player) {
@@ -389,6 +394,27 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 				}
 				break;
 			}
+
+			//Effects
+			for (int a = 0; a < effect.size(); ++a) {
+				switch (effect[a].effect) {
+				case EFFECT_DARKFIRE_SACRIFICE:
+					removeEffect(EFFECT_DARKFIRE_SACRIFICE, true);
+					u->removeBuff(BUFF_DARKFIRE_SACRIFICE, true);
+					for (int b = 0; b < player->hand.size(); ++b) {
+						if (player->hand[b]->type == CARD_UNIT) {
+							dynamic_cast<Unit*>(player->hand[b])->removeBuff(BUFF_DARKFIRE_SACRIFICE, true);
+						}
+					}
+					for (int b = 0; b < player->deck.size(); ++b) {
+						if (player->deck[b]->type == CARD_UNIT) {
+							dynamic_cast<Unit*>(player->deck[b])->removeBuff(BUFF_DARKFIRE_SACRIFICE, true);
+						}
+					}
+					break;
+				}
+			}
+
 		}
 
 	}
@@ -405,8 +431,21 @@ void Unit::onDeath(Unit* u) {
 		if (u == this) {
 			switch (skill.skill) {
 			case SKILL_AETHERMASTER:
+				player->general->removeEffect(EFFECT_AETHERMASTER, false);
 				player->replaces = max(player->replaces - 1, 0);
-				player->general->removeEffect(EFFECT_AETHERMASTER);
+				break;
+			case SKILL_ARCHON_SPELLBINDER:
+				player->enemy->general->removeEffect(EFFECT_ARCHON_SPELLBINDER, false);
+				for (int a = 0; a < player->enemy->hand.size(); ++a) {
+					if (player->enemy->hand[a]->type == CARD_SPELL) {
+						dynamic_cast<Spell*>(player->enemy->hand[a])->removeBuff(BUFF_ARCHON_SPELLBINDER, false);
+					}
+				}
+				for (int a = 0; a < player->enemy->deck.size(); ++a) {
+					if (player->enemy->deck[a]->type == CARD_SPELL) {
+						dynamic_cast<Spell*>(player->enemy->deck[a])->removeBuff(BUFF_ARCHON_SPELLBINDER, false);
+					}
+				}
 				break;
 			case SKILL_AZURE_HORN_SHAMAN:
 				for (int a = max(tile->pos.x - 1, 0); a < min(tile->pos.x + 2, 9); ++a) {
@@ -460,6 +499,42 @@ void Unit::onDamage(Unit* u1, Unit* u2) {
 
 }
 
+//When a card is drawn
+void Unit::onDraw(Card* c, bool fromDeck) {
+
+	//If on board
+	if (tile != nullptr) {
+
+		//Skills
+		switch (skill.skill) {
+		case SKILL_ARCHON_SPELLBINDER:
+			if (!fromDeck) {
+				if (c->player != player && c->type == CARD_SPELL) {
+					dynamic_cast<Spell*>(c)->addBuff(BUFF_ARCHON_SPELLBINDER);
+				}
+			}
+			break;
+		}
+
+		//Effects
+		for (int a = 0; a < effect.size(); ++a) {
+			switch (effect[a].effect) {
+			case EFFECT_DARKFIRE_SACRIFICE:
+				if (!fromDeck) {
+					if (c->player == player && c->type == CARD_UNIT) {
+						for (int b = 0; b < effect[a].count; ++b) {
+							dynamic_cast<Unit*>(c)->addBuff(BUFF_DARKFIRE_SACRIFICE);
+						}
+					}
+				}
+				break;
+			}
+		}
+
+	}
+
+}
+
 //When this card is replaced
 bool Unit::onReplace() {
 	switch (skill.skill) {
@@ -490,15 +565,9 @@ void Unit::onTurnEnd(Player* p) {
 					}
 				}
 				break;
-			}
-
-			//Buffs
-			for (int a = 0; a < effect.size(); ++a) {
-				switch (effect[a].effect) {
-				case EFFECT_AETHERMASTER:
-					player->replaces += effect[a].count;
-					break;
-				}
+			case SKILL_AETHERMASTER:
+				++player->replaces;
+				break;
 			}
 
 		}
@@ -508,7 +577,7 @@ void Unit::onTurnEnd(Player* p) {
 	//Anywhere
 	switch (skill.skill) {
 	case SKILL_CHAKKRAM:
-		if (p == player) { removeBuff(BUFF_CHAKKRAM); }
+		if (p == player) { removeBuff(BUFF_CHAKKRAM, true); }
 		break;
 	}
 

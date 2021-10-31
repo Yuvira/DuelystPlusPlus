@@ -17,6 +17,7 @@ public:
 	void render(Renderer& rm, bool left);
 	void shuffle();
 	void draw();
+	void addToHand(Card* c, bool cast);
 	void replace(int i);
 	int mana;
 	int manaMax;
@@ -25,6 +26,7 @@ public:
 	Sprite uiCrystal[9];
 	Unit* general;
 	Game* game;
+	Player* enemy;
 	std::vector<Card*> deck;
 	std::vector<Card*> hand;
 };

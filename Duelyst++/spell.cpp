@@ -32,11 +32,15 @@ void Spell::addBuff(eBuff b) {
 }
 
 //Remove buff
-void Spell::removeBuff(eBuff b) {
+void Spell::removeBuff(eBuff b, bool allStacks) {
 	Buff _b = game->cl.el.find(b);
 	for (int a = 0; a < buff.size(); ++a) {
 		if (buff[a].buff == b) {
-			buff.erase(buff.begin() + a);
+			if (allStacks) { buff.erase(buff.begin() + a); }
+			else {
+				buff[a].cost -= _b.cost;
+				if (buff[a].cost == 0) { buff.erase(buff.begin() + a); }
+			}
 			break;
 		}
 	}
@@ -153,6 +157,7 @@ void Spell::onUse(BoardTile* t) {
 	case SPELL_DARKFIRE_SACRIFICE:
 		if (t->unit != nullptr) {
 			t->unit->hp = -999;
+			player->general->addEffect(EFFECT_DARKFIRE_SACRIFICE);
 			for (int a = 0; a < player->hand.size(); ++a) {
 				if (player->hand[a]->type == CARD_UNIT) {
 					dynamic_cast<Unit*>(player->hand[a])->addBuff(BUFF_DARKFIRE_SACRIFICE);

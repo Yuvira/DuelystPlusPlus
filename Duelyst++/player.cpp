@@ -9,12 +9,11 @@ Player::~Player() {}
 void Player::preset(CardList& cl, Game* g) {
 	game = g;
 	deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Argeon Highmayne")))));
-	for (int a = 0; a < 2; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Abjudicator"))))); }
-	for (int a = 0; a < 2; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Araki Headhunter"))))); }
+	for (int a = 0; a < 2; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Archon Spellbinder"))))); }
 	for (int a = 0; a < 2; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Alcuin Loremaster"))))); }
+	for (int a = 0; a < 2; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Aethermaster"))))); }
 	for (int a = 0; a < 2; ++a) { deck.push_back(new Spell(*(dynamic_cast<Spell*>(cl.find("Darkfire Sacrifice"))))); }
 	for (int a = 0; a < 2; ++a) { deck.push_back(new Spell(*(dynamic_cast<Spell*>(cl.find("Consuming Rebirth"))))); }
-	for (int a = 0; a < 2; ++a) { deck.push_back(new Spell(*(dynamic_cast<Spell*>(cl.find("Daemonic Lure"))))); }
 	for (int a = 0; a < deck.size(); ++a) {
 		deck[a]->game = game;
 		deck[a]->player = this;
@@ -78,9 +77,32 @@ void Player::shuffle() {
 //Draw card
 void Player::draw() {
 	if (deck.size() > 0) {
-		if (hand.size() < 6) { hand.push_back(deck[0]); }
-		else { game->grave.push_back(deck[0]); }
+		if (hand.size() < 6) {
+			hand.push_back(deck[0]);
+			game->em.sendOnDraw(hand.back(), true);
+		}
+		else {
+			game->grave.push_back(deck[0]);
+			game->em.sendOnDraw(game->grave.back(), true);
+		}
 		deck.erase(deck.begin());
+	}
+}
+
+//Add card to hand
+void Player::addToHand(Card* c, bool cast) {
+	if (cast) {
+		if (c->type == CARD_UNIT) { c = new Unit(*(dynamic_cast<Unit*>(c))); }
+		else if (c->type == CARD_SPELL) { c = new Spell(*(dynamic_cast<Spell*>(c))); }
+	}
+	game->setContext(c, this);
+	if (hand.size() < 6) {
+		hand.push_back(c);
+		game->em.sendOnDraw(hand.back(), false);
+	}
+	else {
+		game->grave.push_back(c);
+		game->em.sendOnDraw(game->grave.back(), false);
 	}
 }
 
