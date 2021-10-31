@@ -219,12 +219,6 @@ void Unit::drawDetails(Renderer& rm, int& y) {
 	}
 	for (int a = 0; a < effect.size(); ++a) {
 		switch (effect[a].effect) {
-		case EFFECT_AETHERMASTER:
-			effect[a].sprite[1].buffer[16].Char.AsciiChar = std::to_string(effect[a].count)[0];
-			break;
-		case EFFECT_ARCHON_SPELLBINDER:
-			effect[a].sprite[1].buffer[31].Char.AsciiChar = std::to_string(effect[a].count)[0];
-			break;
 		case EFFECT_DARKFIRE_SACRIFICE:
 			effect[a].sprite[1].buffer[23].Char.AsciiChar = std::to_string(effect[a].count * 2)[0];
 			break;
@@ -323,7 +317,6 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 				}
 				break;
 			case SKILL_AETHERMASTER:
-				player->general->addEffect(EFFECT_AETHERMASTER);
 				++player->replaces;
 				break;
 			case SKILL_ALCUIN_LOREMASTER:
@@ -335,7 +328,6 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 				}
 				break;
 			case SKILL_ARCHON_SPELLBINDER:
-				player->enemy->general->addEffect(EFFECT_ARCHON_SPELLBINDER);
 				for (int a = 0; a < player->enemy->hand.size(); ++a) {
 					if (player->enemy->hand[a]->type == CARD_SPELL) {
 						dynamic_cast<Spell*>(player->enemy->hand[a])->addBuff(BUFF_ARCHON_SPELLBINDER);
@@ -431,11 +423,9 @@ void Unit::onDeath(Unit* u) {
 		if (u == this) {
 			switch (skill.skill) {
 			case SKILL_AETHERMASTER:
-				player->general->removeEffect(EFFECT_AETHERMASTER, false);
 				player->replaces = max(player->replaces - 1, 0);
 				break;
 			case SKILL_ARCHON_SPELLBINDER:
-				player->enemy->general->removeEffect(EFFECT_ARCHON_SPELLBINDER, false);
 				for (int a = 0; a < player->enemy->hand.size(); ++a) {
 					if (player->enemy->hand[a]->type == CARD_SPELL) {
 						dynamic_cast<Spell*>(player->enemy->hand[a])->removeBuff(BUFF_ARCHON_SPELLBINDER, false);

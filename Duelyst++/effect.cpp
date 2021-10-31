@@ -100,8 +100,6 @@ EffectList::EffectList() {
 	buffList.back().generateSprite("Abjudicator");
 	skillList.push_back(Skill(SKILL_AETHERMASTER));
 	skillList.back().generateSprite("You may replace an additional card|each turn");
-	effectList.push_back(Effect(EFFECT_AETHERMASTER));
-	effectList.back().generateSprite("Aethermaster|You may replace 1 extra card(s) per turn");
 	skillList.push_back(Skill(SKILL_ALCUIN_LOREMASTER));
 	skillList.back().generateSprite("{Opening Gambit}: Put a copy of the|most recently cast spell into your|action bar");
 	skillList.push_back(Skill(SKILL_ARAKI_HEADHUNTER));
@@ -110,8 +108,6 @@ EffectList::EffectList() {
 	buffList.back().generateSprite("Headhunter");
 	skillList.push_back(Skill(SKILL_ARCHON_SPELLBINDER));
 	skillList.back().generateSprite("Your opponent's non-Bloodborn spells|cost 1 more to cast");
-	effectList.push_back(Effect(EFFECT_ARCHON_SPELLBINDER));
-	effectList.back().generateSprite("Spellbound|Your non-Bloodborn spells cost 1 more");
 	buffList.push_back(Buff(BUFF_ARCHON_SPELLBINDER, 1, 0, 0, true));
 	buffList.back().generateSprite("Spellbound");
 	skillList.push_back(Skill(SKILL_ASTRAL_CRUSADER));
