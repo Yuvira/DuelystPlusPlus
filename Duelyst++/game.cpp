@@ -459,6 +459,7 @@ void Game::moveUnit() {
 			activeUnit->setPos(selectable[sPos]->pos.x, selectable[sPos]->pos.y);
 			activeUnit->moved = true;
 			pos = selectable[sPos]->pos;
+			em.sendOnMove(activeUnit, false);
 		}
 		moveable.clear();
 		attackable.clear();

@@ -180,7 +180,7 @@ void Spell::callback(BoardTile* t) {
 		u->setPos(t->pos.x, t->pos.y);
 		--u->hp;
 		game->em.sendOnDamage(nullptr, u, 1);
-		//onMove
+		game->em.sendOnMove(u, true);
 		break;
 	}
 	game->callback = Callback();

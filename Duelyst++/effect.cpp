@@ -131,6 +131,8 @@ EffectList::EffectList() {
 	skillList.back().generateSprite("At the end of your turn, give other|friendly minions +1 Health");
 	buffList.push_back(Buff(BUFF_BASTION, 0, 0, 1, true));
 	buffList.back().generateSprite("Bastion");
+	skillList.push_back(Skill(SKILL_BLACK_LOCUST));
+	skillList.back().generateSprite("{Flying}|After this minion moves, summon|a Black Locust nearby");
 	skillList.push_back(Skill(SKILL_BLAZE_HOUND));
 	skillList.back().generateSprite("{Opening Gambit}: Both players draw|a card");
 	skillList.push_back(Skill(SKILL_BLISTERING_SKORN));

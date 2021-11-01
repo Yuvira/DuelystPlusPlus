@@ -30,6 +30,8 @@ CardList::CardList() {
 	uList.back().skill = el.find(SKILL_AZURE_HORN_SHAMAN);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_STRUCTURE, 3, 0, 5, "bastion", "Bastion"));
 	uList.back().skill = el.find(SKILL_BASTION);
+	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 4, 2, 2, "blacklocust", "Black Locust"));
+	uList.back().skill = el.find(SKILL_BLACK_LOCUST);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 3, 4, 3, "blazehound", "Blaze Hound"));
 	uList.back().skill = el.find(SKILL_BLAZE_HOUND);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 4, 4, 5, "blisteringskorn", "Blistering Skorn"));

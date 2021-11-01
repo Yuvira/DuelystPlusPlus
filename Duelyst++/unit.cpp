@@ -272,6 +272,7 @@ bool Unit::isMoveable() {
 bool Unit::isFlying() {
 	switch (skill.skill) {
 	case SKILL_FLYING:
+	case SKILL_BLACK_LOCUST:
 		return true;
 	}
 	return false;
@@ -541,9 +542,9 @@ void Unit::onDamage(Unit* u1, Unit* u2, int damage) {
 		if (u2 == this) {
 			switch (skill.skill) {
 			case SKILL_CHAOS_ELEMENTAL:
-					BoardTile* t = game->map.getRandom();
-					if (t != nullptr) { setPos(t->pos.x, t->pos.y); }
-					//onMove
+				BoardTile* t = game->map.getRandom();
+				if (t != nullptr) { setPos(t->pos.x, t->pos.y); }
+				game->em.sendOnMove(this, true);
 				break;
 			}
 		}
@@ -561,6 +562,32 @@ void Unit::onDamage(Unit* u1, Unit* u2, int damage) {
 			}
 			break;
 		}
+	}
+
+}
+
+//When a minion moves or is moved
+void Unit::onMove(Unit* u, bool byEffect) {
+
+	//If on board
+	if (tile != nullptr) {
+
+		//If this moved
+		if (u == this) {
+			switch (skill.skill) {
+			case SKILL_BLACK_LOCUST:
+				if (!byEffect) {
+					BoardTile* t = game->map.getRandomNear(tile->pos.x, tile->pos.y);
+					if (t != nullptr) {
+						Unit* u2 = new Unit(*(dynamic_cast<Unit*>(original)));
+						game->setContext(u2, player);
+						game->summon(u2, t->pos.x, t->pos.y, false);
+					}
+				}
+				break;
+			}
+		}
+
 	}
 
 }
@@ -664,7 +691,7 @@ void Unit::callback(BoardTile* t) {
 	case SKILL_GHOST_LYNX:
 		BoardTile* t2 = game->map.getRandom();
 		if (t2 != nullptr) { t->unit->setPos(t2->pos.x, t2->pos.y); }
-		//onMove
+		game->em.sendOnMove(t2->unit, true);
 		break;
 	}
 	game->callback = Callback();
