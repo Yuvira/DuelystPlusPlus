@@ -288,6 +288,31 @@ bool Unit::isRanged() {
 	return false;
 }
 
+//Does unit have provoke
+bool Unit::isProvoking() {
+	switch (skill.skill) {
+	case SKILL_BLOOD_TAURA:
+		return true;
+	}
+	return false;
+}
+
+//Is unit being provoked
+bool Unit::isProvoked() {
+	for (int a = max(tile->pos.x - 1, 0); a < min(tile->pos.x + 2, 9); ++a) {
+		for (int b = max(tile->pos.y - 1, 0); b < min(tile->pos.y + 2, 5); ++b) {
+			if (game->map.tile[a][b].unit != nullptr) {
+				if (game->map.tile[a][b].unit->player != player) {
+					if (game->map.tile[a][b].unit->isProvoking()) {
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
+
 //Attack enemy
 void Unit::attack(Unit* u, bool counter) {
 	int damage = atk;
@@ -349,7 +374,7 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 					break;
 				case SKILL_AZURE_HERALD:
 					player->general->hp = min(player->general->hp + 3, player->general->hpMax);
-					//onHeal
+					game->em.sendOnHeal(this, player->general, 3);
 					break;
 				case SKILL_BLAZE_HOUND:
 					game->player[0].draw();
@@ -554,11 +579,34 @@ void Unit::onDamage(Unit* u1, Unit* u2, int damage) {
 	//If in hand/deck
 	else {
 		switch (skill.skill) {
+		case SKILL_BLOOD_TAURA:
+			if (u2 == player->general) {
+				removeBuff(BUFF_BLOOD_TAURA, true);
+				for (int a = 0; a < 25 - player->general->hp; ++a) { addBuff(BUFF_BLOOD_TAURA); }
+			}
+			break;
 		case SKILL_CHAKKRAM:
 			if (u2 == player->general) {
 				if (&game->player[game->turn] != player) {
 					addBuff(BUFF_CHAKKRAM);
 				}
+			}
+			break;
+		}
+	}
+
+}
+
+//When a unit is healed
+void Unit::onHeal(Unit* u1, Unit* u2, int heal) {
+
+	//If in hand/deck
+	if (tile == nullptr) {
+		switch (skill.skill) {
+		case SKILL_BLOOD_TAURA:
+			if (u2 == player->general) {
+				removeBuff(BUFF_BLOOD_TAURA, true);
+				for (int a = 0; a < 25 - player->general->hp; ++a) { addBuff(BUFF_BLOOD_TAURA); }
 			}
 			break;
 		}

@@ -84,6 +84,7 @@ public:
 	virtual void onDeath(Unit* u) {}
 	virtual void onAttack(Unit* u1, Unit* u2) {}
 	virtual void onDamage(Unit* u1, Unit* u2, int damage) {}
+	virtual void onHeal(Unit* u1, Unit* u2, int heal) {}
 	virtual void onMove(Unit* u, bool byEffect) {}
 	virtual void onDraw(Card* c, bool fromDeck) {}
 	virtual bool onReplace() { return true; }
@@ -123,11 +124,14 @@ public:
 	bool isMoveable();
 	bool isFlying();
 	bool isRanged();
+	bool isProvoking();
+	bool isProvoked();
 	void attack(Unit* u, bool counter);
 	void onSummon(Unit* u, bool actionBar);
 	void onDeath(Unit* u);
 	void onAttack(Unit* u1, Unit* u2);
 	void onDamage(Unit* u1, Unit* u2, int damage);
+	void onHeal(Unit* u1, Unit* u2, int heal);
 	void onMove(Unit* u, bool byEffect);
 	void onDraw(Card* c, bool fromDeck);
 	bool onReplace();

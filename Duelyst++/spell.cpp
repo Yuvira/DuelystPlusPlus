@@ -111,7 +111,7 @@ void Spell::onUse(BoardTile* t) {
 				else {
 					game->unit[a]->hp -= 2;
 					game->em.sendOnDamage(nullptr, game->unit[a], 2);
-					//onHeal
+					game->em.sendOnHeal(nullptr, game->unit[a], 100); //Figure this value out lol
 				}
 			}
 		}

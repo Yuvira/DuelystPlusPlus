@@ -137,6 +137,10 @@ EffectList::EffectList() {
 	skillList.back().generateSprite("{Opening Gambit}: Both players draw|a card");
 	skillList.push_back(Skill(SKILL_BLISTERING_SKORN));
 	skillList.back().generateSprite("{Opening Gambit}: Deal 1 damage to|everything (including itself)");
+	skillList.push_back(Skill(SKILL_BLOOD_TAURA));
+	skillList.back().generateSprite("{Provoke}|This minion's cost is equal to|your General's Health");
+	buffList.push_back(Buff(BUFF_BLOOD_TAURA, -1, 0, 0, true));
+	buffList.back().generateSprite("Blood Taura");
 	skillList.push_back(Skill(SKILL_BLOODTEAR_ALCHEMIST));
 	skillList.back().generateSprite("{Opening Gambit}: Deal 1 damage to|an enemy");
 	skillList.push_back(Skill(SKILL_BLUETIP_SCORPION));

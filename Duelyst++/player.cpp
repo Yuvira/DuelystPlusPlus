@@ -11,7 +11,8 @@ void Player::preset(CardList& cl, Game* g) {
 	deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Argeon Highmayne")))));
 	for (int a = 0; a < 2; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Black Locust"))))); }
 	for (int a = 0; a < 2; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Ash Mephyt"))))); }
-	for (int a = 0; a < 2; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Ghost Lynx"))))); }
+	for (int a = 0; a < 2; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Azure Herald"))))); }
+	for (int a = 0; a < 2; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Blood Taura"))))); }
 	for (int a = 0; a < 2; ++a) { deck.push_back(new Spell(*(dynamic_cast<Spell*>(cl.find("Daemonic Lure"))))); }
 	for (int a = 0; a < 2; ++a) { deck.push_back(new Spell(*(dynamic_cast<Spell*>(cl.find("Consuming Rebirth"))))); }
 	for (int a = 0; a < deck.size(); ++a) {

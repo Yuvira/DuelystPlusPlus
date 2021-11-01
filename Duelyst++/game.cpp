@@ -214,11 +214,7 @@ void Game::update() {
 		generatePaths();
 		for (int a = 0; a < highlighted.size(); ++a) { highlighted[a]->setCol(COLOR_AQUA); }
 		map.tile[pos.x][pos.y].setCol(COLOR_LTWHITE);
-		for (int a = 0; a < hostile.size(); ++a) {
-			if (activeUnit->canAttack(hostile[a]->unit)) {
-				hostile[a]->setCol(COLOR_RED);
-			}
-		}
+		for (int a = 0; a < attackable.size(); ++a) { attackable[a]->setCol(COLOR_RED); }
 	}
 
 	//Highlight selectable spaces
@@ -415,9 +411,26 @@ void Game::useEffect() {
 void Game::select(BoardTile& t) {
 	for (int a = 0; a < highlighted.size(); ++a) { moveable.push_back(highlighted[a]); }
 	if (!t.unit->attacked) {
-		for (int a = 0; a < hostile.size(); ++a) {
-			if (t.unit->canAttack(hostile[a]->unit)) {
-				attackable.push_back(hostile[a]);
+		bool provoked = false;
+		for (int a = max(t.pos.x - 1, 0); a < min(t.pos.x + 2, 9); ++a) {
+			for (int b = max(t.pos.y - 1, 0); b < min(t.pos.y + 2, 5); ++b) {
+				if (map.tile[a][b].unit != nullptr) {
+					if (map.tile[a][b].unit->player != &player[turn]) {
+						if (map.tile[a][b].unit->isProvoking()) {
+							if (t.unit->canAttack(map.tile[a][b].unit)) {
+								attackable.push_back(&map.tile[a][b]);
+								provoked = true;
+							}
+						}
+					}
+				}
+			}
+		}
+		if (!provoked) {
+			for (int a = 0; a < hostile.size(); ++a) {
+				if (t.unit->canAttack(hostile[a]->unit)) {
+					attackable.push_back(hostile[a]);
+				}
 			}
 		}
 	}
@@ -567,7 +580,9 @@ void Game::highlightTile(int x, int y, eColor col) {
 		if (map.tile[pos.x][pos.y].unit != nullptr) {
 			if (!map.tile[pos.x][pos.y].unit->moved && map.tile[pos.x][pos.y].unit->isMoveable()) {
 				if (map.tile[pos.x][pos.y].unit->player == &player[turn]) {
-					highlightMoveable(pos.x, pos.y);
+					if (!map.tile[pos.x][pos.y].unit->isProvoked()) {
+						highlightMoveable(pos.x, pos.y);
+					}
 				}
 			}
 		}

@@ -40,6 +40,15 @@ void EventManager::sendOnDamage(Unit* u1, Unit* u2, int damage) {
 	for (int a = 0; a < game->player[1].deck.size(); ++a) { game->player[1].deck[a]->onDamage(u1, u2, damage); }
 }
 
+//Send onHeal events
+void EventManager::sendOnHeal(Unit* u1, Unit* u2, int heal) {
+	for (int a = 0; a < game->unit.size(); ++a) { game->unit[a]->onHeal(u1, u2, heal); }
+	for (int a = 0; a < game->player[0].hand.size(); ++a) { game->player[0].hand[a]->onHeal(u1, u2, heal); }
+	for (int a = 0; a < game->player[0].deck.size(); ++a) { game->player[0].deck[a]->onHeal(u1, u2, heal); }
+	for (int a = 0; a < game->player[1].hand.size(); ++a) { game->player[1].hand[a]->onHeal(u1, u2, heal); }
+	for (int a = 0; a < game->player[1].deck.size(); ++a) { game->player[1].deck[a]->onHeal(u1, u2, heal); }
+}
+
 //Send onMoved events
 void EventManager::sendOnMove(Unit* u, bool byEffect) {
 	for (int a = 0; a < game->unit.size(); ++a) { game->unit[a]->onMove(u, byEffect); }

@@ -17,6 +17,7 @@ public:
 	void sendOnDeath(Unit* u);
 	void sendOnAttack(Unit* u1, Unit* u2);
 	void sendOnDamage(Unit* u1, Unit* u2, int damage);
+	void sendOnHeal(Unit* u1, Unit* u2, int heal);
 	void sendOnMove(Unit* u, bool byEffect);
 	void sendOnDraw(Card* c, bool fromDeck);
 	void sendOnTurnEnd(Player* p);
