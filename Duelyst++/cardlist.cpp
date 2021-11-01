@@ -5,18 +5,18 @@
 CardList::CardList() {
 
 	//Generals
-	gList.push_back(Unit(FACTION_LYONAR, TRIBE_GENERAL, 0, 2, 25, "lyonargeneral1", "Argeon Highmayne"));
+	gList.push_back(Unit(FACTION_LYONAR, TRIBE_GENERAL, 0, 2, 25, "argeonhighmayne", "Argeon Highmayne"));
 
 	//Units
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_ARCANYST, 3, 3, 1, "abjudicator", "Abjudicator"));
 	uList.back().skill = el.find(SKILL_ABJUDICATOR);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_ARCANYST, 2, 1, 3, "aethermaster", "Aethermaster"));
 	uList.back().skill = el.find(SKILL_AETHERMASTER);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_ARCANYST, 3, 3, 1, "loremaster", "Alcuin Loremaster"));
+	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_ARCANYST, 3, 3, 1, "alcuinloremaster", "Alcuin Loremaster"));
 	uList.back().skill = el.find(SKILL_ALCUIN_LOREMASTER);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 3, "arakiheadhunter", "Araki Headhunter"));
 	uList.back().skill = el.find(SKILL_ARAKI_HEADHUNTER);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_ARCANYST, 6, 7, 7, "spellbinder", "Archon Spellbinder"));
+	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_ARCANYST, 6, 7, 7, "archonspellbinder", "Archon Spellbinder"));
 	uList.back().skill = el.find(SKILL_ARCHON_SPELLBINDER);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_WARMASTER, 4, 2, 4, "arrowwhistler", "Arrow Whistler"));
 	uList.back().skill = el.find(SKILL_ARROW_WHISTLER);
@@ -26,7 +26,7 @@ CardList::CardList() {
 	uList.back().skill = el.find(SKILL_ASTRAL_CRUSADER);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 4, "azureherald", "Azure Herald"));
 	uList.back().skill = el.find(SKILL_AZURE_HERALD);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 4, "azureshaman", "Azure Horn Shaman"));
+	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 4, "azurehornshaman", "Azure Horn Shaman"));
 	uList.back().skill = el.find(SKILL_AZURE_HORN_SHAMAN);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_STRUCTURE, 3, 0, 5, "bastion", "Bastion"));
 	uList.back().skill = el.find(SKILL_BASTION);
@@ -36,17 +36,17 @@ CardList::CardList() {
 	uList.back().skill = el.find(SKILL_BLAZE_HOUND);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 4, 4, 5, "blisteringskorn", "Blistering Skorn"));
 	uList.back().skill = el.find(SKILL_BLISTERING_SKORN);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_GOLEM, 3, 4, 3, "bloodgolem", "Bloodshard Golem"));
+	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_GOLEM, 3, 4, 3, "bloodshardgolem", "Bloodshard Golem"));
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 25, 12, 12, "bloodtaura", "Blood Taura"));
 	uList.back().skill = el.find(SKILL_BLOOD_TAURA);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "bloodalchemist", "Bloodtear Alchemist"));
+	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "bloodtearalchemist", "Bloodtear Alchemist"));
 	uList.back().skill = el.find(SKILL_BLOODTEAR_ALCHEMIST);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 2, 3, 1, "bluetipscorpion", "Bluetip Scorpion"));
 	uList.back().skill = el.find(SKILL_BLUETIP_SCORPION);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 6, 2, 9, "bonereaper", "Bonereaper"));
 	uList.back().skill = el.find(SKILL_BONEREAPER);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_GOLEM, 5, 4, 9, "mossgolem", "Brightmoss Golem"));
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 4, 2, 4, "hankhart", "Captain Hank Hart"));
+	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_GOLEM, 5, 4, 9, "brightmossgolem", "Brightmoss Golem"));
+	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 4, 2, 4, "captainhankhart", "Captain Hank Hart"));
 	uList.back().skill = el.find(SKILL_CAPTAIN_HANK_HART);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 5, 5, 5, "chakkram", "Chakkram"));
 	uList.back().skill = el.find(SKILL_CHAKKRAM);
@@ -59,7 +59,7 @@ CardList::CardList() {
 	uList.push_back(Unit(FACTION_ABYSSIAN, TRIBE_NONE, 1, 1, 1, "wraithling", "Wraithling"));
 
 	//Spells
-	sList.push_back(Spell(FACTION_ABYSSIAN, TARGET_MINION, 4, "breathofunborn", "Breath of The Unborn"));
+	sList.push_back(Spell(FACTION_ABYSSIAN, TARGET_MINION, 4, "breathoftheunborn", "Breath of The Unborn"));
 	sList.back().spell = el.find(SPELL_BREATH_OF_THE_UNBORN);
 	sList.push_back(Spell(FACTION_ABYSSIAN, TARGET_ALLY_MINON, 2, "consumingrebirth", "Consuming Rebirth"));
 	sList.back().spell = el.find(SPELL_CONSUMING_REBIRTH);

@@ -15,6 +15,7 @@ Unit::Unit(eFaction _faction, eTribe _tribe, int _cost, int _atk, int _hp, std::
 	moved = false;
 	attacked = false;
 	if (path == "") { sprite.resize(5, 5); }
+	else if (tribe == TRIBE_GENERAL) { sprite.createFromFile("resources/generals/" + path + ".txt"); }
 	else { sprite.createFromFile("resources/units/" + path + ".txt"); }
 	updateStatSprites();
 	generateDetails();
@@ -182,6 +183,9 @@ void Unit::generateDetails() {
 		break;
 	case TRIBE_STRUCTURE:
 		s += " - STRUCTURE";
+		break;
+	case TRIBE_WARMASTER:
+		s += " - WARMASTER";
 		break;
 	}
 	header[0].createFromString(s);
