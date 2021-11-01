@@ -336,6 +336,16 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 						}
 					}
 					break;
+				case SKILL_ASH_MEPHYT:
+					for (int a = 0; a < 2; ++a) {
+						BoardTile* t = game->map.getRandomNear(tile->pos.x, tile->pos.y);
+						if (t != nullptr) {
+							Unit* u2 = new Unit(*(dynamic_cast<Unit*>(original)));
+							game->setContext(u2, player);
+							game->summon(u2, t->pos.x, t->pos.y, false);
+						}
+					}
+					break;
 				case SKILL_AZURE_HERALD:
 					player->general->hp = min(player->general->hp + 3, player->general->hpMax);
 					//onHeal
@@ -406,6 +416,7 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 						switch (u->skill.skill) {
 						case SKILL_ABJUDICATOR:
 						case SKILL_ALCUIN_LOREMASTER:
+						case SKILL_ASH_MEPHYT:
 						case SKILL_AZURE_HERALD:
 						case SKILL_BLAZE_HOUND:
 						case SKILL_BLISTERING_SKORN:

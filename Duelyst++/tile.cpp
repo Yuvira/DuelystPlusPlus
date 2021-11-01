@@ -75,6 +75,23 @@ BoardTile* Map::getRandom() {
 	return nullptr;
 }
 
+//Get random empty tile
+BoardTile* Map::getRandomNear(int x, int y) {
+	std::vector<BoardTile*> v;
+	for (int a = max(x - 1, 0); a < min(x + 2, 9); ++a) {
+		for (int b = max(y - 1, 0); b < min(y + 2, 5); ++b) {
+			if (tile[a][b].unit == nullptr) {
+				v.push_back(&tile[a][b]);
+			}
+		}
+	}
+	if (v.size() > 0) {
+		int i = rand() % v.size();
+		return v[i];
+	}
+	return nullptr;
+}
+
 //Custom co-ord crap
 Coord::Coord(int _x, int _y) {
 	x = _x;

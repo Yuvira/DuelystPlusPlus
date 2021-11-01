@@ -20,6 +20,8 @@ CardList::CardList() {
 	uList.back().skill = el.find(SKILL_ARCHON_SPELLBINDER);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_WARMASTER, 4, 2, 4, "arrowwhistler", "Arrow Whistler"));
 	uList.back().skill = el.find(SKILL_ARROW_WHISTLER);
+	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 3, "ashmephyt", "Ash Mephyt"));
+	uList.back().skill = el.find(SKILL_ASH_MEPHYT);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 7, 7, 6, "astralcrusader", "Astral Crusader"));
 	uList.back().skill = el.find(SKILL_ASTRAL_CRUSADER);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 4, "azureherald", "Azure Herald"));
