@@ -407,6 +407,19 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 					game->highlightSelectable(TARGET_ENEMY);
 					if (game->selectable.size() > 0) { game->callback = Callback(this, nullptr, nullptr, SKILL_BLOODTEAR_ALCHEMIST); }
 					break;
+				case SKILL_DANCING_BLADES:
+					if (true) { //Why is this necessary to initialize a local variable
+						int _x = tile->pos.x;
+						&game->player[0] == player ? ++_x : --_x;
+						if (_x > -1 && _x < 9) {
+							if (game->map.tile[_x][tile->pos.y].unit != nullptr) {
+								if (game->map.tile[_x][tile->pos.y].unit->tribe != TRIBE_GENERAL) {
+									game->map.tile[_x][tile->pos.y].unit->dealDamage(this, 3);
+								}
+							}
+						}
+					}
+					break;
 				case SKILL_GHOST_LYNX:
 					game->highlightSelectable(TARGET_MINION_NEAR_UNIT, this);
 					if (game->selectable.size() > 0) { game->callback = Callback(this, nullptr, nullptr, SKILL_GHOST_LYNX); }
@@ -464,6 +477,7 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 						case SKILL_BLAZE_HOUND:
 						case SKILL_BLISTERING_SKORN:
 						case SKILL_BLOODTEAR_ALCHEMIST:
+						case SKILL_DANCING_BLADES:
 						case SKILL_GHOST_LYNX:
 							if (actionBar) { addBuff(BUFF_ARAKI_HEADHUNTER); }
 							break;
@@ -477,6 +491,9 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 						u->addBuff(BUFF_ARROW_WHISTLER);
 					}
 				}
+				break;
+			case SKILL_CRIMSON_OCULUS:
+				if (u->player != player) { addBuff(BUFF_CRIMSON_OCULUS); }
 				break;
 			}
 

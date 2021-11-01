@@ -163,6 +163,8 @@ EffectList::EffectList() {
 	skillList.back().generateSprite("Whenever this minion takes damage,|it randomly teleports");
 	skillList.push_back(Skill(SKILL_CRIMSON_OCULUS));
 	skillList.back().generateSprite("Whenever your opponent summons a|minion, this gains +1/+1");
+	buffList.push_back(Buff(BUFF_CRIMSON_OCULUS, 0, 1, 1, true));
+	buffList.back().generateSprite("Crimson Oculus");
 	skillList.push_back(Skill(SKILL_CROSSBONES));
 	skillList.back().generateSprite("{Opening Gambit}: Destroy an enemy|minion with {Ranged}");
 	skillList.push_back(Skill(SKILL_DANCING_BLADES));
