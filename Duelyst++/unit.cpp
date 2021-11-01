@@ -318,71 +318,79 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 			moved = true;
 			attacked = true;
 
-			//Skills (Opening Gambit)
-			switch (skill.skill) {
-			case SKILL_ABJUDICATOR:
-				for (int a = 0; a < player->hand.size(); ++a) {
-					if (player->hand[a]->type == CARD_SPELL) {
-						dynamic_cast<Spell*>(player->hand[a])->addBuff(BUFF_ABJUDICATOR);
+			//From action bar (Opening Gambit)
+			if (actionBar) {
+				switch (skill.skill) {
+				case SKILL_ABJUDICATOR:
+					for (int a = 0; a < player->hand.size(); ++a) {
+						if (player->hand[a]->type == CARD_SPELL) {
+							dynamic_cast<Spell*>(player->hand[a])->addBuff(BUFF_ABJUDICATOR);
+						}
 					}
-				}
-				break;
-			case SKILL_AETHERMASTER:
-				++player->replaces;
-				break;
-			case SKILL_ALCUIN_LOREMASTER:
-				for (int a = game->grave.size() - 1; a > -1; --a) {
-					if (game->grave[a]->type == CARD_SPELL) {
-						player->addToHand(game->grave[a]->original, true);
-						break;
+					break;
+				case SKILL_ALCUIN_LOREMASTER:
+					for (int a = game->grave.size() - 1; a > -1; --a) {
+						if (game->grave[a]->type == CARD_SPELL) {
+							player->addToHand(game->grave[a]->original, true);
+							break;
+						}
 					}
-				}
-				break;
-			case SKILL_ARCHON_SPELLBINDER:
-				for (int a = 0; a < player->enemy->hand.size(); ++a) {
-					if (player->enemy->hand[a]->type == CARD_SPELL) {
-						dynamic_cast<Spell*>(player->enemy->hand[a])->addBuff(BUFF_ARCHON_SPELLBINDER);
+					break;
+				case SKILL_AZURE_HERALD:
+					player->general->hp = min(player->general->hp + 3, player->general->hpMax);
+					//onHeal
+					break;
+				case SKILL_BLAZE_HOUND:
+					game->player[0].draw();
+					game->player[1].draw();
+					break;
+				case SKILL_BLISTERING_SKORN:
+					for (int a = 0; a < game->unit.size(); ++a) {
+						--game->unit[a]->hp;
+						game->em.sendOnDamage(this, game->unit[a], 1);
 					}
+					break;
+				case SKILL_BLOODTEAR_ALCHEMIST:
+					game->highlightSelectable(TARGET_ENEMY);
+					if (game->selectable.size() > 0) { game->callback = Callback(this, nullptr, nullptr, SKILL_BLOODTEAR_ALCHEMIST); }
+					break;
+				case SKILL_GHOST_LYNX:
+					game->highlightSelectable(TARGET_MINION_NEAR_UNIT, this);
+					if (game->selectable.size() > 0) { game->callback = Callback(this, nullptr, nullptr, SKILL_GHOST_LYNX); }
+					break;
 				}
-				for (int a = 0; a < player->enemy->deck.size(); ++a) {
-					if (player->enemy->deck[a]->type == CARD_SPELL) {
-						dynamic_cast<Spell*>(player->enemy->deck[a])->addBuff(BUFF_ARCHON_SPELLBINDER);
+			}
+
+			//Summoned from anywhere (apply global effects)
+			else {
+				switch (skill.skill) {
+				case SKILL_AETHERMASTER:
+					++player->replaces;
+					break;
+				case SKILL_ARCHON_SPELLBINDER:
+					for (int a = 0; a < player->enemy->hand.size(); ++a) {
+						if (player->enemy->hand[a]->type == CARD_SPELL) {
+							dynamic_cast<Spell*>(player->enemy->hand[a])->addBuff(BUFF_ARCHON_SPELLBINDER);
+						}
 					}
-				}
-				break;
-			case SKILL_ARROW_WHISTLER:
-				for (int a = 0; a < game->unit.size(); ++a) {
-					if (game->unit[a]->player == player) {
-						if (game->unit[a] != this) {
-							if (game->unit[a]->isRanged()) {
-								game->unit[a]->addBuff(BUFF_ARROW_WHISTLER);
+					for (int a = 0; a < player->enemy->deck.size(); ++a) {
+						if (player->enemy->deck[a]->type == CARD_SPELL) {
+							dynamic_cast<Spell*>(player->enemy->deck[a])->addBuff(BUFF_ARCHON_SPELLBINDER);
+						}
+					}
+					break;
+				case SKILL_ARROW_WHISTLER:
+					for (int a = 0; a < game->unit.size(); ++a) {
+						if (game->unit[a]->player == player) {
+							if (game->unit[a] != this) {
+								if (game->unit[a]->isRanged()) {
+									game->unit[a]->addBuff(BUFF_ARROW_WHISTLER);
+								}
 							}
 						}
 					}
+					break;
 				}
-				break;
-			case SKILL_AZURE_HERALD:
-				player->general->hp = min(player->general->hp + 3, player->general->hpMax);
-				//onHeal
-				break;
-			case SKILL_BLAZE_HOUND:
-				game->player[0].draw();
-				game->player[1].draw();
-				break;
-			case SKILL_BLISTERING_SKORN:
-				for (int a = 0; a < game->unit.size(); ++a) {
-					--game->unit[a]->hp;
-					game->em.sendOnDamage(this, game->unit[a], 1);
-				}
-				break;
-			case SKILL_BLOODTEAR_ALCHEMIST:
-				game->highlightSelectable(TARGET_ENEMY);
-				if (game->selectable.size() > 0) { game->callback = Callback(this, nullptr, nullptr, SKILL_BLOODTEAR_ALCHEMIST); }
-				break;
-			case SKILL_GHOST_LYNX:
-				game->highlightSelectable(TARGET_MINION_NEAR_UNIT, this);
-				if (game->selectable.size() > 0) { game->callback = Callback(this, nullptr, nullptr, SKILL_GHOST_LYNX); }
-				break;
 			}
 
 		}
@@ -434,6 +442,7 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 					}
 					break;
 				}
+
 			}
 
 		}
