@@ -31,10 +31,11 @@ void Skill::generateSprite(std::string s) {
 	std::vector<Coord> c;
 	std::vector<std::string> v;
 	v.push_back("");
+	int tokens = 0;
 	for (int a = 0; a < s.length(); ++a) {
-		if (s[a] == '|') { v.push_back(""); }
-		else if (s[a] == '{') { c.push_back(Coord()); c.back().x = a; }
-		else if (s[a] == '}') { c.back().y = a - 1; }
+		if (s[a] == '|') { v.push_back(""); ++tokens; }
+		else if (s[a] == '{') { c.push_back(Coord()); c.back().x = a - tokens; ++tokens; }
+		else if (s[a] == '}') { c.back().y = a - tokens; ++tokens; }
 		else { v.back() += s[a]; }
 	}
 	for (int a = 0; a < v.size(); ++a) {
