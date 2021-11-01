@@ -15,6 +15,7 @@ CardList::CardList() {
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_ARCANYST, 3, 3, 1, "alcuinloremaster", "Alcuin Loremaster"));
 	uList.back().skill = el.find(SKILL_ALCUIN_LOREMASTER);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_MECH, 5, 5, 5, "alterrexx", "Alter Rexx"));
+	uList.back().skill = el.find(SKILL_ALTER_REXX);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 3, "arakiheadhunter", "Araki Headhunter"));
 	uList.back().skill = el.find(SKILL_ARAKI_HEADHUNTER);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_ARCANYST, 6, 7, 7, "archonspellbinder", "Archon Spellbinder"));
@@ -54,23 +55,35 @@ CardList::CardList() {
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 3, 4, 4, "chaoselemental", "Chaos Elemental"));
 	uList.back().skill = el.find(SKILL_CHAOS_ELEMENTAL);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 3, "crimsonoculus", "Crimson Oculus"));
+	uList.back().skill = el.find(SKILL_CRIMSON_OCULUS);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 3, 3, 3, "crossbones", "Crossbones"));
+	uList.back().skill = el.find(SKILL_CROSSBONES);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 8, "daggerkiri", "Dagger Kiri"));
+	uList.back().skill = el.find(SKILL_CELERITY);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 5, 4, 6, "dancingblades", "Dancing Blades"));
+	uList.back().skill = el.find(SKILL_DANCING_BLADES);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 7, 4, 10, "darknemesis", "Dark Nemesis"));
+	uList.back().skill = el.find(SKILL_DARK_NEMESIS);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 3, 3, 3, "daywatcher", "Day Watcher"));
+	uList.back().skill = el.find(SKILL_DAY_WATCHER);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 6, 3, 4, "deathblighter", "Deathblighter"));
+	uList.back().skill = el.find(SKILL_DEATHBLIGHTER);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 4, 4, 4, "decimus", "Decimus"));
+	uList.back().skill = el.find(SKILL_DECIMUS);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_GOLEM, 6, 5, 11, "diamondgolem", "Diamond Golem"));
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 4, 5, 3, "dioltas", "Dioltas"));
+	uList.back().skill = el.find(SKILL_DIOLTAS);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "dragonlark", "Dragonlark"));
 	uList.back().skill = el.find(SKILL_FLYING);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 1, "dreamgazer", "Dreamgazer"));
+	uList.back().skill = el.find(SKILL_DREAMGAZER);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_GOLEM, 7, 10, 10, "drybonegolem", "Drybone Golem"));
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 6, 3, 4, "dustwailer", "Dust Wailer"));
+	uList.back().skill = el.find(SKILL_DUST_WAILER);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 1, "ghostlynx", "Ghost Lynx"));
 	uList.back().skill = el.find(SKILL_GHOST_LYNX);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 3, 0, 10, "tombstone", "Tombstone"));
+	uList.back().skill = el.find(SKILL_PROVOKE);
 	uList.push_back(Unit(FACTION_ABYSSIAN, TRIBE_NONE, 1, 1, 1, "wraithling", "Wraithling"));
 
 	//Spells

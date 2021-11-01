@@ -93,16 +93,22 @@ void SpellEffect::generateSprite(std::string s) {
 EffectList::EffectList() {
 
 	//Unit skills
+	skillList.push_back(Skill(SKILL_CELERITY));
+	skillList.back().generateSprite("{Celerity}");
 	skillList.push_back(Skill(SKILL_FLYING));
 	skillList.back().generateSprite("{Flying}");
+	skillList.push_back(Skill(SKILL_PROVOKE));
+	skillList.back().generateSprite("{Provoke}");
 	skillList.push_back(Skill(SKILL_ABJUDICATOR));
-	skillList.back().generateSprite("{Opening Gambit}: Lower the cost of|all spells in your action bar by 1");
+	skillList.back().generateSprite("{Opening Gambit}: Lower the cost of all|spells in your action bar by 1");
 	buffList.push_back(Buff(BUFF_ABJUDICATOR, -1, 0, 0, true));
 	buffList.back().generateSprite("Abjudicator");
 	skillList.push_back(Skill(SKILL_AETHERMASTER));
 	skillList.back().generateSprite("You may replace an additional card|each turn");
 	skillList.push_back(Skill(SKILL_ALCUIN_LOREMASTER));
-	skillList.back().generateSprite("{Opening Gambit}: Put a copy of the|most recently cast spell into your|action bar");
+	skillList.back().generateSprite("{Opening Gambit}: Put a copy of the most|recently cast spell into your|action bar");
+	skillList.push_back(Skill(SKILL_ALTER_REXX));
+	skillList.back().generateSprite("Whenever you summon MECHAZ0R, put a|MECHAZ0R in your action bar");
 	skillList.push_back(Skill(SKILL_ARAKI_HEADHUNTER));
 	skillList.back().generateSprite("Whenever you summon a minion with|Opening Gambit from your action bar,|gain +2 Attack");
 	buffList.push_back(Buff(BUFF_ARAKI_HEADHUNTER, 0, 2, 0, true));
@@ -122,7 +128,7 @@ EffectList::EffectList() {
 	buffList.push_back(Buff(BUFF_ASTRAL_CRUSADER, -3, 3, 3, true));
 	buffList.back().generateSprite("Astral Crusader");
 	skillList.push_back(Skill(SKILL_AZURE_HERALD));
-	skillList.back().generateSprite("{Opening Gambit}: Restore 3 Health to your|General");
+	skillList.back().generateSprite("{Opening Gambit}: Restore 3 Health to|your General");
 	skillList.push_back(Skill(SKILL_AZURE_HORN_SHAMAN));
 	skillList.back().generateSprite("{Dying Wish}: Give +4 Health to friendly|minions around it");
 	buffList.push_back(Buff(BUFF_AZURE_HORN_SHAMAN, 0, 0, 4, true));
@@ -138,7 +144,7 @@ EffectList::EffectList() {
 	skillList.push_back(Skill(SKILL_BLISTERING_SKORN));
 	skillList.back().generateSprite("{Opening Gambit}: Deal 1 damage to|everything (including itself)");
 	skillList.push_back(Skill(SKILL_BLOOD_TAURA));
-	skillList.back().generateSprite("{Provoke}|This minion's cost is equal to|your General's Health");
+	skillList.back().generateSprite("{Provoke}|This minion's cost is equal to your|General's Health");
 	buffList.push_back(Buff(BUFF_BLOOD_TAURA, -1, 0, 0, true));
 	buffList.back().generateSprite("Blood Taura");
 	skillList.push_back(Skill(SKILL_BLOODTEAR_ALCHEMIST));
@@ -146,7 +152,7 @@ EffectList::EffectList() {
 	skillList.push_back(Skill(SKILL_BLUETIP_SCORPION));
 	skillList.back().generateSprite("Deals double damage to minions");
 	skillList.push_back(Skill(SKILL_BONEREAPER));
-	skillList.back().generateSprite("{Provoke}|At the end of your turn, deal 2|damage to all nearby enemy|minions");
+	skillList.back().generateSprite("{Provoke}|At the end of your turn, deal 2 damage|to all nearby enemy minions");
 	skillList.push_back(Skill(SKILL_CAPTAIN_HANK_HART));
 	skillList.back().generateSprite("{Ranged}|Whenever this deals damage, restore|that much health to it");
 	skillList.push_back(Skill(SKILL_CHAKKRAM));
@@ -155,6 +161,26 @@ EffectList::EffectList() {
 	buffList.back().generateSprite("Chakkram");
 	skillList.push_back(Skill(SKILL_CHAOS_ELEMENTAL));
 	skillList.back().generateSprite("Whenever this minion takes damage,|it randomly teleports");
+	skillList.push_back(Skill(SKILL_CRIMSON_OCULUS));
+	skillList.back().generateSprite("Whenever your opponent summons a|minion, this gains +1/+1");
+	skillList.push_back(Skill(SKILL_CROSSBONES));
+	skillList.back().generateSprite("{Opening Gambit}: Destroy an enemy|minion with {Ranged}");
+	skillList.push_back(Skill(SKILL_DANCING_BLADES));
+	skillList.back().generateSprite("{Opening Gambit}: Deal 3 damage to|ANY minion in front of this");
+	skillList.push_back(Skill(SKILL_DARK_NEMESIS));
+	skillList.back().generateSprite("At the start of your turn, deal 4|damage to the enemy General and this|gains +4 Attack");
+	skillList.push_back(Skill(SKILL_DAY_WATCHER));
+	skillList.back().generateSprite("Whenever a friendly minion attacks,|restore 1 Health to your General");
+	skillList.push_back(Skill(SKILL_DEATHBLIGHTER));
+	skillList.back().generateSprite("{Opening Gambit}: Deal 3 damage to|all enemy minions around this");
+	skillList.push_back(Skill(SKILL_DECIMUS));
+	skillList.back().generateSprite("Whenever your opponent draws a card,|deal 2 damage to the enemy General");
+	skillList.push_back(Skill(SKILL_DIOLTAS));
+	skillList.back().generateSprite("{Dying Wish}: Summon a 0/8 Tombstone with|Provoke near your General");
+	skillList.push_back(Skill(SKILL_DREAMGAZER));
+	skillList.back().generateSprite("When you replace this card, summon it|nearby. Your General takes 2 damage");
+	skillList.push_back(Skill(SKILL_DUST_WAILER));
+	skillList.back().generateSprite("{Flying}|{Opening Gambit}: Deal 3 damage to all|enemies in front of this");
 	skillList.push_back(Skill(SKILL_GHOST_LYNX));
 	skillList.back().generateSprite("{Opening Gambit}: Teleport a nearby|minion to a random space");
 
