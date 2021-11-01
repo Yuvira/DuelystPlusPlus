@@ -24,12 +24,17 @@ Collection::~Collection() {}
 //Input
 void Collection::input() {
 
-	//Get keyPress and move pointer
+	//Get keyPress
 	int asciiVal = _getch();
+
+	//Move pointer
 	if (asciiVal == 119 || asciiVal == 87) { moveCursor(0, -1); }     //W
 	else if (asciiVal == 97 || asciiVal == 65) { moveCursor(-1, 0); } //A
 	else if (asciiVal == 115 || asciiVal == 83) { moveCursor(0, 1); } //S
 	else if (asciiVal == 100 || asciiVal == 68) { moveCursor(1, 0); } //D
+
+	//Switch mode
+	else if (asciiVal == 80 || asciiVal == 112) { *modeSwitch = true; } //P
 
 }
 

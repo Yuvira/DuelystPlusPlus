@@ -96,6 +96,7 @@ public:
 	bool turn;
 	bool endTurn;
 	int turnCount;
+	bool* modeSwitch;
 };
 
 #endif

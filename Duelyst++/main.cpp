@@ -15,8 +15,10 @@ int main() {
 	Collection collection;
 	Game game;
 
-	//Mode
-	bool doGame = true;
+	//Switch
+	bool doGame = false;
+	collection.modeSwitch = &doGame;
+	game.modeSwitch = &doGame;
 
 	//Loop
 	while (true) {

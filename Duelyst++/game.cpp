@@ -163,6 +163,9 @@ void Game::input() {
 
 	}
 
+	//Switch mode
+	if (asciiVal == 80 || asciiVal == 112) { *modeSwitch = false; } //P
+
 }
 
 //Update loop

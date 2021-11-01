@@ -20,6 +20,7 @@ public:
 	CardList cl;
 	Tile tile[9][7];
 	Coord pos;
+	bool* modeSwitch;
 };
 
 #endif
