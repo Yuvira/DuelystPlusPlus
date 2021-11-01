@@ -107,19 +107,16 @@ void Spell::onUse(BoardTile* t) {
 	case SPELL_BREATH_OF_THE_UNBORN:
 		for (int a = 0; a < game->unit.size(); ++a) {
 			if (game->unit[a]->tribe != TRIBE_GENERAL) {
-				if (game->unit[a]->player == player) { game->unit[a]->hp = game->unit[a]->hpMax; }
-				else {
-					game->unit[a]->hp -= 2;
-					game->em.sendOnDamage(nullptr, game->unit[a], 2);
-					game->em.sendOnHeal(nullptr, game->unit[a], 100); //Figure this value out lol
-				}
+				if (game->unit[a]->player == player) { game->unit[a]->dealDamage(nullptr, -999); }
+				else { game->unit[a]->dealDamage(nullptr, 2); }
 			}
 		}
 		break;
 	case SPELL_CONSUMING_REBIRTH:
 		if (t->unit != nullptr) {
 			token = t->unit->original;
-			t->unit->hp = -999;
+			t->unit->dead = true;
+			game->em.sendOnDeath(t->unit);
 			game->lateCallback.push_back(Callback(nullptr, this, t->unit->tile, SKILL_NONE));
 		}
 		break;
@@ -129,16 +126,12 @@ void Spell::onUse(BoardTile* t) {
 			game->callback = Callback(nullptr, this, nullptr, SKILL_NONE);
 			token = t->unit;
 		}
-		else {
-			--t->unit->hp;
-			game->em.sendOnDamage(nullptr, t->unit, 1);
-		}
+		else { t->unit->dealDamage(nullptr, 1); }
 		break;
 	case SPELL_DARK_SEED:
 		if (t->unit != nullptr) {
 			int damage = player == &game->player[0] ? game->player[1].hand.size() : game->player[0].hand.size();
-			t->unit->hp -= damage;
-			game->em.sendOnDamage(nullptr, t->unit, damage);
+			t->unit->dealDamage(nullptr, damage);
 		}
 		break;
 	case SPELL_DARK_TRANSFORMATION:
@@ -155,7 +148,8 @@ void Spell::onUse(BoardTile* t) {
 		break;
 	case SPELL_DARKFIRE_SACRIFICE:
 		if (t->unit != nullptr) {
-			t->unit->hp = -999;
+			t->unit->dead = true;
+			game->em.sendOnDeath(t->unit);
 			player->general->addEffect(EFFECT_DARKFIRE_SACRIFICE);
 			for (int a = 0; a < player->hand.size(); ++a) {
 				if (player->hand[a]->type == CARD_UNIT) {
@@ -178,8 +172,7 @@ void Spell::callback(BoardTile* t) {
 	case SPELL_DAEMONIC_LURE:
 		Unit* u = dynamic_cast<Unit*>(token);
 		u->setPos(t->pos.x, t->pos.y);
-		--u->hp;
-		game->em.sendOnDamage(nullptr, u, 1);
+		u->dealDamage(nullptr, 1);
 		game->em.sendOnMove(u, true);
 		break;
 	}

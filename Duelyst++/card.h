@@ -127,6 +127,7 @@ public:
 	bool isProvoking();
 	bool isProvoked();
 	void attack(Unit* u, bool counter);
+	int dealDamage(Unit* u, int damage);
 	void onSummon(Unit* u, bool actionBar);
 	void onDeath(Unit* u);
 	void onAttack(Unit* u1, Unit* u2);

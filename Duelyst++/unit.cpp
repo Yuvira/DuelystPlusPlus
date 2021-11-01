@@ -321,14 +321,30 @@ void Unit::attack(Unit* u, bool counter) {
 		if (u->tribe != TRIBE_GENERAL) { damage += atk; }
 		break;
 	}
-	u->hp -= damage;
+	u->dealDamage(this, damage);
 	game->em.sendOnAttack(this, u);
-	game->em.sendOnDamage(this, u, damage);
 	if (!counter) {
 		moved = true;
 		attacked = true;
 		if (u->canAttack(this)) { u->attack(this, true); }
 	}
+}
+
+//Deal damage to this
+int Unit::dealDamage(Unit* u, int damage) {
+	if (damage < 0) {
+		if (hp - damage > hpMax) {
+			damage = -(hpMax - hp);
+			hp = hpMax;
+		}
+		else { hp -= damage; }
+		game->em.sendOnHeal(u, this, -damage);
+	}
+	else {
+		hp -= damage;
+		game->em.sendOnDamage(u, this, damage);
+	}
+	return damage;
 }
 
 //When a unit is summoned
@@ -373,18 +389,14 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 					}
 					break;
 				case SKILL_AZURE_HERALD:
-					player->general->hp = min(player->general->hp + 3, player->general->hpMax);
-					game->em.sendOnHeal(this, player->general, 3);
+					player->general->dealDamage(this, -3);
 					break;
 				case SKILL_BLAZE_HOUND:
 					game->player[0].draw();
 					game->player[1].draw();
 					break;
 				case SKILL_BLISTERING_SKORN:
-					for (int a = 0; a < game->unit.size(); ++a) {
-						--game->unit[a]->hp;
-						game->em.sendOnDamage(this, game->unit[a], 1);
-					}
+					for (int a = 0; a < game->unit.size(); ++a) { game->unit[a]->dealDamage(this, 1); }
 					break;
 				case SKILL_BLOODTEAR_ALCHEMIST:
 					game->highlightSelectable(TARGET_ENEMY);
@@ -731,10 +743,7 @@ void Unit::onTurnStart(Player* p) {}
 void Unit::callback(BoardTile* t) {
 	switch (game->callback.skill) {
 	case SKILL_BLOODTEAR_ALCHEMIST:
-		if (t->unit != nullptr) {
-			--t->unit->hp;
-			game->em.sendOnDamage(this, t->unit, 1);
-		}
+		if (t->unit != nullptr) { t->unit->dealDamage(this, 1); }
 		break;
 	case SKILL_GHOST_LYNX:
 		BoardTile* t2 = game->map.getRandom();
