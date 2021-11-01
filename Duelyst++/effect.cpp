@@ -145,6 +145,8 @@ EffectList::EffectList() {
 	skillList.back().generateSprite("{Opening Gambit}: Deal 1 damage to|an enemy");
 	skillList.push_back(Skill(SKILL_BLUETIP_SCORPION));
 	skillList.back().generateSprite("Deals double damage to minions");
+	skillList.push_back(Skill(SKILL_BONEREAPER));
+	skillList.back().generateSprite("{Provoke}|At the end of your turn, deal 2|damage to all nearby enemy|minions");
 	skillList.push_back(Skill(SKILL_CAPTAIN_HANK_HART));
 	skillList.back().generateSprite("{Ranged}|Whenever this deals damage, restore|that much health to it");
 	skillList.push_back(Skill(SKILL_CHAKKRAM));

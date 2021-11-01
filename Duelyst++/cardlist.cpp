@@ -43,6 +43,8 @@ CardList::CardList() {
 	uList.back().skill = el.find(SKILL_BLOODTEAR_ALCHEMIST);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 2, 3, 1, "bluetipscorpion", "Bluetip Scorpion"));
 	uList.back().skill = el.find(SKILL_BLUETIP_SCORPION);
+	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 6, 2, 9, "bonereaper", "Bonereaper"));
+	uList.back().skill = el.find(SKILL_BONEREAPER);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_GOLEM, 5, 4, 9, "mossgolem", "Brightmoss Golem"));
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 4, 2, 4, "hankhart", "Captain Hank Hart"));
 	uList.back().skill = el.find(SKILL_CAPTAIN_HANK_HART);

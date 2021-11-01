@@ -292,6 +292,7 @@ bool Unit::isRanged() {
 bool Unit::isProvoking() {
 	switch (skill.skill) {
 	case SKILL_BLOOD_TAURA:
+	case SKILL_BONEREAPER:
 		return true;
 	}
 	return false;
@@ -709,6 +710,9 @@ void Unit::onTurnEnd(Player* p) {
 
 			//Skills
 			switch (skill.skill) {
+			case SKILL_AETHERMASTER:
+				++player->replaces;
+				break;
 			case SKILL_BASTION:
 				for (int a = 0; a < game->unit.size(); ++a) {
 					if (game->unit[a]->player == player && game->unit[a] != this) {
@@ -718,8 +722,18 @@ void Unit::onTurnEnd(Player* p) {
 					}
 				}
 				break;
-			case SKILL_AETHERMASTER:
-				++player->replaces;
+			case SKILL_BONEREAPER:
+				for (int a = max(tile->pos.x - 1, 0); a < min(tile->pos.x + 2, 9); ++a) {
+					for (int b = max(tile->pos.y - 1, 0); b < min(tile->pos.y + 2, 5); ++b) {
+						if (game->map.tile[a][b].unit != nullptr) {
+							if (game->map.tile[a][b].unit->player != player) {
+								if (game->map.tile[a][b].unit->tribe != TRIBE_GENERAL) {
+									game->map.tile[a][b].unit->dealDamage(this, 2);
+								}
+							}
+						}
+					}
+				}
 				break;
 			}
 
