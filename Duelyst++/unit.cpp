@@ -402,16 +402,18 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 			switch (skill.skill) {
 			case SKILL_ARAKI_HEADHUNTER:
 				if (u->player == player) {
-					switch (u->skill.skill) {
-					case SKILL_ABJUDICATOR:
-					case SKILL_ALCUIN_LOREMASTER:
-					case SKILL_AZURE_HERALD:
-					case SKILL_BLAZE_HOUND:
-					case SKILL_BLISTERING_SKORN:
-					case SKILL_BLOODTEAR_ALCHEMIST:
-					case SKILL_GHOST_LYNX:
-						if (actionBar) { addBuff(BUFF_ARAKI_HEADHUNTER); }
-						break;
+					if (actionBar) {
+						switch (u->skill.skill) {
+						case SKILL_ABJUDICATOR:
+						case SKILL_ALCUIN_LOREMASTER:
+						case SKILL_AZURE_HERALD:
+						case SKILL_BLAZE_HOUND:
+						case SKILL_BLISTERING_SKORN:
+						case SKILL_BLOODTEAR_ALCHEMIST:
+						case SKILL_GHOST_LYNX:
+							if (actionBar) { addBuff(BUFF_ARAKI_HEADHUNTER); }
+							break;
+						}
 					}
 				}
 				break;
