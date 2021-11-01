@@ -280,6 +280,7 @@ bool Unit::isFlying() {
 //Is unit ranged
 bool Unit::isRanged() {
 	switch (skill.skill) {
+	case SKILL_ARROW_WHISTLER:
 	case SKILL_CAPTAIN_HANK_HART:
 		return true;
 	}
@@ -349,6 +350,17 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 					}
 				}
 				break;
+			case SKILL_ARROW_WHISTLER:
+				for (int a = 0; a < game->unit.size(); ++a) {
+					if (game->unit[a]->player == player) {
+						if (game->unit[a] != this) {
+							if (game->unit[a]->isRanged()) {
+								game->unit[a]->addBuff(BUFF_ARROW_WHISTLER);
+							}
+						}
+					}
+				}
+				break;
 			case SKILL_AZURE_HERALD:
 				player->general->hp = min(player->general->hp + 3, player->general->hpMax);
 				//onHeal
@@ -392,6 +404,13 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 					case SKILL_GHOST_LYNX:
 						if (actionBar) { addBuff(BUFF_ARAKI_HEADHUNTER); }
 						break;
+					}
+				}
+				break;
+			case SKILL_ARROW_WHISTLER:
+				if (u->player == player) {
+					if (u->isRanged()) {
+						u->addBuff(BUFF_ARROW_WHISTLER);
 					}
 				}
 				break;
@@ -444,6 +463,17 @@ void Unit::onDeath(Unit* u) {
 				for (int a = 0; a < player->enemy->deck.size(); ++a) {
 					if (player->enemy->deck[a]->type == CARD_SPELL) {
 						dynamic_cast<Spell*>(player->enemy->deck[a])->removeBuff(BUFF_ARCHON_SPELLBINDER, false);
+					}
+				}
+				break;
+			case SKILL_ARROW_WHISTLER:
+				for (int a = 0; a < game->unit.size(); ++a) {
+					if (game->unit[a]->player == player) {
+						if (game->unit[a] != this) {
+							if (game->unit[a]->isRanged()) {
+								game->unit[a]->removeBuff(BUFF_ARROW_WHISTLER, false);
+							}
+						}
 					}
 				}
 				break;

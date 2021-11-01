@@ -111,6 +111,10 @@ EffectList::EffectList() {
 	skillList.back().generateSprite("Your opponent's non-Bloodborn spells|cost 1 more to cast");
 	buffList.push_back(Buff(BUFF_ARCHON_SPELLBINDER, 1, 0, 0, true));
 	buffList.back().generateSprite("Spellbound");
+	skillList.push_back(Skill(SKILL_ARROW_WHISTLER));
+	skillList.back().generateSprite("{Ranged}|Your other minions with {Ranged}|have +1 Attack");
+	buffList.push_back(Buff(BUFF_ARROW_WHISTLER, 0, 1, 0, true));
+	buffList.back().generateSprite("Whistling Arrows");
 	skillList.push_back(Skill(SKILL_ASTRAL_CRUSADER));
 	skillList.back().generateSprite("Whenever you replace this card, it|costs 3 less and gains +3/+3");
 	buffList.push_back(Buff(BUFF_ASTRAL_CRUSADER, -3, 3, 3, true));
