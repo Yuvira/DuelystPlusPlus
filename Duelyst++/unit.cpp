@@ -445,6 +445,19 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 						}
 					}
 					break;
+				case SKILL_DEATHBLIGHTER:
+					for (int a = max(tile->pos.x - 1, 0); a < min(tile->pos.x + 2, 9); ++a) {
+						for (int b = max(tile->pos.y - 1, 0); b < min(tile->pos.y + 2, 5); ++b) {
+							if (game->map.tile[a][b].unit != nullptr) {
+								if (game->map.tile[a][b].unit->player != player) {
+									if (game->map.tile[a][b].unit->tribe != TRIBE_GENERAL) {
+										game->map.tile[a][b].unit->dealDamage(this, 3);
+									}
+								}
+							}
+						}
+					}
+					break;
 				case SKILL_GHOST_LYNX:
 					game->highlightSelectable(TARGET_MINION_NEAR_UNIT, this);
 					if (game->selectable.size() > 0) { game->callback = Callback(this, nullptr, nullptr, SKILL_GHOST_LYNX); }
@@ -502,7 +515,9 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 						case SKILL_BLAZE_HOUND:
 						case SKILL_BLISTERING_SKORN:
 						case SKILL_BLOODTEAR_ALCHEMIST:
+						case SKILL_CROSSBONES:
 						case SKILL_DANCING_BLADES:
+						case SKILL_DEATHBLIGHTER:
 						case SKILL_GHOST_LYNX:
 							if (actionBar) { addBuff(BUFF_ARAKI_HEADHUNTER); }
 							break;
