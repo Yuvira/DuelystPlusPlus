@@ -72,7 +72,7 @@ public:
 	std::vector<Unit*> unit;
 	Sprite light;
 	Sprite board;
-	Sprite chars[8];
+	Sprite chars[10];
 	CardList cl;
 	EventManager em;
 	Player player[2];

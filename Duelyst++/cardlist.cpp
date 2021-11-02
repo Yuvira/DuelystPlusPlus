@@ -80,8 +80,12 @@ CardList::CardList() {
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_GOLEM, 7, 10, 10, "drybonegolem", "Drybone Golem"));
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 6, 3, 4, "dustwailer", "Dust Wailer"));
 	uList.back().skill = el.find(SKILL_DUST_WAILER);
+	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 7, 5, 5, "exun", "E'Xun"));
+	uList.back().skill = el.find(SKILL_EXUN);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 1, "ghostlynx", "Ghost Lynx"));
 	uList.back().skill = el.find(SKILL_GHOST_LYNX);
+
+	//Tokens
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 3, 0, 10, "tombstone", "Tombstone"));
 	uList.back().skill = el.find(SKILL_PROVOKE);
 	uList.push_back(Unit(FACTION_ABYSSIAN, TRIBE_NONE, 1, 1, 1, "wraithling", "Wraithling"));

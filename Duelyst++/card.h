@@ -128,6 +128,7 @@ public:
 	bool isProvoking();
 	bool isProvoked();
 	bool hasCelerity();
+	bool hasForcefield();
 	void attack(Unit* u, bool counter);
 	int dealDamage(Unit* u, int damage);
 	void onSummon(Unit* u, bool actionBar);
@@ -150,6 +151,7 @@ public:
 	bool attacked;
 	bool celerityMoved;
 	bool celerityAttacked;
+	bool forcefield;
 	BoardTile* tile;
 	Skill skill;
 	std::vector<Effect> effect;

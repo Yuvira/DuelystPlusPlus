@@ -16,6 +16,7 @@ Unit::Unit(eFaction _faction, eTribe _tribe, int _cost, int _atk, int _hp, std::
 	attacked = false;
 	celerityMoved = true;
 	celerityAttacked = true;
+	forcefield = false;
 	if (path == "") { sprite.resize(5, 5); }
 	else if (tribe == TRIBE_GENERAL) { sprite.createFromFile("resources/generals/" + path + ".txt"); }
 	else { sprite.createFromFile("resources/units/" + path + ".txt"); }
@@ -33,6 +34,18 @@ void Unit::render(Renderer& rm) {
 	rm.render(sprite);
 	rm.render(sATK);
 	rm.render(sHP);
+	if (forcefield) {
+		int x = sprite.pos.X;
+		int y = sprite.pos.Y;
+		rm.render(game->chars[7], x + 1, y + 1);
+		rm.render(game->chars[9], x + 2, y + 1);
+		rm.render(game->chars[6], x + 3, y + 1);
+		rm.render(game->chars[8], x + 1, y + 2);
+		rm.render(game->chars[8], x + 3, y + 2);
+		rm.render(game->chars[6], x + 1, y + 3);
+		rm.render(game->chars[9], x + 2, y + 3);
+		rm.render(game->chars[7], x + 3, y + 3);
+	}
 }
 
 //Set sprite position
@@ -331,6 +344,15 @@ bool Unit::hasCelerity() {
 	return false;
 }
 
+//Does unit have a forcefield
+bool Unit::hasForcefield() {
+	switch (skill.skill) {
+	case SKILL_EXUN:
+		return true;
+	}
+	return false;
+}
+
 //Attack enemy
 void Unit::attack(Unit* u, bool counter) {
 	int damage = atk;
@@ -367,8 +389,14 @@ int Unit::dealDamage(Unit* u, int damage) {
 		game->em.sendOnHeal(u, this, -damage);
 	}
 	else {
-		hp -= damage;
-		game->em.sendOnDamage(u, this, damage);
+		if (forcefield) {
+			forcefield = false;
+			damage = 0;
+		}
+		else {
+			hp -= damage;
+			game->em.sendOnDamage(u, this, damage);
+		}
 	}
 	return damage;
 }
@@ -387,6 +415,7 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 			attacked = true;
 			celerityMoved = true;
 			celerityAttacked = true;
+			if (hasForcefield()) { forcefield = true; }
 
 			//From action bar (Opening Gambit)
 			if (actionBar) {
@@ -666,6 +695,13 @@ void Unit::onAttack(Unit* u1, Unit* u2, bool counter) {
 
 		}
 
+		//If any attacked
+		switch (skill.skill) {
+		case SKILL_EXUN:
+			if ((u1 == this || u2 == this) && !counter) { player->draw(); }
+			break;
+		}
+
 	}
 
 }
@@ -680,7 +716,7 @@ void Unit::onDamage(Unit* u1, Unit* u2, int damage) {
 		if (u1 == this) {
 			switch (skill.skill) {
 			case SKILL_CAPTAIN_HANK_HART:
-				if (hp > 0) { hp = min(hp + damage, hpMax); }
+				if (hp > 0) { dealDamage(this, -damage); }
 				break;
 			}
 		}
@@ -840,6 +876,9 @@ void Unit::onTurnEnd(Player* p) {
 		celerityMoved = false;
 		celerityAttacked = false;
 	}
+
+	//Reset forcefield
+	if (hasForcefield()) { forcefield = true; }
 
 	//If on board
 	if (tile != nullptr) {

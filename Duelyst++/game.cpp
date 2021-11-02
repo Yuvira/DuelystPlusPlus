@@ -28,12 +28,12 @@ Game::Game() {
 	em.game = this;
 
 	//Character sprites
-	char c[] = { 'Û', 'Þ', 'Ý', 'Ü', 'ß', 'X', '\\', '/', '®', 'é', '¯' };
-	for (int a = 0; a < 8; ++a) { chars[a].buffer[0].Char.AsciiChar = c[a]; }
+	char c[] = { 'Û', 'Þ', 'Ý', 'Ü', 'ß', 'X', '\\', '/', '³', 'Ä', '®', 'é', '¯' };
+	for (int a = 0; a < 10; ++a) { chars[a].buffer[0].Char.AsciiChar = c[a]; }
 
 	//Turn indicator
 	light.resize(3, 1);
-	for (int a = 0; a < 3; ++a) { light.buffer[a].Char.AsciiChar = c[a + 8]; }
+	for (int a = 0; a < 3; ++a) { light.buffer[a].Char.AsciiChar = c[a + 10]; }
 	light.setCol(COLOR_LTBLUE);
 
 	//Set opponents
