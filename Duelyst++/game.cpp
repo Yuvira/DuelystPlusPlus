@@ -699,17 +699,13 @@ void Game::highlightSelectable(eTarget type, Unit* u) {
 		}
 		break;
 
-	//Near allies (summon)
-	case TARGET_NEAR_ALLY:
-		for (int a = 0; a < unit.size(); ++a) {
-			if (unit[a]->player == &player[turn]) {
-				for (int b = max(unit[a]->tile->pos.x - 1, 0); b < min(unit[a]->tile->pos.x + 2, 9); ++b) {
-					for (int c = max(unit[a]->tile->pos.y - 1, 0); c < min(unit[a]->tile->pos.y + 2, 5); ++c) {
-						if (map.tile[b][c].unit == nullptr) {
-							if (map.tile[b][c].border.buffer[0].Attributes != COLOR_GREEN) {
-								selectable.push_back(&map.tile[b][c]);
-							}
-						}
+	//Spaces near unit
+	case TARGET_NEAR_UNIT:
+		if (u != nullptr) {
+			for (int a = max(u->tile->pos.x - 1, 0); a < min(u->tile->pos.x + 2, 9); ++a) {
+				for (int b = max(u->tile->pos.y - 1, 0); b < min(u->tile->pos.y + 2, 5); ++b) {
+					if (a != u->tile->pos.x || b != u->tile->pos.y) {
+						selectable.push_back(&map.tile[a][b]);
 					}
 				}
 			}
@@ -723,6 +719,23 @@ void Game::highlightSelectable(eTarget type, Unit* u) {
 				for (int b = max(u->tile->pos.y - 1, 0); b < min(u->tile->pos.y + 2, 5); ++b) {
 					if (map.tile[a][b].unit != nullptr && map.tile[a][b].unit != u && map.tile[a][b].unit->tribe != TRIBE_GENERAL) {
 						selectable.push_back(&map.tile[a][b]);
+					}
+				}
+			}
+		}
+		break;
+
+	//Near allies (summon)
+	case TARGET_NEAR_ALLY:
+		for (int a = 0; a < unit.size(); ++a) {
+			if (unit[a]->player == &player[turn]) {
+				for (int b = max(unit[a]->tile->pos.x - 1, 0); b < min(unit[a]->tile->pos.x + 2, 9); ++b) {
+					for (int c = max(unit[a]->tile->pos.y - 1, 0); c < min(unit[a]->tile->pos.y + 2, 5); ++c) {
+						if (map.tile[b][c].unit == nullptr) {
+							if (map.tile[b][c].border.buffer[0].Attributes != COLOR_GREEN) {
+								selectable.push_back(&map.tile[b][c]);
+							}
+						}
 					}
 				}
 			}

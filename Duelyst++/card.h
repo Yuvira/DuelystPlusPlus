@@ -131,6 +131,7 @@ public:
 	bool hasForcefield();
 	void attack(Unit* u, bool counter);
 	int dealDamage(Unit* u, int damage);
+	void dispel();
 	void onSummon(Unit* u, bool actionBar);
 	void onDeath(Unit* u);
 	void onAttack(Unit* u1, Unit* u2, bool counter);

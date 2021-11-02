@@ -401,6 +401,60 @@ int Unit::dealDamage(Unit* u, int damage) {
 	return damage;
 }
 
+//Dispel unit
+void Unit::dispel() {
+
+	//Remove buffs granted to other units/cards
+	switch (skill.skill) {
+	case SKILL_AETHERMASTER:
+		player->replaces = max(player->replaces - 1, 0);
+		break;
+	case SKILL_ARCHON_SPELLBINDER:
+		for (int a = 0; a < player->enemy->hand.size(); ++a) {
+			if (player->enemy->hand[a]->type == CARD_SPELL) {
+				dynamic_cast<Spell*>(player->enemy->hand[a])->removeBuff(BUFF_ARCHON_SPELLBINDER, false);
+			}
+		}
+		for (int a = 0; a < player->enemy->deck.size(); ++a) {
+			if (player->enemy->deck[a]->type == CARD_SPELL) {
+				dynamic_cast<Spell*>(player->enemy->deck[a])->removeBuff(BUFF_ARCHON_SPELLBINDER, false);
+			}
+		}
+		break;
+	case SKILL_ARROW_WHISTLER:
+		for (int a = 0; a < game->unit.size(); ++a) {
+			if (game->unit[a]->player == player) {
+				if (game->unit[a] != this) {
+					if (game->unit[a]->isRanged()) {
+						game->unit[a]->removeBuff(BUFF_ARROW_WHISTLER, false);
+					}
+				}
+			}
+		}
+		break;
+	}
+	
+	//Remove skills and buffs on this
+	skill = game->cl.el.find(SKILL_DISPELLED);
+	for (int a = 0; a < buff.size(); ++a) {
+		switch (buff[a].buff) {
+		default:
+			buff.erase(buff.begin() + a);
+			--a;
+			break;
+		}
+	}
+
+	//Remove misc
+	celerityMoved = true;
+	celerityAttacked = true;
+	forcefield = false;
+
+	//Update
+	updateStatBuffs();
+
+}
+
 //When a unit is summoned
 void Unit::onSummon(Unit* u, bool actionBar) {
 
@@ -509,6 +563,10 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 					player->general->dealDamage(this, -4);
 					player->enemy->general->dealDamage(this, -4);
 					break;
+				case SKILL_EPHEMERAL_SHROUD:
+					game->highlightSelectable(TARGET_NEAR_UNIT, this);
+					if (game->selectable.size() > 0) { game->callback = Callback(this, nullptr, nullptr, SKILL_EPHEMERAL_SHROUD); }
+					break;
 				case SKILL_GHOST_LYNX:
 					game->highlightSelectable(TARGET_MINION_NEAR_UNIT, this);
 					if (game->selectable.size() > 0) { game->callback = Callback(this, nullptr, nullptr, SKILL_GHOST_LYNX); }
@@ -571,6 +629,7 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 						case SKILL_DEATHBLIGHTER:
 						case SKILL_DUST_WAILER:
 						case SKILL_EMERALD_REJUVENATOR:
+						case SKILL_EPHEMERAL_SHROUD:
 						case SKILL_GHOST_LYNX:
 							if (actionBar) { addBuff(BUFF_ARAKI_HEADHUNTER); }
 							break;
@@ -973,6 +1032,10 @@ void Unit::callback(BoardTile* t) {
 		break;
 	case SKILL_CROSSBONES:
 		if (t->unit != nullptr) { t->unit->dead = true; }
+		break;
+	case SKILL_EPHEMERAL_SHROUD:
+		t->setFeature(TILE_NONE);
+		if (t->unit != nullptr) { t->unit->dispel(); }
 		break;
 	case SKILL_GHOST_LYNX:
 		if (true) {

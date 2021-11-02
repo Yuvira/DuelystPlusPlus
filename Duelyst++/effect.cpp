@@ -93,6 +93,8 @@ void SpellEffect::generateSprite(std::string s) {
 EffectList::EffectList() {
 
 	//Unit skills
+	skillList.push_back(Skill(SKILL_DISPELLED));
+	skillList.back().generateSprite("{Dispelled}");
 	skillList.push_back(Skill(SKILL_CELERITY));
 	skillList.back().generateSprite("{Celerity}");
 	skillList.push_back(Skill(SKILL_FLYING));
@@ -189,6 +191,8 @@ EffectList::EffectList() {
 	skillList.back().generateSprite("Whenever this minion takes damage, it|deals that much damage to the|enemy General");
 	skillList.push_back(Skill(SKILL_EMERALD_REJUVENATOR));
 	skillList.back().generateSprite("{Opening Gambit}: Restore 4 Health to|BOTH Generals");
+	skillList.push_back(Skill(SKILL_EPHEMERAL_SHROUD));
+	skillList.back().generateSprite("{Opening Gambit}: Dispel 1 nearby space");
 	skillList.push_back(Skill(SKILL_EXUN));
 	skillList.back().generateSprite("{Forcefield}|Whenever this minion attacks or is|attacked, draw a card");
 	skillList.push_back(Skill(SKILL_GHOST_LYNX));
