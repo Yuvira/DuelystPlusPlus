@@ -279,6 +279,7 @@ bool Unit::isFlying() {
 	switch (skill.skill) {
 	case SKILL_FLYING:
 	case SKILL_BLACK_LOCUST:
+	case SKILL_DUST_WAILER:
 		return true;
 	}
 	return false;
@@ -459,6 +460,22 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 						}
 					}
 					break;
+				case SKILL_DUST_WAILER:
+					if (&game->player[0] == player && tile->pos.x < 8) {
+						for (int a = tile->pos.x + 1; a < 9; ++a) {
+							if (game->map.tile[a][tile->pos.y].unit != nullptr) {
+								game->map.tile[a][tile->pos.y].unit->dealDamage(this, 3);
+							}
+						}
+					}
+					else if (&game->player[1] == player && tile->pos.x > 0) {
+						for (int a = tile->pos.x - 1; a > -1; --a) {
+							if (game->map.tile[a][tile->pos.y].unit != nullptr) {
+								game->map.tile[a][tile->pos.y].unit->dealDamage(this, 3);
+							}
+						}
+					}
+					break;
 				case SKILL_GHOST_LYNX:
 					game->highlightSelectable(TARGET_MINION_NEAR_UNIT, this);
 					if (game->selectable.size() > 0) { game->callback = Callback(this, nullptr, nullptr, SKILL_GHOST_LYNX); }
@@ -519,6 +536,7 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 						case SKILL_CROSSBONES:
 						case SKILL_DANCING_BLADES:
 						case SKILL_DEATHBLIGHTER:
+						case SKILL_DUST_WAILER:
 						case SKILL_GHOST_LYNX:
 							if (actionBar) { addBuff(BUFF_ARAKI_HEADHUNTER); }
 							break;
