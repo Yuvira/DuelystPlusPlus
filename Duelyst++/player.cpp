@@ -11,8 +11,8 @@ void Player::preset(CardList& cl, Game* g) {
 	deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Argeon Highmayne")))));
 	for (int a = 0; a < 2; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Day Watcher"))))); }
 	for (int a = 0; a < 2; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Deathblighter"))))); }
-	for (int a = 0; a < 2; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Dark Nemesis"))))); }
-	for (int a = 0; a < 2; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Dagger Kiri"))))); }
+	for (int a = 0; a < 2; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Decimus"))))); }
+	for (int a = 0; a < 2; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Blaze Hound"))))); }
 	for (int a = 0; a < 2; ++a) { deck.push_back(new Spell(*(dynamic_cast<Spell*>(cl.find("Daemonic Lure"))))); }
 	for (int a = 0; a < 2; ++a) { deck.push_back(new Spell(*(dynamic_cast<Spell*>(cl.find("Consuming Rebirth"))))); }
 	for (int a = 0; a < deck.size(); ++a) {

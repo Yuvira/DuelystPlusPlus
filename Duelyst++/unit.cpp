@@ -750,6 +750,13 @@ void Unit::onDraw(Card* c, bool fromDeck) {
 				}
 			}
 			break;
+		case SKILL_DECIMUS:
+			if (fromDeck) {
+				if (c->player != player) {
+					player->enemy->general->dealDamage(this, 2);
+				}
+			}
+			break;
 		}
 
 		//Effects
