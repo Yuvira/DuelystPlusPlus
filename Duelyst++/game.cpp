@@ -682,6 +682,19 @@ void Game::highlightSelectable(eTarget type, Unit* u) {
 		}
 		break;
 
+	//Enemy minions
+	case TARGET_ENEMY_RANGED:
+		for (int a = 0; a < unit.size(); ++a) {
+			if (unit[a]->player != &player[turn]) {
+				if (unit[a]->tribe != TRIBE_GENERAL) {
+					if (unit[a]->isRanged()) {
+						selectable.push_back(unit[a]->tile);
+					}
+				}
+			}
+		}
+		break;
+
 	//Enemey general
 	case TARGET_ENEMY_GENERAL:
 		for (int a = 0; a < unit.size(); ++a) {
