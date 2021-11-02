@@ -23,12 +23,12 @@ void EventManager::sendOnDeath(Unit* u) {
 }
 
 //Send onAttack events
-void EventManager::sendOnAttack(Unit* u1, Unit* u2) {
-	for (int a = 0; a < game->unit.size(); ++a) { game->unit[a]->onAttack(u1, u2); }
-	for (int a = 0; a < game->player[0].hand.size(); ++a) { game->player[0].hand[a]->onAttack(u1, u2); }
-	for (int a = 0; a < game->player[0].deck.size(); ++a) { game->player[0].deck[a]->onAttack(u1, u2); }
-	for (int a = 0; a < game->player[1].hand.size(); ++a) { game->player[1].hand[a]->onAttack(u1, u2); }
-	for (int a = 0; a < game->player[1].deck.size(); ++a) { game->player[1].deck[a]->onAttack(u1, u2); }
+void EventManager::sendOnAttack(Unit* u1, Unit* u2, bool counter) {
+	for (int a = 0; a < game->unit.size(); ++a) { game->unit[a]->onAttack(u1, u2, counter); }
+	for (int a = 0; a < game->player[0].hand.size(); ++a) { game->player[0].hand[a]->onAttack(u1, u2, counter); }
+	for (int a = 0; a < game->player[0].deck.size(); ++a) { game->player[0].deck[a]->onAttack(u1, u2, counter); }
+	for (int a = 0; a < game->player[1].hand.size(); ++a) { game->player[1].hand[a]->onAttack(u1, u2, counter); }
+	for (int a = 0; a < game->player[1].deck.size(); ++a) { game->player[1].deck[a]->onAttack(u1, u2, counter); }
 }
 
 //Send onDamage events

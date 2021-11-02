@@ -83,7 +83,7 @@ public:
 	virtual void drawDetails(Renderer& rm, int& y) {}
 	virtual void onSummon(Unit* u, bool actionBar) {}
 	virtual void onDeath(Unit* u) {}
-	virtual void onAttack(Unit* u1, Unit* u2) {}
+	virtual void onAttack(Unit* u1, Unit* u2, bool counter) {}
 	virtual void onDamage(Unit* u1, Unit* u2, int damage) {}
 	virtual void onHeal(Unit* u1, Unit* u2, int heal) {}
 	virtual void onMove(Unit* u, bool byEffect) {}
@@ -132,7 +132,7 @@ public:
 	int dealDamage(Unit* u, int damage);
 	void onSummon(Unit* u, bool actionBar);
 	void onDeath(Unit* u);
-	void onAttack(Unit* u1, Unit* u2);
+	void onAttack(Unit* u1, Unit* u2, bool counter);
 	void onDamage(Unit* u1, Unit* u2, int damage);
 	void onHeal(Unit* u1, Unit* u2, int heal);
 	void onMove(Unit* u, bool byEffect);

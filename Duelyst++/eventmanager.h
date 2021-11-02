@@ -15,7 +15,7 @@ public:
 	~EventManager();
 	void sendOnSummon(Unit* u, bool actionBar);
 	void sendOnDeath(Unit* u);
-	void sendOnAttack(Unit* u1, Unit* u2);
+	void sendOnAttack(Unit* u1, Unit* u2, bool counter);
 	void sendOnDamage(Unit* u1, Unit* u2, int damage);
 	void sendOnHeal(Unit* u1, Unit* u2, int heal);
 	void sendOnMove(Unit* u, bool byEffect);

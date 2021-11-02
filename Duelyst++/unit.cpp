@@ -338,7 +338,7 @@ void Unit::attack(Unit* u, bool counter) {
 		break;
 	}
 	u->dealDamage(this, damage);
-	game->em.sendOnAttack(this, u);
+	game->em.sendOnAttack(this, u, counter);
 	if (!counter) {
 		if (!celerityAttacked && !moved) {
 			celerityMoved = true;
@@ -603,7 +603,28 @@ void Unit::onDeath(Unit* u) {
 }
 
 //When a unit attacks
-void Unit::onAttack(Unit* u1, Unit* u2) {
+void Unit::onAttack(Unit* u1, Unit* u2, bool counter) {
+
+	//If on board
+	if (tile != nullptr) {
+
+		//If ally attacked
+		if (u1->player == player) {
+
+			//Skills
+			switch (skill.skill) {
+			case SKILL_DAY_WATCHER:
+				if (!counter) {
+					if (u1->tribe != TRIBE_GENERAL) {
+						player->general->dealDamage(this, -1);
+					}
+				}
+				break;
+			}
+
+		}
+
+	}
 
 }
 
