@@ -336,12 +336,6 @@ void Game::changeTurn(bool t) {
 	if (turn) { light.setCol(COLOR_RED); }
 	else { light.setCol(COLOR_LTBLUE); }
 
-	//Refresh units
-	for (int a = 0; a < unit.size(); ++a) {
-		unit[a]->moved = false;
-		unit[a]->attacked = false;
-	}
-
 	//End old turn, start new turn
 	em.sendOnTurnEnd(&player[!t]);
 	em.sendOnTurnStart(&player[t]);
@@ -473,7 +467,8 @@ void Game::moveUnit() {
 	if (selectable[sPos]->unit == nullptr || selectable[sPos] == &map.tile[pos.x][pos.y]) {
 		if (selectable[sPos] != &map.tile[pos.x][pos.y]) {
 			activeUnit->setPos(selectable[sPos]->pos.x, selectable[sPos]->pos.y);
-			activeUnit->moved = true;
+			if (!activeUnit->celerityMoved) { activeUnit->celerityMoved = true; }
+			else { activeUnit->moved = true; }
 			pos = selectable[sPos]->pos;
 			em.sendOnMove(activeUnit, false);
 		}

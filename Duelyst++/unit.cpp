@@ -14,6 +14,8 @@ Unit::Unit(eFaction _faction, eTribe _tribe, int _cost, int _atk, int _hp, std::
 	dead = false;
 	moved = false;
 	attacked = false;
+	celerityMoved = true;
+	celerityAttacked = true;
 	if (path == "") { sprite.resize(5, 5); }
 	else if (tribe == TRIBE_GENERAL) { sprite.createFromFile("resources/generals/" + path + ".txt"); }
 	else { sprite.createFromFile("resources/units/" + path + ".txt"); }
@@ -318,6 +320,15 @@ bool Unit::isProvoked() {
 	return false;
 }
 
+//Does unit have celerity
+bool Unit::hasCelerity() {
+	switch (skill.skill) {
+	case SKILL_CELERITY:
+		return true;
+	}
+	return false;
+}
+
 //Attack enemy
 void Unit::attack(Unit* u, bool counter) {
 	int damage = atk;
@@ -329,8 +340,16 @@ void Unit::attack(Unit* u, bool counter) {
 	u->dealDamage(this, damage);
 	game->em.sendOnAttack(this, u);
 	if (!counter) {
-		moved = true;
-		attacked = true;
+		if (!celerityAttacked && !moved) {
+			celerityMoved = true;
+			celerityAttacked = true;
+		}
+		else {
+			moved = true;
+			attacked = true;
+			celerityMoved = true;
+			celerityAttacked = true;
+		}
 		if (u->canAttack(this)) { u->attack(this, true); }
 	}
 }
@@ -364,6 +383,8 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 			//Exhaust
 			moved = true;
 			attacked = true;
+			celerityMoved = true;
+			celerityAttacked = true;
 
 			//From action bar (Opening Gambit)
 			if (actionBar) {
@@ -726,6 +747,14 @@ bool Unit::onReplace() {
 
 //When a player's turn ends
 void Unit::onTurnEnd(Player* p) {
+
+	//Refresh
+	moved = false;
+	attacked = false;
+	if (hasCelerity()) {
+		celerityMoved = false;
+		celerityAttacked = false;
+	}
 
 	//If on board
 	if (tile != nullptr) {
