@@ -788,13 +788,28 @@ void Unit::onDraw(Card* c, bool fromDeck) {
 }
 
 //When this card is replaced
-bool Unit::onReplace() {
-	switch (skill.skill) {
-	case SKILL_ASTRAL_CRUSADER:
-		addBuff(BUFF_ASTRAL_CRUSADER);
-		return true;
+void Unit::onReplace(Card* c) {
+
+	//If this is replaced
+	if (c->type == CARD_UNIT) {
+		if (dynamic_cast<Unit*>(c) == this) {
+			switch (skill.skill) {
+			case SKILL_ASTRAL_CRUSADER:
+				addBuff(BUFF_ASTRAL_CRUSADER);
+				break;
+			case SKILL_DREAMGAZER:
+				BoardTile* t = game->map.getRandomNear(player->general->tile->pos.x, player->general->tile->pos.y);
+				if (t != nullptr) {
+					Unit* u = new Unit(*(dynamic_cast<Unit*>(original)));
+					game->setContext(u, player);
+					game->summon(u, t->pos.x, t->pos.y, false);
+					player->general->dealDamage(this, 2);
+				}
+				break;
+			}
+		}
 	}
-	return true;
+
 }
 
 //When a player's turn ends

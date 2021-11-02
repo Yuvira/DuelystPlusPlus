@@ -88,7 +88,7 @@ public:
 	virtual void onHeal(Unit* u1, Unit* u2, int heal) {}
 	virtual void onMove(Unit* u, bool byEffect) {}
 	virtual void onDraw(Card* c, bool fromDeck) {}
-	virtual bool onReplace() { return true; }
+	virtual void onReplace(Card* c) {}
 	virtual void onTurnEnd(Player* p) {}
 	virtual void onTurnStart(Player* p) {}
 	eFaction faction;
@@ -137,7 +137,7 @@ public:
 	void onHeal(Unit* u1, Unit* u2, int heal);
 	void onMove(Unit* u, bool byEffect);
 	void onDraw(Card* c, bool fromDeck);
-	bool onReplace();
+	void onReplace(Card* c);
 	void onTurnEnd(Player* p);
 	void onTurnStart(Player* p);
 	void callback(BoardTile* t);

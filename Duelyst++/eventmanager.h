@@ -20,6 +20,7 @@ public:
 	void sendOnHeal(Unit* u1, Unit* u2, int heal);
 	void sendOnMove(Unit* u, bool byEffect);
 	void sendOnDraw(Card* c, bool fromDeck);
+	void sendOnReplace(Card* c);
 	void sendOnTurnEnd(Player* p);
 	void sendOnTurnStart(Player* p);
 	Game* game;

@@ -9,11 +9,9 @@ Player::~Player() {}
 void Player::preset(CardList& cl, Game* g) {
 	game = g;
 	deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Argeon Highmayne")))));
-	for (int a = 0; a < 2; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Day Watcher"))))); }
-	for (int a = 0; a < 2; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Deathblighter"))))); }
-	for (int a = 0; a < 2; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Dioltas"))))); }
+	for (int a = 0; a < 2; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Astral Crusader"))))); }
+	for (int a = 0; a < 2; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Dreamgazer"))))); }
 	for (int a = 0; a < 2; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Blaze Hound"))))); }
-	for (int a = 0; a < 2; ++a) { deck.push_back(new Spell(*(dynamic_cast<Spell*>(cl.find("Daemonic Lure"))))); }
 	for (int a = 0; a < 2; ++a) { deck.push_back(new Spell(*(dynamic_cast<Spell*>(cl.find("Consuming Rebirth"))))); }
 	for (int a = 0; a < deck.size(); ++a) {
 		deck[a]->game = game;
@@ -110,11 +108,10 @@ void Player::addToHand(Card* c, bool cast) {
 //Replace card
 void Player::replace(int i) {
 	if (replaces > 0 && hand.size() > i) {
-		if (hand[i]->onReplace()) {
-			deck.push_back(hand[i]);
-			hand.erase(hand.begin() + i);
-			shuffle();
-		}
+		game->em.sendOnReplace(hand[i]);
+		deck.push_back(hand[i]);
+		hand.erase(hand.begin() + i);
+		shuffle();
 		hand.insert(hand.begin() + i, deck[0]);
 		deck.erase(deck.begin());
 		--replaces;

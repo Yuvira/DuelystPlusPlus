@@ -67,6 +67,15 @@ void EventManager::sendOnDraw(Card* c, bool fromDeck) {
 	for (int a = 0; a < game->player[1].deck.size(); ++a) { game->player[1].deck[a]->onDraw(c, fromDeck); }
 }
 
+//Send onReplace events
+void EventManager::sendOnReplace(Card* c) {
+	for (int a = 0; a < game->unit.size(); ++a) { game->unit[a]->onReplace(c); }
+	for (int a = 0; a < game->player[0].hand.size(); ++a) { game->player[0].hand[a]->onReplace(c); }
+	for (int a = 0; a < game->player[0].deck.size(); ++a) { game->player[0].deck[a]->onReplace(c); }
+	for (int a = 0; a < game->player[1].hand.size(); ++a) { game->player[1].hand[a]->onReplace(c); }
+	for (int a = 0; a < game->player[1].deck.size(); ++a) { game->player[1].deck[a]->onReplace(c); }
+}
+
 //Send onTurnEnd events
 void EventManager::sendOnTurnEnd(Player* p) {
 	for (int a = 0; a < game->unit.size(); ++a) { game->unit[a]->onTurnEnd(p); }
