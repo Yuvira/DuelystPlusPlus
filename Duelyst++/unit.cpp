@@ -505,6 +505,10 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 						}
 					}
 					break;
+				case SKILL_EMERALD_REJUVENATOR:
+					player->general->dealDamage(this, -4);
+					player->enemy->general->dealDamage(this, -4);
+					break;
 				case SKILL_GHOST_LYNX:
 					game->highlightSelectable(TARGET_MINION_NEAR_UNIT, this);
 					if (game->selectable.size() > 0) { game->callback = Callback(this, nullptr, nullptr, SKILL_GHOST_LYNX); }
@@ -566,6 +570,7 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 						case SKILL_DANCING_BLADES:
 						case SKILL_DEATHBLIGHTER:
 						case SKILL_DUST_WAILER:
+						case SKILL_EMERALD_REJUVENATOR:
 						case SKILL_GHOST_LYNX:
 							if (actionBar) { addBuff(BUFF_ARAKI_HEADHUNTER); }
 							break;

@@ -187,6 +187,8 @@ EffectList::EffectList() {
 	skillList.back().generateSprite("{Flying}|{Opening Gambit}: Deal 3 damage to all|enemies in front of this");
 	skillList.push_back(Skill(SKILL_ECLIPSE));
 	skillList.back().generateSprite("Whenever this minion takes damage, it|deals that much damage to the|enemy General");
+	skillList.push_back(Skill(SKILL_EMERALD_REJUVENATOR));
+	skillList.back().generateSprite("{Opening Gambit}: Restore 4 Health to|BOTH Generals");
 	skillList.push_back(Skill(SKILL_EXUN));
 	skillList.back().generateSprite("{Forcefield}|Whenever this minion attacks or is|attacked, draw a card");
 	skillList.push_back(Skill(SKILL_GHOST_LYNX));
