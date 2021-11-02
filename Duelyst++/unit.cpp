@@ -407,6 +407,10 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 					game->highlightSelectable(TARGET_ENEMY);
 					if (game->selectable.size() > 0) { game->callback = Callback(this, nullptr, nullptr, SKILL_BLOODTEAR_ALCHEMIST); }
 					break;
+				case SKILL_CROSSBONES:
+					game->highlightSelectable(TARGET_ENEMY_RANGED);
+					if (game->selectable.size() > 0) { game->callback = Callback(this, nullptr, nullptr, SKILL_CROSSBONES); }
+					break;
 				case SKILL_DANCING_BLADES:
 					if (true) { //Why is this necessary to initialize a local variable
 						int _x = tile->pos.x;
@@ -779,6 +783,9 @@ void Unit::callback(BoardTile* t) {
 	switch (game->callback.skill) {
 	case SKILL_BLOODTEAR_ALCHEMIST:
 		if (t->unit != nullptr) { t->unit->dealDamage(this, 1); }
+		break;
+	case SKILL_CROSSBONES:
+		if (t->unit != nullptr) { t->unit->dead = true; }
 		break;
 	case SKILL_GHOST_LYNX:
 		BoardTile* t2 = game->map.getRandom();
