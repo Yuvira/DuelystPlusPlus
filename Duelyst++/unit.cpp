@@ -297,6 +297,7 @@ bool Unit::isRanged() {
 //Does unit have provoke
 bool Unit::isProvoking() {
 	switch (skill.skill) {
+	case SKILL_PROVOKE:
 	case SKILL_BLOOD_TAURA:
 	case SKILL_BONEREAPER:
 		return true;
@@ -608,6 +609,14 @@ void Unit::onDeath(Unit* u) {
 							}
 						}
 					}
+				}
+				break;
+			case SKILL_DIOLTAS:
+				BoardTile* t = game->map.getRandomNear(player->general->tile->pos.x, player->general->tile->pos.y);
+				if (t != nullptr) {
+					Unit* u2 = new Unit(*(dynamic_cast<Unit*>(token)));
+					game->setContext(u2, player);
+					game->summon(u2, t->pos.x, t->pos.y, false);
 				}
 				break;
 			}

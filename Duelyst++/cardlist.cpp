@@ -110,6 +110,7 @@ CardList::CardList() {
 
 	//Add tokens
 	find("Dark Transformation")->token = find("Wraithling");
+	find("Dioltas")->token = find("Tombstone");
 
 }
 CardList::~CardList() {}
