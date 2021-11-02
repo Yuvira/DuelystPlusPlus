@@ -464,7 +464,7 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 					if (game->selectable.size() > 0) { game->callback = Callback(this, nullptr, nullptr, SKILL_CROSSBONES); }
 					break;
 				case SKILL_DANCING_BLADES:
-					if (true) { //Why is this necessary to initialize a local variable
+					if (true) {
 						int _x = tile->pos.x;
 						&game->player[0] == player ? ++_x : --_x;
 						if (_x > -1 && _x < 9) {
@@ -659,11 +659,13 @@ void Unit::onDeath(Unit* u) {
 				}
 				break;
 			case SKILL_DIOLTAS:
-				BoardTile* t = game->map.getRandomNear(player->general->tile->pos.x, player->general->tile->pos.y);
-				if (t != nullptr) {
-					Unit* u2 = new Unit(*(dynamic_cast<Unit*>(token)));
-					game->setContext(u2, player);
-					game->summon(u2, t->pos.x, t->pos.y, false);
+				if (true) {
+					BoardTile* t = game->map.getRandomNear(player->general->tile->pos.x, player->general->tile->pos.y);
+					if (t != nullptr) {
+						Unit* u2 = new Unit(*(dynamic_cast<Unit*>(token)));
+						game->setContext(u2, player);
+						game->summon(u2, t->pos.x, t->pos.y, false);
+					}
 				}
 				break;
 			}
@@ -725,9 +727,14 @@ void Unit::onDamage(Unit* u1, Unit* u2, int damage) {
 		if (u2 == this) {
 			switch (skill.skill) {
 			case SKILL_CHAOS_ELEMENTAL:
-				BoardTile* t = game->map.getRandom();
-				if (t != nullptr) { setPos(t->pos.x, t->pos.y); }
-				game->em.sendOnMove(this, true);
+				if (true) {
+					BoardTile* t = game->map.getRandom();
+					if (t != nullptr) { setPos(t->pos.x, t->pos.y); }
+					game->em.sendOnMove(this, true);
+				}
+				break;
+			case SKILL_ECLIPSE:
+				player->enemy->general->dealDamage(this, damage);
 				break;
 			}
 		}
@@ -852,12 +859,14 @@ void Unit::onReplace(Card* c) {
 				addBuff(BUFF_ASTRAL_CRUSADER);
 				break;
 			case SKILL_DREAMGAZER:
-				BoardTile* t = game->map.getRandomNear(player->general->tile->pos.x, player->general->tile->pos.y);
-				if (t != nullptr) {
-					Unit* u = new Unit(*(dynamic_cast<Unit*>(original)));
-					game->setContext(u, player);
-					game->summon(u, t->pos.x, t->pos.y, false);
-					player->general->dealDamage(this, 2);
+				if (true) {
+					BoardTile* t = game->map.getRandomNear(player->general->tile->pos.x, player->general->tile->pos.y);
+					if (t != nullptr) {
+						Unit* u = new Unit(*(dynamic_cast<Unit*>(original)));
+						game->setContext(u, player);
+						game->summon(u, t->pos.x, t->pos.y, false);
+						player->general->dealDamage(this, 2);
+					}
 				}
 				break;
 			}
@@ -961,9 +970,11 @@ void Unit::callback(BoardTile* t) {
 		if (t->unit != nullptr) { t->unit->dead = true; }
 		break;
 	case SKILL_GHOST_LYNX:
-		BoardTile* t2 = game->map.getRandom();
-		if (t2 != nullptr) { t->unit->setPos(t2->pos.x, t2->pos.y); }
-		game->em.sendOnMove(t2->unit, true);
+		if (true) {
+			BoardTile* t2 = game->map.getRandom();
+			if (t2 != nullptr) { t->unit->setPos(t2->pos.x, t2->pos.y); }
+			game->em.sendOnMove(t2->unit, true);
+		}
 		break;
 	}
 	game->callback = Callback();
