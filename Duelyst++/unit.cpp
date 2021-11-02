@@ -805,7 +805,27 @@ void Unit::onTurnEnd(Player* p) {
 }
 
 //When a player's turn starts
-void Unit::onTurnStart(Player* p) {}
+void Unit::onTurnStart(Player* p) {
+
+	//If on board
+	if (tile != nullptr) {
+
+		//If this unit's player started turn
+		if (p == player) {
+
+			//Skills
+			switch (skill.skill) {
+			case SKILL_DARK_NEMESIS:
+				player->enemy->general->dealDamage(this, 4);
+				addBuff(BUFF_DARK_NEMESIS);
+				break;
+			}
+
+		}
+
+	}
+
+}
 
 //Effect callback
 void Unit::callback(BoardTile* t) {

@@ -171,6 +171,8 @@ EffectList::EffectList() {
 	skillList.back().generateSprite("{Opening Gambit}: Deal 3 damage to|ANY minion in front of this");
 	skillList.push_back(Skill(SKILL_DARK_NEMESIS));
 	skillList.back().generateSprite("At the start of your turn, deal 4|damage to the enemy General and this|gains +4 Attack");
+	buffList.push_back(Buff(BUFF_DARK_NEMESIS, 0, 4, 0, true));
+	buffList.back().generateSprite("Dark Nemesis");
 	skillList.push_back(Skill(SKILL_DAY_WATCHER));
 	skillList.back().generateSprite("Whenever a friendly minion attacks,|restore 1 Health to your General");
 	skillList.push_back(Skill(SKILL_DEATHBLIGHTER));
