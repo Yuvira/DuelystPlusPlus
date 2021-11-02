@@ -61,6 +61,10 @@ void Unit::setPos(int x, int y) {
 	sHP.pos.Y = _y + 4;
 	tile = &game->map.tile[x][y];
 	tile->unit = this;
+	if (tile->feature == TILE_MANA) {
+		tile->setFeature(TILE_NONE);
+		++player->mana;
+	}
 }
 
 //Add buff to list

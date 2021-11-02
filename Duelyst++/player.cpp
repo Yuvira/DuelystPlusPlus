@@ -38,7 +38,7 @@ void Player::init(int _mana) {
 void Player::updateMana(eColor col) {
 	for (int a = 0; a < mana; ++a) { uiCrystal[a].setCol(col); }
 	for (int a = mana; a < manaMax; ++a) { uiCrystal[a].setCol(COLOR_LTWHITE); }
-	for (int a = manaMax; a < 9; ++a) { uiCrystal[a].setCol(COLOR_GRAY); }
+	for (int a = max(mana, manaMax); a < 9; ++a) { uiCrystal[a].setCol(COLOR_GRAY); }
 }
 
 //Render UI
