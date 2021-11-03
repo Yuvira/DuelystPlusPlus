@@ -17,6 +17,9 @@ Collection::Collection() {
 
 	//Variables
 	pos = Coord(0, 0);
+	page = 0;
+	pages = (cl.cList.size() + 53) / 54;
+	pageNumber.createFromString(std::to_string(page + 1) + " / " + std::to_string(pages));
 
 }
 Collection::~Collection() {}
@@ -67,7 +70,7 @@ void Collection::render(Renderer& rm) {
 	}
 
 	//Cards
-	for (int a = 0; a < cl.cList.size(); ++a) { rm.render(cl.cList[a]->sprite, ((a % 9) * 7) + 2, ((a / 9) * 7) + 7); }
+	for (int a = page * 54; a < min((page + 1) * 54, cl.cList.size()); ++a) { rm.render(cl.cList[a]->sprite, (((a - (page * 54)) % 9) * 7) + 2, (((a - (page * 54)) / 9) * 7) + 7); }
 
 	//Card counts
 	count[0].createFromString("Generals  : " + std::to_string(cl.gList.size()));
@@ -81,17 +84,28 @@ void Collection::render(Renderer& rm) {
 	//Sidebar
 	renderSidebar(rm);
 
+	//Page number
+	rm.render(pageNumber, 66, 47);
+
 }
 
 //Render sidebar
 void Collection::renderSidebar(Renderer& rm) {
 	int y = 1;
-	int i = (pos.y * 9) + pos.x;
+	int i = (pos.y * 9) + pos.x + (page * 54);
 	if (i < cl.cList.size()) { cl.cList[i]->drawDetails(rm, y); }
 }
 
 //Move cursor position
 void Collection::moveCursor(int x, int y) {
+	if (pos.x + x == 9) {
+		page = (page + 1 + pages) % pages;
+		pageNumber.createFromString(std::to_string(page + 1) + " / " + std::to_string(pages));
+	}
+	else if (pos.x + x == -1) {
+		page = (page - 1 + pages) % pages;
+		pageNumber.createFromString(std::to_string(page + 1) + " / " + std::to_string(pages));
+	}
 	pos.x = (pos.x + x + 9) % 9;
 	pos.y = (pos.y + y + 6) % 6;
 }

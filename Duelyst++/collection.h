@@ -17,9 +17,12 @@ public:
 	void moveCursor(int x, int y);
 	Sprite board;
 	Sprite count[5];
+	Sprite pageNumber;
 	CardList cl;
 	Tile tile[9][7];
 	Coord pos;
+	int page;
+	int pages;
 	bool* modeSwitch;
 };
 
