@@ -358,6 +358,15 @@ bool Unit::hasForcefield() {
 	return false;
 }
 
+//Does unit have rush
+bool Unit::hasRush() {
+	switch (skill.skill) {
+	case SKILL_RUSH:
+		return true;
+	}
+	return false;
+}
+
 //Attack enemy
 void Unit::attack(Unit* u, bool counter) {
 	int damage = atk;
@@ -477,6 +486,14 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 			attacked = true;
 			celerityMoved = true;
 			celerityAttacked = true;
+			if (hasRush()) {
+				moved = false;
+				attacked = false;
+				if (hasCelerity()) {
+					celerityMoved = false;
+					celerityAttacked = false;
+				}
+			}
 			if (hasForcefield()) { forcefield = true; }
 
 			//From action bar (Opening Gambit)
@@ -878,6 +895,32 @@ void Unit::onMove(Unit* u, bool byEffect) {
 						Unit* u2 = new Unit(*(dynamic_cast<Unit*>(original)));
 						game->setContext(u2, player);
 						game->summon(u2, t->pos.x, t->pos.y, false);
+					}
+				}
+				break;
+			}
+		}
+
+	}
+
+}
+
+//When a spell is cast
+void Unit::onSpellCast(Spell* s) {
+
+	//If on board
+	if (tile != nullptr) {
+		
+		//If ally spell cast
+		if (s->player == player) {
+			switch (skill.skill) {
+			case SKILL_FIRESTARTER:
+				if (true) {
+					BoardTile* t = game->map.getRandomNear(tile->pos.x, tile->pos.y);
+					if (t != nullptr) {
+						Unit* u = new Unit(*(dynamic_cast<Unit*>(token)));
+						game->setContext(u, player);
+						game->summon(u, t->pos.x, t->pos.y, false);
 					}
 				}
 				break;

@@ -111,6 +111,7 @@ void Spell::onUse(BoardTile* t) {
 				else { game->unit[a]->dealDamage(nullptr, 2); }
 			}
 		}
+		game->em.sendOnSpellCast(this);
 		break;
 	case SPELL_CONSUMING_REBIRTH:
 		if (t->unit != nullptr) {
@@ -119,6 +120,7 @@ void Spell::onUse(BoardTile* t) {
 			game->em.sendOnDeath(t->unit);
 			game->lateCallback.push_back(Callback(nullptr, this, t->unit->tile, SKILL_NONE));
 		}
+		game->em.sendOnSpellCast(this);
 		break;
 	case SPELL_DAEMONIC_LURE:
 		game->highlightSelectable(TARGET_TILE);
@@ -133,6 +135,7 @@ void Spell::onUse(BoardTile* t) {
 			int damage = player == &game->player[0] ? game->player[1].hand.size() : game->player[0].hand.size();
 			t->unit->dealDamage(nullptr, damage);
 		}
+		game->em.sendOnSpellCast(this);
 		break;
 	case SPELL_DARK_TRANSFORMATION:
 		if (true) { //Need this to initialize variable
@@ -145,6 +148,7 @@ void Spell::onUse(BoardTile* t) {
 				game->em.sendOnDeath(u1);
 			}
 		}
+		game->em.sendOnSpellCast(this);
 		break;
 	case SPELL_DARKFIRE_SACRIFICE:
 		if (t->unit != nullptr) {
@@ -162,6 +166,7 @@ void Spell::onUse(BoardTile* t) {
 				}
 			}
 		}
+		game->em.sendOnSpellCast(this);
 		break;
 	}
 }
@@ -174,6 +179,7 @@ void Spell::callback(BoardTile* t) {
 		u->setPos(t->pos.x, t->pos.y);
 		u->dealDamage(nullptr, 1);
 		game->em.sendOnMove(u, true);
+		game->em.sendOnSpellCast(this);
 		break;
 	}
 	game->callback = Callback();

@@ -19,6 +19,7 @@ public:
 	void sendOnDamage(Unit* u1, Unit* u2, int damage);
 	void sendOnHeal(Unit* u1, Unit* u2, int heal);
 	void sendOnMove(Unit* u, bool byEffect);
+	void sendOnSpellCast(Spell* s);
 	void sendOnDraw(Card* c, bool fromDeck);
 	void sendOnReplace(Card* c);
 	void sendOnTurnEnd(Player* p);

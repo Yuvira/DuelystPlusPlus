@@ -96,10 +96,14 @@ CardList::CardList() {
 	uList.back().skill = el.find(SKILL_PROVOKE);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "firespitter", "Fire Spitter"));
 	uList.back().skill = el.find(SKILL_RANGED);
+	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_ARCANYST, 5, 3, 5, "firestarter", "Firestarter"));
+	uList.back().skill = el.find(SKILL_FIRESTARTER);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 1, "ghostlynx", "Ghost Lynx"));
 	uList.back().skill = el.find(SKILL_GHOST_LYNX);
 
 	//Tokens
+	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 1, "spellspark", "Spellspark"));
+	uList.back().skill = el.find(SKILL_RUSH);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 3, 0, 10, "tombstone", "Tombstone"));
 	uList.back().skill = el.find(SKILL_PROVOKE);
 	uList.push_back(Unit(FACTION_ABYSSIAN, TRIBE_NONE, 1, 1, 1, "wraithling", "Wraithling"));
@@ -129,6 +133,7 @@ CardList::CardList() {
 	//Add tokens
 	find("Dark Transformation")->token = find("Wraithling");
 	find("Dioltas")->token = find("Tombstone");
+	find("Firestarter")->token = find("Spellspark");
 
 }
 CardList::~CardList() {}

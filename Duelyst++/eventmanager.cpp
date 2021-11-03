@@ -58,6 +58,15 @@ void EventManager::sendOnMove(Unit* u, bool byEffect) {
 	for (int a = 0; a < game->player[1].deck.size(); ++a) { game->player[1].deck[a]->onMove(u, byEffect); }
 }
 
+//Send onSpellCast events
+void EventManager::sendOnSpellCast(Spell* s) {
+	for (int a = 0; a < game->unit.size(); ++a) { game->unit[a]->onSpellCast(s); }
+	for (int a = 0; a < game->player[0].hand.size(); ++a) { game->player[0].hand[a]->onSpellCast(s); }
+	for (int a = 0; a < game->player[0].deck.size(); ++a) { game->player[0].deck[a]->onSpellCast(s); }
+	for (int a = 0; a < game->player[1].hand.size(); ++a) { game->player[1].hand[a]->onSpellCast(s); }
+	for (int a = 0; a < game->player[1].deck.size(); ++a) { game->player[1].deck[a]->onSpellCast(s); }
+}
+
 //Send onDraw events
 void EventManager::sendOnDraw(Card* c, bool fromDeck) {
 	for (int a = 0; a < game->unit.size(); ++a) { game->unit[a]->onDraw(c, fromDeck); }

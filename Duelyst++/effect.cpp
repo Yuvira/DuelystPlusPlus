@@ -103,6 +103,8 @@ EffectList::EffectList() {
 	skillList.back().generateSprite("{Provoke}");
 	skillList.push_back(Skill(SKILL_RANGED));
 	skillList.back().generateSprite("{Ranged}");
+	skillList.push_back(Skill(SKILL_RUSH));
+	skillList.back().generateSprite("{Rush}");
 	skillList.push_back(Skill(SKILL_ABJUDICATOR));
 	skillList.back().generateSprite("{Opening Gambit}: Lower the cost of all|spells in your action bar by 1");
 	buffList.push_back(Buff(BUFF_ABJUDICATOR, -1, 0, 0, true));
@@ -201,6 +203,8 @@ EffectList::EffectList() {
 	skillList.back().generateSprite("{Forcefield}|Whenever this minion attacks or is|attacked, draw a card");
 	skillList.push_back(Skill(SKILL_FACESTRIKER));
 	skillList.back().generateSprite("Deals double damage to Generals");
+	skillList.push_back(Skill(SKILL_FIRESTARTER));
+	skillList.back().generateSprite("Whenever you cast a spell, summon a|1/1 Spellspark with {Rush} nearby");
 	skillList.push_back(Skill(SKILL_GHOST_LYNX));
 	skillList.back().generateSprite("{Opening Gambit}: Teleport a nearby|minion to a random space");
 

@@ -9,6 +9,7 @@
 //Definitions
 class Game;
 class Player;
+class Spell; //why do i have to predefine this and not unit???
 
 //Card types
 enum eCard {
@@ -87,6 +88,7 @@ public:
 	virtual void onDamage(Unit* u1, Unit* u2, int damage) {}
 	virtual void onHeal(Unit* u1, Unit* u2, int heal) {}
 	virtual void onMove(Unit* u, bool byEffect) {}
+	virtual void onSpellCast(Spell* s) {}
 	virtual void onDraw(Card* c, bool fromDeck) {}
 	virtual void onReplace(Card* c) {}
 	virtual void onTurnEnd(Player* p) {}
@@ -129,6 +131,7 @@ public:
 	bool isProvoked();
 	bool hasCelerity();
 	bool hasForcefield();
+	bool hasRush();
 	void attack(Unit* u, bool counter);
 	int dealDamage(Unit* u, int damage);
 	void dispel();
@@ -138,6 +141,7 @@ public:
 	void onDamage(Unit* u1, Unit* u2, int damage);
 	void onHeal(Unit* u1, Unit* u2, int heal);
 	void onMove(Unit* u, bool byEffect);
+	void onSpellCast(Spell* s);
 	void onDraw(Card* c, bool fromDeck);
 	void onReplace(Card* c);
 	void onTurnEnd(Player* p);
