@@ -90,6 +90,12 @@ CardList::CardList() {
 	uList.back().skill = el.find(SKILL_EPHEMERAL_SHROUD);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 7, 5, 5, "exun", "E'Xun"));
 	uList.back().skill = el.find(SKILL_EXUN);
+	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 6, 4, 6, "facestriker", "Facestriker"));
+	uList.back().skill = el.find(SKILL_FACESTRIKER);
+	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 5, 5, 5, "fireblazer", "Fireblazer"));
+	uList.back().skill = el.find(SKILL_PROVOKE);
+	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "firespitter", "Fire Spitter"));
+	uList.back().skill = el.find(SKILL_RANGED);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 1, "ghostlynx", "Ghost Lynx"));
 	uList.back().skill = el.find(SKILL_GHOST_LYNX);
 

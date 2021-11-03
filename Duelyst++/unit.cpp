@@ -305,6 +305,7 @@ bool Unit::isFlying() {
 //Is unit ranged
 bool Unit::isRanged() {
 	switch (skill.skill) {
+	case SKILL_RANGED:
 	case SKILL_ARROW_WHISTLER:
 	case SKILL_CAPTAIN_HANK_HART:
 		return true;
@@ -362,7 +363,10 @@ void Unit::attack(Unit* u, bool counter) {
 	int damage = atk;
 	switch (skill.skill) {
 	case SKILL_BLUETIP_SCORPION:
-		if (u->tribe != TRIBE_GENERAL) { damage += atk; }
+		if (u->tribe != TRIBE_GENERAL) { damage *= 2; }
+		break;
+	case SKILL_FACESTRIKER:
+		if (u->tribe == TRIBE_GENERAL) { damage *= 2; }
 		break;
 	}
 	u->dealDamage(this, damage);
