@@ -191,6 +191,8 @@ EffectList::EffectList() {
 	skillList.back().generateSprite("Whenever this minion takes damage, it|deals that much damage to the|enemy General");
 	skillList.push_back(Skill(SKILL_EMERALD_REJUVENATOR));
 	skillList.back().generateSprite("{Opening Gambit}: Restore 4 Health to|BOTH Generals");
+	skillList.push_back(Skill(SKILL_ENVYBAER));
+	skillList.back().generateSprite("Whenever this minion damages an enemy,|teleport that enemy to a random corner");
 	skillList.push_back(Skill(SKILL_EPHEMERAL_SHROUD));
 	skillList.back().generateSprite("{Opening Gambit}: Dispel 1 nearby space");
 	skillList.push_back(Skill(SKILL_EXUN));

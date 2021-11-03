@@ -788,6 +788,15 @@ void Unit::onDamage(Unit* u1, Unit* u2, int damage) {
 			case SKILL_CAPTAIN_HANK_HART:
 				if (hp > 0) { dealDamage(this, -damage); }
 				break;
+			case SKILL_ENVYBAER:
+				if (true) {
+					BoardTile* t = game->map.getRandomCorner();
+					if (t != nullptr) {
+						u2->setPos(t->pos.x, t->pos.y);
+						game->em.sendOnMove(u2, true);
+					}
+				}
+				break;
 			}
 		}
 
@@ -797,8 +806,10 @@ void Unit::onDamage(Unit* u1, Unit* u2, int damage) {
 			case SKILL_CHAOS_ELEMENTAL:
 				if (true) {
 					BoardTile* t = game->map.getRandom();
-					if (t != nullptr) { setPos(t->pos.x, t->pos.y); }
-					game->em.sendOnMove(this, true);
+					if (t != nullptr) {
+						setPos(t->pos.x, t->pos.y);
+						game->em.sendOnMove(this, true);
+					}
 				}
 				break;
 			case SKILL_ECLIPSE:

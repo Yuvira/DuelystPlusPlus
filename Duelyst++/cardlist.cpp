@@ -84,6 +84,8 @@ CardList::CardList() {
 	uList.back().skill = el.find(SKILL_ECLIPSE);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 4, 4, 4, "emeraldrejuvenator", "Emerald Rejuvenator"));
 	uList.back().skill = el.find(SKILL_EMERALD_REJUVENATOR);
+	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 5, 3, 10, "envybaer", "Envybaer"));
+	uList.back().skill = el.find(SKILL_ENVYBAER);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 1, "ephemeralshroud", "Ephemeral Shroud"));
 	uList.back().skill = el.find(SKILL_EPHEMERAL_SHROUD);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 7, 5, 5, "exun", "E'Xun"));

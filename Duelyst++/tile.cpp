@@ -75,6 +75,20 @@ BoardTile* Map::getRandom() {
 	return nullptr;
 }
 
+//Get random empty corner
+BoardTile* Map::getRandomCorner() {
+	std::vector<BoardTile*> v;
+	if (tile[0][0].unit == nullptr) { v.push_back(&tile[0][0]); }
+	else if (tile[8][0].unit == nullptr) { v.push_back(&tile[8][0]); }
+	else if (tile[0][4].unit == nullptr) { v.push_back(&tile[0][4]); }
+	else if (tile[8][4].unit == nullptr) { v.push_back(&tile[8][4]); }
+	if (v.size() > 0) {
+		int i = rand() % v.size();
+		return v[i];
+	}
+	return nullptr;
+}
+
 //Get random empty tile
 BoardTile* Map::getRandomNear(int x, int y) {
 	std::vector<BoardTile*> v;
