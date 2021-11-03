@@ -205,6 +205,10 @@ EffectList::EffectList() {
 	skillList.back().generateSprite("Deals double damage to Generals");
 	skillList.push_back(Skill(SKILL_FIRESTARTER));
 	skillList.back().generateSprite("Whenever you cast a spell, summon a|1/1 Spellspark with {Rush} nearby");
+	skillList.push_back(Skill(SKILL_FIRST_SWORD_OF_AKRANE));
+	skillList.back().generateSprite("Your other minions have +1 Attack");
+	buffList.push_back(Buff(BUFF_FIRST_SWORD_OF_AKRANE, 0, 1, 0, true));
+	buffList.back().generateSprite("Might of Akrane");
 	skillList.push_back(Skill(SKILL_GHOST_LYNX));
 	skillList.back().generateSprite("{Opening Gambit}: Teleport a nearby|minion to a random space");
 

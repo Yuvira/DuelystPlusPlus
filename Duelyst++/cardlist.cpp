@@ -98,6 +98,8 @@ CardList::CardList() {
 	uList.back().skill = el.find(SKILL_RANGED);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_ARCANYST, 5, 3, 5, "firestarter", "Firestarter"));
 	uList.back().skill = el.find(SKILL_FIRESTARTER);
+	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 6, 7, 7, "firstswordofakrane", "First Sword of Akrane"));
+	uList.back().skill = el.find(SKILL_FIRST_SWORD_OF_AKRANE);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 1, "ghostlynx", "Ghost Lynx"));
 	uList.back().skill = el.find(SKILL_GHOST_LYNX);
 

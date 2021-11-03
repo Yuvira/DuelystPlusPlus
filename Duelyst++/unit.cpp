@@ -449,12 +449,25 @@ void Unit::dispel() {
 			}
 		}
 		break;
+	case SKILL_FIRST_SWORD_OF_AKRANE:
+		for (int a = 0; a < game->unit.size(); ++a) {
+			if (game->unit[a]->player == player) {
+				if (game->unit[a]->tribe != TRIBE_GENERAL) {
+					if (game->unit[a] != this) {
+						game->unit[a]->removeBuff(BUFF_FIRST_SWORD_OF_AKRANE, false);
+					}
+				}
+			}
+		}
+		break;
 	}
 	
 	//Remove skills and buffs on this
 	skill = game->cl.el.find(SKILL_DISPELLED);
 	for (int a = 0; a < buff.size(); ++a) {
 		switch (buff[a].buff) {
+		case BUFF_FIRST_SWORD_OF_AKRANE:
+			break;
 		default:
 			buff.erase(buff.begin() + a);
 			--a;
@@ -600,35 +613,44 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 			}
 
 			//Summoned from anywhere (apply global effects)
-			else {
-				switch (skill.skill) {
-				case SKILL_AETHERMASTER:
-					++player->replaces;
-					break;
-				case SKILL_ARCHON_SPELLBINDER:
-					for (int a = 0; a < player->enemy->hand.size(); ++a) {
-						if (player->enemy->hand[a]->type == CARD_SPELL) {
-							dynamic_cast<Spell*>(player->enemy->hand[a])->addBuff(BUFF_ARCHON_SPELLBINDER);
-						}
+			switch (skill.skill) {
+			case SKILL_AETHERMASTER:
+				++player->replaces;
+				break;
+			case SKILL_ARCHON_SPELLBINDER:
+				for (int a = 0; a < player->enemy->hand.size(); ++a) {
+					if (player->enemy->hand[a]->type == CARD_SPELL) {
+						dynamic_cast<Spell*>(player->enemy->hand[a])->addBuff(BUFF_ARCHON_SPELLBINDER);
 					}
-					for (int a = 0; a < player->enemy->deck.size(); ++a) {
-						if (player->enemy->deck[a]->type == CARD_SPELL) {
-							dynamic_cast<Spell*>(player->enemy->deck[a])->addBuff(BUFF_ARCHON_SPELLBINDER);
-						}
+				}
+				for (int a = 0; a < player->enemy->deck.size(); ++a) {
+					if (player->enemy->deck[a]->type == CARD_SPELL) {
+						dynamic_cast<Spell*>(player->enemy->deck[a])->addBuff(BUFF_ARCHON_SPELLBINDER);
 					}
-					break;
-				case SKILL_ARROW_WHISTLER:
-					for (int a = 0; a < game->unit.size(); ++a) {
-						if (game->unit[a]->player == player) {
-							if (game->unit[a] != this) {
-								if (game->unit[a]->isRanged()) {
-									game->unit[a]->addBuff(BUFF_ARROW_WHISTLER);
-								}
+				}
+				break;
+			case SKILL_ARROW_WHISTLER:
+				for (int a = 0; a < game->unit.size(); ++a) {
+					if (game->unit[a]->player == player) {
+						if (game->unit[a] != this) {
+							if (game->unit[a]->isRanged()) {
+								game->unit[a]->addBuff(BUFF_ARROW_WHISTLER);
 							}
 						}
 					}
-					break;
 				}
+				break;
+			case SKILL_FIRST_SWORD_OF_AKRANE:
+				for (int a = 0; a < game->unit.size(); ++a) {
+					if (game->unit[a]->player == player) {
+						if (game->unit[a]->tribe != TRIBE_GENERAL) {
+							if (game->unit[a] != this) {
+								game->unit[a]->addBuff(BUFF_FIRST_SWORD_OF_AKRANE);
+							}
+						}
+					}
+				}
+				break;
 			}
 
 		}
@@ -671,6 +693,11 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 				break;
 			case SKILL_CRIMSON_OCULUS:
 				if (u->player != player) { addBuff(BUFF_CRIMSON_OCULUS); }
+				break;
+			case SKILL_FIRST_SWORD_OF_AKRANE:
+				if (u->player == player) {
+					u->addBuff(BUFF_FIRST_SWORD_OF_AKRANE);
+				}
 				break;
 			}
 
@@ -754,6 +781,17 @@ void Unit::onDeath(Unit* u) {
 						Unit* u2 = new Unit(*(dynamic_cast<Unit*>(token)));
 						game->setContext(u2, player);
 						game->summon(u2, t->pos.x, t->pos.y, false);
+					}
+				}
+				break;
+			case SKILL_FIRST_SWORD_OF_AKRANE:
+				for (int a = 0; a < game->unit.size(); ++a) {
+					if (game->unit[a]->player == player) {
+						if (game->unit[a]->tribe != TRIBE_GENERAL) {
+							if (game->unit[a] != this) {
+								game->unit[a]->removeBuff(BUFF_FIRST_SWORD_OF_AKRANE, false);
+							}
+						}
 					}
 				}
 				break;
