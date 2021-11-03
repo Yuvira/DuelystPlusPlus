@@ -605,6 +605,21 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 					game->highlightSelectable(TARGET_NEAR_UNIT, this);
 					if (game->selectable.size() > 0) { game->callback = Callback(this, nullptr, nullptr, SKILL_EPHEMERAL_SHROUD); }
 					break;
+				case SKILL_FLAMEBLOOD_WARLOCK:
+					player->general->dealDamage(this, 3);
+					player->enemy->general->dealDamage(this, 3);
+					break;
+				case SKILL_FROSTBONE_NAGA:
+					for (int a = max(tile->pos.x - 1, 0); a < min(tile->pos.x + 2, 9); ++a) {
+						for (int b = max(tile->pos.y - 1, 0); b < min(tile->pos.y + 2, 5); ++b) {
+							if (game->map.tile[a][b].unit != nullptr) {
+								if (game->map.tile[a][b].unit != this) {
+									game->map.tile[a][b].unit->dealDamage(this, 2);
+								}
+							}
+						}
+					}
+					break;
 				case SKILL_GHOST_LYNX:
 					game->highlightSelectable(TARGET_MINION_NEAR_UNIT, this);
 					if (game->selectable.size() > 0) { game->callback = Callback(this, nullptr, nullptr, SKILL_GHOST_LYNX); }
@@ -677,6 +692,8 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 						case SKILL_DUST_WAILER:
 						case SKILL_EMERALD_REJUVENATOR:
 						case SKILL_EPHEMERAL_SHROUD:
+						case SKILL_FLAMEBLOOD_WARLOCK:
+						case SKILL_FROSTBONE_NAGA:
 						case SKILL_GHOST_LYNX:
 							if (actionBar) { addBuff(BUFF_ARAKI_HEADHUNTER); }
 							break;

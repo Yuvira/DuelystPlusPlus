@@ -209,6 +209,10 @@ EffectList::EffectList() {
 	skillList.back().generateSprite("Your other minions have +1 Attack");
 	buffList.push_back(Buff(BUFF_FIRST_SWORD_OF_AKRANE, 0, 1, 0, true));
 	buffList.back().generateSprite("Might of Akrane");
+	skillList.push_back(Skill(SKILL_FLAMEBLOOD_WARLOCK));
+	skillList.back().generateSprite("{Opening Gambit}: Deal 3 damage to|BOTH Generals");
+	skillList.push_back(Skill(SKILL_FROSTBONE_NAGA));
+	skillList.back().generateSprite("{Opening Gambit}: Deal 2 damage to everything around this");
 	skillList.push_back(Skill(SKILL_GHOST_LYNX));
 	skillList.back().generateSprite("{Opening Gambit}: Teleport a nearby|minion to a random space");
 
