@@ -361,6 +361,12 @@ bool Unit::hasForcefield() {
 	case SKILL_EXUN:
 		return true;
 	}
+	for (int a = 0; a < effect.size(); ++a) {
+		switch (effect[a].effect) {
+		case EFFECT_GROVE_LION:
+			return true;
+		}
+	}
 	return false;
 }
 
@@ -487,6 +493,17 @@ void Unit::dispel() {
 			}
 		}
 		break;
+	case SKILL_GROVE_LION:
+		for (int a = 0; a < player->general->effect.size(); ++a) {
+			if (player->general->effect[a].effect == EFFECT_GROVE_LION) {
+				if (player->general->effect[a].count == 1) {
+					player->general->forcefield = false;
+				}
+				player->general->removeEffect(EFFECT_GROVE_LION, false);
+				break;
+			}
+		}
+		break;
 	}
 	
 	//Remove skills and buffs on this
@@ -495,6 +512,7 @@ void Unit::dispel() {
 		switch (effect[a].effect) {
 		case EFFECT_DARKFIRE_SACRIFICE:
 		case EFFECT_GOLEM_VANQUISHER:
+		case EFFECT_GROVE_LION:
 			break;
 		default:
 			effect.erase(effect.begin() + a);
@@ -733,6 +751,10 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 					}
 				}
 				break;
+			case SKILL_GROVE_LION:
+				player->general->addEffect(EFFECT_GROVE_LION);
+				player->general->forcefield = true;
+				break;
 			}
 
 		}
@@ -923,6 +945,17 @@ void Unit::onDeath(Unit* u) {
 						if (game->unit[a] != this) {
 							game->unit[a]->removeEffect(EFFECT_GOLEM_VANQUISHER, false);
 						}
+					}
+				}
+				break;
+			case SKILL_GROVE_LION:
+				for (int a = 0; a < player->general->effect.size(); ++a) {
+					if (player->general->effect[a].effect == EFFECT_GROVE_LION) {
+						if (player->general->effect[a].count == 1) {
+							player->general->forcefield = false;
+						}
+						player->general->removeEffect(EFFECT_GROVE_LION, false);
+						break;
 					}
 				}
 				break;

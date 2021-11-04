@@ -223,6 +223,10 @@ EffectList::EffectList() {
 	skillList.back().generateSprite("{Provoke}|Your other Golem minions have {Provoke}");
 	effectList.push_back(Effect(EFFECT_GOLEM_VANQUISHER));
 	effectList.back().generateSprite("Golem Vanquisher|Provoke");
+	skillList.push_back(Skill(SKILL_GROVE_LION));
+	skillList.back().generateSprite("While this minion is on the battlefield,|your general has {Forcefield}");
+	effectList.push_back(Effect(EFFECT_GROVE_LION));
+	effectList.back().generateSprite("Grove Lion|Forcefield");
 
 	//Spell effects
 	spellList.push_back(SpellEffect(SPELL_BREATH_OF_THE_UNBORN));
