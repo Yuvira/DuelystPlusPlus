@@ -227,6 +227,8 @@ EffectList::EffectList() {
 	skillList.back().generateSprite("While this minion is on the battlefield,|your general has {Forcefield}");
 	effectList.push_back(Effect(EFFECT_GROVE_LION));
 	effectList.back().generateSprite("Grove Lion|Forcefield");
+	skillList.push_back(Skill(SKILL_HEALING_MYSTIC));
+	skillList.back().generateSprite("{Opening Gambit}: Restore 2 Health|to anything");
 
 	//Spell effects
 	spellList.push_back(SpellEffect(SPELL_BREATH_OF_THE_UNBORN));

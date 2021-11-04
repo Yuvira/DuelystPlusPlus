@@ -637,6 +637,13 @@ void Game::highlightSelectable(eTarget type, Unit* u) {
 		}
 		break;
 
+	//Any unit
+	case TARGET_UNIT:
+		for (int a = 0; a < unit.size(); ++a) {
+			selectable.push_back(unit[a]->tile);
+		}
+		break;
+
 	//Any minion
 	case TARGET_MINION:
 		for (int a = 0; a < unit.size(); ++a) {

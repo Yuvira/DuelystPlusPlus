@@ -680,6 +680,10 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 					game->highlightSelectable(TARGET_MINION_NEAR_UNIT, this);
 					if (game->selectable.size() > 0) { game->callback = Callback(this, nullptr, nullptr, SKILL_GHOST_LYNX); }
 					break;
+				case SKILL_HEALING_MYSTIC:
+					game->highlightSelectable(TARGET_UNIT, this);
+					if (game->selectable.size() > 0) { game->callback = Callback(this, nullptr, nullptr, SKILL_HEALING_MYSTIC); }
+					break;
 				}
 			}
 
@@ -784,6 +788,7 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 						case SKILL_FLAMEBLOOD_WARLOCK:
 						case SKILL_FROSTBONE_NAGA:
 						case SKILL_GHOST_LYNX:
+						case SKILL_HEALING_MYSTIC:
 							if (actionBar) { addBuff(BUFF_ARAKI_HEADHUNTER); }
 							break;
 						}
@@ -1347,6 +1352,9 @@ void Unit::callback(BoardTile* t) {
 			if (t2 != nullptr) { t->unit->setPos(t2->pos.x, t2->pos.y); }
 			game->em.sendOnMove(t2->unit, true);
 		}
+		break;
+	case SKILL_HEALING_MYSTIC:
+		if (t->unit != nullptr) { t->unit->dealDamage(this, -2); }
 		break;
 	}
 	game->callback = Callback();

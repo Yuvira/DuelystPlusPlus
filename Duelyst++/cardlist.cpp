@@ -112,6 +112,9 @@ CardList::CardList() {
 	uList.back().skill = el.find(SKILL_GOLEM_VANQUISHER);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 6, 5, 5, "grovelion", "Grove Lion"));
 	uList.back().skill = el.find(SKILL_GROVE_LION);
+	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_GOLEM, 4, 4, 6, "hailstonegolem", "Hailstone Golem"));
+	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 3, "healingmystic", "Healing Mystic"));
+	uList.back().skill = el.find(SKILL_HEALING_MYSTIC);
 
 	//Tokens
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 1, "spellspark", "Spellspark"));
