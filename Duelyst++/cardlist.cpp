@@ -106,6 +106,8 @@ CardList::CardList() {
 	uList.back().skill = el.find(SKILL_FROSTBONE_NAGA);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 1, "ghostlynx", "Ghost Lynx"));
 	uList.back().skill = el.find(SKILL_GHOST_LYNX);
+	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_GOLEM, 2, 2, 3, "golemmetallurgist", "Golem Metallurgist"));
+	uList.back().skill = el.find(SKILL_GOLEM_METALLURGIST);
 
 	//Tokens
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 1, "spellspark", "Spellspark"));

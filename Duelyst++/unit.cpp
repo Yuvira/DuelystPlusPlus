@@ -460,6 +460,18 @@ void Unit::dispel() {
 			}
 		}
 		break;
+	case SKILL_GOLEM_METALLURGIST:
+		for (int a = 0; a < player->hand.size(); ++a) {
+			if (player->hand[a]->type == CARD_UNIT) {
+				dynamic_cast<Unit*>(player->hand[a])->removeBuff(BUFF_GOLEM_METALLURGIST, false);
+			}
+		}
+		for (int a = 0; a < player->deck.size(); ++a) {
+			if (player->deck[a]->type == CARD_UNIT) {
+				dynamic_cast<Unit*>(player->deck[a])->removeBuff(BUFF_GOLEM_METALLURGIST, false);
+			}
+		}
+		break;
 	}
 	
 	//Remove skills and buffs on this
@@ -666,6 +678,24 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 					}
 				}
 				break;
+			case SKILL_GOLEM_METALLURGIST:
+				for (int a = 0; a < player->hand.size(); ++a) {
+					if (player->hand[a]->type == CARD_UNIT) {
+						Unit* u = dynamic_cast<Unit*>(player->hand[a]);
+						if (u->tribe == TRIBE_GOLEM) {
+							u->addBuff(BUFF_GOLEM_METALLURGIST);
+						}
+					}
+				}
+				for (int a = 0; a < player->deck.size(); ++a) {
+					if (player->deck[a]->type == CARD_UNIT) {
+						Unit* u = dynamic_cast<Unit*>(player->deck[a]);
+						if (u->tribe == TRIBE_GOLEM) {
+							u->addBuff(BUFF_GOLEM_METALLURGIST);
+						}
+					}
+				}
+				break;
 			}
 
 		}
@@ -716,22 +746,41 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 					u->addBuff(BUFF_FIRST_SWORD_OF_AKRANE);
 				}
 				break;
+			case SKILL_GOLEM_METALLURGIST:
+				if (u->player == player) {
+					if (u->tribe == TRIBE_GOLEM) {
+						u->removeBuff(BUFF_GOLEM_METALLURGIST, true);
+						for (int b = 0; b < player->hand.size(); ++b) {
+							if (player->hand[b]->type == CARD_UNIT) {
+								dynamic_cast<Unit*>(player->hand[b])->removeBuff(BUFF_GOLEM_METALLURGIST, true);
+							}
+						}
+						for (int b = 0; b < player->deck.size(); ++b) {
+							if (player->deck[b]->type == CARD_UNIT) {
+								dynamic_cast<Unit*>(player->deck[b])->removeBuff(BUFF_GOLEM_METALLURGIST, true);
+							}
+						}
+					}
+				}
+				break;
 			}
 
 			//Effects
 			for (int a = 0; a < effect.size(); ++a) {
 				switch (effect[a].effect) {
 				case EFFECT_DARKFIRE_SACRIFICE:
-					removeEffect(EFFECT_DARKFIRE_SACRIFICE, true);
-					u->removeBuff(BUFF_DARKFIRE_SACRIFICE, true);
-					for (int b = 0; b < player->hand.size(); ++b) {
-						if (player->hand[b]->type == CARD_UNIT) {
-							dynamic_cast<Unit*>(player->hand[b])->removeBuff(BUFF_DARKFIRE_SACRIFICE, true);
+					if (u->player == player) {
+						removeEffect(EFFECT_DARKFIRE_SACRIFICE, true);
+						u->removeBuff(BUFF_DARKFIRE_SACRIFICE, true);
+						for (int b = 0; b < player->hand.size(); ++b) {
+							if (player->hand[b]->type == CARD_UNIT) {
+								dynamic_cast<Unit*>(player->hand[b])->removeBuff(BUFF_DARKFIRE_SACRIFICE, true);
+							}
 						}
-					}
-					for (int b = 0; b < player->deck.size(); ++b) {
-						if (player->deck[b]->type == CARD_UNIT) {
-							dynamic_cast<Unit*>(player->deck[b])->removeBuff(BUFF_DARKFIRE_SACRIFICE, true);
+						for (int b = 0; b < player->deck.size(); ++b) {
+							if (player->deck[b]->type == CARD_UNIT) {
+								dynamic_cast<Unit*>(player->deck[b])->removeBuff(BUFF_DARKFIRE_SACRIFICE, true);
+							}
 						}
 					}
 					break;
@@ -809,6 +858,18 @@ void Unit::onDeath(Unit* u) {
 								game->unit[a]->removeBuff(BUFF_FIRST_SWORD_OF_AKRANE, false);
 							}
 						}
+					}
+				}
+				break;
+			case SKILL_GOLEM_METALLURGIST:
+				for (int a = 0; a < player->hand.size(); ++a) {
+					if (player->hand[a]->type == CARD_UNIT) {
+						dynamic_cast<Unit*>(player->hand[a])->removeBuff(BUFF_GOLEM_METALLURGIST, false);
+					}
+				}
+				for (int a = 0; a < player->deck.size(); ++a) {
+					if (player->deck[a]->type == CARD_UNIT) {
+						dynamic_cast<Unit*>(player->deck[a])->removeBuff(BUFF_GOLEM_METALLURGIST, false);
 					}
 				}
 				break;
@@ -1008,6 +1069,16 @@ void Unit::onDraw(Card* c, bool fromDeck) {
 				}
 			}
 			break;
+		case SKILL_GOLEM_METALLURGIST:
+			if (!fromDeck) {
+				if (c->player == player && c->type == CARD_UNIT) {
+					Unit* u = dynamic_cast<Unit*>(c);
+					if (u->tribe == TRIBE_GOLEM) {
+						dynamic_cast<Unit*>(c)->addBuff(BUFF_DARKFIRE_SACRIFICE);
+					}
+				}
+			}
+			break;
 		}
 
 		//Effects
@@ -1103,6 +1174,18 @@ void Unit::onTurnEnd(Player* p) {
 					}
 				}
 				break;
+			case SKILL_GOLEM_METALLURGIST:
+				for (int a = 0; a < player->hand.size(); ++a) {
+					if (player->hand[a]->type == CARD_UNIT) {
+						dynamic_cast<Unit*>(player->hand[a])->removeBuff(BUFF_GOLEM_METALLURGIST, true);
+					}
+				}
+				for (int a = 0; a < player->deck.size(); ++a) {
+					if (player->deck[a]->type == CARD_UNIT) {
+						dynamic_cast<Unit*>(player->deck[a])->removeBuff(BUFF_GOLEM_METALLURGIST, true);
+					}
+				}
+				break;
 			}
 
 		}
@@ -1132,6 +1215,24 @@ void Unit::onTurnStart(Player* p) {
 			case SKILL_DARK_NEMESIS:
 				player->enemy->general->dealDamage(this, 4);
 				addBuff(BUFF_DARK_NEMESIS);
+				break;
+			case SKILL_GOLEM_METALLURGIST:
+				for (int a = 0; a < player->hand.size(); ++a) {
+					if (player->hand[a]->type == CARD_UNIT) {
+						Unit* u = dynamic_cast<Unit*>(player->hand[a]);
+						if (u->tribe == TRIBE_GOLEM) {
+							u->addBuff(BUFF_GOLEM_METALLURGIST);
+						}
+					}
+				}
+				for (int a = 0; a < player->deck.size(); ++a) {
+					if (player->deck[a]->type == CARD_UNIT) {
+						Unit* u = dynamic_cast<Unit*>(player->deck[a]);
+						if (u->tribe == TRIBE_GOLEM) {
+							u->addBuff(BUFF_GOLEM_METALLURGIST);
+						}
+					}
+				}
 				break;
 			}
 

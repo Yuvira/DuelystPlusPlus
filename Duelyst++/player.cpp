@@ -9,12 +9,12 @@ Player::~Player() {}
 void Player::preset(CardList& cl, Game* g) {
 	game = g;
 	deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Argeon Highmayne")))));
-	for (int a = 0; a < 2; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("E'Xun"))))); }
+	for (int a = 0; a < 2; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Brightmoss Golem"))))); }
 	for (int a = 0; a < 2; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Ephemeral Shroud"))))); }
-	for (int a = 0; a < 2; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Flameblood Warlock"))))); }
-	for (int a = 0; a < 2; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Frostbone Naga"))))); }
+	for (int a = 0; a < 2; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Bloodshard Golem"))))); }
+	for (int a = 0; a < 2; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Golem Metallurgist"))))); }
 	for (int a = 0; a < 2; ++a) { deck.push_back(new Spell(*(dynamic_cast<Spell*>(cl.find("Consuming Rebirth"))))); }
-	for (int a = 0; a < 2; ++a) { deck.push_back(new Spell(*(dynamic_cast<Spell*>(cl.find("Dark Transformation"))))); }
+	for (int a = 0; a < 2; ++a) { deck.push_back(new Spell(*(dynamic_cast<Spell*>(cl.find("Darkfire Sacrifice"))))); }
 	for (int a = 0; a < deck.size(); ++a) {
 		deck[a]->game = game;
 		deck[a]->player = this;
