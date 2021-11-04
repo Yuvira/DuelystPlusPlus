@@ -219,6 +219,10 @@ EffectList::EffectList() {
 	skillList.back().generateSprite("The first Golem you summon each turn|costs 1 less");
 	buffList.push_back(Buff(BUFF_GOLEM_METALLURGIST, -1, 0, 0, true));
 	buffList.back().generateSprite("Golem Metallurgist");
+	skillList.push_back(Skill(SKILL_GOLEM_VANQUISHER));
+	skillList.back().generateSprite("{Provoke}|Your other Golem minions have {Provoke}");
+	effectList.push_back(Effect(EFFECT_GOLEM_VANQUISHER));
+	effectList.back().generateSprite("Golem Vanquisher|Provoke");
 
 	//Spell effects
 	spellList.push_back(SpellEffect(SPELL_BREATH_OF_THE_UNBORN));

@@ -321,6 +321,12 @@ bool Unit::isProvoking() {
 	case SKILL_BONEREAPER:
 		return true;
 	}
+	for (int a = 0; a < effect.size(); ++a) {
+		switch (effect[a].effect) {
+		case EFFECT_GOLEM_VANQUISHER:
+			return true;
+		}
+	}
 	return false;
 }
 
@@ -472,10 +478,30 @@ void Unit::dispel() {
 			}
 		}
 		break;
+	case SKILL_GOLEM_VANQUISHER:
+		for (int a = 0; a < game->unit.size(); ++a) {
+			if (game->unit[a]->player == player) {
+				if (game->unit[a] != this) {
+					game->unit[a]->removeEffect(EFFECT_GOLEM_VANQUISHER, false);
+				}
+			}
+		}
+		break;
 	}
 	
 	//Remove skills and buffs on this
 	skill = game->cl.el.find(SKILL_DISPELLED);
+	for (int a = 0; a < effect.size(); ++a) {
+		switch (effect[a].effect) {
+		case EFFECT_DARKFIRE_SACRIFICE:
+		case EFFECT_GOLEM_VANQUISHER:
+			break;
+		default:
+			effect.erase(effect.begin() + a);
+			--a;
+			break;
+		}
+	}
 	for (int a = 0; a < buff.size(); ++a) {
 		switch (buff[a].buff) {
 		case BUFF_FIRST_SWORD_OF_AKRANE:
@@ -696,6 +722,17 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 					}
 				}
 				break;
+			case SKILL_GOLEM_VANQUISHER:
+				for (int a = 0; a < game->unit.size(); ++a) {
+					if (game->unit[a]->player == player) {
+						if (game->unit[a] != this) {
+							if (game->unit[a]->tribe == TRIBE_GOLEM) {
+								game->unit[a]->addEffect(EFFECT_GOLEM_VANQUISHER);
+							}
+						}
+					}
+				}
+				break;
 			}
 
 		}
@@ -760,6 +797,13 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 								dynamic_cast<Unit*>(player->deck[b])->removeBuff(BUFF_GOLEM_METALLURGIST, true);
 							}
 						}
+					}
+				}
+				break;
+			case SKILL_GOLEM_VANQUISHER:
+				if (u->player == player) {
+					if (u->tribe == TRIBE_GOLEM) {
+						u->addEffect(EFFECT_GOLEM_VANQUISHER);
 					}
 				}
 				break;
@@ -870,6 +914,15 @@ void Unit::onDeath(Unit* u) {
 				for (int a = 0; a < player->deck.size(); ++a) {
 					if (player->deck[a]->type == CARD_UNIT) {
 						dynamic_cast<Unit*>(player->deck[a])->removeBuff(BUFF_GOLEM_METALLURGIST, false);
+					}
+				}
+				break;
+			case SKILL_GOLEM_VANQUISHER:
+				for (int a = 0; a < game->unit.size(); ++a) {
+					if (game->unit[a]->player == player) {
+						if (game->unit[a] != this) {
+							game->unit[a]->removeEffect(EFFECT_GOLEM_VANQUISHER, false);
+						}
 					}
 				}
 				break;
