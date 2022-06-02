@@ -117,8 +117,16 @@ CardList::CardList() {
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_GOLEM, 4, 4, 6, "hailstonegolem", "Hailstone Golem"));
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 3, "healingmystic", "Healing Mystic"));
 	uList.back().skill = el.find(SKILL_HEALING_MYSTIC);
+	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 5, 4, 3, "ironclad", "Ironclad"));
+	uList.back().skill = el.find(SKILL_IRONCLAD);
+	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 6, 1, 1, "jaxtruesight", "Jax Truesight"));
+	uList.back().skill = el.find(SKILL_JAX_TRUESIGHT);
+	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 1, "jaxi", "Jaxi"));
+	uList.back().skill = el.find(SKILL_JAXI);
 
 	//Tokens
+	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 1, "minijax", "Mini-Jax"));
+	uList.back().skill = el.find(SKILL_RANGED);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 1, "spellspark", "Spellspark"));
 	uList.back().skill = el.find(SKILL_RUSH);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 3, 0, 10, "tombstone", "Tombstone"));
@@ -151,6 +159,8 @@ CardList::CardList() {
 	find("Dark Transformation")->token = find("Wraithling");
 	find("Dioltas")->token = find("Tombstone");
 	find("Firestarter")->token = find("Spellspark");
+	find("Jax Truesight")->token = find("Mini-Jax");
+	find("Jaxi")->token = find("Mini-Jax");
 
 }
 CardList::~CardList() {}

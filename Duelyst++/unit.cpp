@@ -320,6 +320,7 @@ bool Unit::isRanged() {
 	case SKILL_RANGED:
 	case SKILL_ARROW_WHISTLER:
 	case SKILL_CAPTAIN_HANK_HART:
+	case SKILL_JAX_TRUESIGHT:
 		return true;
 	}
 	return false;
@@ -708,6 +709,17 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 					game->highlightSelectable(TARGET_UNIT, this);
 					if (game->selectable.size() > 0) { game->callback = Callback(this, nullptr, nullptr, SKILL_HEALING_MYSTIC); }
 					break;
+				case SKILL_JAX_TRUESIGHT:
+					for (int a = 0; a < 9; a += 8) {
+						for (int b = 0; b < 5; b += 4) {
+							if (game->map.tile[a][b].unit == nullptr) {
+								Unit* u2 = new Unit(*(dynamic_cast<Unit*>(token)));
+								game->setContext(u2, player);
+								game->summon(u2, a, b, false);
+							}
+						}
+					}
+					break;
 				}
 			}
 
@@ -1014,6 +1026,23 @@ void Unit::onDeath(Unit* u) {
 						}
 						player->general->removeEffect(EFFECT_GROVE_LION, false);
 						break;
+					}
+				}
+				break;
+			case SKILL_IRONCLAD:
+				for (int a = 0; a < game->unit.size(); ++a) {
+					if (game->unit[a]->player != player) {
+						game->unit[a]->dispel();
+					}
+				}
+				break;
+			case SKILL_JAXI:
+				if (true) {
+					BoardTile* t = game->map.getRandomCorner();
+					if (t != nullptr) {
+						Unit* u2 = new Unit(*(dynamic_cast<Unit*>(token)));
+						game->setContext(u2, player);
+						game->summon(u2, t->pos.x, t->pos.y, false);
 					}
 				}
 				break;

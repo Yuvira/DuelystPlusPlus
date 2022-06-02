@@ -233,6 +233,12 @@ EffectList::EffectList() {
 	effectList.back().generateSprite("Grove Lion|Forcefield");
 	skillList.push_back(Skill(SKILL_HEALING_MYSTIC));
 	skillList.back().generateSprite("{Opening Gambit}: Restore 2 Health|to anything");
+	skillList.push_back(Skill(SKILL_IRONCLAD));
+	skillList.back().generateSprite("{Dying Wish}: Dispel all enemy minions");
+	skillList.push_back(Skill(SKILL_JAX_TRUESIGHT));
+	skillList.back().generateSprite("{Ranged}|{Opening Gambit}: Summon a 1/1 {Ranged}|Mini-Jax in each corner");
+	skillList.push_back(Skill(SKILL_JAXI));
+	skillList.back().generateSprite("{Dying Wish}: Summon a 1/1 {Ranged}|Mini-Jax in a random corner");
 
 	//Spell effects
 	spellList.push_back(SpellEffect(SPELL_BREATH_OF_THE_UNBORN));
