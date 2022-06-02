@@ -291,6 +291,18 @@ bool Unit::isMoveable() {
 	return true;
 }
 
+//Unit range
+int Unit::moveRange() {
+	int r = 2;
+	for (int a = 0; a < effect.size(); ++a) {
+		switch (effect[a].effect) {
+		case EFFECT_GOLDEN_JUSTICAR:
+			r += 2;
+		}
+	}
+	return r;
+}
+
 //Is unit flying
 bool Unit::isFlying() {
 	switch (skill.skill) {
@@ -319,6 +331,7 @@ bool Unit::isProvoking() {
 	case SKILL_PROVOKE:
 	case SKILL_BLOOD_TAURA:
 	case SKILL_BONEREAPER:
+	case SKILL_GOLDEN_JUSTICAR:
 		return true;
 	}
 	for (int a = 0; a < effect.size(); ++a) {
@@ -467,6 +480,17 @@ void Unit::dispel() {
 				if (game->unit[a]->tribe != TRIBE_GENERAL) {
 					if (game->unit[a] != this) {
 						game->unit[a]->removeBuff(BUFF_FIRST_SWORD_OF_AKRANE, false);
+					}
+				}
+			}
+		}
+		break;
+	case SKILL_GOLDEN_JUSTICAR:
+		for (int a = 0; a < game->unit.size(); ++a) {
+			if (game->unit[a]->player == player) {
+				if (game->unit[a] != this) {
+					if (game->unit[a]->isProvoking()) {
+						game->unit[a]->removeEffect(EFFECT_GOLDEN_JUSTICAR, false);
 					}
 				}
 			}
@@ -726,6 +750,17 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 					}
 				}
 				break;
+			case SKILL_GOLDEN_JUSTICAR:
+				for (int a = 0; a < game->unit.size(); ++a) {
+					if (game->unit[a]->player == player) {
+						if (game->unit[a] != this) {
+							if (game->unit[a]->isProvoking()) {
+								game->unit[a]->addEffect(EFFECT_GOLDEN_JUSTICAR);
+							}
+						}
+					}
+				}
+				break;
 			case SKILL_GOLEM_METALLURGIST:
 				for (int a = 0; a < player->hand.size(); ++a) {
 					if (player->hand[a]->type == CARD_UNIT) {
@@ -808,6 +843,13 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 			case SKILL_FIRST_SWORD_OF_AKRANE:
 				if (u->player == player) {
 					u->addBuff(BUFF_FIRST_SWORD_OF_AKRANE);
+				}
+				break;
+			case SKILL_GOLDEN_JUSTICAR:
+				if (u->player == player) {
+					if (u->isProvoking()) {
+						u->addEffect(EFFECT_GOLDEN_JUSTICAR);
+					}
 				}
 				break;
 			case SKILL_GOLEM_METALLURGIST:
@@ -927,6 +969,17 @@ void Unit::onDeath(Unit* u) {
 						if (game->unit[a]->tribe != TRIBE_GENERAL) {
 							if (game->unit[a] != this) {
 								game->unit[a]->removeBuff(BUFF_FIRST_SWORD_OF_AKRANE, false);
+							}
+						}
+					}
+				}
+				break;
+			case SKILL_GOLDEN_JUSTICAR:
+				for (int a = 0; a < game->unit.size(); ++a) {
+					if (game->unit[a]->player == player) {
+						if (game->unit[a] != this) {
+							if (game->unit[a]->isProvoking()) {
+								game->unit[a]->removeEffect(EFFECT_GOLDEN_JUSTICAR, false);
 							}
 						}
 					}

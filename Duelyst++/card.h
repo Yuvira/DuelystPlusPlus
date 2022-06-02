@@ -125,6 +125,7 @@ public:
 	void drawDetails(Renderer& rm, int& y);
 	bool canAttack(Unit* u);
 	bool isMoveable();
+	int moveRange();
 	bool isFlying();
 	bool isRanged();
 	bool isProvoking();

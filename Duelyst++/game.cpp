@@ -600,21 +600,16 @@ void Game::highlightMoveable(int x, int y) {
 			}
 		}
 	}
-	else {
-		bool u = false; bool l = false; bool r = false; bool d = false;
-		if (canMove(x, y - 1)) { highlightTile(x, y - 1, COLOR_GRAY); u = true; } //Up
-		if (canMove(x - 1, y)) { highlightTile(x - 1, y, COLOR_GRAY); l = true; } //Left
-		if (canMove(x, y + 1)) { highlightTile(x, y + 1, COLOR_GRAY); d = true; } //Down
-		if (canMove(x + 1, y)) { highlightTile(x + 1, y, COLOR_GRAY); r = true; } //Right
-		if (canMove(x, y - 2) && u) { highlightTile(x, y - 2, COLOR_GRAY); } //Up x 2
-		if (canMove(x - 2, y) && l) { highlightTile(x - 2, y, COLOR_GRAY); } //Left x 2
-		if (canMove(x, y + 2) && d) { highlightTile(x, y + 2, COLOR_GRAY); } //Down x 2
-		if (canMove(x + 2, y) && r) { highlightTile(x + 2, y, COLOR_GRAY); } //Right x 2
-		if (canMove(x - 1, y - 1) && (u || l)) { highlightTile(x - 1, y - 1, COLOR_GRAY); } //Up-left
-		if (canMove(x - 1, y + 1) && (d || l)) { highlightTile(x - 1, y + 1, COLOR_GRAY); } //Down-left
-		if (canMove(x + 1, y + 1) && (d || r)) { highlightTile(x + 1, y + 1, COLOR_GRAY); } //Down-right
-		if (canMove(x + 1, y - 1) && (u || r)) { highlightTile(x + 1, y - 1, COLOR_GRAY); } //Up-right
-	}
+	else { searchMoveable(pos.x, pos.y, map.tile[pos.x][pos.y].unit->moveRange()); }
+}
+
+//Recursively search for moveable spaces
+void Game::searchMoveable(int x, int y, int range) {
+	if (range == 0) { return; }
+	if (canMove(x, y - 1)) { highlightTile(x, y - 1, COLOR_GRAY); searchMoveable(x, y - 1, range - 1); } //Up
+	if (canMove(x - 1, y)) { highlightTile(x - 1, y, COLOR_GRAY); searchMoveable(x - 1, y, range - 1); } //Left
+	if (canMove(x, y + 1)) { highlightTile(x, y + 1, COLOR_GRAY); searchMoveable(x, y + 1, range - 1); } //Down
+	if (canMove(x + 1, y)) { highlightTile(x + 1, y, COLOR_GRAY); searchMoveable(x + 1, y, range - 1); } //Right
 }
 
 //Highlight targetable tiles

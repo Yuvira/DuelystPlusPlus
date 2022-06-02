@@ -61,6 +61,7 @@ public:
 	bool canMove(int x, int y);
 	void highlightTile(int x, int y, eColor col);
 	void highlightMoveable(int x, int y);
+	void searchMoveable(int x, int y, int range);
 	void highlightSelectable(eTarget type, Unit* = nullptr);
 	void createPath();
 	bool addToPaths(int x, int y, int l, int c);

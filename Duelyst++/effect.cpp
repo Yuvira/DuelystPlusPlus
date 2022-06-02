@@ -215,6 +215,10 @@ EffectList::EffectList() {
 	skillList.back().generateSprite("{Opening Gambit}: Deal 2 damage to everything around this");
 	skillList.push_back(Skill(SKILL_GHOST_LYNX));
 	skillList.back().generateSprite("{Opening Gambit}: Teleport a nearby|minion to a random space");
+	skillList.push_back(Skill(SKILL_GOLDEN_JUSTICAR));
+	skillList.back().generateSprite("{Provoke}|Your other minions with {Provoke}|can move two additional spaces");
+	effectList.push_back(Effect(EFFECT_GOLDEN_JUSTICAR));
+	effectList.back().generateSprite("Golden Justicar|Can move two extra spaces");
 	skillList.push_back(Skill(SKILL_GOLEM_METALLURGIST));
 	skillList.back().generateSprite("The first Golem you summon each turn|costs 1 less");
 	buffList.push_back(Buff(BUFF_GOLEM_METALLURGIST, -1, 0, 0, true));
