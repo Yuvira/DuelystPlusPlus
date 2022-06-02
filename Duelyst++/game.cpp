@@ -601,6 +601,7 @@ void Game::highlightMoveable(int x, int y) {
 		}
 	}
 	else { searchMoveable(pos.x, pos.y, map.tile[pos.x][pos.y].unit->moveRange()); }
+	map.tile[x][y].setCol(COLOR_AQUA);
 }
 
 //Recursively search for moveable spaces
