@@ -123,15 +123,21 @@ CardList::CardList() {
 	uList.back().skill = el.find(SKILL_JAX_TRUESIGHT);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 1, "jaxi", "Jaxi"));
 	uList.back().skill = el.find(SKILL_JAXI);
+	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 5, 3, 4, "keeperofthevale", "Keeper of The Vale"));
+	uList.back().skill = el.find(SKILL_KEEPER_OF_THE_VALE);
 
 	//Tokens
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 1, "minijax", "Mini-Jax"));
 	uList.back().skill = el.find(SKILL_RANGED);
+	uList.back().isToken = true;
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 1, "spellspark", "Spellspark"));
 	uList.back().skill = el.find(SKILL_RUSH);
+	uList.back().isToken = true;
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 3, 0, 10, "tombstone", "Tombstone"));
 	uList.back().skill = el.find(SKILL_PROVOKE);
+	uList.back().isToken = true;
 	uList.push_back(Unit(FACTION_ABYSSIAN, TRIBE_NONE, 1, 1, 1, "wraithling", "Wraithling"));
+	uList.back().isToken = true;
 
 	//Spells
 	sList.push_back(Spell(FACTION_ABYSSIAN, TARGET_MINION, 4, "breathoftheunborn", "Breath of The Unborn"));

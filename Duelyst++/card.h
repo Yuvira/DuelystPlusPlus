@@ -44,6 +44,7 @@ enum eTarget {
 	TARGET_NEAR_ANY,
 	TARGET_NEAR_UNIT,
 	TARGET_MINION_NEAR_UNIT,
+	TARGET_TILE_NEAR_UNIT,
 	TARGET_NEAR_ALLY,
 	TARGET_NEAR_ENEMY
 };
@@ -78,6 +79,7 @@ class Card {
 public:
 	Card() {
 		token = nullptr;
+		isToken = false;
 		divider.createFromString("컴TOKEN컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴");
 	}
 	~Card() {}
@@ -95,6 +97,7 @@ public:
 	virtual void onTurnStart(Player* p) {}
 	eFaction faction;
 	eCard type;
+	bool isToken;
 	int cost;
 	Game* game;
 	Player* player;

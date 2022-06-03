@@ -239,6 +239,8 @@ EffectList::EffectList() {
 	skillList.back().generateSprite("{Ranged}|{Opening Gambit}: Summon a 1/1 {Ranged}|Mini-Jax in each corner");
 	skillList.push_back(Skill(SKILL_JAXI));
 	skillList.back().generateSprite("{Dying Wish}: Summon a 1/1 {Ranged}|Mini-Jax in a random corner");
+	skillList.push_back(Skill(SKILL_KEEPER_OF_THE_VALE));
+	skillList.back().generateSprite("{Opening Gambit}: Summon a random friendly|minion destroyed this game nearby this|minion");
 
 	//Spell effects
 	spellList.push_back(SpellEffect(SPELL_BREATH_OF_THE_UNBORN));

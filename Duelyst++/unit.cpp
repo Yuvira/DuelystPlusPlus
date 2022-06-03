@@ -720,6 +720,15 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 						}
 					}
 					break;
+				case SKILL_KEEPER_OF_THE_VALE:
+					for (int a = 0; a < game->grave.size(); ++a) {
+						if (game->grave[a]->type == CARD_UNIT && !game->grave[a]->isToken && game->grave[a]->player == player) {
+							game->highlightSelectable(TARGET_TILE_NEAR_UNIT, this);
+							if (game->selectable.size() > 0) { game->callback = Callback(this, nullptr, nullptr, SKILL_KEEPER_OF_THE_VALE); }
+							break;
+						}
+					}
+					break;
 				}
 			}
 
@@ -1437,6 +1446,22 @@ void Unit::callback(BoardTile* t) {
 		break;
 	case SKILL_HEALING_MYSTIC:
 		if (t->unit != nullptr) { t->unit->dealDamage(this, -2); }
+		break;
+	case SKILL_KEEPER_OF_THE_VALE:
+		if (t->unit == nullptr) {
+			std::vector<Card*> cv;
+			for (int a = 0; a < game->grave.size(); ++a) {
+				if (game->grave[a]->type == CARD_UNIT && !game->grave[a]->isToken && game->grave[a]->player == player) {
+					cv.push_back(game->grave[a]);
+				}
+			}
+			if (cv.size() > 0) {
+				int i = rand() % cv.size();
+				Unit* u2 = new Unit(*(dynamic_cast<Unit*>(cv[i]->original)));
+				game->setContext(u2, player);
+				game->summon(u2, t->pos.x, t->pos.y, false);
+			}
+		}
 		break;
 	}
 	game->callback = Callback();

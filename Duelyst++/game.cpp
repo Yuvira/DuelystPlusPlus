@@ -728,6 +728,19 @@ void Game::highlightSelectable(eTarget type, Unit* u) {
 		}
 		break;
 
+	//Empty tile near unit
+	case TARGET_TILE_NEAR_UNIT:
+		if (u != nullptr) {
+			for (int a = max(u->tile->pos.x - 1, 0); a < min(u->tile->pos.x + 2, 9); ++a) {
+				for (int b = max(u->tile->pos.y - 1, 0); b < min(u->tile->pos.y + 2, 5); ++b) {
+					if (map.tile[a][b].unit == nullptr) {
+						selectable.push_back(&map.tile[a][b]);
+					}
+				}
+			}
+		}
+		break;
+
 	//Near allies (summon)
 	case TARGET_NEAR_ALLY:
 		for (int a = 0; a < unit.size(); ++a) {
