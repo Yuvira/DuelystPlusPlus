@@ -125,6 +125,8 @@ CardList::CardList() {
 	uList.back().skill = el.find(SKILL_JAXI);
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 5, 3, 4, "keeperofthevale", "Keeper of The Vale"));
 	uList.back().skill = el.find(SKILL_KEEPER_OF_THE_VALE);
+	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 8, 5, 12, "khymera", "Khymera"));
+	uList.back().skill = el.find(SKILL_KHYMERA);
 
 	//Token units
 	tuList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 1, "minijax", "Mini-Jax"));

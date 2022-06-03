@@ -1134,6 +1134,15 @@ void Unit::onDamage(Unit* u1, Unit* u2, int damage) {
 			case SKILL_ECLIPSE:
 				player->enemy->general->dealDamage(this, damage);
 				break;
+			case SKILL_KHYMERA:
+				BoardTile* t = game->map.getRandomNear(tile->pos.x, tile->pos.y);
+				if (t != nullptr) {
+					int i = rand() % game->cl.tuList.size();
+					Unit* u2 = new Unit(*(dynamic_cast<Unit*>(&game->cl.tuList[i])));
+					game->setContext(u2, player);
+					game->summon(u2, t->pos.x, t->pos.y, false);
+				}
+				break;
 			}
 		}
 
