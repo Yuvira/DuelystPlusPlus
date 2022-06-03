@@ -63,7 +63,7 @@ void Unit::setPos(int x, int y) {
 	tile->unit = this;
 	if (tile->feature == TILE_MANA) {
 		tile->setFeature(TILE_NONE);
-		++player->mana;
+		if (player->mana < 9) { ++player->mana; }
 	}
 }
 
