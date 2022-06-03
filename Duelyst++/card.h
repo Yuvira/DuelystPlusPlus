@@ -198,7 +198,9 @@ public:
 	std::vector<Card*> cList;
 	std::vector<Unit> gList;
 	std::vector<Unit> uList;
+	std::vector<Unit> tuList;
 	std::vector<Spell> sList;
+	std::vector<Spell> tsList;
 };
 
 #endif

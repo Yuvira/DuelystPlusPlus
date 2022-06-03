@@ -126,18 +126,18 @@ CardList::CardList() {
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 5, 3, 4, "keeperofthevale", "Keeper of The Vale"));
 	uList.back().skill = el.find(SKILL_KEEPER_OF_THE_VALE);
 
-	//Tokens
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 1, "minijax", "Mini-Jax"));
-	uList.back().skill = el.find(SKILL_RANGED);
-	uList.back().isToken = true;
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 1, "spellspark", "Spellspark"));
-	uList.back().skill = el.find(SKILL_RUSH);
-	uList.back().isToken = true;
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 3, 0, 10, "tombstone", "Tombstone"));
-	uList.back().skill = el.find(SKILL_PROVOKE);
-	uList.back().isToken = true;
-	uList.push_back(Unit(FACTION_ABYSSIAN, TRIBE_NONE, 1, 1, 1, "wraithling", "Wraithling"));
-	uList.back().isToken = true;
+	//Token units
+	tuList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 1, "minijax", "Mini-Jax"));
+	tuList.back().skill = el.find(SKILL_RANGED);
+	tuList.back().isToken = true;
+	tuList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 1, "spellspark", "Spellspark"));
+	tuList.back().skill = el.find(SKILL_RUSH);
+	tuList.back().isToken = true;
+	tuList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 3, 0, 10, "tombstone", "Tombstone"));
+	tuList.back().skill = el.find(SKILL_PROVOKE);
+	tuList.back().isToken = true;
+	tuList.push_back(Unit(FACTION_ABYSSIAN, TRIBE_NONE, 1, 1, 1, "wraithling", "Wraithling"));
+	tuList.back().isToken = true;
 
 	//Spells
 	sList.push_back(Spell(FACTION_ABYSSIAN, TARGET_MINION, 4, "breathoftheunborn", "Breath of The Unborn"));
@@ -153,10 +153,14 @@ CardList::CardList() {
 	sList.push_back(Spell(FACTION_ABYSSIAN, TARGET_ALLY_MINON, 0, "darkfiresacrifice", "Darkfire Sacrifice"));
 	sList.back().spell = el.find(SPELL_DARKFIRE_SACRIFICE);
 
+	//Token spells
+
 	//Generate card list
 	for (int a = 0; a < gList.size(); ++a) { cList.push_back(&gList[a]); }
 	for (int a = 0; a < uList.size(); ++a) { cList.push_back(&uList[a]); }
+	for (int a = 0; a < tuList.size(); ++a) { cList.push_back(&tuList[a]); }
 	for (int a = 0; a < sList.size(); ++a) { cList.push_back(&sList[a]); }
+	for (int a = 0; a < tsList.size(); ++a) { cList.push_back(&tsList[a]); }
 
 	//Set original references
 	for (int a = 0; a < cList.size(); ++a) { cList[a]->original = cList[a]; }
