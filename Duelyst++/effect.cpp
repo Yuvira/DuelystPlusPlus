@@ -57,6 +57,35 @@ void Skill::generateSprite(std::string s) {
 	}
 }
 
+//Is skill an opening gambit
+bool Skill::isOpeningGambit() {
+	switch (skill) {
+	case SKILL_ABJUDICATOR:
+	case SKILL_ALCUIN_LOREMASTER:
+	case SKILL_ASH_MEPHYT:
+	case SKILL_AZURE_HERALD:
+	case SKILL_BLAZE_HOUND:
+	case SKILL_BLISTERING_SKORN:
+	case SKILL_BLOODTEAR_ALCHEMIST:
+	case SKILL_CROSSBONES:
+	case SKILL_DANCING_BLADES:
+	case SKILL_DEATHBLIGHTER:
+	case SKILL_DUST_WAILER:
+	case SKILL_EMERALD_REJUVENATOR:
+	case SKILL_EPHEMERAL_SHROUD:
+	case SKILL_FLAMEBLOOD_WARLOCK:
+	case SKILL_FROSTBONE_NAGA:
+	case SKILL_GHOST_LYNX:
+	case SKILL_HEALING_MYSTIC:
+	case SKILL_JAX_TRUESIGHT:
+	case SKILL_KEEPER_OF_THE_VALE:
+	case SKILL_LADY_LOCKE:
+		return true;
+		break;
+	}
+	return false;
+}
+
 //Generate effect sprite
 void Effect::generateSprite(std::string s) {
 	std::string _s;

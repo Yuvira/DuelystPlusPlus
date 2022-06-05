@@ -115,6 +115,7 @@ public:
 	Skill(eSkill = SKILL_NONE);
 	~Skill();
 	void generateSprite(std::string s);
+	bool isOpeningGambit();
 	std::vector<Sprite> sprite;
 	eSkill skill;
 };
