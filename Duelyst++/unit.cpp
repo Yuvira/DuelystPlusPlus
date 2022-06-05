@@ -321,6 +321,7 @@ bool Unit::isRanged() {
 	case SKILL_ARROW_WHISTLER:
 	case SKILL_CAPTAIN_HANK_HART:
 	case SKILL_JAX_TRUESIGHT:
+	case SKILL_LUX_IGNIS:
 		return true;
 	}
 	return false;
@@ -734,6 +735,17 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 					break;
 				case SKILL_LADY_LOCKE:
 					player->general->addEffect(EFFECT_LADY_LOCKE_A);
+					break;
+				case SKILL_LIGHTBENDER:
+					for (int a = max(tile->pos.x - 1, 0); a < min(tile->pos.x + 2, 9); ++a) {
+						for (int b = max(tile->pos.y - 1, 0); b < min(tile->pos.y + 2, 5); ++b) {
+							if (game->map.tile[a][b].unit != nullptr) {
+								if (game->map.tile[a][b].unit != this) {
+									game->map.tile[a][b].unit->dispel();
+								}
+							}
+						}
+					}
 					break;
 				}
 			}
@@ -1366,6 +1378,21 @@ void Unit::onTurnEnd(Player* p) {
 				for (int a = 0; a < player->deck.size(); ++a) {
 					if (player->deck[a]->type == CARD_UNIT) {
 						dynamic_cast<Unit*>(player->deck[a])->removeBuff(BUFF_GOLEM_METALLURGIST, true);
+					}
+				}
+				break;
+			case SKILL_LUX_IGNIS:
+				for (int a = max(tile->pos.x - 1, 0); a < min(tile->pos.x + 2, 9); ++a) {
+					for (int b = max(tile->pos.y - 1, 0); b < min(tile->pos.y + 2, 5); ++b) {
+						if (game->map.tile[a][b].unit != nullptr) {
+							if (game->map.tile[a][b].unit->player == player) {
+								if (game->map.tile[a][b].unit != this) {
+									if (game->map.tile[a][b].unit != player->general) {
+										game->map.tile[a][b].unit->dealDamage(this, -2);
+									}
+								}
+							}
+						}
 					}
 				}
 				break;

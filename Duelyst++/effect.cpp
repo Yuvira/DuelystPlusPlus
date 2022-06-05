@@ -80,6 +80,7 @@ bool Skill::isOpeningGambit() {
 	case SKILL_JAX_TRUESIGHT:
 	case SKILL_KEEPER_OF_THE_VALE:
 	case SKILL_LADY_LOCKE:
+	case SKILL_LIGHTBENDER:
 		return true;
 		break;
 	}
@@ -280,6 +281,10 @@ EffectList::EffectList() {
 	effectList.back().generateSprite("Lady Locke|Provoke");
 	buffList.push_back(Buff(BUFF_LADY_LOCKE, 0, 1, 1, true));
 	buffList.back().generateSprite("Lady Locke");
+	skillList.push_back(Skill(SKILL_LIGHTBENDER));
+	skillList.back().generateSprite("{Opening Gambit}: Dispel ALL spaces|around it");
+	skillList.push_back(Skill(SKILL_LUX_IGNIS));
+	skillList.back().generateSprite("{Ranged}|At the end of your turn, restore|2 Health to all nearby friendly minions");
 
 	//Spell effects
 	spellList.push_back(SpellEffect(SPELL_BREATH_OF_THE_UNBORN));

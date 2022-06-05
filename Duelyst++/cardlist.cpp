@@ -130,6 +130,10 @@ CardList::CardList() {
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 3, "komodocharger", "Komodo Charger"));
 	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 3, "ladylocke", "Lady Locke"));
 	uList.back().skill = el.find(SKILL_LADY_LOCKE);
+	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_ARCANYST, 4, 3, 3, "lightbender", "Lightbender"));
+	uList.back().skill = el.find(SKILL_LIGHTBENDER);
+	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 5, "luxignis", "Lux Ignis"));
+	uList.back().skill = el.find(SKILL_LUX_IGNIS);
 
 	//Token units
 	tuList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 1, "minijax", "Mini-Jax"));
