@@ -333,11 +333,13 @@ bool Unit::isProvoking() {
 	case SKILL_BLOOD_TAURA:
 	case SKILL_BONEREAPER:
 	case SKILL_GOLDEN_JUSTICAR:
+	case SKILL_LADY_LOCKE:
 		return true;
 	}
 	for (int a = 0; a < effect.size(); ++a) {
 		switch (effect[a].effect) {
 		case EFFECT_GOLEM_VANQUISHER:
+		case EFFECT_LADY_LOCKE_B:
 			return true;
 		}
 	}
@@ -538,6 +540,7 @@ void Unit::dispel() {
 		case EFFECT_DARKFIRE_SACRIFICE:
 		case EFFECT_GOLEM_VANQUISHER:
 		case EFFECT_GROVE_LION:
+		case EFFECT_LADY_LOCKE_A:
 			break;
 		default:
 			effect.erase(effect.begin() + a);
@@ -729,6 +732,9 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 						}
 					}
 					break;
+				case SKILL_LADY_LOCKE:
+					player->general->addEffect(EFFECT_LADY_LOCKE_A);
+					break;
 				}
 			}
 
@@ -896,6 +902,12 @@ void Unit::onSummon(Unit* u, bool actionBar) {
 								dynamic_cast<Unit*>(player->deck[b])->removeBuff(BUFF_DARKFIRE_SACRIFICE, true);
 							}
 						}
+					}
+					break;
+				case EFFECT_LADY_LOCKE_A:
+					if (u->player == player) {
+						u->addEffect(EFFECT_LADY_LOCKE_B);
+						for (int b = 0; b < effect[a].count; ++b) { u->addBuff(BUFF_LADY_LOCKE); }
 					}
 					break;
 				}
@@ -1357,6 +1369,15 @@ void Unit::onTurnEnd(Player* p) {
 					}
 				}
 				break;
+			}
+
+			//Effects
+			for (int a = 0; a < effect.size(); ++a) {
+				switch (effect[a].effect) {
+				case EFFECT_LADY_LOCKE_A:
+					removeEffect(EFFECT_LADY_LOCKE_A, true);
+					break;
+				}
 			}
 
 		}

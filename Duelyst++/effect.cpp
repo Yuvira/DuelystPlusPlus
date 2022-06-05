@@ -272,6 +272,14 @@ EffectList::EffectList() {
 	skillList.back().generateSprite("{Opening Gambit}: Summon a random friendly|minion destroyed this game nearby this|minion");
 	skillList.push_back(Skill(SKILL_KHYMERA));
 	skillList.back().generateSprite("Whenever this minion takes damage,|summon a random token minion nearby");
+	skillList.push_back(Skill(SKILL_LADY_LOCKE));
+	skillList.back().generateSprite("{Provoke}|{Opening Gambit}: Other minions you summon|this turn gain +1/+1 and {Provoke}");
+	effectList.push_back(Effect(EFFECT_LADY_LOCKE_A));
+	effectList.back().generateSprite("Lady Locke|Summoned minions gain +1/+1 and Provoke");
+	effectList.push_back(Effect(EFFECT_LADY_LOCKE_B));
+	effectList.back().generateSprite("Lady Locke|Provoke");
+	buffList.push_back(Buff(BUFF_LADY_LOCKE, 0, 1, 1, true));
+	buffList.back().generateSprite("Lady Locke");
 
 	//Spell effects
 	spellList.push_back(SpellEffect(SPELL_BREATH_OF_THE_UNBORN));
