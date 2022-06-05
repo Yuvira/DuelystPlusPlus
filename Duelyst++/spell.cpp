@@ -61,7 +61,7 @@ void Spell::generateDetails() {
 	std::transform(name.begin(), name.end(), s.begin(), ::toupper);
 	s += " - SPELL";
 	header[0].createFromString(s);
-	for (int a = name.size(); a < header[0].size; ++a) { header[0].buffer[a].Attributes = COLOR_GRAY; }
+	for (int a = name.size(); a < header[0].buffer.size(); ++a) { header[0].buffer[a].Attributes = COLOR_GRAY; }
 	updateDetailStats();
 }
 
@@ -69,7 +69,7 @@ void Spell::generateDetails() {
 void Spell::updateDetailStats() {
 	std::string s = "COST:" + std::to_string(cost);
 	header[1].createFromString(s);
-	for (int a = 0; a < header[1].size; ++a) { if (s[a] != ':') { header[1].buffer[a].Attributes = COLOR_LTBLUE; } }
+	for (int a = 0; a < header[1].buffer.size(); ++a) { if (s[a] != ':') { header[1].buffer[a].Attributes = COLOR_LTBLUE; } }
 }
 
 //Draw card details

@@ -5,6 +5,7 @@
 //Include
 #include <string>
 #include <fstream>
+#include <vector>
 #include "windows.h"
 
 //Color enum
@@ -37,12 +38,9 @@ public:
 	void setCol(eColor col);
 	void createFromFile(std::string filename);
 	void createFromString(std::string s, bool = false);
-	char symbol;
-	int size;
-	COORD spriteSize;
-	COORD aniPos;
+	int width, height;
 	COORD pos;
-	CHAR_INFO * buffer;
+	std::vector<CHAR_INFO> buffer;
 };
 
 #endif

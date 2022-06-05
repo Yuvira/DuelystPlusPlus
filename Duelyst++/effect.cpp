@@ -45,13 +45,13 @@ void Skill::generateSprite(std::string s) {
 	}
 	for (int a = 0; a < c.size(); ++a) {
 		for (int b = 0; b < sprite.size(); ++b) {
-			if (c[a].x < sprite[b].size) {
+			if (c[a].x < sprite[b].buffer.size()) {
 				for (int d = c[a].x; d < c[a].y; ++d) { sprite[b].buffer[d].Attributes = COLOR_LTWHITE; }
 				break;
 			}
 			else { 
-				c[a].x -= sprite[b].size;
-				c[a].y -= sprite[b].size;
+				c[a].x -= sprite[b].buffer.size();
+				c[a].y -= sprite[b].buffer.size();
 			}
 		}
 	}

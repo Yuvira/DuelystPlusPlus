@@ -17,24 +17,30 @@ void Renderer::swapBuffer() {
 	currentBuffer = !currentBuffer;
 }
 
-//Render sprite
+//Render sprite at sprite position
 void Renderer::render(Sprite s) {
 	SMALL_RECT t;
 	t.Top = s.pos.Y;
 	t.Left = s.pos.X;
-	t.Bottom = s.pos.Y + s.spriteSize.Y;
-	t.Right = s.pos.X + s.spriteSize.X;
-	WriteConsoleOutputA(frameBuffer[currentBuffer], s.buffer, s.spriteSize, s.aniPos, &t);
+	t.Bottom = s.pos.Y + s.height;
+	t.Right = s.pos.X + s.width;
+	COORD c;
+	c.X = s.width;
+	c.Y = s.height;
+	WriteConsoleOutputA(frameBuffer[currentBuffer],  &s.buffer[0], c, startPos, &t);
 }
 
-//Render sprite at position
+//Render sprite at given position
 void Renderer::render(Sprite s, int x, int y) {
 	SMALL_RECT t;
 	t.Top = y;
 	t.Left = x;
-	t.Bottom = y + s.spriteSize.Y;
-	t.Right = x+ s.spriteSize.X;
-	WriteConsoleOutputA(frameBuffer[currentBuffer], s.buffer, s.spriteSize, s.aniPos, &t);
+	t.Bottom = y + s.height;
+	t.Right = x + s.width;
+	COORD c;
+	c.X = s.width;
+	c.Y = s.height;
+	WriteConsoleOutputA(frameBuffer[currentBuffer], &s.buffer[0], c, startPos, &t);
 }
 
 //Clear screen

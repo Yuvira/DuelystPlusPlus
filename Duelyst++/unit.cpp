@@ -57,7 +57,7 @@ void Unit::setPos(int x, int y) {
 	sprite.pos.Y = _y;
 	sATK.pos.X = _x;
 	sATK.pos.Y = _y + 4;
-	sHP.pos.X = (_x + 4) - (sHP.size - 1);
+	sHP.pos.X = (_x + 4) - (sHP.buffer.size() - 1);
 	sHP.pos.Y = _y + 4;
 	tile = &game->map.tile[x][y];
 	tile->unit = this;
@@ -162,7 +162,7 @@ void Unit::updateStatSprites() {
 	sATK.resize(s.length(), 1);
 	for (int a = 0; a < s.length(); ++a) { sATK.buffer[a].Char.AsciiChar = s[a]; }
 	sATK.setCol(COLOR_GREEN);
-	int i = sHP.size;
+	int i = sHP.buffer.size();
 	s = std::to_string(hp);
 	sHP.resize(s.length(), 1);
 	for (int a = 0; a < s.length(); ++a) { sHP.buffer[a].Char.AsciiChar = s[a]; }
@@ -208,7 +208,7 @@ void Unit::generateDetails() {
 		break;
 	}
 	header[0].createFromString(s);
-	for (int a = name.size(); a < header[0].size; ++a) { header[0].buffer[a].Attributes = COLOR_GRAY; }
+	for (int a = name.size(); a < header[0].buffer.size(); ++a) { header[0].buffer[a].Attributes = COLOR_GRAY; }
 	updateDetailStats();
 }
 
@@ -219,7 +219,7 @@ void Unit::updateDetailStats() {
 	if (tribe != TRIBE_GENERAL) { s = "COST:" + std::to_string(cost) + " ATK:" + std::to_string(atk) + " HP:" + std::to_string(hp); }
 	else { s = "ATK:" + std::to_string(atk) + " HP:" + std::to_string(hp); col = COLOR_GREEN; }
 	header[1].createFromString(s);
-	for (int a = 0; a < header[1].size; ++a) {
+	for (int a = 0; a < header[1].buffer.size(); ++a) {
 		if (s[a] != ':' && s[a] != ' ') { header[1].buffer[a].Attributes = col; }
 		if (s[a] == ' ') {
 			if (col == COLOR_LTBLUE) { col = COLOR_GREEN; }
