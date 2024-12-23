@@ -18,8 +18,7 @@ Unit::Unit(eFaction _faction, eTribe _tribe, int _cost, int _atk, int _hp, std::
 	celerityAttacked = true;
 	forcefield = false;
 	if (path == "") { sprite.resize(5, 5); }
-	else if (tribe == TRIBE_GENERAL) { sprite.createFromFile("resources/generals/" + path + ".txt"); }
-	else { sprite.createFromFile("resources/units/" + path + ".txt"); }
+	else { sprite.createFromFile("resources/minions/" + path + ".txt"); }
 	updateStatSprites();
 	generateDetails();
 	tile = nullptr;
