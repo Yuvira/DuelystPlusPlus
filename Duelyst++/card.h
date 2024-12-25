@@ -13,6 +13,7 @@ class Spell;
 
 //Card types
 enum eCard {
+	CARD_NONE,
 	CARD_UNIT,
 	CARD_SPELL,
 	CARD_ARTIFACT
@@ -77,14 +78,10 @@ enum eTribe {
 //Card class
 class Card {
 public:
-	Card() {
-		token = nullptr;
-		isToken = false;
-		divider.CreateFromString("컴TOKEN컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴");
-	}
-	~Card() {}
-	void AddEffect(eEffect effect);
-	void RemoveEffect(eEffect effect, bool allStacks);
+	Card();
+	~Card();
+	void AddEffect(Effect effect, Card* source);
+	void RemoveEffect(Effect effect, Card* source, bool allStacks);
 	virtual void UpdateStatBuffs() {}
 	virtual void DrawDetails(Renderer& renderer, int& y) {}
 	virtual void OnSummon(Minion* minion, bool fromActionBar) {}
@@ -118,6 +115,7 @@ class Minion : public Card {
 public:
 	Minion();
 	Minion(eFaction _faction, eTribe _tribe, int _cost, int _atk, int _hp, std::string path, std::string _name);
+	Minion(eFaction _faction, eTribe _tribe, int _cost, int _atk, int _hp, std::string path, std::string _name, Effect effect);
 	~Minion();
 	void Render(Renderer& renderer);
 	void SetPosition(int x, int y);
@@ -130,13 +128,8 @@ public:
 	bool CanAttack(Minion* target);
 	bool IsMoveable();
 	int MoveRange();
-	bool IsFlying();
-	bool IsRanged();
-	bool IsProvoking();
+	bool HasKeywords(eKeywordFlags keywords);
 	bool IsProvoked();
-	bool HasCelerity();
-	bool HasForcefield();
-	bool HasRush();
 	void Attack(Minion* target, bool counter);
 	int DealDamage(Minion* source, int damage);
 	void Dispel();
@@ -189,7 +182,8 @@ class CardList {
 public:
 	CardList();
 	~CardList();
-	Card* Find(std::string name);
+	Card* FindCard(std::string name);
+	Effect FindEffect(eEffect effect);
 	EffectList effectList;
 	std::vector<Card*> cardList;
 	std::vector<Minion> generalList;

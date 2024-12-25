@@ -15,8 +15,9 @@ Player::~Player() {}
 //Preset deck
 void Player::Preset(CardList& cardList, Game* _game) {
 	game = _game;
-	deck.push_back(new Minion(*(dynamic_cast<Minion*>(cardList.Find("Argeon Highmayne")))));
-	for (int i = 0; i < 40; ++i) { deck.push_back(new Minion(*(dynamic_cast<Minion*>(cardList.Find("Komodo Charger"))))); }
+	deck.push_back(new Minion(*(dynamic_cast<Minion*>(cardList.FindCard("Argeon Highmayne")))));
+	for (int i = 0; i < 10; ++i) { deck.push_back(new Minion(*(dynamic_cast<Minion*>(cardList.FindCard("Komodo Charger"))))); }
+	for (int i = 0; i < 10; ++i) { deck.push_back(new Minion(*(dynamic_cast<Minion*>(cardList.FindCard("Dragonlark"))))); }
 	for (int i = 0; i < deck.size(); ++i) {
 		deck[i]->game = game;
 		deck[i]->owner = this;

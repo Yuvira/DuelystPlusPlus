@@ -1,33 +1,51 @@
 //Include
 #include "game.h"
 
+//Card constructor / destructor
+Card::Card() {
+	faction = FACTION_NEUTRAL;
+	cardType = CARD_NONE;
+	isToken = false;
+	cost = 0;
+	game = nullptr;
+	owner = nullptr;
+	original = this;
+	token = nullptr;
+	name = "???";
+	divider.CreateFromString("컴TOKEN컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴");
+}
+Card::~Card() {}
+
 //Add effect to list
-void Card::AddEffect(eEffect effect) {
-	Effect effectObj = game->cardList.effectList.Find(effect);
+void Card::AddEffect(Effect effect, Card* source) {
 	for (int i = 0; i < effects.size(); ++i) {
-		if (effects[i].effect == effect) {
-			++effects[i].stacks;
+		if (effects[i].effect == effect.effect) {
+			effects[i].sources.push_back(source);
 			UpdateStatBuffs();
 			return;
 		}
 	}
-	effects.push_back(effectObj);
+	effects.push_back(effect);
+	effects.back().sources.push_back(source);
 	UpdateStatBuffs();
 }
 
 //Remove effect from list
-void Card::RemoveEffect(eEffect effect, bool allStacks) {
-	Effect effectObj = game->cardList.effectList.Find(effect);
+void Card::RemoveEffect(Effect effect, Card* source, bool allStacks) {
 	for (int i = 0; i < effects.size(); ++i) {
-		if (effects[i].effect == effect) {
-			if (allStacks)
-				effects.erase(effects.begin() + i);
-			else {
-				--effects[i].stacks;
-				if (effects[i].stacks == 0)
-					effects.erase(effects.begin() + i);
+		if (effects[i].effect == effect.effect) {
+			for (int j = 0; j < effects[i].sources.size(); ++j) {
+				if (effects[i].sources[j] == source) {
+					effects[i].sources.erase(effects[i].sources.begin() + j);
+					if (!allStacks)
+						break;
+					--j;
+				}
 			}
-			break;
+			if (effects[i].sources.size() == 0) {
+				effects.erase(effects.begin() + i);
+				break;
+			}
 		}
 	}
 	UpdateStatBuffs();
@@ -40,6 +58,7 @@ CardList::CardList() {
 	generalList.push_back(Minion(FACTION_LYONAR, TRIBE_GENERAL, 0, 2, 25, "argeonhighmayne", "Argeon Highmayne"));
 
 	//Minions
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "dragonlark", "Dragonlark", FindEffect(SKILL_FLYING)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 3, "komodocharger", "Komodo Charger"));
 
 	/*
@@ -110,8 +129,6 @@ CardList::CardList() {
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_GOLEM, 6, 5, 11, "diamondgolem", "Diamond Golem"));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 4, 5, 3, "dioltas", "Dioltas"));
 	minionList.back().skill = effectList.Find(SKILL_DIOLTAS);
-	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "dragonlark", "Dragonlark"));
-	minionList.back().skill = effectList.Find(SKILL_FLYING);
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 1, "dreamgazer", "Dreamgazer"));
 	minionList.back().skill = effectList.Find(SKILL_DREAMGAZER);
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_GOLEM, 7, 10, 10, "drybonegolem", "Drybone Golem"));
@@ -223,9 +240,14 @@ CardList::CardList() {
 CardList::~CardList() {}
 
 //Find card by name
-Card* CardList::Find(std::string name) {
+Card* CardList::FindCard(std::string name) {
 	for (int i = 0; i < cardList.size(); ++i)
 		if (cardList[i]->name == name)
 			return cardList[i];
 	return cardList[0];
+}
+
+//Find effect
+Effect CardList::FindEffect(eEffect effect) {
+	return effectList.Find(effect);
 }

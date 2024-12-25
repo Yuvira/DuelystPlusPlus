@@ -28,6 +28,10 @@ Minion::Minion(eFaction _faction, eTribe _tribe, int _cost, int _atk, int _hp, s
 	game = nullptr;
 	owner = nullptr;
 }
+Minion::Minion(eFaction _faction, eTribe _tribe, int _cost, int _atk, int _hp, std::string path, std::string _name, Effect effect) : Minion(_faction, _tribe, _cost, _atk, _hp, path, _name) {
+	if (effect.effect != EFFECT_NONE)
+		AddEffect(effect, this);
+}
 Minion::~Minion() {}
 
 //Render sprites
@@ -85,9 +89,9 @@ void Minion::UpdateStatBuffs() {
 	int hpBuff = 0;
 	int hpDelta = hp - hpMax;
 	for (int i = 0; i < effects.size(); ++i) {
-		costBuff += effects[i].costBuff;
-		atkBuff += effects[i].atkBuff;
-		hpBuff += effects[i].hpBuff;
+		costBuff += effects[i].costBuff * effects[i].sources.size();
+		atkBuff += effects[i].atkBuff * effects[i].sources.size();
+		hpBuff += effects[i].hpBuff * effects[i].sources.size();
 	}
 	Minion* orig = dynamic_cast<Minion*>(original);
 	cost = max(orig->cost + costBuff, 0);
@@ -202,7 +206,7 @@ void Minion::DrawDetails(Renderer& renderer, int& y) {
 bool Minion::CanAttack(Minion* target) {
 	if (target != nullptr) {
 		if (atk > 0) {
-			if (IsRanged())
+			if (HasKeywords(KEYWORD_RANGED))
 				return true;
 			else if (abs(curTile->pos.x - target->curTile->pos.x) < 2 && abs(curTile->pos.y - target->curTile->pos.y) < 2)
 				return true;
@@ -230,49 +234,12 @@ int Minion::MoveRange() {
 	return range;
 }
 
-//Is minion flying
-bool Minion::IsFlying() {
-	for (int i = 0; i < effects.size(); ++i) {
-		switch (effects[i].effect) {
-		case SKILL_FLYING:
-		case SKILL_BLACK_LOCUST:
-		case SKILL_DUST_WAILER:
-			return true;
-		}
-	}
-	return false;
-}
-
-//Is minion ranged
-bool Minion::IsRanged() {
-	for (int i = 0; i < effects.size(); ++i) {
-		switch (effects[i].effect) {
-		case SKILL_RANGED:
-		case SKILL_ARROW_WHISTLER:
-		case SKILL_CAPTAIN_HANK_HART:
-		case SKILL_JAX_TRUESIGHT:
-		case SKILL_LUX_IGNIS:
-			return true;
-		}
-	}
-	return false;
-}
-
-//Does minion have provoke
-bool Minion::IsProvoking() {
-	for (int i = 0; i < effects.size(); ++i) {
-		switch (effects[i].effect) {
-		case SKILL_PROVOKE:
-		case SKILL_BLOOD_TAURA:
-		case SKILL_BONEREAPER:
-		case SKILL_GOLDEN_JUSTICAR:
-		case SKILL_LADY_LOCKE:
-		case EFFECT_GOLEM_VANQUISHER:
-		case EFFECT_LADY_LOCKE:
-			return true;
-		}
-	}
-	return false;
+//Check if minion has given keywords
+bool Minion::HasKeywords(eKeywordFlags keywords) {
+	int flags = KEYWORD_NONE;
+	for (int i = 0; i < effects.size(); ++i)
+		flags |= effects[i].keywords;
+	return (flags & keywords) == keywords;
 }
 
 //Is minion being provoked
@@ -281,41 +248,8 @@ bool Minion::IsProvoked() {
 		for (int j = max(curTile->pos.y - 1, 0); j < min(curTile->pos.y + 2, 5); ++j)
 			if (game->map.tiles[i][j].minion != nullptr)
 				if (game->map.tiles[i][j].minion->owner != owner)
-					if (game->map.tiles[i][j].minion->IsProvoking())
+					if (game->map.tiles[i][j].minion->HasKeywords(KEYWORD_PROVOKE))
 						return true;
-	return false;
-}
-
-//Does minion have celerity
-bool Minion::HasCelerity() {
-	for (int i = 0; i < effects.size(); ++i) {
-		switch (effects[i].effect) {
-		case SKILL_CELERITY:
-			return true;
-		}
-	}
-}
-
-//Does minion have a forcefield
-bool Minion::HasForcefield() {
-	for (int i = 0; i < effects.size(); ++i) {
-		switch (effects[i].effect) {
-		case SKILL_EXUN:
-		case EFFECT_GROVE_LION:
-			return true;
-		}
-	}
-	return false;
-}
-
-//Does minion have rush
-bool Minion::HasRush() {
-	for (int i = 0; i < effects.size(); ++i) {
-		switch (effects[i].effect) {
-		case SKILL_RUSH:
-			return true;
-		}
-	}
 	return false;
 }
 
@@ -517,15 +451,15 @@ void Minion::OnSummon(Minion* minion, bool actionBar) {
 			hasAttacked = true;
 			hasCelerityMoved = true;
 			hasCelerityAttacked = true;
-			if (HasRush()) {
+			if (HasKeywords(KEYWORD_RUSH)) {
 				hasMoved = false;
 				hasAttacked = false;
-				if (HasCelerity()) {
+				if (HasKeywords(KEYWORD_CELERITY)) {
 					hasCelerityMoved = false;
 					hasCelerityAttacked = false;
 				}
 			}
-			if (HasForcefield()) { hasForcefield = true; }
+			if (HasKeywords(KEYWORD_FORCEFIELD)) { hasForcefield = true; }
 
 			/*
 
@@ -1301,13 +1235,13 @@ void Minion::OnTurnEnd(Player* player) {
 	//Refresh
 	hasMoved = false;
 	hasAttacked = false;
-	if (HasCelerity()) {
+	if (HasKeywords(KEYWORD_CELERITY)) {
 		hasCelerityMoved = false;
 		hasCelerityAttacked = false;
 	}
 
 	//Reset forcefield
-	if (HasForcefield()) { hasForcefield = true; }
+	if (HasKeywords(KEYWORD_FORCEFIELD)) { hasForcefield = true; }
 
 	/*
 

@@ -2,7 +2,7 @@
 #include "game.h"
 
 //Callback stuff
-EffectCallback::EffectCallback() : EffectCallback(nullptr, nullptr, nullptr, SKILL_NONE) {}
+EffectCallback::EffectCallback() : EffectCallback(nullptr, nullptr, nullptr, EFFECT_NONE) {}
 EffectCallback::EffectCallback(Minion* _minion, Spell* _spell, BoardTile* _tile, eEffect _effect) {
 	minion = _minion;
 	spell = _spell;
@@ -426,7 +426,7 @@ void Game::SelectTile(BoardTile& tile) {
 			for (int j = max(tile.pos.y - 1, 0); j < min(tile.pos.y + 2, 5); ++j)
 				if (map.tiles[i][j].minion != nullptr)
 					if (map.tiles[i][j].minion->owner != &players[turn])
-						if (map.tiles[i][j].minion->IsProvoking())
+						if (map.tiles[i][j].minion->HasKeywords(KEYWORD_PROVOKE))
 							if (tile.minion->CanAttack(map.tiles[i][j].minion)) {
 								attackable.push_back(&map.tiles[i][j]);
 								provoked = true;
@@ -593,7 +593,7 @@ void Game::HighlightTile(int x, int y, eColor color) {
 
 //Highlight moveable spaces
 void Game::HighlightMoveable(int x, int y) {
-	if (map.tiles[pos.x][pos.y].minion->IsFlying()) {
+	if (map.tiles[pos.x][pos.y].minion->HasKeywords(KEYWORD_FLYING)) {
 		for (int i = 0; i < 9; ++i)
 			for (int j = 0; j < 5; ++j)
 				if (i != pos.x || j != pos.y)
@@ -673,7 +673,7 @@ void Game::HighlightSelectable(eTarget targetMode, Minion* minion) {
 		for (int i = 0; i < minions.size(); ++i)
 			if (minions[i]->owner != &players[turn])
 				if (minions[i]->tribe != TRIBE_GENERAL)
-					if (minions[i]->IsRanged())
+					if (minions[i]->HasKeywords(KEYWORD_RANGED))
 						selectable.push_back(minions[i]->curTile);
 		break;
 
@@ -747,7 +747,7 @@ bool Game::AddToPaths(int x, int y, int last, int count) {
 		for (int i = 0; i < pathList.size(); ++i)
 			if (pathList[i].pos.x == x && pathList[i].pos.y == y)
 				return false;
-		if (map.tiles[pos.x][pos.y].minion->IsFlying()) {
+		if (map.tiles[pos.x][pos.y].minion->HasKeywords(KEYWORD_FLYING)) {
 			pathList.push_back(PathCoord(Coord(x, y), last, count));
 			if (selectable[selectionIdx]->pos.x == x && selectable[selectionIdx]->pos.y == y)
 				return true;

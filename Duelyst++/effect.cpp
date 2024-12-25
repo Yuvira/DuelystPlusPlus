@@ -2,13 +2,16 @@
 #include "effect.h"
 
 //Effect constructor/deconstructor
-Effect::Effect() : Effect(EFFECT_NONE, 0, 0, 0) {}
-Effect::Effect(eEffect _effect, int _costBuff, int _atkBuff, int _hpBuff) {
+Effect::Effect() : Effect(EFFECT_NONE, KEYWORD_NONE, 0, 0, 0, "") {}
+Effect::Effect(eEffect _effect, eKeywordFlags _keywords, int _costBuff, int _atkBuff, int _hpBuff) : Effect(_effect, _keywords, _costBuff, _atkBuff, _hpBuff, "") {}
+Effect::Effect(eEffect _effect, eKeywordFlags _keywords, int _costBuff, int _atkBuff, int _hpBuff, std::string description) {
 	effect = _effect;
+	keywords = _keywords;
 	costBuff = _costBuff;
 	atkBuff = _atkBuff;
 	hpBuff = _hpBuff;
-	stacks = 1;
+	if (description != "")
+		GenerateSprite(description);
 }
 Effect::~Effect() {}
 
@@ -44,7 +47,7 @@ void Effect::GenerateSprite(std::string str) {
 
 	//Draw
 	int idxDelta = 0;
-	WORD color = COLOR_LTWHITE;
+	WORD color = COLOR_GRAY;
 	for (int i = 0; i < lines.size(); ++i) {
 		for (int j = 0; j < lines[i].length(); ++j) {
 			if (lines[i][j] == '{') {
@@ -56,12 +59,11 @@ void Effect::GenerateSprite(std::string str) {
 				++idxDelta;
 			}
 			else {
-				sprite.buffer[(i + (j * sprite.width)) - idxDelta].Char.AsciiChar = lines[i][j];
-				sprite.buffer[(i + (j * sprite.width)) - idxDelta].Attributes = color;
+				sprite.buffer[(j + (i * sprite.width)) - idxDelta].Char.AsciiChar = lines[i][j];
+				sprite.buffer[(j + (i * sprite.width)) - idxDelta].Attributes = color;
 			}
 		}
 		idxDelta = 0;
-		color = COLOR_GRAY;
 	}
 
 	/*
@@ -131,6 +133,9 @@ void SpellEffect::GenerateSprite(std::string str) {
 //Effect list constructor/deconstructor
 EffectList::EffectList() {
 
+	//Minion skills
+	effectList.push_back(Effect(SKILL_FLYING, KEYWORD_FLYING, 0, 0, 0, "{Flying}"));
+
 	/*
 
 	//Minion skills
@@ -138,8 +143,6 @@ EffectList::EffectList() {
 	skillList.back().GenerateSprite("{Dispelled}");
 	skillList.push_back(Skill(SKILL_CELERITY));
 	skillList.back().GenerateSprite("{Celerity}");
-	skillList.push_back(Skill(SKILL_FLYING));
-	skillList.back().GenerateSprite("{Flying}");
 	skillList.push_back(Skill(SKILL_PROVOKE));
 	skillList.back().GenerateSprite("{Provoke}");
 	skillList.push_back(Skill(SKILL_RANGED));

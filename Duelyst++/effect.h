@@ -5,22 +5,25 @@
 //Include
 #include "tile.h"
 
+//Definitions
+class Card;
+
 //Keyword flags
 enum eKeywordFlags {
-	KEYWORD_NONE,
-	KEYWORD_CELERITY,
-	KEYWORD_FLYING,
-	KEYWORD_PROVOKE,
-	KEYWORD_RANGED,
-	KEYWORD_RUSH
+	KEYWORD_NONE       = 0,
+	KEYWORD_CELERITY   = 1 << 0,
+	KEYWORD_FLYING     = 1 << 1,
+	KEYWORD_FORCEFIELD = 1 << 2,
+	KEYWORD_PROVOKE    = 1 << 3,
+	KEYWORD_RANGED     = 1 << 4,
+	KEYWORD_RUSH       = 1 << 5
 };
 
-//Effects
+//Skills and effects
 enum eEffect {
-	SKILL_NONE,
-	SKILL_DISPELLED,
 	SKILL_CELERITY,
 	SKILL_FLYING,
+	SKILL_FORCEFIELD,
 	SKILL_PROVOKE,
 	SKILL_RANGED,
 	SKILL_RUSH,
@@ -81,6 +84,7 @@ enum eEffect {
 	SKILL_LIGHTBENDER,
 	SKILL_LUX_IGNIS,
 	EFFECT_NONE,
+	EFFECT_DISPELLED,
 	EFFECT_ABJUDICATOR,
 	EFFECT_ARAKI_HEADHUNTER,
 	EFFECT_ARCHON_SPELLBINDER,
@@ -117,16 +121,18 @@ enum eSpell {
 class Effect {
 public:
 	Effect();
-	Effect(eEffect _effect, int _costBuff, int _atkBuff, int _hpBuff);
+	Effect(eEffect _effect, eKeywordFlags _keywords, int _costBuff, int _atkBuff, int _hpBuff);
+	Effect(eEffect _effect, eKeywordFlags _keywords, int _costBuff, int _atkBuff, int _hpBuff, std::string description);
 	~Effect();
 	void GenerateSprite(std::string str);
 	bool IsOpeningGambit();
 	Sprite sprite;
 	eEffect effect;
+	eKeywordFlags keywords;
 	int costBuff;
 	int atkBuff;
 	int hpBuff;
-	int stacks;
+	std::vector<Card*> sources;
 };
 
 //Spell class
