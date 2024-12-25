@@ -118,21 +118,23 @@ enum eSpell {
 //Skill class
 class Skill {
 public:
-	Skill(eSkill = SKILL_NONE);
+	Skill();
+	Skill(eSkill _skill);
 	~Skill();
-	void generateSprite(std::string s);
-	bool isOpeningGambit();
-	std::vector<Sprite> sprite;
+	void GenerateSprite(std::string str);
+	bool IsOpeningGambit();
+	std::vector<Sprite> sprites;
 	eSkill skill;
 };
 
 //Effect class
 class Effect {
 public:
-	Effect(eEffect = EFFECT_NONE);
+	Effect();
+	Effect(eEffect _effect);
 	~Effect();
-	void generateSprite(std::string s);
-	Sprite sprite[2];
+	void GenerateSprite(std::string str);
+	Sprite sprites[2];
 	eEffect effect;
 	int count;
 };
@@ -140,9 +142,10 @@ public:
 //Stat buff class
 class Buff {
 public:
-	Buff(eBuff = BUFF_NONE, int = 0, int = 0, int = 0, bool = true);
+	Buff();
+	Buff(eBuff _buff, int _cost, int _atk, int _hp, bool _stacking);
 	~Buff();
-	void generateSprite(std::string s);
+	void GenerateSprite(std::string str);
 	Sprite sprite;
 	eBuff buff;
 	int cost;
@@ -154,10 +157,11 @@ public:
 //Spell class
 class SpellEffect {
 public:
-	SpellEffect(eSpell = SPELL_NONE);
+	SpellEffect();
+	SpellEffect(eSpell _spell);
 	~SpellEffect();
-	void generateSprite(std::string s);
-	std::vector<Sprite> sprite;
+	void GenerateSprite(std::string str);
+	std::vector<Sprite> sprites;
 	eSpell spell;
 };
 
@@ -166,10 +170,10 @@ class EffectList {
 public:
 	EffectList();
 	~EffectList();
-	Skill find(eSkill s);
-	Effect find(eEffect e);
-	Buff find(eBuff b);
-	SpellEffect find(eSpell s);
+	Skill Find(eSkill skill);
+	Effect Find(eEffect effect);
+	Buff Find(eBuff buff);
+	SpellEffect Find(eSpell spell);
 	std::vector<Skill> skillList;
 	std::vector<Effect> effectList;
 	std::vector<Buff> buffList;

@@ -9,7 +9,7 @@
 //Definitions
 class Game;
 class Player;
-class Spell; //why do i have to predefine this and not unit???
+class Spell;
 
 //Card types
 enum eCard {
@@ -80,27 +80,27 @@ public:
 	Card() {
 		token = nullptr;
 		isToken = false;
-		divider.createFromString("컴TOKEN컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴");
+		divider.CreateFromString("컴TOKEN컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴");
 	}
 	~Card() {}
-	virtual void drawDetails(Renderer& rm, int& y) {}
-	virtual void onSummon(Unit* u, bool actionBar) {}
-	virtual void onDeath(Unit* u) {}
-	virtual void onAttack(Unit* u1, Unit* u2, bool counter) {}
-	virtual void onDamage(Unit* u1, Unit* u2, int damage) {}
-	virtual void onHeal(Unit* u1, Unit* u2, int heal) {}
-	virtual void onMove(Unit* u, bool byEffect) {}
-	virtual void onSpellCast(Spell* s) {}
-	virtual void onDraw(Card* c, bool fromDeck) {}
-	virtual void onReplace(Card* c) {}
-	virtual void onTurnEnd(Player* p) {}
-	virtual void onTurnStart(Player* p) {}
+	virtual void DrawDetails(Renderer& renderer, int& y) {}
+	virtual void OnSummon(Minion* minion, bool fromActionBar) {}
+	virtual void OnDeath(Minion* minion) {}
+	virtual void OnAttack(Minion* source, Minion* target, bool counter) {}
+	virtual void OnDamage(Minion* source, Minion* target, int damage) {}
+	virtual void OnHeal(Minion* source, Minion* target, int heal) {}
+	virtual void OnMove(Minion* minion, bool byEffect) {}
+	virtual void OnSpellCast(Spell* spell) {}
+	virtual void OnDraw(Card* card, bool fromDeck) {}
+	virtual void OnReplace(Card* replaced) {}
+	virtual void OnTurnEnd(Player* player) {}
+	virtual void OnTurnStart(Player* player) {}
 	eFaction faction;
-	eCard type;
+	eCard cardType;
 	bool isToken;
 	int cost;
 	Game* game;
-	Player* player;
+	Player* owner;
 	Card* original;
 	Card* token;
 	std::string name;
@@ -109,83 +109,85 @@ public:
 	Sprite divider;
 };
 
-//Unit class
-class Unit : public Card {
+//Minion class
+class Minion : public Card {
 public:
-	Unit(eFaction = FACTION_NEUTRAL, eTribe = TRIBE_NONE, int = 0, int = 0, int = 0, std::string = "", std::string = "???");
-	~Unit();
-	void render(Renderer& rm);
-	void setPos(int x, int y);
-	void addBuff(eBuff b);
-	void removeBuff(eBuff b, bool allStacks);
-	void addEffect(eEffect e);
-	void removeEffect(eEffect e, bool allStacks);
-	void update(bool& r);
-	void updateStatBuffs();
-	void updateStatSprites();
-	void generateDetails();
-	void updateDetailStats();
-	void drawDetails(Renderer& rm, int& y);
-	bool canAttack(Unit* u);
-	bool isMoveable();
-	int moveRange();
-	bool isFlying();
-	bool isRanged();
-	bool isProvoking();
-	bool isProvoked();
-	bool hasCelerity();
-	bool hasForcefield();
-	bool hasRush();
-	void attack(Unit* u, bool counter);
-	int dealDamage(Unit* u, int damage);
-	void dispel();
-	void onSummon(Unit* u, bool actionBar);
-	void onDeath(Unit* u);
-	void onAttack(Unit* u1, Unit* u2, bool counter);
-	void onDamage(Unit* u1, Unit* u2, int damage);
-	void onHeal(Unit* u1, Unit* u2, int heal);
-	void onMove(Unit* u, bool byEffect);
-	void onSpellCast(Spell* s);
-	void onDraw(Card* c, bool fromDeck);
-	void onReplace(Card* c);
-	void onTurnEnd(Player* p);
-	void onTurnStart(Player* p);
-	void callback(BoardTile* t);
+	Minion();
+	Minion(eFaction _faction, eTribe _tribe, int _cost, int _atk, int _hp, std::string path, std::string _name);
+	~Minion();
+	void Render(Renderer& renderer);
+	void SetPosition(int x, int y);
+	void AddBuff(eBuff buff);
+	void RemoveBuff(eBuff buff, bool allStacks);
+	void AddEffect(eEffect effect);
+	void RemoveEffect(eEffect effect, bool allStacks);
+	void Update(bool& shouldLoop);
+	void UpdateStatBuffs();
+	void UpdateStatSprites();
+	void GenerateDetails();
+	void UpdateDetailStats();
+	void DrawDetails(Renderer& renderer, int& y);
+	bool CanAttack(Minion* target);
+	bool IsMoveable();
+	int MoveRange();
+	bool IsFlying();
+	bool IsRanged();
+	bool IsProvoking();
+	bool IsProvoked();
+	bool HasCelerity();
+	bool HasForcefield();
+	bool HasRush();
+	void Attack(Minion* target, bool counter);
+	int DealDamage(Minion* source, int damage);
+	void Dispel();
+	void OnSummon(Minion* minion, bool actionBar);
+	void OnDeath(Minion* minion);
+	void OnAttack(Minion* source, Minion* target, bool counter);
+	void OnDamage(Minion* source, Minion* target, int damage);
+	void OnHeal(Minion* source, Minion* target, int heal);
+	void OnMove(Minion* minion, bool byEffect);
+	void OnSpellCast(Spell* spell);
+	void OnDraw(Card* card, bool fromDeck);
+	void OnReplace(Card* replaced);
+	void OnTurnEnd(Player* player);
+	void OnTurnStart(Player* player);
+	void Callback(BoardTile* tile);
 	eTribe tribe;
 	int atk;
 	int hp;
 	int hpMax;
-	bool dead;
-	bool moved;
-	bool attacked;
-	bool celerityMoved;
-	bool celerityAttacked;
-	bool forcefield;
-	BoardTile* tile;
+	bool isDead;
+	bool hasMoved;
+	bool hasAttacked;
+	bool hasCelerityMoved;
+	bool hasCelerityAttacked;
+	bool hasForcefield;
+	BoardTile* curTile;
 	Skill skill;
-	std::vector<Effect> effect;
-	std::vector<Buff> buff;
-	Sprite sHP;
-	Sprite sATK;
+	std::vector<Effect> effects;
+	std::vector<Buff> buffs;
+	Sprite hpSprite;
+	Sprite atkSprite;
 };
 
 //Spell class
 class Spell : public Card {
 public:
-	Spell(eFaction = FACTION_NEUTRAL,  eTarget = TARGET_ANY, int = 0, std::string = "", std::string = "???");
+	Spell();
+	Spell(eFaction _faction, eTarget _target, int _cost, std::string path, std::string _name);
 	~Spell();
-	void addBuff(eBuff b);
-	void removeBuff(eBuff b, bool allStacks);
-	void updateStatBuffs();
-	void generateDetails();
-	void updateDetailStats();
-	void drawDetails(Renderer& rm, int& y);
-	void onUse(BoardTile* t);
-	void callback(BoardTile* t);
-	void lateCallback();
-	eTarget target;
+	void AddBuff(eBuff buff);
+	void RemoveBuff(eBuff buff, bool allStacks);
+	void UpdateStatBuffs();
+	void GenerateDetails();
+	void UpdateDetailStats();
+	void DrawDetails(Renderer& renderer, int& y);
+	void OnUse(BoardTile* tile);
+	void Callback(BoardTile* tile);
+	void LateCallback();
+	eTarget targetMode;
 	SpellEffect spell;
-	std::vector<Buff> buff;
+	std::vector<Buff> buffs;
 };
 
 //Card list class
@@ -193,14 +195,14 @@ class CardList {
 public:
 	CardList();
 	~CardList();
-	Card* find(std::string s);
-	EffectList el;
-	std::vector<Card*> cList;
-	std::vector<Unit> gList;
-	std::vector<Unit> uList;
-	std::vector<Unit> tuList;
-	std::vector<Spell> sList;
-	std::vector<Spell> tsList;
+	Card* Find(std::string name);
+	EffectList effectList;
+	std::vector<Card*> cardList;
+	std::vector<Minion> generalList;
+	std::vector<Minion> minionList;
+	std::vector<Minion> minionTokenList;
+	std::vector<Spell> spellList;
+	std::vector<Spell> spellTokenList;
 };
 
 #endif

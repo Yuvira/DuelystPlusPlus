@@ -2,15 +2,17 @@
 #include "game.h"
 
 //Callback stuff
-Callback::Callback(Unit* u, Spell* s, BoardTile* t, eSkill es) {
-	unit = u;
-	spell = s;
-	tile = t;
-	skill = es;
+EffectCallback::EffectCallback() : EffectCallback(nullptr, nullptr, nullptr, SKILL_NONE) {}
+EffectCallback::EffectCallback(Minion* _minion, Spell* _spell, BoardTile* _tile, eSkill _skill) {
+	minion = _minion;
+	spell = _spell;
+	tile = _tile;
+	skill = _skill;
 }
-Callback::~Callback() {}
+EffectCallback::~EffectCallback() {}
 
 //Path co-ordinate constructor / destructor
+PathCoord::PathCoord() : PathCoord(Coord(), 0, 0) {}
 PathCoord::PathCoord(Coord _pos, int _last, int _count) {
 	pos = _pos;
 	last = _last;
@@ -22,47 +24,47 @@ PathCoord::~PathCoord() {}
 Game::Game() {
 
 	//Board border
-	board.createFromFile("resources/board.txt");
+	board.CreateFromFile("resources/board.txt");
 
 	//Event manager context
-	em.game = this;
+	eventManager.game = this;
 
 	//Character sprites
 	char c[] = { 'Û', 'Þ', 'Ý', 'Ü', 'ß', 'X', '\\', '/', '³', 'Ä', '®', 'é', '¯' };
-	for (int a = 0; a < 10; ++a) { chars[a].buffer[0].Char.AsciiChar = c[a]; }
+	for (int i = 0; i < 10; ++i) { chars[i].buffer[0].Char.AsciiChar = c[i]; }
 
 	//Turn indicator
-	light.resize(3, 1);
-	for (int a = 0; a < 3; ++a) { light.buffer[a].Char.AsciiChar = c[a + 10]; }
-	light.setCol(COLOR_LTBLUE);
+	light.Resize(3, 1);
+	for (int i = 0; i < 3; ++i) { light.buffer[i].Char.AsciiChar = c[i + 10]; }
+	light.SetColor(COLOR_LTBLUE);
 
 	//Set opponents
-	player[0].enemy = &player[1];
-	player[1].enemy = &player[0];
+	players[0].opponent = &players[1];
+	players[1].opponent = &players[0];
 
 	//Initialize players
-	for (int a = 0; a < 2; ++a) {
-		player[a].preset(cl, this);
-		summon(player[a].deck[0], a * 8, 2, false);
-		player[a].deck.erase(player[a].deck.begin());
-		player[a].general = unit.back();
-		player[a].init(a + 2);
+	for (int i = 0; i < 2; ++i) {
+		players[i].Preset(cardList, this);
+		Summon(players[i].deck[0], i * 8, 2, false);
+		players[i].deck.erase(players[i].deck.begin());
+		players[i].general = minions.back();
+		players[i].Init(i + 2);
 	}
 
 	//Hand
-	for (int a = 0; a < 7; ++a) {
-		hand[a].border.pos.X = (a * 7) + 1;
-		hand[a].border.pos.Y = 41;
+	for (int i = 0; i < 7; ++i) {
+		hand[i].border.pos.X = (i * 7) + 1;
+		hand[i].border.pos.Y = 41;
 	}
 
 	//Variables
 	pos = Coord(0, 0);
-	hPos = -1;
-	sPos = -1;
+	handIdx = -1;
+	selectionIdx = -1;
 	turnCount = 0;
 	endTurn = false;
-	changeTurn(false);
-	moveCursor(0, 0);
+	ChangeTurn(false);
+	MoveCursor(0, 0);
 	activeUnit = nullptr;
 	mode = MODE_NONE;
 
@@ -70,7 +72,7 @@ Game::Game() {
 Game::~Game() {}
 
 //Input
-void Game::input() {
+void Game::Input() {
 
 	//Get keyPress
 	int asciiVal = _getch();
@@ -79,22 +81,21 @@ void Game::input() {
 	if (mode == MODE_NONE) {
 
 		//Move pointer
-		if (asciiVal == 119 || asciiVal == 87) { moveCursor(0, -1); }     //W
-		else if (asciiVal == 97 || asciiVal == 65) { moveCursor(-1, 0); } //A
-		else if (asciiVal == 115 || asciiVal == 83) { moveCursor(0, 1); } //S
-		else if (asciiVal == 100 || asciiVal == 68) { moveCursor(1, 0); } //D
+		if (asciiVal == 119 || asciiVal == 87) { MoveCursor(0, -1); }     //W
+		else if (asciiVal == 97 || asciiVal == 65) { MoveCursor(-1, 0); } //A
+		else if (asciiVal == 115 || asciiVal == 83) { MoveCursor(0, 1); } //S
+		else if (asciiVal == 100 || asciiVal == 68) { MoveCursor(1, 0); } //D
 
-		//Select unit
+		//Select minion
 		else if (asciiVal == 32) {
-			if (map.tile[pos.x][pos.y].unit != nullptr) {
-				if (map.tile[pos.x][pos.y].unit->player == &player[turn]) {
-					select(map.tile[pos.x][pos.y]);
-				}
-			}
+			if (map.tiles[pos.x][pos.y].minion != nullptr)
+				if (map.tiles[pos.x][pos.y].minion->owner == &players[turn])
+					SelectTile(map.tiles[pos.x][pos.y]);
 		}
 
 		//Change turn
-		else if (asciiVal == 10 || asciiVal == 13) { changeTurn(!turn); }
+		else if (asciiVal == 10 || asciiVal == 13)
+			ChangeTurn(!turn);
 
 	}
 
@@ -102,20 +103,19 @@ void Game::input() {
 	else if (mode == MODE_HAND) {
 
 		//Move pointer
-		if (asciiVal == 119 || asciiVal == 87) { moveCursorHand(0, 4); }       //W
-		else if (asciiVal == 97 || asciiVal == 65) { moveCursorHand(-1, -1); } //A
-		else if (asciiVal == 115 || asciiVal == 83) { moveCursorHand(0, 0); }  //S
-		else if (asciiVal == 100 || asciiVal == 68) { moveCursorHand(1, -1); } //D
+		if (asciiVal == 119 || asciiVal == 87) { MoveCursorHand(0, 4); }       //W
+		else if (asciiVal == 97 || asciiVal == 65) { MoveCursorHand(-1, -1); } //A
+		else if (asciiVal == 115 || asciiVal == 83) { MoveCursorHand(0, 0); }  //S
+		else if (asciiVal == 100 || asciiVal == 68) { MoveCursorHand(1, -1); } //D
 
 		//Replace card
-		else if (asciiVal == 114 || asciiVal == 82) { player[turn].replace(hPos); }
+		else if (asciiVal == 114 || asciiVal == 82)
+			players[turn].Replace(handIdx);
 
 		//Select card
-		else if (asciiVal == 32) {
-			if (hPos < player[turn].hand.size()) {
-				selectCard();
-			}
-		}
+		else if (asciiVal == 32)
+			if (handIdx < players[turn].hand.size())
+				SelectCard();
 
 	}
 
@@ -123,20 +123,20 @@ void Game::input() {
 	else if (mode == MODE_MOVE) {
 
 		//Move arrow
-		if (asciiVal == 119 || asciiVal == 87) { moveSelect(0, -1); }     //W
-		else if (asciiVal == 97 || asciiVal == 65) { moveSelect(-1, 0); } //A
-		else if (asciiVal == 115 || asciiVal == 83) { moveSelect(0, 1); } //S
-		else if (asciiVal == 100 || asciiVal == 68) { moveSelect(1, 0); } //D
+		if (asciiVal == 119 || asciiVal == 87) { MoveSelect(0, -1); }     //W
+		else if (asciiVal == 97 || asciiVal == 65) { MoveSelect(-1, 0); } //A
+		else if (asciiVal == 115 || asciiVal == 83) { MoveSelect(0, 1); } //S
+		else if (asciiVal == 100 || asciiVal == 68) { MoveSelect(1, 0); } //D
 
-		//Move unit
+		//Move minion
 		else if (asciiVal == 32) {
 			for (int a = 0; a < attackable.size(); ++a) {
-				if (attackable[a] == selectable[sPos]) {
-					attackUnit();
+				if (attackable[a] == selectable[selectionIdx]) {
+					AttackUnit();
 					goto end;
 				}
 			}
-			moveUnit();
+			MoveUnit();
 			end:;
 		}
 
@@ -146,18 +146,20 @@ void Game::input() {
 	else if (mode == MODE_SELECT) {
 
 		//Move selection
-		if (asciiVal == 119 || asciiVal == 87) { moveSelect(0, -1); }     //W
-		else if (asciiVal == 97 || asciiVal == 65) { moveSelect(-1, 0); } //A
-		else if (asciiVal == 115 || asciiVal == 83) { moveSelect(0, 1); } //S
-		else if (asciiVal == 100 || asciiVal == 68) { moveSelect(1, 0); } //D
+		if (asciiVal == 119 || asciiVal == 87) { MoveSelect(0, -1); }     //W
+		else if (asciiVal == 97 || asciiVal == 65) { MoveSelect(-1, 0); } //A
+		else if (asciiVal == 115 || asciiVal == 83) { MoveSelect(0, 1); } //S
+		else if (asciiVal == 100 || asciiVal == 68) { MoveSelect(1, 0); } //D
 
 		//Use card at selection
 		else if (asciiVal == 32) {
-			if (callback.unit || callback.spell) { useEffect(); }
-			else { useCard(); }
+			if (callback.minion || callback.spell)
+				UseEffect();
+			else
+				UseCard();
 			if (endTurn) {
-				update();
-				changeTurn(!turn);
+				Update();
+				ChangeTurn(!turn);
 			}
 		}
 
@@ -169,176 +171,184 @@ void Game::input() {
 }
 
 //Update loop
-void Game::update() {
+void Game::Update() {
 
 	//Update units
 	bool reloop;
 	do { 
 		reloop = false;
-		for (int a = 0; a < unit.size(); ++a) {
-			if (!unit[a]->dead) {
-				unit[a]->update(reloop);
-			}
-		}
+		for (int a = 0; a < minions.size(); ++a)
+			if (!minions[a]->isDead)
+				minions[a]->Update(reloop);
 	} while (reloop);
-	for (int a = 0; a < unit.size(); ++a) {
-		if (unit[a]->dead) {
-			if (unit[a] == unit[a]->tile->unit) { unit[a]->tile->unit = nullptr; }
-			unit[a]->tile = nullptr;
-			grave.push_back(unit[a]);
-			unit.erase(unit.begin() + a);
-			--a;
+	for (int i = 0; i < minions.size(); ++i) {
+		if (minions[i]->isDead) {
+			if (minions[i] == minions[i]->curTile->minion)
+				minions[i]->curTile->minion = nullptr;
+			minions[i]->curTile = nullptr;
+			grave.push_back(minions[i]);
+			minions.erase(minions.begin() + i);
+			--i;
 		}
-		else { unit[a]->updateStatSprites(); }
+		else
+			minions[i]->UpdateStatSprites();
 	}
 
 	//Update mana bars
-	player[0].updateMana(COLOR_LTBLUE);
-	player[1].updateMana(COLOR_RED);
+	players[0].UpdateMana(COLOR_LTBLUE);
+	players[1].UpdateMana(COLOR_RED);
 
-	//Clear tile highlights
-	for (int a = 0; a < 9; ++a) {
-		for (int b = 0; b < 5; ++b) {
-			map.tile[a][b].setCol(COLOR_LTWHITE);
-		}
-	}
+	//Clear tiles highlights
+	for (int i = 0; i < 9; ++i)
+		for (int j = 0; j < 5; ++j)
+			map.tiles[i][j].SetColor(COLOR_LTWHITE);
 
 	//Re-highlight hostiles
 	hostile.clear();
-	for (int b = 0; b < unit.size(); ++b) {
-		if (unit[b]->player != &player[turn]) {
-			hostile.push_back(unit[b]->tile);
-		}
-	}
-	for (int a = 0; a < hostile.size(); ++a) { hostile[a]->setCol(COLOR_LTRED); }
+	for (int i = 0; i < minions.size(); ++i)
+		if (minions[i]->owner != &players[turn])
+			hostile.push_back(minions[i]->curTile);
+	for (int i = 0; i < hostile.size(); ++i)
+		hostile[i]->SetColor(COLOR_LTRED);
 
 	//Highlight moveable spaces and create move path
 	if (mode == MODE_MOVE) {
-		generatePaths();
-		for (int a = 0; a < highlighted.size(); ++a) { highlighted[a]->setCol(COLOR_AQUA); }
-		map.tile[pos.x][pos.y].setCol(COLOR_LTWHITE);
-		for (int a = 0; a < attackable.size(); ++a) { attackable[a]->setCol(COLOR_RED); }
+		GeneratePaths();
+		for (int i = 0; i < highlighted.size(); ++i)
+			highlighted[i]->SetColor(COLOR_AQUA);
+		map.tiles[pos.x][pos.y].SetColor(COLOR_LTWHITE);
+		for (int i = 0; i < attackable.size(); ++i)
+			attackable[i]->SetColor(COLOR_RED);
 	}
 
 	//Highlight selectable spaces
 	else if (mode == MODE_SELECT) {
-		for (int a = 0; a < selectable.size(); ++a) { selectable[a]->setCol(COLOR_GREEN); }
-		selectable[sPos]->setCol(COLOR_LTGREEN);
+		for (int i = 0; i < selectable.size(); ++i)
+			selectable[i]->SetColor(COLOR_GREEN);
+		selectable[selectionIdx]->SetColor(COLOR_LTGREEN);
 	}
 
 	//Highlight cursor position
 	else if (mode == MODE_NONE) {
 		highlighted.clear();
-		highlightTile(pos.x, pos.y, COLOR_AQUA);
+		HighlightTile(pos.x, pos.y, COLOR_AQUA);
 	}
 
 }
 
 //Render objects
-void Game::render(Renderer& rm) {
+void Game::RenderGame(Renderer& renderer) {
 
 	//Board
-	rm.render(board);
+	renderer.Render(board);
 
 	//Turn indicator
-	rm.render(light, 31, 2);
+	renderer.Render(light, 31, 2);
 
 	//Tiles
-	for (int a = 0; a < 9; ++a) {
-		for (int b = 0; b < 5; ++b) {
-			rm.render(map.tile[a][b].border);
-			rm.render(map.tile[a][b].sprite);
+	for (int i = 0; i < 9; ++i) {
+		for (int j = 0; j < 5; ++j) {
+			renderer.Render(map.tiles[i][j].border);
+			renderer.Render(map.tiles[i][j].sprite);
 		}
 	}
 
 	//Units
-	for (int a = 0; a < unit.size(); ++a) { unit[a]->render(rm); }
+	for (int i = 0; i < minions.size(); ++i)
+		minions[i]->Render(renderer);
 
 	//Move mode indicators
 	if (mode == MODE_MOVE) {
-		for (int a = 0; a < attackable.size(); ++a) {
-			if (attackable[a] == selectable[sPos]) {
-				COORD c = selectable[sPos]->border.pos;
-				drawSword(c.X, c.Y, rm);
-				c = activeUnit->tile->border.pos;
-				if (selectable[sPos]->unit->canAttack(activeUnit)) { drawSword(c.X, c.Y, rm); }
+		for (int i = 0; i < attackable.size(); ++i) {
+			if (attackable[i] == selectable[selectionIdx]) {
+				COORD coord = selectable[selectionIdx]->border.pos;
+				DrawSword(coord.X, coord.Y, renderer);
+				coord = activeUnit->curTile->border.pos;
+				if (selectable[selectionIdx]->minion->CanAttack(activeUnit))
+					DrawSword(coord.X, coord.Y, renderer);
 				goto end;
 			}
 		}
-		drawPath(rm);
+		DrawPath(renderer);
 		end:;
 	}
 
 	//Hand
-	for (int a = 0; a < 7; ++a) { rm.render(hand[a].border); }
-	for (int a = 0; a < player[turn].hand.size(); ++a) {
-		player[turn].hand[a]->sprite.setCol(COLOR_LTWHITE);
-		rm.render(player[turn].hand[a]->sprite, (a * 7) + 9, 42);
+	for (int i = 0; i < 7; ++i)
+		renderer.Render(hand[i].border);
+	for (int i = 0; i < players[turn].hand.size(); ++i) {
+		players[turn].hand[i]->sprite.SetColor(COLOR_LTWHITE);
+		renderer.Render(players[turn].hand[i]->sprite, (i * 7) + 9, 42);
 	}
 
 	//Player UI
-	player[0].render(rm, true);
-	player[1].render(rm, false);
+	players[0].Render(renderer, true);
+	players[1].Render(renderer, false);
 
 	//Sidebar
-	renderSidebar(rm);
+	RenderSidebar(renderer);
 
 }
 
 //Render sidebar
-void Game::renderSidebar(Renderer& rm) {
+void Game::RenderSidebar(Renderer& renderer) {
 
 	//Vertical position
 	int y = 1;
 
-	//Unit on board
+	//Minion on board
 	if (mode == MODE_NONE) {
-		if (map.tile[pos.x][pos.y].unit != nullptr) {
-			map.tile[pos.x][pos.y].unit->drawDetails(rm, y);
-		}
+		if (map.tiles[pos.x][pos.y].minion != nullptr)
+			map.tiles[pos.x][pos.y].minion->DrawDetails(renderer, y);
 	}
 
-	//Unit in hand
+	//Minion in hand
 	else if (mode == MODE_HAND || mode == MODE_SELECT) {
-		if (hPos < player[turn].hand.size()) {
-			player[turn].hand[hPos]->drawDetails(rm, y);
-		}
+		if (handIdx < players[turn].hand.size())
+			players[turn].hand[handIdx]->DrawDetails(renderer, y);
 	}
 
 }
 
 //Change turn
-void Game::changeTurn(bool t) {
+void Game::ChangeTurn(bool _turn) {
 
 	//Indicate turn is ending
 	endTurn = true;
 
 	//Do late callbacks
 	while (lateCallback.size() > 0) {
-		if (lateCallback[0].spell != nullptr) { lateCallback[0].spell->lateCallback(); }
+		if (lateCallback[0].spell != nullptr)
+			lateCallback[0].spell->LateCallback();
 		lateCallback.erase(lateCallback.begin());
-		if (selectable.size() > 0) { return; }
+		if (selectable.size() > 0)
+			return;
 	}
 
 	//Draw and reset replaces
-	if (turnCount > 0) { player[turn].draw(); }
-	player[turn].replaces = 1;
+	if (turnCount > 0)
+		players[turn].Draw();
+	players[turn].replaces = 1;
 
 	//Change turn
-	turn = t;
-	if (!turn) { ++turnCount; }
+	turn = _turn;
+	if (!turn)
+		++turnCount;
 
 	//Refresh mana
-	if (turnCount > 1 && player[turn].manaMax < 9) { ++player[turn].manaMax; }
-	player[turn].mana = player[turn].manaMax;
+	if (turnCount > 1 && players[turn].manaMax < 9)
+		++players[turn].manaMax;
+	players[turn].mana = players[turn].manaMax;
 
 	//Set turn indicator
-	if (turn) { light.setCol(COLOR_RED); }
-	else { light.setCol(COLOR_LTBLUE); }
+	if (turn)
+		light.SetColor(COLOR_RED);
+	else
+		light.SetColor(COLOR_LTBLUE);
 
 	//End old turn, start new turn
-	em.sendOnTurnEnd(&player[!t]);
-	em.sendOnTurnStart(&player[t]);
+	eventManager.SendOnTurnEnd(&players[!turn]);
+	eventManager.SendOnTurnStart(&players[turn]);
 
 	//Turn has ended
 	endTurn = false;
@@ -346,131 +356,127 @@ void Game::changeTurn(bool t) {
 }
 
 //Set game context for new token cards
-void Game::setContext(Card* c, Player* p) {
-	c->game = this;
-	c->player = p;
+void Game::SetContext(Card* card, Player* player) {
+	card->game = this;
+	card->owner = player;
 }
 
 //Summon at position
-void Game::summon(Card* c, int x, int y, bool actionBar) {
-	unit.push_back(dynamic_cast<Unit*>(c));
-	unit.back()->setPos(x, y);
-	em.sendOnSummon(unit.back(), actionBar);
+void Game::Summon(Card* card, int x, int y, bool actionBar) {
+	minions.push_back(dynamic_cast<Minion*>(card));
+	minions.back()->SetPosition(x, y);
+	eventManager.SendOnSummon(minions.back(), actionBar);
 }
 
 //Use active card
-void Game::useCard() {
+void Game::UseCard() {
 
 	//Use mana
-	player[turn].mana -= activeCard->cost;
+	players[turn].mana -= activeCard->cost;
 
-	//Summon unit
-	if (activeCard->type == CARD_UNIT) {
-		pos = selectable[sPos]->pos;
-		hand[hPos + 1].setCol(COLOR_LTWHITE);
+	//Summon minion
+	if (activeCard->cardType == CARD_UNIT) {
+		pos = selectable[selectionIdx]->pos;
+		hand[handIdx + 1].SetColor(COLOR_LTWHITE);
 		selectable.clear();
-		sPos = -1;
+		selectionIdx = -1;
 		mode = MODE_NONE;
-		player[turn].hand.erase(player[turn].hand.begin() + hPos);
-		summon(activeCard, pos.x, pos.y, true);
+		players[turn].hand.erase(players[turn].hand.begin() + handIdx);
+		Summon(activeCard, pos.x, pos.y, true);
 		activeCard = nullptr;
-		hPos = -1;
+		handIdx = -1;
 	}
 
 	//Use spell
-	else if (activeCard->type == CARD_SPELL) {
-		pos = selectable[sPos]->pos;
-		hand[hPos + 1].setCol(COLOR_LTWHITE);
+	else if (activeCard->cardType == CARD_SPELL) {
+		pos = selectable[selectionIdx]->pos;
+		hand[handIdx + 1].SetColor(COLOR_LTWHITE);
 		selectable.clear();
-		sPos = -1;
+		selectionIdx = -1;
 		mode = MODE_NONE;
-		player[turn].hand.erase(player[turn].hand.begin() + hPos);
+		players[turn].hand.erase(players[turn].hand.begin() + handIdx);
 		grave.push_back(activeCard);
-		dynamic_cast<Spell*>(activeCard)->onUse(&map.tile[pos.x][pos.y]);
+		dynamic_cast<Spell*>(activeCard)->OnUse(&map.tiles[pos.x][pos.y]);
 		activeCard = nullptr;
-		hPos = -1;
+		handIdx = -1;
 	}
 
 }
 
 //Use active effect
-void Game::useEffect() {
-	BoardTile* t = selectable[sPos];
+void Game::UseEffect() {
+	BoardTile* t = selectable[selectionIdx];
 	pos = t->pos;
 	selectable.clear();
-	sPos = -1;
+	selectionIdx = -1;
 	mode = MODE_NONE;
-	if (callback.unit != nullptr) { callback.unit->callback(t); }
-	else if (callback.spell != nullptr) { callback.spell->callback(t); }
+	if (callback.minion != nullptr)
+		callback.minion->Callback(t);
+	else if (callback.spell != nullptr)
+		callback.spell->Callback(t);
 }
 
-//Select unit
-void Game::select(BoardTile& t) {
-	for (int a = 0; a < highlighted.size(); ++a) { moveable.push_back(highlighted[a]); }
-	if (!t.unit->attacked) {
+//Select minion
+void Game::SelectTile(BoardTile& tile) {
+	for (int i = 0; i < highlighted.size(); ++i)
+		moveable.push_back(highlighted[i]);
+	if (!tile.minion->hasAttacked) {
 		bool provoked = false;
-		for (int a = max(t.pos.x - 1, 0); a < min(t.pos.x + 2, 9); ++a) {
-			for (int b = max(t.pos.y - 1, 0); b < min(t.pos.y + 2, 5); ++b) {
-				if (map.tile[a][b].unit != nullptr) {
-					if (map.tile[a][b].unit->player != &player[turn]) {
-						if (map.tile[a][b].unit->isProvoking()) {
-							if (t.unit->canAttack(map.tile[a][b].unit)) {
-								attackable.push_back(&map.tile[a][b]);
+		for (int i = max(tile.pos.x - 1, 0); i < min(tile.pos.x + 2, 9); ++i)
+			for (int j = max(tile.pos.y - 1, 0); j < min(tile.pos.y + 2, 5); ++j)
+				if (map.tiles[i][j].minion != nullptr)
+					if (map.tiles[i][j].minion->owner != &players[turn])
+						if (map.tiles[i][j].minion->IsProvoking())
+							if (tile.minion->CanAttack(map.tiles[i][j].minion)) {
+								attackable.push_back(&map.tiles[i][j]);
 								provoked = true;
 							}
-						}
-					}
-				}
-			}
-		}
-		if (!provoked) {
-			for (int a = 0; a < hostile.size(); ++a) {
-				if (t.unit->canAttack(hostile[a]->unit)) {
+		if (!provoked)
+			for (int a = 0; a < hostile.size(); ++a)
+				if (tile.minion->CanAttack(hostile[a]->minion))
 					attackable.push_back(hostile[a]);
-				}
-			}
-		}
 	}
 	if (moveable.size() > 1 || attackable.size() > 0) {
 		selectable.insert(selectable.end(), moveable.begin(), moveable.end());
 		selectable.insert(selectable.end(), attackable.begin(), attackable.end());
-		activeUnit = t.unit;
-		sPos = 0;
+		activeUnit = tile.minion;
+		selectionIdx = 0;
 		mode = MODE_MOVE;
 	}
-	else { moveable.clear(); }
+	else
+		moveable.clear();
 }
 
 //Select card in hand
-void Game::selectCard() {
+void Game::SelectCard() {
 
-	//Unit card
-	if (player[turn].hand[hPos]->type == CARD_UNIT) {
-		if (player[turn].hand[hPos]->cost <= player[turn].mana) {
-			highlightSelectable(TARGET_NEAR_ALLY);
-			if (selectable.size() > 0) { activeCard = player[turn].hand[hPos]; }
+	//Minion card
+	if (players[turn].hand[handIdx]->cardType == CARD_UNIT) {
+		if (players[turn].hand[handIdx]->cost <= players[turn].mana) {
+			HighlightSelectable(TARGET_NEAR_ALLY);
+			if (selectable.size() > 0) { activeCard = players[turn].hand[handIdx]; }
 		}
 	}
 
 	//Spell card
-	if (player[turn].hand[hPos]->type == CARD_SPELL) {
-		if (player[turn].hand[hPos]->cost <= player[turn].mana) {
-			highlightSelectable(dynamic_cast<Spell*>(player[turn].hand[hPos])->target);
-			if (selectable.size() > 0) { activeCard = player[turn].hand[hPos]; }
+	if (players[turn].hand[handIdx]->cardType == CARD_SPELL) {
+		if (players[turn].hand[handIdx]->cost <= players[turn].mana) {
+			HighlightSelectable(dynamic_cast<Spell*>(players[turn].hand[handIdx])->targetMode);
+			if (selectable.size() > 0) { activeCard = players[turn].hand[handIdx]; }
 		}
 	}
 
 }
 
-//Move selected unit
-void Game::moveUnit() {
-	if (selectable[sPos]->unit == nullptr || selectable[sPos] == &map.tile[pos.x][pos.y]) {
-		if (selectable[sPos] != &map.tile[pos.x][pos.y]) {
-			activeUnit->setPos(selectable[sPos]->pos.x, selectable[sPos]->pos.y);
-			if (!activeUnit->celerityMoved) { activeUnit->celerityMoved = true; }
-			else { activeUnit->moved = true; }
-			pos = selectable[sPos]->pos;
-			em.sendOnMove(activeUnit, false);
+//Move selected minion
+void Game::MoveUnit() {
+	if (selectable[selectionIdx]->minion == nullptr || selectable[selectionIdx] == &map.tiles[pos.x][pos.y]) {
+		if (selectable[selectionIdx] != &map.tiles[pos.x][pos.y]) {
+			activeUnit->SetPosition(selectable[selectionIdx]->pos.x, selectable[selectionIdx]->pos.y);
+			if (!activeUnit->hasCelerityMoved) { activeUnit->hasCelerityMoved = true; }
+			else { activeUnit->hasMoved = true; }
+			pos = selectable[selectionIdx]->pos;
+			eventManager.SendOnMove(activeUnit, false);
 		}
 		moveable.clear();
 		attackable.clear();
@@ -480,10 +486,10 @@ void Game::moveUnit() {
 	}
 }
 
-//Attack unit
-void Game::attackUnit() {
-	activeUnit->attack(selectable[sPos]->unit, false);
-	pos = selectable[sPos]->pos;
+//Attack minion
+void Game::AttackUnit() {
+	activeUnit->Attack(selectable[selectionIdx]->minion, false);
+	pos = selectable[selectionIdx]->pos;
 	moveable.clear();
 	attackable.clear();
 	selectable.clear();
@@ -492,52 +498,53 @@ void Game::attackUnit() {
 }
 
 //Move cursor position
-void Game::moveCursor(int x, int y) {
+void Game::MoveCursor(int x, int y) {
 	
 	//Move cursor
 	pos.x = (pos.x + x + 9) % 9;
 	if ((y == -1 && pos.y == 0) || (y == 1 && pos.y == 4)) {
-		hPos = max(min(pos.x - 1, 5), 0);
-		hand[hPos + 1].setCol(COLOR_AQUA);
+		handIdx = max(min(pos.x - 1, 5), 0);
+		hand[handIdx + 1].SetColor(COLOR_AQUA);
 		pos = Coord(-1, -1);
 		mode = MODE_HAND;
 	}
-	else { pos.y = (pos.y + y + 5) % 5; }
+	else
+		pos.y = (pos.y + y + 5) % 5;
 
 }
 
 //Move cursor position
-void Game::moveCursorHand(int x, int y) {
+void Game::MoveCursorHand(int x, int y) {
 
-	//Deselect tile
-	hand[hPos + 1].setCol(COLOR_LTWHITE);
+	//Deselect tiles
+	hand[handIdx + 1].SetColor(COLOR_LTWHITE);
 
 	//Move cursor
-	hPos = (hPos + x + 6) % 6;
+	handIdx = (handIdx + x + 6) % 6;
 	if (y != -1) {
-		pos = Coord(hPos + 1, y);
-		hPos = -1;
+		pos = Coord(handIdx + 1, y);
+		handIdx = -1;
 		mode = MODE_NONE;
 		return;
 	}
 
-	//Select new tile
-	hand[hPos + 1].setCol(COLOR_AQUA);
+	//Select new tiles
+	hand[handIdx + 1].SetColor(COLOR_AQUA);
 
 }
 
-//Move selected tile
-void Game::moveSelect(int x, int y) {
-	int _x = selectable[sPos]->pos.x + x;
-	int _y = selectable[sPos]->pos.y + y;
+//Move selected tiles
+void Game::MoveSelect(int x, int y) {
+	int _x = selectable[selectionIdx]->pos.x + x;
+	int _y = selectable[selectionIdx]->pos.y + y;
 	if (x != 0) {
-		for (int a = 0; x > 0 ? a < 9 : a > -9; a += x) {
-			for (int b = 0; b < 3; b > 0 ? b *= -1 : b = (b - 1) * -1) {
-				int __x = (_x + a + 9) % 9;
-				int __y = (_y + b + 5) % 5;
-				for (int c = 0; c < selectable.size(); ++c) {
-					if (&map.tile[__x][__y] == selectable[c]) {
-						sPos = c;
+		for (int i = 0; x > 0 ? i < 9 : i > -9; i += x) {
+			for (int j = 0; j < 3; j > 0 ? j *= -1 : j = (j - 1) * -1) {
+				int __x = (_x + i + 9) % 9;
+				int __y = (_y + j + 5) % 5;
+				for (int k = 0; k < selectable.size(); ++k) {
+					if (&map.tiles[__x][__y] == selectable[k]) {
+						selectionIdx = k;
 						goto end;
 					}
 				}
@@ -545,13 +552,13 @@ void Game::moveSelect(int x, int y) {
 		}
 	}
 	else if (y != 0) {
-		for (int a = 0; y > 0 ? a < 5 : a > -5; a += y) {
-			for (int b = 0; b < 5; b > 0 ? b *= -1 : b = (b - 1) * -1) {
-				int __x = (_x + b + 9) % 9;
-				int __y = (_y + a + 5) % 5;
-				for (int c = 0; c < selectable.size(); ++c) {
-					if (&map.tile[__x][__y] == selectable[c]) {
-						sPos = c;
+		for (int i = 0; y > 0 ? i < 5 : i > -5; i += y) {
+			for (int j = 0; j < 5; j > 0 ? j *= -1 : j = (j - 1) * -1) {
+				int __x = (_x + j + 9) % 9;
+				int __y = (_y + i + 5) % 5;
+				for (int k = 0; k < selectable.size(); ++k) {
+					if (&map.tiles[__x][__y] == selectable[k]) {
+						selectionIdx = k;
 						goto end;
 					}
 				}
@@ -561,235 +568,196 @@ void Game::moveSelect(int x, int y) {
 	end:;
 }
 
-//Check if tile is moveable
-bool Game::canMove(int x, int y) {
+//Check if tiles is moveable
+bool Game::CanMove(int x, int y) {
 	if (x > -1 && x < 9 && y > -1 && y < 5) {
-		if (map.tile[x][y].unit == nullptr) { return true; }
-		else if (map.tile[x][y].unit->player == map.tile[pos.x][pos.y].unit->player) { return true; }
+		if (map.tiles[x][y].minion == nullptr)
+			return true;
+		else if (map.tiles[x][y].minion->owner == map.tiles[pos.x][pos.y].minion->owner)
+			return true;
 	}
 	return false;
 }
 
-//Highlight tile
-void Game::highlightTile(int x, int y, eColor col) {
-	map.tile[x][y].setCol(col);
-	highlighted.push_back(&map.tile[x][y]);
-	if (col == COLOR_AQUA && mode == MODE_NONE) {
-		if (map.tile[pos.x][pos.y].unit != nullptr) {
-			if (!map.tile[pos.x][pos.y].unit->moved && map.tile[pos.x][pos.y].unit->isMoveable()) {
-				if (map.tile[pos.x][pos.y].unit->player == &player[turn]) {
-					if (!map.tile[pos.x][pos.y].unit->isProvoked()) {
-						highlightMoveable(pos.x, pos.y);
-					}
-				}
-			}
-		}
-	}
+//Highlight tiles
+void Game::HighlightTile(int x, int y, eColor color) {
+	map.tiles[x][y].SetColor(color);
+	highlighted.push_back(&map.tiles[x][y]);
+	if (color == COLOR_AQUA && mode == MODE_NONE)
+		if (map.tiles[pos.x][pos.y].minion != nullptr)
+			if (!map.tiles[pos.x][pos.y].minion->hasMoved && map.tiles[pos.x][pos.y].minion->IsMoveable())
+				if (map.tiles[pos.x][pos.y].minion->owner == &players[turn])
+					if (!map.tiles[pos.x][pos.y].minion->IsProvoked())
+						HighlightMoveable(pos.x, pos.y);
 }
 
 //Highlight moveable spaces
-void Game::highlightMoveable(int x, int y) {
-	if (map.tile[pos.x][pos.y].unit->isFlying()) {
-		for (int a = 0; a < 9; ++a) {
-			for (int b = 0; b < 5; ++b) {
-				if (a != pos.x || b != pos.y) {
-					if (canMove(a, b)) {
-						highlightTile(a, b, COLOR_GRAY);
-					}
-				}
-			}
-		}
+void Game::HighlightMoveable(int x, int y) {
+	if (map.tiles[pos.x][pos.y].minion->IsFlying()) {
+		for (int i = 0; i < 9; ++i)
+			for (int j = 0; j < 5; ++j)
+				if (i != pos.x || j != pos.y)
+					if (CanMove(i, j))
+						HighlightTile(i, j, COLOR_GRAY);
 	}
-	else { searchMoveable(pos.x, pos.y, map.tile[pos.x][pos.y].unit->moveRange()); }
-	map.tile[x][y].setCol(COLOR_AQUA);
+	else
+		SearchMoveable(pos.x, pos.y, map.tiles[pos.x][pos.y].minion->MoveRange());
+	map.tiles[x][y].SetColor(COLOR_AQUA);
 }
 
 //Recursively search for moveable spaces
-void Game::searchMoveable(int x, int y, int range) {
+void Game::SearchMoveable(int x, int y, int range) {
 	if (range == 0) { return; }
-	if (canMove(x, y - 1)) { highlightTile(x, y - 1, COLOR_GRAY); searchMoveable(x, y - 1, range - 1); } //Up
-	if (canMove(x - 1, y)) { highlightTile(x - 1, y, COLOR_GRAY); searchMoveable(x - 1, y, range - 1); } //Left
-	if (canMove(x, y + 1)) { highlightTile(x, y + 1, COLOR_GRAY); searchMoveable(x, y + 1, range - 1); } //Down
-	if (canMove(x + 1, y)) { highlightTile(x + 1, y, COLOR_GRAY); searchMoveable(x + 1, y, range - 1); } //Right
+	if (CanMove(x, y - 1)) { HighlightTile(x, y - 1, COLOR_GRAY); SearchMoveable(x, y - 1, range - 1); } //Up
+	if (CanMove(x - 1, y)) { HighlightTile(x - 1, y, COLOR_GRAY); SearchMoveable(x - 1, y, range - 1); } //Left
+	if (CanMove(x, y + 1)) { HighlightTile(x, y + 1, COLOR_GRAY); SearchMoveable(x, y + 1, range - 1); } //Down
+	if (CanMove(x + 1, y)) { HighlightTile(x + 1, y, COLOR_GRAY); SearchMoveable(x + 1, y, range - 1); } //Right
 }
 
 //Highlight targetable tiles
-void Game::highlightSelectable(eTarget type, Unit* u) {
+void Game::HighlightSelectable(eTarget targetMode) { HighlightSelectable(targetMode, nullptr); }
+void Game::HighlightSelectable(eTarget targetMode, Minion* minion) {
 
 	//Clear
 	selectable.clear();
 
 	//Target type
-	switch (type) {
+	switch (targetMode) {
 
-	//Empty tile
+	//Empty tiles
 	case TARGET_TILE:
-		for (int a = 0; a < 9; ++a) {
-			for (int b = 0; b < 5; ++b) {
-				if (map.tile[a][b].unit == nullptr) {
-					selectable.push_back(&map.tile[a][b]);
-				}
-			}
-		}
-		break;
-
-	//Any unit
-	case TARGET_UNIT:
-		for (int a = 0; a < unit.size(); ++a) {
-			selectable.push_back(unit[a]->tile);
-		}
+		for (int i = 0; i < 9; ++i)
+			for (int j = 0; j < 5; ++j)
+				if (map.tiles[i][j].minion == nullptr)
+					selectable.push_back(&map.tiles[i][j]);
 		break;
 
 	//Any minion
+	case TARGET_UNIT:
+		for (int i = 0; i < minions.size(); ++i)
+			selectable.push_back(minions[i]->curTile);
+		break;
+
+	//Any (non-general) minion
 	case TARGET_MINION:
-		for (int a = 0; a < unit.size(); ++a) {
-			if (unit[a]->tribe != TRIBE_GENERAL) {
-				selectable.push_back(unit[a]->tile);
-			}
-		}
+		for (int i = 0; i < minions.size(); ++i)
+			if (minions[i]->tribe != TRIBE_GENERAL)
+				selectable.push_back(minions[i]->curTile);
 		break;
 
 	//Enemies
 	case TARGET_ENEMY:
-		for (int a = 0; a < unit.size(); ++a) {
-			if (unit[a]->player != &player[turn]) {
-				selectable.push_back(unit[a]->tile);
-			}
-		}
+		for (int i = 0; i < minions.size(); ++i)
+			if (minions[i]->owner != &players[turn])
+				selectable.push_back(minions[i]->curTile);
 		break;
 
 	//Allied minions
 	case TARGET_ALLY_MINON:
-		for (int a = 0; a < unit.size(); ++a) {
-			if (unit[a]->player == &player[turn]) {
-				if (unit[a]->tribe != TRIBE_GENERAL) {
-					selectable.push_back(unit[a]->tile);
-				}
-			}
-		}
+		for (int i = 0; i < minions.size(); ++i)
+			if (minions[i]->owner == &players[turn])
+				if (minions[i]->tribe != TRIBE_GENERAL)
+					selectable.push_back(minions[i]->curTile);
 		break;
 
 	//Enemy minions
 	case TARGET_ENEMY_MINION:
-		for (int a = 0; a < unit.size(); ++a) {
-			if (unit[a]->player != &player[turn]) {
-				if (unit[a]->tribe != TRIBE_GENERAL) {
-					selectable.push_back(unit[a]->tile);
-				}
-			}
-		}
+		for (int i = 0; i < minions.size(); ++i)
+			if (minions[i]->owner != &players[turn])
+				if (minions[i]->tribe != TRIBE_GENERAL)
+					selectable.push_back(minions[i]->curTile);
 		break;
 
 	//Enemy minions
 	case TARGET_ENEMY_RANGED:
-		for (int a = 0; a < unit.size(); ++a) {
-			if (unit[a]->player != &player[turn]) {
-				if (unit[a]->tribe != TRIBE_GENERAL) {
-					if (unit[a]->isRanged()) {
-						selectable.push_back(unit[a]->tile);
-					}
-				}
-			}
-		}
+		for (int i = 0; i < minions.size(); ++i)
+			if (minions[i]->owner != &players[turn])
+				if (minions[i]->tribe != TRIBE_GENERAL)
+					if (minions[i]->IsRanged())
+						selectable.push_back(minions[i]->curTile);
 		break;
 
-	//Enemey general
+	//Enemy general
 	case TARGET_ENEMY_GENERAL:
-		for (int a = 0; a < unit.size(); ++a) {
-			if (unit[a] == player[!turn].general) {
-				selectable.push_back(unit[a]->tile);
-			}
-		}
+		for (int i = 0; i < minions.size(); ++i)
+			if (minions[i] == players[!turn].general)
+				selectable.push_back(minions[i]->curTile);
 		break;
 
-	//Spaces near unit
+	//Spaces near minion
 	case TARGET_NEAR_UNIT:
-		if (u != nullptr) {
-			for (int a = max(u->tile->pos.x - 1, 0); a < min(u->tile->pos.x + 2, 9); ++a) {
-				for (int b = max(u->tile->pos.y - 1, 0); b < min(u->tile->pos.y + 2, 5); ++b) {
-					if (a != u->tile->pos.x || b != u->tile->pos.y) {
-						selectable.push_back(&map.tile[a][b]);
-					}
-				}
-			}
-		}
+		if (minion != nullptr)
+			for (int i = max(minion->curTile->pos.x - 1, 0); i < min(minion->curTile->pos.x + 2, 9); ++i)
+				for (int j = max(minion->curTile->pos.y - 1, 0); j < min(minion->curTile->pos.y + 2, 5); ++j)
+					if (i != minion->curTile->pos.x || j != minion->curTile->pos.y)
+						selectable.push_back(&map.tiles[i][j]);
 		break;
 
-	//Minons near unit
+	//Minons near minion
 	case TARGET_MINION_NEAR_UNIT:
-		if (u != nullptr) {
-			for (int a = max(u->tile->pos.x - 1, 0); a < min(u->tile->pos.x + 2, 9); ++a) {
-				for (int b = max(u->tile->pos.y - 1, 0); b < min(u->tile->pos.y + 2, 5); ++b) {
-					if (map.tile[a][b].unit != nullptr && map.tile[a][b].unit != u && map.tile[a][b].unit->tribe != TRIBE_GENERAL) {
-						selectable.push_back(&map.tile[a][b]);
-					}
-				}
-			}
-		}
+		if (minion != nullptr)
+			for (int i = max(minion->curTile->pos.x - 1, 0); i < min(minion->curTile->pos.x + 2, 9); ++i)
+				for (int j = max(minion->curTile->pos.y - 1, 0); j < min(minion->curTile->pos.y + 2, 5); ++j)
+					if (map.tiles[i][j].minion != nullptr && map.tiles[i][j].minion != minion && map.tiles[i][j].minion->tribe != TRIBE_GENERAL)
+						selectable.push_back(&map.tiles[i][j]);
 		break;
 
-	//Empty tile near unit
+	//Empty tiles near minion
 	case TARGET_TILE_NEAR_UNIT:
-		if (u != nullptr) {
-			for (int a = max(u->tile->pos.x - 1, 0); a < min(u->tile->pos.x + 2, 9); ++a) {
-				for (int b = max(u->tile->pos.y - 1, 0); b < min(u->tile->pos.y + 2, 5); ++b) {
-					if (map.tile[a][b].unit == nullptr) {
-						selectable.push_back(&map.tile[a][b]);
-					}
-				}
-			}
-		}
+		if (minion != nullptr)
+			for (int i = max(minion->curTile->pos.x - 1, 0); i < min(minion->curTile->pos.x + 2, 9); ++i)
+				for (int j = max(minion->curTile->pos.y - 1, 0); j < min(minion->curTile->pos.y + 2, 5); ++j)
+					if (map.tiles[i][j].minion == nullptr)
+						selectable.push_back(&map.tiles[i][j]);
 		break;
 
 	//Near allies (summon)
 	case TARGET_NEAR_ALLY:
-		for (int a = 0; a < unit.size(); ++a) {
-			if (unit[a]->player == &player[turn]) {
-				for (int b = max(unit[a]->tile->pos.x - 1, 0); b < min(unit[a]->tile->pos.x + 2, 9); ++b) {
-					for (int c = max(unit[a]->tile->pos.y - 1, 0); c < min(unit[a]->tile->pos.y + 2, 5); ++c) {
-						if (map.tile[b][c].unit == nullptr) {
-							if (map.tile[b][c].border.buffer[0].Attributes != COLOR_GREEN) {
-								selectable.push_back(&map.tile[b][c]);
-							}
-						}
-					}
-				}
-			}
-		}
+		for (int i = 0; i < minions.size(); ++i)
+			if (minions[i]->owner == &players[turn])
+				for (int j = max(minions[i]->curTile->pos.x - 1, 0); j < min(minions[i]->curTile->pos.x + 2, 9); ++j)
+					for (int k = max(minions[i]->curTile->pos.y - 1, 0); k < min(minions[i]->curTile->pos.y + 2, 5); ++k)
+						if (map.tiles[j][k].minion == nullptr)
+							if (map.tiles[j][k].border.buffer[0].Attributes != COLOR_GREEN)
+								selectable.push_back(&map.tiles[j][k]);
 		break;
 
 	}
 
 	//If selectable tiles found, highlight first and switch to select mode
 	if (selectable.size() > 0) {
-		sPos = 0;
+		selectionIdx = 0;
 		mode = MODE_SELECT;
 	}
 
 }
 
 //Get final path from list
-void Game::createPath() {
-	int i = pathList.size() - 1;
-	for (int a = 0; a < pathList.back().count + 1; ++a) {
-		path.insert(path.begin(), pathList[i].pos);
-		i = pathList[i].last;
+void Game::CreatePath() {
+	int idx = pathList.size() - 1;
+	for (int i = 0; i < pathList.back().count + 1; ++i) {
+		path.insert(path.begin(), pathList[idx].pos);
+		idx = pathList[idx].last;
 	}
 }
 
 //Add position to path list
-bool Game::addToPaths(int x, int y, int l, int c) {
+bool Game::AddToPaths(int x, int y, int last, int count) {
 	if (x > -1 && x < 9 && y > -1 && y < 5) {
-		for (int a = 0; a < pathList.size(); ++a) { if (pathList[a].pos.x == x && pathList[a].pos.y == y) { return false; } }
-		if (map.tile[pos.x][pos.y].unit->isFlying()) {
-			pathList.push_back(PathCoord(Coord(x, y), l, c));
-			if (selectable[sPos]->pos.x == x && selectable[sPos]->pos.y == y) { return true; }
+		for (int i = 0; i < pathList.size(); ++i)
+			if (pathList[i].pos.x == x && pathList[i].pos.y == y)
+				return false;
+		if (map.tiles[pos.x][pos.y].minion->IsFlying()) {
+			pathList.push_back(PathCoord(Coord(x, y), last, count));
+			if (selectable[selectionIdx]->pos.x == x && selectable[selectionIdx]->pos.y == y)
+				return true;
 			return false;
 		}
-		for (int a = 0; a < moveable.size(); ++a) {
-			if (moveable[a] == &map.tile[x][y]) {
-				pathList.push_back(PathCoord(Coord(x, y), l, c));
-				if (selectable[sPos] == moveable[a]) { return true; }
+		for (int i = 0; i < moveable.size(); ++i) {
+			if (moveable[i] == &map.tiles[x][y]) {
+				pathList.push_back(PathCoord(Coord(x, y), last, count));
+				if (selectable[selectionIdx] == moveable[i])
+					return true;
 				return false;
 			}
 		}
@@ -798,176 +766,178 @@ bool Game::addToPaths(int x, int y, int l, int c) {
 }
 
 //Generate paths to target
-void Game::generatePaths() {
+void Game::GeneratePaths() {
 	path.clear();
-	if (selectable[sPos] != &map.tile[pos.x][pos.y]) {
-		for (int a = 0; a < attackable.size(); ++a) { if (attackable[a] == selectable[sPos]) { return; } }
+	if (selectable[selectionIdx] != &map.tiles[pos.x][pos.y]) {
+		for (int i = 0; i < attackable.size(); ++i)
+			if (attackable[i] == selectable[selectionIdx])
+				return;
 		pathList.push_back(PathCoord(pos, 0, 0));
 		int count = 0;
 		while (true) {
-			for (int a = 0; a < pathList.size(); ++a) {
-				if (pathList[a].count == count) {
-					if (addToPaths(pathList[a].pos.x, pathList[a].pos.y - 1, a, pathList[a].count + 1)) { goto end; }
-					if (addToPaths(pathList[a].pos.x, pathList[a].pos.y + 1, a, pathList[a].count + 1)) { goto end; }
-					if (addToPaths(pathList[a].pos.x - 1, pathList[a].pos.y, a, pathList[a].count + 1)) { goto end; }
-					if (addToPaths(pathList[a].pos.x + 1, pathList[a].pos.y, a, pathList[a].count + 1)) { goto end; }
+			for (int i = 0; i < pathList.size(); ++i) {
+				if (pathList[i].count == count) {
+					if (AddToPaths(pathList[i].pos.x, pathList[i].pos.y - 1, i, pathList[i].count + 1)) { goto end; }
+					if (AddToPaths(pathList[i].pos.x, pathList[i].pos.y + 1, i, pathList[i].count + 1)) { goto end; }
+					if (AddToPaths(pathList[i].pos.x - 1, pathList[i].pos.y, i, pathList[i].count + 1)) { goto end; }
+					if (AddToPaths(pathList[i].pos.x + 1, pathList[i].pos.y, i, pathList[i].count + 1)) { goto end; }
 				}
 			}
 			++count;
 		}
 		end:;
-		createPath();
+		CreatePath();
 		pathList.clear();
 	}
 }
 
 //Draw arrow path
-void Game::drawPath(Renderer& rm) {
-	int a = path.size() - 1;
-	if (a > 0) {
-		COORD c = map.tile[path[0].x][path[0].y].border.pos;
-		if (path[0].y > path[1].y) { drawArrow(1, c.X, c.Y, rm); }      //Start up
-		else if (path[0].x > path[1].x) { drawArrow(2, c.X, c.Y, rm); } //Start left
-		else if (path[0].y < path[1].y) { drawArrow(3, c.X, c.Y, rm); } //Start down
-		else if (path[0].x < path[1].x) { drawArrow(4, c.X, c.Y, rm); } //Start right
-		c = map.tile[path[a].x][path[a].y].border.pos;
-		if (path[a].y < path[a - 1].y) { drawArrow(5, c.X, c.Y, rm); }      //End up
-		else if (path[a].x < path[a - 1].x) { drawArrow(6, c.X, c.Y, rm); } //End left
-		else if (path[a].y > path[a - 1].y) { drawArrow(7, c.X, c.Y, rm); } //End down
-		else if (path[a].x > path[a - 1].x) { drawArrow(8, c.X, c.Y, rm); } //End right
-		if (a > 1) {
-			for (int b = 1; b < a; ++b) {
-				c = map.tile[path[b].x][path[b].y].border.pos;
-				if (path[b].x == path[b - 1].x && path[b].x == path[b + 1].x) { drawArrow(9, c.X, c.Y, rm); }       //Up-down
-				else if (path[b].y == path[b - 1].y && path[b].y == path[b + 1].y) { drawArrow(10, c.X, c.Y, rm); } //Left-right
-				else if ((path[b].x > path[b - 1].x && path[b].y > path[b + 1].y) || (path[b].x > path[b + 1].x && path[b].y > path[b - 1].y)) { drawArrow(11, c.X, c.Y, rm); } //Up-left
-				else if ((path[b].x > path[b - 1].x && path[b].y < path[b + 1].y) || (path[b].x > path[b + 1].x && path[b].y < path[b - 1].y)) { drawArrow(12, c.X, c.Y, rm); } //Down-left
-				else if ((path[b].x < path[b - 1].x && path[b].y < path[b + 1].y) || (path[b].x < path[b + 1].x && path[b].y < path[b - 1].y)) { drawArrow(13, c.X, c.Y, rm); } //Down-right
-				else if ((path[b].x < path[b - 1].x && path[b].y > path[b + 1].y) || (path[b].x < path[b + 1].x && path[b].y > path[b - 1].y)) { drawArrow(14, c.X, c.Y, rm); } //Up-right
+void Game::DrawPath(Renderer& renderer) {
+	int pathSize = path.size() - 1;
+	if (pathSize > 0) {
+		COORD coord = map.tiles[path[0].x][path[0].y].border.pos;
+		if (path[0].y > path[1].y) { DrawArrow(1, coord.X, coord.Y, renderer); }      //Start up
+		else if (path[0].x > path[1].x) { DrawArrow(2, coord.X, coord.Y, renderer); } //Start left
+		else if (path[0].y < path[1].y) { DrawArrow(3, coord.X, coord.Y, renderer); } //Start down
+		else if (path[0].x < path[1].x) { DrawArrow(4, coord.X, coord.Y, renderer); } //Start right
+		coord = map.tiles[path[pathSize].x][path[pathSize].y].border.pos;
+		if (path[pathSize].y < path[pathSize - 1].y) { DrawArrow(5, coord.X, coord.Y, renderer); }      //End up
+		else if (path[pathSize].x < path[pathSize - 1].x) { DrawArrow(6, coord.X, coord.Y, renderer); } //End left
+		else if (path[pathSize].y > path[pathSize - 1].y) { DrawArrow(7, coord.X, coord.Y, renderer); } //End down
+		else if (path[pathSize].x > path[pathSize - 1].x) { DrawArrow(8, coord.X, coord.Y, renderer); } //End right
+		if (pathSize > 1) {
+			for (int i = 1; i < pathSize; ++i) {
+				coord = map.tiles[path[i].x][path[i].y].border.pos;
+				if (path[i].x == path[i - 1].x && path[i].x == path[i + 1].x) { DrawArrow(9, coord.X, coord.Y, renderer); }       //Up-down
+				else if (path[i].y == path[i - 1].y && path[i].y == path[i + 1].y) { DrawArrow(10, coord.X, coord.Y, renderer); } //Left-right
+				else if ((path[i].x > path[i - 1].x && path[i].y > path[i + 1].y) || (path[i].x > path[i + 1].x && path[i].y > path[i - 1].y)) { DrawArrow(11, coord.X, coord.Y, renderer); } //Up-left
+				else if ((path[i].x > path[i - 1].x && path[i].y < path[i + 1].y) || (path[i].x > path[i + 1].x && path[i].y < path[i - 1].y)) { DrawArrow(12, coord.X, coord.Y, renderer); } //Down-left
+				else if ((path[i].x < path[i - 1].x && path[i].y < path[i + 1].y) || (path[i].x < path[i + 1].x && path[i].y < path[i - 1].y)) { DrawArrow(13, coord.X, coord.Y, renderer); } //Down-right
+				else if ((path[i].x < path[i - 1].x && path[i].y > path[i + 1].y) || (path[i].x < path[i + 1].x && path[i].y > path[i - 1].y)) { DrawArrow(14, coord.X, coord.Y, renderer); } //Up-right
 			}
 		}
 	}
 }
 
 //Draw attack swords
-void Game::drawSword(int x, int y, Renderer& rm) {
-	rm.render(chars[6], x + 2, y + 2);
-	rm.render(chars[7], x + 4, y + 2);
-	rm.render(chars[5], x + 3, y + 3);
-	rm.render(chars[5], x + 2, y + 4);
-	rm.render(chars[5], x + 4, y + 4);
+void Game::DrawSword(int x, int y, Renderer& renderer) {
+	renderer.Render(chars[6], x + 2, y + 2);
+	renderer.Render(chars[7], x + 4, y + 2);
+	renderer.Render(chars[5], x + 3, y + 3);
+	renderer.Render(chars[5], x + 2, y + 4);
+	renderer.Render(chars[5], x + 4, y + 4);
 }
 
 //Draw arrows
-void Game::drawArrow(int a, int x, int y, Renderer& rm) {
-	if (a == 1) { //Start up
-		rm.render(chars[0], x + 3, y + 1);
-		rm.render(chars[0], x + 3, y);
+void Game::DrawArrow(int type, int x, int y, Renderer& renderer) {
+	if (type == 1) { //Start up
+		renderer.Render(chars[0], x + 3, y + 1);
+		renderer.Render(chars[0], x + 3, y);
 	}
-	else if (a == 2) { // Start left
-		rm.render(chars[0], x + 1, y + 3);
-		rm.render(chars[0], x, y + 3);
+	else if (type == 2) { // Start left
+		renderer.Render(chars[0], x + 1, y + 3);
+		renderer.Render(chars[0], x, y + 3);
 	}
-	else if (a == 3) { //Start down
-		rm.render(chars[0], x + 3, y + 5);
-		rm.render(chars[0], x + 3, y + 6);
+	else if (type == 3) { //Start down
+		renderer.Render(chars[0], x + 3, y + 5);
+		renderer.Render(chars[0], x + 3, y + 6);
 	}
-	else if (a == 4) { //Start right
-		rm.render(chars[0], x + 5, y + 3);
-		rm.render(chars[0], x + 6, y + 3);
+	else if (type == 4) { //Start right
+		renderer.Render(chars[0], x + 5, y + 3);
+		renderer.Render(chars[0], x + 6, y + 3);
 	}
-	else if (a == 5) { //End up
-		rm.render(chars[0], x + 3, y + 6);
-		rm.render(chars[0], x + 2, y + 5);
-		rm.render(chars[0], x + 3, y + 5);
-		rm.render(chars[0], x + 4, y + 5);
-		rm.render(chars[1], x + 2, y + 4);
-		rm.render(chars[0], x + 3, y + 4);
-		rm.render(chars[2], x + 4, y + 4);
-		rm.render(chars[0], x + 3, y + 3);
+	else if (type == 5) { //End up
+		renderer.Render(chars[0], x + 3, y + 6);
+		renderer.Render(chars[0], x + 2, y + 5);
+		renderer.Render(chars[0], x + 3, y + 5);
+		renderer.Render(chars[0], x + 4, y + 5);
+		renderer.Render(chars[1], x + 2, y + 4);
+		renderer.Render(chars[0], x + 3, y + 4);
+		renderer.Render(chars[2], x + 4, y + 4);
+		renderer.Render(chars[0], x + 3, y + 3);
 	}
-	else if (a == 6) { //End left
-		rm.render(chars[0], x + 6, y + 3);
-		rm.render(chars[0], x + 5, y + 2);
-		rm.render(chars[0], x + 5, y + 3);
-		rm.render(chars[0], x + 5, y + 4);
-		rm.render(chars[3], x + 4, y + 2);
-		rm.render(chars[0], x + 4, y + 3);
-		rm.render(chars[4], x + 4, y + 4);
-		rm.render(chars[0], x + 3, y + 3);
+	else if (type == 6) { //End left
+		renderer.Render(chars[0], x + 6, y + 3);
+		renderer.Render(chars[0], x + 5, y + 2);
+		renderer.Render(chars[0], x + 5, y + 3);
+		renderer.Render(chars[0], x + 5, y + 4);
+		renderer.Render(chars[3], x + 4, y + 2);
+		renderer.Render(chars[0], x + 4, y + 3);
+		renderer.Render(chars[4], x + 4, y + 4);
+		renderer.Render(chars[0], x + 3, y + 3);
 	}
-	else if (a == 7) { //End down
-		rm.render(chars[0], x + 3, y);
-		rm.render(chars[0], x + 2, y + 1);
-		rm.render(chars[0], x + 3, y + 1);
-		rm.render(chars[0], x + 4, y + 1);
-		rm.render(chars[1], x + 2, y + 2);
-		rm.render(chars[0], x + 3, y + 2);
-		rm.render(chars[2], x + 4, y + 2);
-		rm.render(chars[0], x + 3, y + 3);
+	else if (type == 7) { //End down
+		renderer.Render(chars[0], x + 3, y);
+		renderer.Render(chars[0], x + 2, y + 1);
+		renderer.Render(chars[0], x + 3, y + 1);
+		renderer.Render(chars[0], x + 4, y + 1);
+		renderer.Render(chars[1], x + 2, y + 2);
+		renderer.Render(chars[0], x + 3, y + 2);
+		renderer.Render(chars[2], x + 4, y + 2);
+		renderer.Render(chars[0], x + 3, y + 3);
 	}
-	else if (a == 8) { //End right
-		rm.render(chars[0], x, y + 3);
-		rm.render(chars[0], x + 1, y + 2);
-		rm.render(chars[0], x + 1, y + 3);
-		rm.render(chars[0], x + 1, y + 4);
-		rm.render(chars[3], x + 2, y + 2);
-		rm.render(chars[0], x + 2, y + 3);
-		rm.render(chars[4], x + 2, y + 4);
-		rm.render(chars[0], x + 3, y + 3);
+	else if (type == 8) { //End right
+		renderer.Render(chars[0], x, y + 3);
+		renderer.Render(chars[0], x + 1, y + 2);
+		renderer.Render(chars[0], x + 1, y + 3);
+		renderer.Render(chars[0], x + 1, y + 4);
+		renderer.Render(chars[3], x + 2, y + 2);
+		renderer.Render(chars[0], x + 2, y + 3);
+		renderer.Render(chars[4], x + 2, y + 4);
+		renderer.Render(chars[0], x + 3, y + 3);
 	}
-	else if (a == 9) { //Up-down
-		rm.render(chars[0], x + 3, y);
-		rm.render(chars[0], x + 3, y + 1);
-		rm.render(chars[0], x + 3, y + 2);
-		rm.render(chars[0], x + 3, y + 3);
-		rm.render(chars[0], x + 3, y + 4);
-		rm.render(chars[0], x + 3, y + 5);
-		rm.render(chars[0], x + 3, y + 6);
+	else if (type == 9) { //Up-down
+		renderer.Render(chars[0], x + 3, y);
+		renderer.Render(chars[0], x + 3, y + 1);
+		renderer.Render(chars[0], x + 3, y + 2);
+		renderer.Render(chars[0], x + 3, y + 3);
+		renderer.Render(chars[0], x + 3, y + 4);
+		renderer.Render(chars[0], x + 3, y + 5);
+		renderer.Render(chars[0], x + 3, y + 6);
 	}
-	else if (a == 10) { //Left-right
-		rm.render(chars[0], x, y + 3);
-		rm.render(chars[0], x + 1, y + 3);
-		rm.render(chars[0], x + 2, y + 3);
-		rm.render(chars[0], x + 3, y + 3);
-		rm.render(chars[0], x + 4, y + 3);
-		rm.render(chars[0], x + 5, y + 3);
-		rm.render(chars[0], x + 6, y + 3);
+	else if (type == 10) { //Left-right
+		renderer.Render(chars[0], x, y + 3);
+		renderer.Render(chars[0], x + 1, y + 3);
+		renderer.Render(chars[0], x + 2, y + 3);
+		renderer.Render(chars[0], x + 3, y + 3);
+		renderer.Render(chars[0], x + 4, y + 3);
+		renderer.Render(chars[0], x + 5, y + 3);
+		renderer.Render(chars[0], x + 6, y + 3);
 	}
-	else if (a == 11) { //Up-left
-		rm.render(chars[0], x, y + 3);
-		rm.render(chars[0], x + 1, y + 3);
-		rm.render(chars[0], x + 2, y + 3);
-		rm.render(chars[0], x + 3, y + 3);
-		rm.render(chars[0], x + 3, y + 2);
-		rm.render(chars[0], x + 3, y + 1);
-		rm.render(chars[0], x + 3, y);
+	else if (type == 11) { //Up-left
+		renderer.Render(chars[0], x, y + 3);
+		renderer.Render(chars[0], x + 1, y + 3);
+		renderer.Render(chars[0], x + 2, y + 3);
+		renderer.Render(chars[0], x + 3, y + 3);
+		renderer.Render(chars[0], x + 3, y + 2);
+		renderer.Render(chars[0], x + 3, y + 1);
+		renderer.Render(chars[0], x + 3, y);
 	}
-	else if (a == 12) { //Down-left
-		rm.render(chars[0], x, y + 3);
-		rm.render(chars[0], x + 1, y + 3);
-		rm.render(chars[0], x + 2, y + 3);
-		rm.render(chars[0], x + 3, y + 3);
-		rm.render(chars[0], x + 3, y + 4);
-		rm.render(chars[0], x + 3, y + 5);
-		rm.render(chars[0], x + 3, y + 6);
+	else if (type == 12) { //Down-left
+		renderer.Render(chars[0], x, y + 3);
+		renderer.Render(chars[0], x + 1, y + 3);
+		renderer.Render(chars[0], x + 2, y + 3);
+		renderer.Render(chars[0], x + 3, y + 3);
+		renderer.Render(chars[0], x + 3, y + 4);
+		renderer.Render(chars[0], x + 3, y + 5);
+		renderer.Render(chars[0], x + 3, y + 6);
 	}
-	else if (a == 13) { //Down-right
-		rm.render(chars[0], x + 3, y + 6);
-		rm.render(chars[0], x + 3, y + 5);
-		rm.render(chars[0], x + 3, y + 4);
-		rm.render(chars[0], x + 3, y + 3);
-		rm.render(chars[0], x + 4, y + 3);
-		rm.render(chars[0], x + 5, y + 3);
-		rm.render(chars[0], x + 6, y + 3);
+	else if (type == 13) { //Down-right
+		renderer.Render(chars[0], x + 3, y + 6);
+		renderer.Render(chars[0], x + 3, y + 5);
+		renderer.Render(chars[0], x + 3, y + 4);
+		renderer.Render(chars[0], x + 3, y + 3);
+		renderer.Render(chars[0], x + 4, y + 3);
+		renderer.Render(chars[0], x + 5, y + 3);
+		renderer.Render(chars[0], x + 6, y + 3);
 	}
-	else if (a == 14) { //Up-right
-		rm.render(chars[0], x + 6, y + 3);
-		rm.render(chars[0], x + 5, y + 3);
-		rm.render(chars[0], x + 4, y + 3);
-		rm.render(chars[0], x + 3, y + 3);
-		rm.render(chars[0], x + 3, y + 2);
-		rm.render(chars[0], x + 3, y + 1);
-		rm.render(chars[0], x + 3, y);
+	else if (type == 14) { //Up-right
+		renderer.Render(chars[0], x + 6, y + 3);
+		renderer.Render(chars[0], x + 5, y + 3);
+		renderer.Render(chars[0], x + 4, y + 3);
+		renderer.Render(chars[0], x + 3, y + 3);
+		renderer.Render(chars[0], x + 3, y + 2);
+		renderer.Render(chars[0], x + 3, y + 1);
+		renderer.Render(chars[0], x + 3, y);
 	}
 }

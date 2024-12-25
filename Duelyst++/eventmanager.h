@@ -13,17 +13,17 @@ class EventManager {
 public:
 	EventManager();
 	~EventManager();
-	void sendOnSummon(Unit* u, bool actionBar);
-	void sendOnDeath(Unit* u);
-	void sendOnAttack(Unit* u1, Unit* u2, bool counter);
-	void sendOnDamage(Unit* u1, Unit* u2, int damage);
-	void sendOnHeal(Unit* u1, Unit* u2, int heal);
-	void sendOnMove(Unit* u, bool byEffect);
-	void sendOnSpellCast(Spell* s);
-	void sendOnDraw(Card* c, bool fromDeck);
-	void sendOnReplace(Card* c);
-	void sendOnTurnEnd(Player* p);
-	void sendOnTurnStart(Player* p);
+	void SendOnSummon(Minion* minion, bool actionBar);
+	void SendOnDeath(Minion* minion);
+	void SendOnAttack(Minion* source, Minion* target, bool counter);
+	void SendOnDamage(Minion* source, Minion* target, int damage);
+	void SendOnHeal(Minion* source, Minion* target, int heal);
+	void SendOnMove(Minion* minion, bool byEffect);
+	void SendOnSpellCast(Spell* spell);
+	void SendOnDraw(Card* card, bool fromDeck);
+	void SendOnReplace(Card* card);
+	void SendOnTurnEnd(Player* player);
+	void SendOnTurnStart(Player* player);
 	Game* game;
 };
 

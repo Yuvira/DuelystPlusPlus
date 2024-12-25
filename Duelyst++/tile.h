@@ -7,7 +7,7 @@
 #include "renderer.h"
 
 //Definition
-class Unit;
+class Minion;
 
 //Tile features
 enum eFeature {
@@ -19,10 +19,11 @@ enum eFeature {
 	TILE_CREEP,
 };
 
-//Custom co-ord because vector of COORD is invalid??
+//Custom co-ordinate because you can't vector COORD
 class Coord {
 public:
-	Coord(int _x = 0, int _y = 0);
+	Coord();
+	Coord(int _x, int _y);
 	~Coord();
 	int x;
 	int y;
@@ -33,7 +34,7 @@ class Tile {
 public:
 	Tile();
 	~Tile();
-	void setCol(eColor col);
+	void SetColor(eColor color);
 	Sprite border;
 };
 
@@ -41,22 +42,22 @@ class BoardTile : public Tile {
 public:
 	BoardTile();
 	~BoardTile();
-	void setFeature(eFeature f);
+	void SetFeature(eFeature newFeature);
 	eFeature feature;
-	Unit* unit;
+	Minion* minion;
 	Sprite sprite;
 	Coord pos;
 };
 
-//Map (tile container)
+//Map (tiles container)
 class Map {
 public:
 	Map();
 	~Map();
-	BoardTile* getRandom();
-	BoardTile* getRandomCorner();
-	BoardTile* getRandomNear(int x, int y);
-	BoardTile tile[9][5];
+	BoardTile* GetRandom();
+	BoardTile* GetRandomCorner();
+	BoardTile* GetRandomNear(int x, int y);
+	BoardTile tiles[9][5];
 };
 
 #endif

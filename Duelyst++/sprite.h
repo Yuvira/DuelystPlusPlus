@@ -31,13 +31,15 @@ enum eColor {
 //Sprite class
 class Sprite {
 public:
-	Sprite(int = 1, int = 1);
+	Sprite();
+	Sprite(int _width, int _height);
 	~Sprite();
-	void clear();
-	void resize(int sx, int sy);
-	void setCol(eColor col);
-	void createFromFile(std::string filename);
-	void createFromString(std::string s, bool = false);
+	void Clear();
+	void Resize(int newWidth, int newHeight);
+	void SetColor(eColor color);
+	void CreateFromFile(std::string filename);
+	void CreateFromString(std::string str);
+	void CreateFromString(std::string str, bool vertical);
 	int width, height;
 	COORD pos;
 	std::vector<CHAR_INFO> buffer;

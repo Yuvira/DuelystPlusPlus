@@ -2,42 +2,43 @@
 #include "sprite.h"
 
 //Sprite constructor / destructor
-Sprite::Sprite(int sx, int sy) {
+Sprite::Sprite() : Sprite(1, 1) {}
+Sprite::Sprite(int _width, int _height) {
 	pos.X = 0;
 	pos.Y = 0;
-	width = sx;
-	height = sy;
-	for (int a = 0; a < (width * height); ++a) { buffer.push_back(CHAR_INFO()); }
-	clear();
+	width = _width;
+	height = _height;
+	for (int i = 0; i < (width * height); ++i) { buffer.push_back(CHAR_INFO()); }
+	Clear();
 }
 Sprite::~Sprite() { }
 
-//Clear sprite
-void Sprite::clear() {
-	for (int a = 0; a < buffer.size(); ++a) {
-		buffer[a].Char.AsciiChar = ' ';
-		buffer[a].Attributes = COLOR_LTWHITE;
+//Clear sprites
+void Sprite::Clear() {
+	for (int i = 0; i < buffer.size(); ++i) {
+		buffer[i].Char.AsciiChar = ' ';
+		buffer[i].Attributes = COLOR_LTWHITE;
 	}
 }
 
-//Resize sprite
-void Sprite::resize(int sx, int sy) {
-	width = sx;
-	height = sy;
+//Resize sprites
+void Sprite::Resize(int newWidth, int newHeight) {
+	width = newWidth;
+	height = newHeight;
 	buffer.clear();
-	for (int a = 0; a < (width * height); ++a) { buffer.push_back(CHAR_INFO()); }
-	clear();
+	for (int i = 0; i < (width * height); ++i)
+		buffer.push_back(CHAR_INFO());
+	Clear();
 }
 
 //Set color
-void Sprite::setCol(eColor col) {
-	for (int a = 0; a < buffer.size(); ++a) {
-		buffer[a].Attributes = col;
-	}
+void Sprite::SetColor(eColor color) {
+	for (int i = 0; i < buffer.size(); ++i)
+		buffer[i].Attributes = color;
 }
 
-//Generate sprite from text file
-void Sprite::createFromFile(std::string filename) {
+//Generate sprites from text file
+void Sprite::CreateFromFile(std::string filename) {
 	std::ifstream file(filename);
 	if (file.is_open()) {
 		width = 0;
@@ -49,29 +50,30 @@ void Sprite::createFromFile(std::string filename) {
 			++height;
 		}
 		buffer.clear();
-		for (int a = 0; a < (width * height); ++a) {
+		for (int i = 0; i < (width * height); ++i) {
 			buffer.push_back(CHAR_INFO());
-			buffer[a].Char.AsciiChar = in[a];
-			buffer[a].Attributes = COLOR_LTWHITE;
+			buffer[i].Char.AsciiChar = in[i];
+			buffer[i].Attributes = COLOR_LTWHITE;
 		}
 		file.close();
 	}
 }
 
-//Generate text sprite from string
-void Sprite::createFromString(std::string s, bool vertical) {
+//Generate text sprites from string
+void Sprite::CreateFromString(std::string str) { CreateFromString(str, false); }
+void Sprite::CreateFromString(std::string str, bool vertical) {
 	if (vertical) {
 		width = 1;
-		height = s.length();
+		height = str.length();
 	}
 	else {
-		width = s.length();
+		width = str.length();
 		height = 1;
 	}
 	buffer.clear();
-	for (int a = 0; a < s.length(); ++a) {
+	for (int i = 0; i < str.length(); ++i) {
 		buffer.push_back(CHAR_INFO());
-		buffer[a].Char.AsciiChar = s[a];
-		buffer[a].Attributes = COLOR_LTWHITE;
+		buffer[i].Char.AsciiChar = str[i];
+		buffer[i].Attributes = COLOR_LTWHITE;
 	}
 }

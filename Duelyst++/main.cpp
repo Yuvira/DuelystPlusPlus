@@ -11,7 +11,7 @@ int main() {
 	srand(time(NULL));
 
 	//Variables
-	Renderer rm;
+	Renderer renderer;
 	Collection collection;
 	Game game;
 
@@ -25,20 +25,20 @@ int main() {
 
 		//Game
 		if (doGame) {
-			game.update();
-			rm.cls();
-			game.render(rm);
-			rm.swapBuffer();
-			game.input();
+			game.Update();
+			renderer.ClearScreen();
+			game.RenderGame(renderer);
+			renderer.SwapBuffer();
+			game.Input();
 		}
 
 		//Collection
 		else {
-			collection.update();
-			rm.cls();
-			collection.render(rm);
-			rm.swapBuffer();
-			collection.input();
+			collection.Update();
+			renderer.ClearScreen();
+			collection.RenderCollection(renderer);
+			renderer.SwapBuffer();
+			collection.Input();
 		}
 
 	}

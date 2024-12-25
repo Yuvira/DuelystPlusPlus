@@ -2,118 +2,134 @@
 #include "game.h"
 
 //Game constructor / destructor
-Player::Player() {}
+Player::Player() {
+	mana = 0;
+	manaMax = 0;
+	replaces = 0;
+	game = nullptr;
+	general = nullptr;
+	opponent = nullptr;
+}
 Player::~Player() {}
 
 //Preset deck
-void Player::preset(CardList& cl, Game* g) {
-	game = g;
-	deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Argeon Highmayne")))));
-	for (int a = 0; a < 3; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Lady Locke"))))); }
-	for (int a = 0; a < 3; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Komodo Charger"))))); }
-	for (int a = 0; a < 3; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Ephemeral Shroud"))))); }
-	for (int a = 0; a < 3; ++a) { deck.push_back(new Unit(*(dynamic_cast<Unit*>(cl.find("Araki Headhunter"))))); }
+void Player::Preset(CardList& cardList, Game* _game) {
+	game = _game;
+	deck.push_back(new Minion(*(dynamic_cast<Minion*>(cardList.Find("Argeon Highmayne")))));
+	for (int i = 0; i < 3; ++i) { deck.push_back(new Minion(*(dynamic_cast<Minion*>(cardList.Find("Lady Locke"))))); }
+	for (int i = 0; i < 3; ++i) { deck.push_back(new Minion(*(dynamic_cast<Minion*>(cardList.Find("Komodo Charger"))))); }
+	for (int i = 0; i < 3; ++i) { deck.push_back(new Minion(*(dynamic_cast<Minion*>(cardList.Find("Ephemeral Shroud"))))); }
+	for (int i = 0; i < 3; ++i) { deck.push_back(new Minion(*(dynamic_cast<Minion*>(cardList.Find("Araki Headhunter"))))); }
 	//for (int a = 0; a < 3; ++a) { deck.push_back(new Spell(*(dynamic_cast<Spell*>(cl.find("Dark Transformation"))))); }
-	for (int a = 0; a < deck.size(); ++a) {
-		deck[a]->game = game;
-		deck[a]->player = this;
+	for (int i = 0; i < deck.size(); ++i) {
+		deck[i]->game = game;
+		deck[i]->owner = this;
 	}
 }
 
 //Initialize deck/hand
-void Player::init(int _mana) {
+void Player::Init(int _mana) {
 	mana = _mana;
 	manaMax = _mana;
 	replaces = 1;
-	for (int a = 0; a < 9; ++a) {
-		uiCrystal[a].buffer[0].Char.AsciiChar = '';
-		uiCrystal[a].setCol(COLOR_GRAY);
+	for (int i = 0; i < 9; ++i) {
+		uiCrystal[i].buffer[0].Char.AsciiChar = '';
+		uiCrystal[i].SetColor(COLOR_GRAY);
 	}
-	shuffle();
-	for (int a = 0; a < 5; ++a) { hand.push_back(deck[a]); }
+	Shuffle();
+	for (int i = 0; i < 5; ++i)
+		hand.push_back(deck[i]);
 	deck.erase(deck.begin(), deck.begin() + 5);
 }
 
 //Update mana sprites
-void Player::updateMana(eColor col) {
-	for (int a = 0; a < mana; ++a) { uiCrystal[a].setCol(col); }
-	for (int a = mana; a < manaMax; ++a) { uiCrystal[a].setCol(COLOR_LTWHITE); }
-	for (int a = max(mana, manaMax); a < 9; ++a) { uiCrystal[a].setCol(COLOR_GRAY); }
+void Player::UpdateMana(eColor color) {
+	for (int i = 0; i < mana; ++i)
+		uiCrystal[i].SetColor(color);
+	for (int i = mana; i < manaMax; ++i)
+		uiCrystal[i].SetColor(COLOR_LTWHITE);
+	for (int i = max(mana, manaMax); i < 9; ++i)
+		uiCrystal[i].SetColor(COLOR_GRAY);
 }
 
 //Render UI
-void Player::render(Renderer& rm, bool left) {
+void Player::Render(Renderer& renderer, bool left) {
 
 	//Mana crystals
-	for (int a = 0; a < 9; ++a) { rm.render(uiCrystal[a], left ? (a * 2) + 2 : 62 - (a * 2), 2); }
+	for (int i = 0; i < 9; ++i)
+		renderer.Render(uiCrystal[i], left ? (i * 2) + 2 : 62 - (i * 2), 2);
 
 	//Cards in hand/deck
-	std::string s = std::to_string(hand.size()) + "/6 " + std::to_string(deck.size()) + "/40";
-	if (!left) {s = std::to_string(deck.size()) + "/40 " + std::to_string(hand.size()) + "/6"; }
-	Sprite _s;
-	_s.createFromString(s);
-	rm.render(_s, left ? 20 : 45 - s.length(), 2);
+	std::string str = std::to_string(hand.size()) + "/6 " + std::to_string(deck.size()) + "/40";
+	if (!left)
+		str = std::to_string(deck.size()) + "/40 " + std::to_string(hand.size()) + "/6";
+	Sprite spr;
+	spr.CreateFromString(str);
+	renderer.Render(spr, left ? 20 : 45 - str.length(), 2);
 
 	//Replace
-	if (&game->player[game->turn] == this) {
+	if (&game->players[game->turn] == this) {
 		uiReplace.buffer[0].Char.AsciiChar = std::to_string(replaces)[0];
-		rm.render(uiReplace, 4, 44);
+		renderer.Render(uiReplace, 4, 44);
 	}
 
 }
 
 //Shuffle deck
-void Player::shuffle() {
+void Player::Shuffle() {
 	std::vector<Card*> shuffle;
-	for (int a = 0; a < deck.size(); ) {
-		int i = rand() % deck.size();
-		shuffle.push_back(deck[i]);
-		deck.erase(deck.begin() + i);
+	for (int i = 0; i < deck.size(); ) {
+		int idx = rand() % deck.size();
+		shuffle.push_back(deck[idx]);
+		deck.erase(deck.begin() + idx);
 	}
-	for (int a = 0; a < shuffle.size(); ++a) { deck.push_back(shuffle[a]); }
+	for (int i = 0; i < shuffle.size(); ++i)
+		deck.push_back(shuffle[i]);
 	shuffle.clear();
 }
 
 //Draw card
-void Player::draw() {
+void Player::Draw() {
 	if (deck.size() > 0) {
 		if (hand.size() < 6) {
 			hand.push_back(deck[0]);
-			game->em.sendOnDraw(hand.back(), true);
+			game->eventManager.SendOnDraw(hand.back(), true);
 		}
 		else {
 			game->grave.push_back(deck[0]);
-			game->em.sendOnDraw(game->grave.back(), true);
+			game->eventManager.SendOnDraw(game->grave.back(), true);
 		}
 		deck.erase(deck.begin());
 	}
 }
 
 //Add card to hand
-void Player::addToHand(Card* c, bool cast) {
+void Player::AddToHand(Card* card, bool cast) {
 	if (cast) {
-		if (c->type == CARD_UNIT) { c = new Unit(*(dynamic_cast<Unit*>(c))); }
-		else if (c->type == CARD_SPELL) { c = new Spell(*(dynamic_cast<Spell*>(c))); }
+		if (card->cardType == CARD_UNIT)
+			card = new Minion(*(dynamic_cast<Minion*>(card)));
+		else if (card->cardType == CARD_SPELL)
+			card = new Spell(*(dynamic_cast<Spell*>(card)));
 	}
-	game->setContext(c, this);
+	game->SetContext(card, this);
 	if (hand.size() < 6) {
-		hand.push_back(c);
-		game->em.sendOnDraw(hand.back(), false);
+		hand.push_back(card);
+		game->eventManager.SendOnDraw(hand.back(), false);
 	}
 	else {
-		game->grave.push_back(c);
-		game->em.sendOnDraw(game->grave.back(), false);
+		game->grave.push_back(card);
+		game->eventManager.SendOnDraw(game->grave.back(), false);
 	}
 }
 
 //Replace card
-void Player::replace(int i) {
-	if (replaces > 0 && hand.size() > i) {
-		game->em.sendOnReplace(hand[i]);
-		deck.push_back(hand[i]);
-		hand.erase(hand.begin() + i);
-		shuffle();
-		hand.insert(hand.begin() + i, deck[0]);
+void Player::Replace(int idx) {
+	if (replaces > 0 && hand.size() > idx) {
+		game->eventManager.SendOnReplace(hand[idx]);
+		deck.push_back(hand[idx]);
+		hand.erase(hand.begin() + idx);
+		Shuffle();
+		hand.insert(hand.begin() + idx, deck[0]);
 		deck.erase(deck.begin());
 		--replaces;
 	}

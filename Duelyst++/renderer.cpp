@@ -12,39 +12,27 @@ Renderer::Renderer() {
 Renderer::~Renderer() {}
 
 //Swap screen buffers
-void Renderer::swapBuffer() {
+void Renderer::SwapBuffer() {
 	SetConsoleActiveScreenBuffer (frameBuffer[currentBuffer]);
 	currentBuffer = !currentBuffer;
 }
 
-//Render sprite at sprite position
-void Renderer::render(Sprite s) {
-	SMALL_RECT t;
-	t.Top = s.pos.Y;
-	t.Left = s.pos.X;
-	t.Bottom = s.pos.Y + s.height;
-	t.Right = s.pos.X + s.width;
-	COORD c;
-	c.X = s.width;
-	c.Y = s.height;
-	WriteConsoleOutputA(frameBuffer[currentBuffer],  &s.buffer[0], c, startPos, &t);
-}
-
-//Render sprite at given position
-void Renderer::render(Sprite s, int x, int y) {
-	SMALL_RECT t;
-	t.Top = y;
-	t.Left = x;
-	t.Bottom = y + s.height;
-	t.Right = x + s.width;
-	COORD c;
-	c.X = s.width;
-	c.Y = s.height;
-	WriteConsoleOutputA(frameBuffer[currentBuffer], &s.buffer[0], c, startPos, &t);
+//Render sprite
+void Renderer::Render(Sprite sprite) { Render(sprite, sprite.pos.X, sprite.pos.Y); }
+void Renderer::Render(Sprite sprite, int x, int y) {
+	SMALL_RECT box;
+	box.Top = y;
+	box.Left = x;
+	box.Bottom = y + sprite.height;
+	box.Right = x + sprite.width;
+	COORD size;
+	size.X = sprite.width;
+	size.Y = sprite.height;
+	WriteConsoleOutputA(frameBuffer[currentBuffer], &sprite.buffer[0], size, startPos, &box);
 }
 
 //Clear screen
-void Renderer::cls() {
+void Renderer::ClearScreen() {
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	DWORD conSize;
 	DWORD charsWritten;
@@ -55,7 +43,7 @@ void Renderer::cls() {
 }
 
 //Set size
-void Renderer::setSize(COORD size) {
+void Renderer::SetSize(COORD size) {
 	SetConsoleScreenBufferSize(frameBuffer[0], size);
 	SetConsoleScreenBufferSize(frameBuffer[1], size);
 }

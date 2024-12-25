@@ -1,104 +1,106 @@
 //Include
 #include "game.h"
 
-EventManager::EventManager() {}
+EventManager::EventManager() {
+	game = nullptr;
+}
 EventManager::~EventManager() {}
 
 //Send onSummon events
-void EventManager::sendOnSummon(Unit* u, bool actionBar) {
-	for (int a = 0; a < game->unit.size(); ++a) { game->unit[a]->onSummon(u, actionBar); }
-	for (int a = 0; a < game->player[0].hand.size(); ++a) { game->player[0].hand[a]->onSummon(u, actionBar); }
-	for (int a = 0; a < game->player[0].deck.size(); ++a) { game->player[0].deck[a]->onSummon(u, actionBar); }
-	for (int a = 0; a < game->player[1].hand.size(); ++a) { game->player[1].hand[a]->onSummon(u, actionBar); }
-	for (int a = 0; a < game->player[1].deck.size(); ++a) { game->player[1].deck[a]->onSummon(u, actionBar); }
+void EventManager::SendOnSummon(Minion* minion, bool actionBar) {
+	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnSummon(minion, actionBar); }
+	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnSummon(minion, actionBar); }
+	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnSummon(minion, actionBar); }
+	for (int i = 0; i < game->players[1].hand.size(); ++i) { game->players[1].hand[i]->OnSummon(minion, actionBar); }
+	for (int i = 0; i < game->players[1].deck.size(); ++i) { game->players[1].deck[i]->OnSummon(minion, actionBar); }
 }
 
 //Send onDeath events
-void EventManager::sendOnDeath(Unit* u) {
-	for (int a = 0; a < game->unit.size(); ++a) { game->unit[a]->onDeath(u); }
-	for (int a = 0; a < game->player[0].hand.size(); ++a) { game->player[0].hand[a]->onDeath(u); }
-	for (int a = 0; a < game->player[0].deck.size(); ++a) { game->player[0].deck[a]->onDeath(u); }
-	for (int a = 0; a < game->player[1].hand.size(); ++a) { game->player[1].hand[a]->onDeath(u); }
-	for (int a = 0; a < game->player[1].deck.size(); ++a) { game->player[1].deck[a]->onDeath(u); }
+void EventManager::SendOnDeath(Minion* minion) {
+	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnDeath(minion); }
+	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnDeath(minion); }
+	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnDeath(minion); }
+	for (int i = 0; i < game->players[1].hand.size(); ++i) { game->players[1].hand[i]->OnDeath(minion); }
+	for (int i = 0; i < game->players[1].deck.size(); ++i) { game->players[1].deck[i]->OnDeath(minion); }
 }
 
 //Send onAttack events
-void EventManager::sendOnAttack(Unit* u1, Unit* u2, bool counter) {
-	for (int a = 0; a < game->unit.size(); ++a) { game->unit[a]->onAttack(u1, u2, counter); }
-	for (int a = 0; a < game->player[0].hand.size(); ++a) { game->player[0].hand[a]->onAttack(u1, u2, counter); }
-	for (int a = 0; a < game->player[0].deck.size(); ++a) { game->player[0].deck[a]->onAttack(u1, u2, counter); }
-	for (int a = 0; a < game->player[1].hand.size(); ++a) { game->player[1].hand[a]->onAttack(u1, u2, counter); }
-	for (int a = 0; a < game->player[1].deck.size(); ++a) { game->player[1].deck[a]->onAttack(u1, u2, counter); }
+void EventManager::SendOnAttack(Minion* source, Minion* target, bool counter) {
+	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnAttack(source, target, counter); }
+	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnAttack(source, target, counter); }
+	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnAttack(source, target, counter); }
+	for (int i = 0; i < game->players[1].hand.size(); ++i) { game->players[1].hand[i]->OnAttack(source, target, counter); }
+	for (int i = 0; i < game->players[1].deck.size(); ++i) { game->players[1].deck[i]->OnAttack(source, target, counter); }
 }
 
 //Send onDamage events
-void EventManager::sendOnDamage(Unit* u1, Unit* u2, int damage) {
-	for (int a = 0; a < game->unit.size(); ++a) { game->unit[a]->onDamage(u1, u2, damage); }
-	for (int a = 0; a < game->player[0].hand.size(); ++a) { game->player[0].hand[a]->onDamage(u1, u2, damage); }
-	for (int a = 0; a < game->player[0].deck.size(); ++a) { game->player[0].deck[a]->onDamage(u1, u2, damage); }
-	for (int a = 0; a < game->player[1].hand.size(); ++a) { game->player[1].hand[a]->onDamage(u1, u2, damage); }
-	for (int a = 0; a < game->player[1].deck.size(); ++a) { game->player[1].deck[a]->onDamage(u1, u2, damage); }
+void EventManager::SendOnDamage(Minion* source, Minion* target, int damage) {
+	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnDamage(source, target, damage); }
+	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnDamage(source, target, damage); }
+	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnDamage(source, target, damage); }
+	for (int i = 0; i < game->players[1].hand.size(); ++i) { game->players[1].hand[i]->OnDamage(source, target, damage); }
+	for (int i = 0; i < game->players[1].deck.size(); ++i) { game->players[1].deck[i]->OnDamage(source, target, damage); }
 }
 
 //Send onHeal events
-void EventManager::sendOnHeal(Unit* u1, Unit* u2, int heal) {
-	for (int a = 0; a < game->unit.size(); ++a) { game->unit[a]->onHeal(u1, u2, heal); }
-	for (int a = 0; a < game->player[0].hand.size(); ++a) { game->player[0].hand[a]->onHeal(u1, u2, heal); }
-	for (int a = 0; a < game->player[0].deck.size(); ++a) { game->player[0].deck[a]->onHeal(u1, u2, heal); }
-	for (int a = 0; a < game->player[1].hand.size(); ++a) { game->player[1].hand[a]->onHeal(u1, u2, heal); }
-	for (int a = 0; a < game->player[1].deck.size(); ++a) { game->player[1].deck[a]->onHeal(u1, u2, heal); }
+void EventManager::SendOnHeal(Minion* source, Minion* target, int heal) {
+	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnHeal(source, target, heal); }
+	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnHeal(source, target, heal); }
+	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnHeal(source, target, heal); }
+	for (int i = 0; i < game->players[1].hand.size(); ++i) { game->players[1].hand[i]->OnHeal(source, target, heal); }
+	for (int i = 0; i < game->players[1].deck.size(); ++i) { game->players[1].deck[i]->OnHeal(source, target, heal); }
 }
 
 //Send onMoved events
-void EventManager::sendOnMove(Unit* u, bool byEffect) {
-	for (int a = 0; a < game->unit.size(); ++a) { game->unit[a]->onMove(u, byEffect); }
-	for (int a = 0; a < game->player[0].hand.size(); ++a) { game->player[0].hand[a]->onMove(u, byEffect); }
-	for (int a = 0; a < game->player[0].deck.size(); ++a) { game->player[0].deck[a]->onMove(u, byEffect); }
-	for (int a = 0; a < game->player[1].hand.size(); ++a) { game->player[1].hand[a]->onMove(u, byEffect); }
-	for (int a = 0; a < game->player[1].deck.size(); ++a) { game->player[1].deck[a]->onMove(u, byEffect); }
+void EventManager::SendOnMove(Minion* minion, bool byEffect) {
+	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnMove(minion, byEffect); }
+	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnMove(minion, byEffect); }
+	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnMove(minion, byEffect); }
+	for (int i = 0; i < game->players[1].hand.size(); ++i) { game->players[1].hand[i]->OnMove(minion, byEffect); }
+	for (int i = 0; i < game->players[1].deck.size(); ++i) { game->players[1].deck[i]->OnMove(minion, byEffect); }
 }
 
 //Send onSpellCast events
-void EventManager::sendOnSpellCast(Spell* s) {
-	for (int a = 0; a < game->unit.size(); ++a) { game->unit[a]->onSpellCast(s); }
-	for (int a = 0; a < game->player[0].hand.size(); ++a) { game->player[0].hand[a]->onSpellCast(s); }
-	for (int a = 0; a < game->player[0].deck.size(); ++a) { game->player[0].deck[a]->onSpellCast(s); }
-	for (int a = 0; a < game->player[1].hand.size(); ++a) { game->player[1].hand[a]->onSpellCast(s); }
-	for (int a = 0; a < game->player[1].deck.size(); ++a) { game->player[1].deck[a]->onSpellCast(s); }
+void EventManager::SendOnSpellCast(Spell* spell) {
+	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnSpellCast(spell); }
+	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnSpellCast(spell); }
+	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnSpellCast(spell); }
+	for (int i = 0; i < game->players[1].hand.size(); ++i) { game->players[1].hand[i]->OnSpellCast(spell); }
+	for (int i = 0; i < game->players[1].deck.size(); ++i) { game->players[1].deck[i]->OnSpellCast(spell); }
 }
 
 //Send onDraw events
-void EventManager::sendOnDraw(Card* c, bool fromDeck) {
-	for (int a = 0; a < game->unit.size(); ++a) { game->unit[a]->onDraw(c, fromDeck); }
-	for (int a = 0; a < game->player[0].hand.size(); ++a) { game->player[0].hand[a]->onDraw(c, fromDeck); }
-	for (int a = 0; a < game->player[0].deck.size(); ++a) { game->player[0].deck[a]->onDraw(c, fromDeck); }
-	for (int a = 0; a < game->player[1].hand.size(); ++a) { game->player[1].hand[a]->onDraw(c, fromDeck); }
-	for (int a = 0; a < game->player[1].deck.size(); ++a) { game->player[1].deck[a]->onDraw(c, fromDeck); }
+void EventManager::SendOnDraw(Card* card, bool fromDeck) {
+	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnDraw(card, fromDeck); }
+	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnDraw(card, fromDeck); }
+	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnDraw(card, fromDeck); }
+	for (int i = 0; i < game->players[1].hand.size(); ++i) { game->players[1].hand[i]->OnDraw(card, fromDeck); }
+	for (int i = 0; i < game->players[1].deck.size(); ++i) { game->players[1].deck[i]->OnDraw(card, fromDeck); }
 }
 
 //Send onReplace events
-void EventManager::sendOnReplace(Card* c) {
-	for (int a = 0; a < game->unit.size(); ++a) { game->unit[a]->onReplace(c); }
-	for (int a = 0; a < game->player[0].hand.size(); ++a) { game->player[0].hand[a]->onReplace(c); }
-	for (int a = 0; a < game->player[0].deck.size(); ++a) { game->player[0].deck[a]->onReplace(c); }
-	for (int a = 0; a < game->player[1].hand.size(); ++a) { game->player[1].hand[a]->onReplace(c); }
-	for (int a = 0; a < game->player[1].deck.size(); ++a) { game->player[1].deck[a]->onReplace(c); }
+void EventManager::SendOnReplace(Card* card) {
+	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnReplace(card); }
+	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnReplace(card); }
+	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnReplace(card); }
+	for (int i = 0; i < game->players[1].hand.size(); ++i) { game->players[1].hand[i]->OnReplace(card); }
+	for (int i = 0; i < game->players[1].deck.size(); ++i) { game->players[1].deck[i]->OnReplace(card); }
 }
 
 //Send onTurnEnd events
-void EventManager::sendOnTurnEnd(Player* p) {
-	for (int a = 0; a < game->unit.size(); ++a) { game->unit[a]->onTurnEnd(p); }
-	for (int a = 0; a < game->player[0].hand.size(); ++a) { game->player[0].hand[a]->onTurnEnd(p); }
-	for (int a = 0; a < game->player[0].deck.size(); ++a) { game->player[0].deck[a]->onTurnEnd(p); }
-	for (int a = 0; a < game->player[1].hand.size(); ++a) { game->player[1].hand[a]->onTurnEnd(p); }
-	for (int a = 0; a < game->player[1].deck.size(); ++a) { game->player[1].deck[a]->onTurnEnd(p); }
+void EventManager::SendOnTurnEnd(Player* player) {
+	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnTurnEnd(player); }
+	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnTurnEnd(player); }
+	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnTurnEnd(player); }
+	for (int i = 0; i < game->players[1].hand.size(); ++i) { game->players[1].hand[i]->OnTurnEnd(player); }
+	for (int i = 0; i < game->players[1].deck.size(); ++i) { game->players[1].deck[i]->OnTurnEnd(player); }
 }
 
 //Send onTurnStart events
-void EventManager::sendOnTurnStart(Player* p) {
-	for (int a = 0; a < game->unit.size(); ++a) { game->unit[a]->onTurnStart(p); }
-	for (int a = 0; a < game->player[0].hand.size(); ++a) { game->player[0].hand[a]->onTurnStart(p); }
-	for (int a = 0; a < game->player[0].deck.size(); ++a) { game->player[0].deck[a]->onTurnStart(p); }
-	for (int a = 0; a < game->player[1].hand.size(); ++a) { game->player[1].hand[a]->onTurnStart(p); }
-	for (int a = 0; a < game->player[1].deck.size(); ++a) { game->player[1].deck[a]->onTurnStart(p); }
+void EventManager::SendOnTurnStart(Player* player) {
+	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnTurnStart(player); }
+	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnTurnStart(player); }
+	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnTurnStart(player); }
+	for (int i = 0; i < game->players[1].hand.size(); ++i) { game->players[1].hand[i]->OnTurnStart(player); }
+	for (int i = 0; i < game->players[1].deck.size(); ++i) { game->players[1].deck[i]->OnTurnStart(player); }
 }

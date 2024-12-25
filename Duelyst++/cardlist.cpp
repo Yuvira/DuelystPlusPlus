@@ -5,191 +5,189 @@
 CardList::CardList() {
 
 	//Generals
-	gList.push_back(Unit(FACTION_LYONAR, TRIBE_GENERAL, 0, 2, 25, "argeonhighmayne", "Argeon Highmayne"));
+	generalList.push_back(Minion(FACTION_LYONAR, TRIBE_GENERAL, 0, 2, 25, "argeonhighmayne", "Argeon Highmayne"));
 
 	//Units
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_ARCANYST, 3, 3, 1, "abjudicator", "Abjudicator"));
-	uList.back().skill = el.find(SKILL_ABJUDICATOR);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_ARCANYST, 2, 1, 3, "aethermaster", "Aethermaster"));
-	uList.back().skill = el.find(SKILL_AETHERMASTER);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_ARCANYST, 3, 3, 1, "alcuinloremaster", "Alcuin Loremaster"));
-	uList.back().skill = el.find(SKILL_ALCUIN_LOREMASTER);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_MECH, 5, 5, 5, "alterrexx", "Alter Rexx"));
-	uList.back().skill = el.find(SKILL_ALTER_REXX);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 3, "arakiheadhunter", "Araki Headhunter"));
-	uList.back().skill = el.find(SKILL_ARAKI_HEADHUNTER);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_ARCANYST, 6, 7, 7, "archonspellbinder", "Archon Spellbinder"));
-	uList.back().skill = el.find(SKILL_ARCHON_SPELLBINDER);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_WARMASTER, 4, 2, 4, "arrowwhistler", "Arrow Whistler"));
-	uList.back().skill = el.find(SKILL_ARROW_WHISTLER);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 3, "ashmephyt", "Ash Mephyt"));
-	uList.back().skill = el.find(SKILL_ASH_MEPHYT);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 7, 7, 6, "astralcrusader", "Astral Crusader"));
-	uList.back().skill = el.find(SKILL_ASTRAL_CRUSADER);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 4, "azureherald", "Azure Herald"));
-	uList.back().skill = el.find(SKILL_AZURE_HERALD);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 4, "azurehornshaman", "Azure Horn Shaman"));
-	uList.back().skill = el.find(SKILL_AZURE_HORN_SHAMAN);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_STRUCTURE, 3, 0, 5, "bastion", "Bastion"));
-	uList.back().skill = el.find(SKILL_BASTION);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 4, 2, 2, "blacklocust", "Black Locust"));
-	uList.back().skill = el.find(SKILL_BLACK_LOCUST);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 3, 4, 3, "blazehound", "Blaze Hound"));
-	uList.back().skill = el.find(SKILL_BLAZE_HOUND);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 4, 4, 5, "blisteringskorn", "Blistering Skorn"));
-	uList.back().skill = el.find(SKILL_BLISTERING_SKORN);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_GOLEM, 3, 4, 3, "bloodshardgolem", "Bloodshard Golem"));
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 25, 12, 12, "bloodtaura", "Blood Taura"));
-	uList.back().skill = el.find(SKILL_BLOOD_TAURA);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "bloodtearalchemist", "Bloodtear Alchemist"));
-	uList.back().skill = el.find(SKILL_BLOODTEAR_ALCHEMIST);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 2, 3, 1, "bluetipscorpion", "Bluetip Scorpion"));
-	uList.back().skill = el.find(SKILL_BLUETIP_SCORPION);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 6, 2, 9, "bonereaper", "Bonereaper"));
-	uList.back().skill = el.find(SKILL_BONEREAPER);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_GOLEM, 5, 4, 9, "brightmossgolem", "Brightmoss Golem"));
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 4, 2, 4, "captainhankhart", "Captain Hank Hart"));
-	uList.back().skill = el.find(SKILL_CAPTAIN_HANK_HART);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 5, 5, 5, "chakkram", "Chakkram"));
-	uList.back().skill = el.find(SKILL_CHAKKRAM);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 3, 4, 4, "chaoselemental", "Chaos Elemental"));
-	uList.back().skill = el.find(SKILL_CHAOS_ELEMENTAL);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 3, "crimsonoculus", "Crimson Oculus"));
-	uList.back().skill = el.find(SKILL_CRIMSON_OCULUS);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 3, 3, 3, "crossbones", "Crossbones"));
-	uList.back().skill = el.find(SKILL_CROSSBONES);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 8, "daggerkiri", "Dagger Kiri"));
-	uList.back().skill = el.find(SKILL_CELERITY);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 5, 4, 6, "dancingblades", "Dancing Blades"));
-	uList.back().skill = el.find(SKILL_DANCING_BLADES);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 7, 4, 10, "darknemesis", "Dark Nemesis"));
-	uList.back().skill = el.find(SKILL_DARK_NEMESIS);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 3, 3, 3, "daywatcher", "Day Watcher"));
-	uList.back().skill = el.find(SKILL_DAY_WATCHER);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 6, 3, 4, "deathblighter", "Deathblighter"));
-	uList.back().skill = el.find(SKILL_DEATHBLIGHTER);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 4, 4, 4, "decimus", "Decimus"));
-	uList.back().skill = el.find(SKILL_DECIMUS);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_GOLEM, 6, 5, 11, "diamondgolem", "Diamond Golem"));
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 4, 5, 3, "dioltas", "Dioltas"));
-	uList.back().skill = el.find(SKILL_DIOLTAS);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "dragonlark", "Dragonlark"));
-	uList.back().skill = el.find(SKILL_FLYING);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 1, "dreamgazer", "Dreamgazer"));
-	uList.back().skill = el.find(SKILL_DREAMGAZER);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_GOLEM, 7, 10, 10, "drybonegolem", "Drybone Golem"));
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 6, 3, 4, "dustwailer", "Dust Wailer"));
-	uList.back().skill = el.find(SKILL_DUST_WAILER);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_ARCANYST, 6, 3, 7, "eclipse", "Eclipse"));
-	uList.back().skill = el.find(SKILL_ECLIPSE);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 4, 4, 4, "emeraldrejuvenator", "Emerald Rejuvenator"));
-	uList.back().skill = el.find(SKILL_EMERALD_REJUVENATOR);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 5, 3, 10, "envybaer", "Envybaer"));
-	uList.back().skill = el.find(SKILL_ENVYBAER);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 1, "ephemeralshroud", "Ephemeral Shroud"));
-	uList.back().skill = el.find(SKILL_EPHEMERAL_SHROUD);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 7, 5, 5, "exun", "E'Xun"));
-	uList.back().skill = el.find(SKILL_EXUN);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 6, 4, 6, "facestriker", "Facestriker"));
-	uList.back().skill = el.find(SKILL_FACESTRIKER);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 5, 5, 5, "fireblazer", "Fireblazer"));
-	uList.back().skill = el.find(SKILL_PROVOKE);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "firespitter", "Fire Spitter"));
-	uList.back().skill = el.find(SKILL_RANGED);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_ARCANYST, 5, 3, 5, "firestarter", "Firestarter"));
-	uList.back().skill = el.find(SKILL_FIRESTARTER);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 6, 7, 7, "firstswordofakrane", "First Sword of Akrane"));
-	uList.back().skill = el.find(SKILL_FIRST_SWORD_OF_AKRANE);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 2, 3, 1, "flamebloodwarlock", "Flameblood Warlock"));
-	uList.back().skill = el.find(SKILL_FLAMEBLOOD_WARLOCK);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 3, "frostbonenaga", "Frostbone Naga"));
-	uList.back().skill = el.find(SKILL_FROSTBONE_NAGA);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 1, "ghostlynx", "Ghost Lynx"));
-	uList.back().skill = el.find(SKILL_GHOST_LYNX);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_WARMASTER, 5, 4, 6, "goldenjusticar", "Golden Justicar"));
-	uList.back().skill = el.find(SKILL_GOLDEN_JUSTICAR);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_GOLEM, 2, 2, 3, "golemmetallurgist", "Golem Metallurgist"));
-	uList.back().skill = el.find(SKILL_GOLEM_METALLURGIST);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_GOLEM, 3, 2, 4, "golemvanquisher", "Golem Vanquisher"));
-	uList.back().skill = el.find(SKILL_GOLEM_VANQUISHER);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 6, 5, 5, "grovelion", "Grove Lion"));
-	uList.back().skill = el.find(SKILL_GROVE_LION);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_GOLEM, 4, 4, 6, "hailstonegolem", "Hailstone Golem"));
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 3, "healingmystic", "Healing Mystic"));
-	uList.back().skill = el.find(SKILL_HEALING_MYSTIC);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 5, 4, 3, "ironclad", "Ironclad"));
-	uList.back().skill = el.find(SKILL_IRONCLAD);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 6, 1, 1, "jaxtruesight", "Jax Truesight"));
-	uList.back().skill = el.find(SKILL_JAX_TRUESIGHT);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 1, "jaxi", "Jaxi"));
-	uList.back().skill = el.find(SKILL_JAXI);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 5, 3, 4, "keeperofthevale", "Keeper of The Vale"));
-	uList.back().skill = el.find(SKILL_KEEPER_OF_THE_VALE);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 8, 5, 12, "khymera", "Khymera"));
-	uList.back().skill = el.find(SKILL_KHYMERA);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 3, "komodocharger", "Komodo Charger"));
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 3, "ladylocke", "Lady Locke"));
-	uList.back().skill = el.find(SKILL_LADY_LOCKE);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_ARCANYST, 4, 3, 3, "lightbender", "Lightbender"));
-	uList.back().skill = el.find(SKILL_LIGHTBENDER);
-	uList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 5, "luxignis", "Lux Ignis"));
-	uList.back().skill = el.find(SKILL_LUX_IGNIS);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_ARCANYST, 3, 3, 1, "abjudicator", "Abjudicator"));
+	minionList.back().skill = effectList.Find(SKILL_ABJUDICATOR);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_ARCANYST, 2, 1, 3, "aethermaster", "Aethermaster"));
+	minionList.back().skill = effectList.Find(SKILL_AETHERMASTER);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_ARCANYST, 3, 3, 1, "alcuinloremaster", "Alcuin Loremaster"));
+	minionList.back().skill = effectList.Find(SKILL_ALCUIN_LOREMASTER);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_MECH, 5, 5, 5, "alterrexx", "Alter Rexx"));
+	minionList.back().skill = effectList.Find(SKILL_ALTER_REXX);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 3, "arakiheadhunter", "Araki Headhunter"));
+	minionList.back().skill = effectList.Find(SKILL_ARAKI_HEADHUNTER);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_ARCANYST, 6, 7, 7, "archonspellbinder", "Archon Spellbinder"));
+	minionList.back().skill = effectList.Find(SKILL_ARCHON_SPELLBINDER);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_WARMASTER, 4, 2, 4, "arrowwhistler", "Arrow Whistler"));
+	minionList.back().skill = effectList.Find(SKILL_ARROW_WHISTLER);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 3, "ashmephyt", "Ash Mephyt"));
+	minionList.back().skill = effectList.Find(SKILL_ASH_MEPHYT);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 7, 7, 6, "astralcrusader", "Astral Crusader"));
+	minionList.back().skill = effectList.Find(SKILL_ASTRAL_CRUSADER);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 4, "azureherald", "Azure Herald"));
+	minionList.back().skill = effectList.Find(SKILL_AZURE_HERALD);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 4, "azurehornshaman", "Azure Horn Shaman"));
+	minionList.back().skill = effectList.Find(SKILL_AZURE_HORN_SHAMAN);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_STRUCTURE, 3, 0, 5, "bastion", "Bastion"));
+	minionList.back().skill = effectList.Find(SKILL_BASTION);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 4, 2, 2, "blacklocust", "Black Locust"));
+	minionList.back().skill = effectList.Find(SKILL_BLACK_LOCUST);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 3, 4, 3, "blazehound", "Blaze Hound"));
+	minionList.back().skill = effectList.Find(SKILL_BLAZE_HOUND);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 4, 4, 5, "blisteringskorn", "Blistering Skorn"));
+	minionList.back().skill = effectList.Find(SKILL_BLISTERING_SKORN);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_GOLEM, 3, 4, 3, "bloodshardgolem", "Bloodshard Golem"));
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 25, 12, 12, "bloodtaura", "Blood Taura"));
+	minionList.back().skill = effectList.Find(SKILL_BLOOD_TAURA);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "bloodtearalchemist", "Bloodtear Alchemist"));
+	minionList.back().skill = effectList.Find(SKILL_BLOODTEAR_ALCHEMIST);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 2, 3, 1, "bluetipscorpion", "Bluetip Scorpion"));
+	minionList.back().skill = effectList.Find(SKILL_BLUETIP_SCORPION);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 6, 2, 9, "bonereaper", "Bonereaper"));
+	minionList.back().skill = effectList.Find(SKILL_BONEREAPER);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_GOLEM, 5, 4, 9, "brightmossgolem", "Brightmoss Golem"));
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 4, 2, 4, "captainhankhart", "Captain Hank Hart"));
+	minionList.back().skill = effectList.Find(SKILL_CAPTAIN_HANK_HART);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 5, 5, 5, "chakkram", "Chakkram"));
+	minionList.back().skill = effectList.Find(SKILL_CHAKKRAM);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 3, 4, 4, "chaoselemental", "Chaos Elemental"));
+	minionList.back().skill = effectList.Find(SKILL_CHAOS_ELEMENTAL);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 3, "crimsonoculus", "Crimson Oculus"));
+	minionList.back().skill = effectList.Find(SKILL_CRIMSON_OCULUS);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 3, 3, 3, "crossbones", "Crossbones"));
+	minionList.back().skill = effectList.Find(SKILL_CROSSBONES);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 8, "daggerkiri", "Dagger Kiri"));
+	minionList.back().skill = effectList.Find(SKILL_CELERITY);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 5, 4, 6, "dancingblades", "Dancing Blades"));
+	minionList.back().skill = effectList.Find(SKILL_DANCING_BLADES);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 7, 4, 10, "darknemesis", "Dark Nemesis"));
+	minionList.back().skill = effectList.Find(SKILL_DARK_NEMESIS);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 3, 3, 3, "daywatcher", "Day Watcher"));
+	minionList.back().skill = effectList.Find(SKILL_DAY_WATCHER);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 6, 3, 4, "deathblighter", "Deathblighter"));
+	minionList.back().skill = effectList.Find(SKILL_DEATHBLIGHTER);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 4, 4, 4, "decimus", "Decimus"));
+	minionList.back().skill = effectList.Find(SKILL_DECIMUS);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_GOLEM, 6, 5, 11, "diamondgolem", "Diamond Golem"));
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 4, 5, 3, "dioltas", "Dioltas"));
+	minionList.back().skill = effectList.Find(SKILL_DIOLTAS);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "dragonlark", "Dragonlark"));
+	minionList.back().skill = effectList.Find(SKILL_FLYING);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 1, "dreamgazer", "Dreamgazer"));
+	minionList.back().skill = effectList.Find(SKILL_DREAMGAZER);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_GOLEM, 7, 10, 10, "drybonegolem", "Drybone Golem"));
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 6, 3, 4, "dustwailer", "Dust Wailer"));
+	minionList.back().skill = effectList.Find(SKILL_DUST_WAILER);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_ARCANYST, 6, 3, 7, "eclipse", "Eclipse"));
+	minionList.back().skill = effectList.Find(SKILL_ECLIPSE);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 4, 4, 4, "emeraldrejuvenator", "Emerald Rejuvenator"));
+	minionList.back().skill = effectList.Find(SKILL_EMERALD_REJUVENATOR);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 5, 3, 10, "envybaer", "Envybaer"));
+	minionList.back().skill = effectList.Find(SKILL_ENVYBAER);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 1, "ephemeralshroud", "Ephemeral Shroud"));
+	minionList.back().skill = effectList.Find(SKILL_EPHEMERAL_SHROUD);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 7, 5, 5, "exun", "E'Xun"));
+	minionList.back().skill = effectList.Find(SKILL_EXUN);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 6, 4, 6, "facestriker", "Facestriker"));
+	minionList.back().skill = effectList.Find(SKILL_FACESTRIKER);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 5, 5, 5, "fireblazer", "Fireblazer"));
+	minionList.back().skill = effectList.Find(SKILL_PROVOKE);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "firespitter", "Fire Spitter"));
+	minionList.back().skill = effectList.Find(SKILL_RANGED);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_ARCANYST, 5, 3, 5, "firestarter", "Firestarter"));
+	minionList.back().skill = effectList.Find(SKILL_FIRESTARTER);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 6, 7, 7, "firstswordofakrane", "First Sword of Akrane"));
+	minionList.back().skill = effectList.Find(SKILL_FIRST_SWORD_OF_AKRANE);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 2, 3, 1, "flamebloodwarlock", "Flameblood Warlock"));
+	minionList.back().skill = effectList.Find(SKILL_FLAMEBLOOD_WARLOCK);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 3, "frostbonenaga", "Frostbone Naga"));
+	minionList.back().skill = effectList.Find(SKILL_FROSTBONE_NAGA);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 1, "ghostlynx", "Ghost Lynx"));
+	minionList.back().skill = effectList.Find(SKILL_GHOST_LYNX);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_WARMASTER, 5, 4, 6, "goldenjusticar", "Golden Justicar"));
+	minionList.back().skill = effectList.Find(SKILL_GOLDEN_JUSTICAR);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_GOLEM, 2, 2, 3, "golemmetallurgist", "Golem Metallurgist"));
+	minionList.back().skill = effectList.Find(SKILL_GOLEM_METALLURGIST);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_GOLEM, 3, 2, 4, "golemvanquisher", "Golem Vanquisher"));
+	minionList.back().skill = effectList.Find(SKILL_GOLEM_VANQUISHER);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 6, 5, 5, "grovelion", "Grove Lion"));
+	minionList.back().skill = effectList.Find(SKILL_GROVE_LION);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_GOLEM, 4, 4, 6, "hailstonegolem", "Hailstone Golem"));
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 3, "healingmystic", "Healing Mystic"));
+	minionList.back().skill = effectList.Find(SKILL_HEALING_MYSTIC);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 5, 4, 3, "ironclad", "Ironclad"));
+	minionList.back().skill = effectList.Find(SKILL_IRONCLAD);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 6, 1, 1, "jaxtruesight", "Jax Truesight"));
+	minionList.back().skill = effectList.Find(SKILL_JAX_TRUESIGHT);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 1, "jaxi", "Jaxi"));
+	minionList.back().skill = effectList.Find(SKILL_JAXI);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 5, 3, 4, "keeperofthevale", "Keeper of The Vale"));
+	minionList.back().skill = effectList.Find(SKILL_KEEPER_OF_THE_VALE);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 8, 5, 12, "khymera", "Khymera"));
+	minionList.back().skill = effectList.Find(SKILL_KHYMERA);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 3, "komodocharger", "Komodo Charger"));
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 3, "ladylocke", "Lady Locke"));
+	minionList.back().skill = effectList.Find(SKILL_LADY_LOCKE);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_ARCANYST, 4, 3, 3, "lightbender", "Lightbender"));
+	minionList.back().skill = effectList.Find(SKILL_LIGHTBENDER);
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 5, "luxignis", "Lux Ignis"));
+	minionList.back().skill = effectList.Find(SKILL_LUX_IGNIS);
 
 	//Token units
-	tuList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 1, "minijax", "Mini-Jax"));
-	tuList.back().skill = el.find(SKILL_RANGED);
-	tuList.back().isToken = true;
-	tuList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 1, "spellspark", "Spellspark"));
-	tuList.back().skill = el.find(SKILL_RUSH);
-	tuList.back().isToken = true;
-	tuList.push_back(Unit(FACTION_NEUTRAL, TRIBE_NONE, 3, 0, 10, "tombstone", "Tombstone"));
-	tuList.back().skill = el.find(SKILL_PROVOKE);
-	tuList.back().isToken = true;
-	tuList.push_back(Unit(FACTION_ABYSSIAN, TRIBE_NONE, 1, 1, 1, "wraithling", "Wraithling"));
-	tuList.back().isToken = true;
+	minionTokenList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 1, "minijax", "Mini-Jax"));
+	minionTokenList.back().skill = effectList.Find(SKILL_RANGED);
+	minionTokenList.back().isToken = true;
+	minionTokenList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 1, "spellspark", "Spellspark"));
+	minionTokenList.back().skill = effectList.Find(SKILL_RUSH);
+	minionTokenList.back().isToken = true;
+	minionTokenList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 3, 0, 10, "tombstone", "Tombstone"));
+	minionTokenList.back().skill = effectList.Find(SKILL_PROVOKE);
+	minionTokenList.back().isToken = true;
+	minionTokenList.push_back(Minion(FACTION_ABYSSIAN, TRIBE_NONE, 1, 1, 1, "wraithling", "Wraithling"));
+	minionTokenList.back().isToken = true;
 
 	//Spells
-	sList.push_back(Spell(FACTION_ABYSSIAN, TARGET_MINION, 4, "breathoftheunborn", "Breath of The Unborn"));
-	sList.back().spell = el.find(SPELL_BREATH_OF_THE_UNBORN);
-	sList.push_back(Spell(FACTION_ABYSSIAN, TARGET_ALLY_MINON, 2, "consumingrebirth", "Consuming Rebirth"));
-	sList.back().spell = el.find(SPELL_CONSUMING_REBIRTH);
-	sList.push_back(Spell(FACTION_ABYSSIAN, TARGET_ENEMY_MINION, 2, "daemoniclure", "Daemonic Lure"));
-	sList.back().spell = el.find(SPELL_DAEMONIC_LURE);
-	sList.push_back(Spell(FACTION_ABYSSIAN, TARGET_ENEMY_GENERAL, 4, "darkseed", "Dark Seed"));
-	sList.back().spell = el.find(SPELL_DARK_SEED);
-	sList.push_back(Spell(FACTION_ABYSSIAN, TARGET_ENEMY_MINION, 5, "darktransformation", "Dark Transformation"));
-	sList.back().spell = el.find(SPELL_DARK_TRANSFORMATION);
-	sList.push_back(Spell(FACTION_ABYSSIAN, TARGET_ALLY_MINON, 0, "darkfiresacrifice", "Darkfire Sacrifice"));
-	sList.back().spell = el.find(SPELL_DARKFIRE_SACRIFICE);
+	spellList.push_back(Spell(FACTION_ABYSSIAN, TARGET_MINION, 4, "breathoftheunborn", "Breath of The Unborn"));
+	spellList.back().spell = effectList.Find(SPELL_BREATH_OF_THE_UNBORN);
+	spellList.push_back(Spell(FACTION_ABYSSIAN, TARGET_ALLY_MINON, 2, "consumingrebirth", "Consuming Rebirth"));
+	spellList.back().spell = effectList.Find(SPELL_CONSUMING_REBIRTH);
+	spellList.push_back(Spell(FACTION_ABYSSIAN, TARGET_ENEMY_MINION, 2, "daemoniclure", "Daemonic Lure"));
+	spellList.back().spell = effectList.Find(SPELL_DAEMONIC_LURE);
+	spellList.push_back(Spell(FACTION_ABYSSIAN, TARGET_ENEMY_GENERAL, 4, "darkseed", "Dark Seed"));
+	spellList.back().spell = effectList.Find(SPELL_DARK_SEED);
+	spellList.push_back(Spell(FACTION_ABYSSIAN, TARGET_ENEMY_MINION, 5, "darktransformation", "Dark Transformation"));
+	spellList.back().spell = effectList.Find(SPELL_DARK_TRANSFORMATION);
+	spellList.push_back(Spell(FACTION_ABYSSIAN, TARGET_ALLY_MINON, 0, "darkfiresacrifice", "Darkfire Sacrifice"));
+	spellList.back().spell = effectList.Find(SPELL_DARKFIRE_SACRIFICE);
 
 	//Token spells
 
 	//Generate card list
-	for (int a = 0; a < gList.size(); ++a) { cList.push_back(&gList[a]); }
-	for (int a = 0; a < uList.size(); ++a) { cList.push_back(&uList[a]); }
-	for (int a = 0; a < tuList.size(); ++a) { cList.push_back(&tuList[a]); }
-	for (int a = 0; a < sList.size(); ++a) { cList.push_back(&sList[a]); }
-	for (int a = 0; a < tsList.size(); ++a) { cList.push_back(&tsList[a]); }
+	for (int i = 0; i < generalList.size(); ++i) { cardList.push_back(&generalList[i]); }
+	for (int i = 0; i < minionList.size(); ++i) { cardList.push_back(&minionList[i]); }
+	for (int i = 0; i < minionTokenList.size(); ++i) { cardList.push_back(&minionTokenList[i]); }
+	for (int i = 0; i < spellList.size(); ++i) { cardList.push_back(&spellList[i]); }
+	for (int i = 0; i < spellTokenList.size(); ++i) { cardList.push_back(&spellTokenList[i]); }
 
 	//Set original references
-	for (int a = 0; a < cList.size(); ++a) { cList[a]->original = cList[a]; }
+	for (int i = 0; i < cardList.size(); ++i) { cardList[i]->original = cardList[i]; }
 
 	//Add tokens
-	find("Dark Transformation")->token = find("Wraithling");
-	find("Dioltas")->token = find("Tombstone");
-	find("Firestarter")->token = find("Spellspark");
-	find("Jax Truesight")->token = find("Mini-Jax");
-	find("Jaxi")->token = find("Mini-Jax");
+	Find("Dark Transformation")->token = Find("Wraithling");
+	Find("Dioltas")->token = Find("Tombstone");
+	Find("Firestarter")->token = Find("Spellspark");
+	Find("Jax Truesight")->token = Find("Mini-Jax");
+	Find("Jaxi")->token = Find("Mini-Jax");
 
 }
 CardList::~CardList() {}
 
 //Find card by name
-Card* CardList::find(std::string s) {
-	for (int a = 0; a < cList.size(); ++a) {
-		if (cList[a]->name == s) {
-			return cList[a];
-		}
-	}
-	return cList[0];
+Card* CardList::Find(std::string name) {
+	for (int i = 0; i < cardList.size(); ++i)
+		if (cardList[i]->name == name)
+			return cardList[i];
+	return cardList[0];
 }
