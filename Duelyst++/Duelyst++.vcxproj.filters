@@ -30,7 +30,7 @@
     <ClCompile Include="player.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="unit.cpp">
+    <ClCompile Include="minion.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="tile.cpp">

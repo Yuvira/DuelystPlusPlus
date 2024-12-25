@@ -125,7 +125,7 @@
     <ClCompile Include="spell.cpp" />
     <ClCompile Include="sprite.cpp" />
     <ClCompile Include="tile.cpp" />
-    <ClCompile Include="unit.cpp" />
+    <ClCompile Include="minion.cpp" />
     <ClCompile Include="cardlist.cpp" />
   </ItemGroup>
   <ItemGroup>
