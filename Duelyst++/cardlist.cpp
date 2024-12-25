@@ -1,11 +1,48 @@
 //Include
-#include "card.h"
+#include "game.h"
+
+//Add effect to list
+void Card::AddEffect(eEffect effect) {
+	Effect effectObj = game->cardList.effectList.Find(effect);
+	for (int i = 0; i < effects.size(); ++i) {
+		if (effects[i].effect == effect) {
+			++effects[i].stacks;
+			UpdateStatBuffs();
+			return;
+		}
+	}
+	effects.push_back(effectObj);
+	UpdateStatBuffs();
+}
+
+//Remove effect from list
+void Card::RemoveEffect(eEffect effect, bool allStacks) {
+	Effect effectObj = game->cardList.effectList.Find(effect);
+	for (int i = 0; i < effects.size(); ++i) {
+		if (effects[i].effect == effect) {
+			if (allStacks)
+				effects.erase(effects.begin() + i);
+			else {
+				--effects[i].stacks;
+				if (effects[i].stacks == 0)
+					effects.erase(effects.begin() + i);
+			}
+			break;
+		}
+	}
+	UpdateStatBuffs();
+}
 
 //Card list constructor / destructor
 CardList::CardList() {
 
 	//Generals
 	generalList.push_back(Minion(FACTION_LYONAR, TRIBE_GENERAL, 0, 2, 25, "argeonhighmayne", "Argeon Highmayne"));
+
+	//Minions
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 3, "komodocharger", "Komodo Charger"));
+
+	/*
 
 	//Units
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_ARCANYST, 3, 3, 1, "abjudicator", "Abjudicator"));
@@ -127,7 +164,6 @@ CardList::CardList() {
 	minionList.back().skill = effectList.Find(SKILL_KEEPER_OF_THE_VALE);
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 8, 5, 12, "khymera", "Khymera"));
 	minionList.back().skill = effectList.Find(SKILL_KHYMERA);
-	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 3, "komodocharger", "Komodo Charger"));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 3, "ladylocke", "Lady Locke"));
 	minionList.back().skill = effectList.Find(SKILL_LADY_LOCKE);
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_ARCANYST, 4, 3, 3, "lightbender", "Lightbender"));
@@ -164,22 +200,24 @@ CardList::CardList() {
 
 	//Token spells
 
-	//Generate card list
-	for (int i = 0; i < generalList.size(); ++i) { cardList.push_back(&generalList[i]); }
-	for (int i = 0; i < minionList.size(); ++i) { cardList.push_back(&minionList[i]); }
-	for (int i = 0; i < minionTokenList.size(); ++i) { cardList.push_back(&minionTokenList[i]); }
-	for (int i = 0; i < spellList.size(); ++i) { cardList.push_back(&spellList[i]); }
-	for (int i = 0; i < spellTokenList.size(); ++i) { cardList.push_back(&spellTokenList[i]); }
-
-	//Set original references
-	for (int i = 0; i < cardList.size(); ++i) { cardList[i]->original = cardList[i]; }
-
 	//Add tokens
 	Find("Dark Transformation")->token = Find("Wraithling");
 	Find("Dioltas")->token = Find("Tombstone");
 	Find("Firestarter")->token = Find("Spellspark");
 	Find("Jax Truesight")->token = Find("Mini-Jax");
 	Find("Jaxi")->token = Find("Mini-Jax");
+
+	*/
+
+	//Set original references
+	for (int i = 0; i < cardList.size(); ++i) { cardList[i]->original = cardList[i]; }
+
+	//Generate card list
+	for (int i = 0; i < generalList.size(); ++i) { cardList.push_back(&generalList[i]); }
+	for (int i = 0; i < minionList.size(); ++i) { cardList.push_back(&minionList[i]); }
+	for (int i = 0; i < minionTokenList.size(); ++i) { cardList.push_back(&minionTokenList[i]); }
+	for (int i = 0; i < spellList.size(); ++i) { cardList.push_back(&spellList[i]); }
+	for (int i = 0; i < spellTokenList.size(); ++i) { cardList.push_back(&spellTokenList[i]); }
 
 }
 CardList::~CardList() {}

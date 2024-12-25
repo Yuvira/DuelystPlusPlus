@@ -3,11 +3,11 @@
 
 //Callback stuff
 EffectCallback::EffectCallback() : EffectCallback(nullptr, nullptr, nullptr, SKILL_NONE) {}
-EffectCallback::EffectCallback(Minion* _minion, Spell* _spell, BoardTile* _tile, eSkill _skill) {
+EffectCallback::EffectCallback(Minion* _minion, Spell* _spell, BoardTile* _tile, eEffect _effect) {
 	minion = _minion;
 	spell = _spell;
 	tile = _tile;
-	skill = _skill;
+	effect = _effect;
 }
 EffectCallback::~EffectCallback() {}
 

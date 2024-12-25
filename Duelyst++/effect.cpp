@@ -1,81 +1,91 @@
 //Include
 #include "effect.h"
 
-//Skill constructor/deconstructor
-Skill::Skill() : Skill(SKILL_NONE) {}
-Skill::Skill(eSkill _skill) { skill = _skill; }
-Skill::~Skill() {}
-
 //Effect constructor/deconstructor
-Effect::Effect() : Effect(EFFECT_NONE) {}
-Effect::Effect(eEffect _effect) {
+Effect::Effect() : Effect(EFFECT_NONE, 0, 0, 0) {}
+Effect::Effect(eEffect _effect, int _costBuff, int _atkBuff, int _hpBuff) {
 	effect = _effect;
-	count = 1;
+	costBuff = _costBuff;
+	atkBuff = _atkBuff;
+	hpBuff = _hpBuff;
+	stacks = 1;
 }
 Effect::~Effect() {}
-
-//Buff constructor/deconstructor
-Buff::Buff() : Buff(BUFF_NONE, 0, 0, 0, true) {}
-Buff::Buff(eBuff _buff, int _cost, int _atk, int _hp, bool _stacking) {
-	buff = _buff;
-	cost = _cost;
-	atk = _atk;
-	hp = _hp;
-	stacking = _stacking;
-}
-Buff::~Buff() {}
 
 //Spell constructor/deconstructor
 SpellEffect::SpellEffect() : SpellEffect(SPELL_NONE) {}
 SpellEffect::SpellEffect(eSpell _spell) { spell = _spell; }
 SpellEffect::~SpellEffect() {}
 
-//Generate skill sprites
-void Skill::GenerateSprite(std::string str) {
-	std::vector<Coord> coords;
+//Generate effect sprite
+void Effect::GenerateSprite(std::string str) {
+
+	//Split lines and get max width
+	int maxWidth = 0;
+	int curWidth = 0;
 	std::vector<std::string> lines;
 	lines.push_back("");
-	int tokens = 0;
 	for (int i = 0; i < str.length(); ++i) {
 		if (str[i] == '|') {
 			lines.push_back("");
-			++tokens;
+			if (curWidth > maxWidth)
+				maxWidth = curWidth;
+			curWidth = 0;
 		}
-		else if (str[i] == '{') {
-			coords.push_back(Coord());
-			coords.back().x = i - tokens;
-			++tokens;
-		}
-		else if (str[i] == '}') {
-			coords.back().y = i - tokens;
-			++tokens;
-		}
-		else
+		else {
 			lines.back() += str[i];
-	}
-	for (int i = 0; i < lines.size(); ++i) {
-		sprites.push_back(Sprite());
-		sprites.back().CreateFromString(lines[i]);
-		sprites.back().SetColor(COLOR_GRAY);
-	}
-	for (int i = 0; i < coords.size(); ++i) {
-		for (int j = 0; j < sprites.size(); ++j) {
-			if (coords[i].x < sprites[j].buffer.size()) {
-				for (int k = coords[i].x; k < coords[i].y; ++k)
-					sprites[j].buffer[k].Attributes = COLOR_LTWHITE;
-				break;
-			}
-			else { 
-				coords[i].x -= sprites[j].buffer.size();
-				coords[i].y -= sprites[j].buffer.size();
-			}
+			if (str[i] != '{' && str[i] != '}')
+				++curWidth;
 		}
 	}
+
+	//Resize and clear
+	sprite.Resize(max(maxWidth, curWidth), lines.size());
+
+	//Draw
+	int idxDelta = 0;
+	WORD color = COLOR_LTWHITE;
+	for (int i = 0; i < lines.size(); ++i) {
+		for (int j = 0; j < lines[i].length(); ++j) {
+			if (lines[i][j] == '{') {
+				color = COLOR_LTWHITE;
+				++idxDelta;
+			}
+			else if (lines[i][j] == '}') {
+				color = COLOR_GRAY;
+				++idxDelta;
+			}
+			else {
+				sprite.buffer[(i + (j * sprite.width)) - idxDelta].Char.AsciiChar = lines[i][j];
+				sprite.buffer[(i + (j * sprite.width)) - idxDelta].Attributes = color;
+			}
+		}
+		idxDelta = 0;
+		color = COLOR_GRAY;
+	}
+
+	/*
+	std::string str = "";
+	if (buffs[i].hp == 0 && buffs[i].atk != 0)
+		str += (buffs[i].atk > 0 ? "+" : "-") + std::to_string(abs(buffs[i].atk)) + " Attack";
+	else if (buffs[i].atk == 0 && buffs[i].hp != 0)
+		str += (buffs[i].hp > 0 ? "+" : "-") + std::to_string(abs(buffs[i].hp)) + " Health";
+	else if (buffs[i].atk != 0 && buffs[i].hp != 0)
+		str += (buffs[i].atk > 0 ? "+" : "-") + std::to_string(buffs[i].atk) + (buffs[i].hp > 0 ? "/+" : "/-") + std::to_string(abs(buffs[i].hp));
+	else if (buffs[i].cost == 0)
+		str += "+0/+0";
+	if (buffs[i].cost != 0) {
+		if (str != "")
+			str += ", ";
+		str += (buffs[i].cost > 0 ? "+" : "-") + std::to_string(abs(buffs[i].cost)) + " Cost";
+	}
+	*/
+
 }
 
 //Is skill an opening gambit
-bool Skill::IsOpeningGambit() {
-	switch (skill) {
+bool Effect::IsOpeningGambit() {
+	switch (effect) {
 	case SKILL_ABJUDICATOR:
 	case SKILL_ALCUIN_LOREMASTER:
 	case SKILL_ASH_MEPHYT:
@@ -103,24 +113,6 @@ bool Skill::IsOpeningGambit() {
 	return false;
 }
 
-//Generate effect sprites
-void Effect::GenerateSprite(std::string str) {
-	std::string line;
-	for (int i = 0; i < str.length(); ++i) {
-		if (str[i] == '|') {
-			sprites[0].CreateFromString(line);
-			line = "";
-		}
-		else
-			line += str[i];
-	}
-	sprites[1].CreateFromString(line);
-	sprites[1].SetColor(COLOR_GRAY);
-}
-
-//Generate buff sprites
-void Buff::GenerateSprite(std::string str) { sprite.CreateFromString(str); }
-
 //Generate spell sprites
 void SpellEffect::GenerateSprite(std::string str) {
 	std::vector<std::string> lines;
@@ -138,6 +130,8 @@ void SpellEffect::GenerateSprite(std::string str) {
 
 //Effect list constructor/deconstructor
 EffectList::EffectList() {
+
+	/*
 
 	//Minion skills
 	skillList.push_back(Skill(SKILL_DISPELLED));
@@ -323,28 +317,16 @@ EffectList::EffectList() {
 	buffList.push_back(Buff(BUFF_DARKFIRE_SACRIFICE, -2, 0, 0, true));
 	buffList.back().GenerateSprite("Darkfire Sacrifice");
 
+	*/
+
 }
 EffectList::~EffectList() {}
-
-//Find skill by enum
-Skill EffectList::Find(eSkill skill) {
-	for (int i = 0; i < skillList.size(); ++i)
-		if (skillList[i].skill == skill)
-			return skillList[i];
-}
 
 //Find effect by enum
 Effect EffectList::Find(eEffect effect) {
 	for (int i = 0; i < effectList.size(); ++i)
 		if (effectList[i].effect == effect)
 			return effectList[i];
-}
-
-//Find buff by enum
-Buff EffectList::Find(eBuff buff) {
-	for (int i = 0; i < buffList.size(); ++i)
-		if (buffList[i].buff == buff)
-			return buffList[i];
 }
 
 //Find spell by enum

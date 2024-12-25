@@ -20,12 +20,12 @@ enum eMode {
 class EffectCallback {
 public:
 	EffectCallback();
-	EffectCallback(Minion* _minion, Spell* _spell, BoardTile* _tile, eSkill _skill);
+	EffectCallback(Minion* _minion, Spell* _spell, BoardTile* _tile, eEffect _effect);
 	~EffectCallback();
 	Minion* minion;
 	Spell* spell;
 	BoardTile* tile;
-	eSkill skill;
+	eEffect effect;
 };
 
 //Pathing coords

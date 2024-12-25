@@ -5,8 +5,18 @@
 //Include
 #include "tile.h"
 
-//Skills
-enum eSkill {
+//Keyword flags
+enum eKeywordFlags {
+	KEYWORD_NONE,
+	KEYWORD_CELERITY,
+	KEYWORD_FLYING,
+	KEYWORD_PROVOKE,
+	KEYWORD_RANGED,
+	KEYWORD_RUSH
+};
+
+//Effects
+enum eEffect {
 	SKILL_NONE,
 	SKILL_DISPELLED,
 	SKILL_CELERITY,
@@ -69,39 +79,27 @@ enum eSkill {
 	SKILL_KHYMERA,
 	SKILL_LADY_LOCKE,
 	SKILL_LIGHTBENDER,
-	SKILL_LUX_IGNIS
-};
-
-//Effects
-enum eEffect {
+	SKILL_LUX_IGNIS,
 	EFFECT_NONE,
+	EFFECT_ABJUDICATOR,
+	EFFECT_ARAKI_HEADHUNTER,
+	EFFECT_ARCHON_SPELLBINDER,
+	EFFECT_ARROW_WHISTLER,
+	EFFECT_ASTRAL_CRUSADER,
+	EFFECT_AZURE_HORN_SHAMAN,
+	EFFECT_BASTION,
+	EFFECT_BLOOD_TAURA,
+	EFFECT_CHAKKRAM,
+	EFFECT_CONSUMING_REBIRTH,
+	EFFECT_CRIMSON_OCULUS,
+	EFFECT_DARK_NEMESIS,
 	EFFECT_DARKFIRE_SACRIFICE,
+	EFFECT_FIRST_SWORD_OF_AKRANE,
 	EFFECT_GOLDEN_JUSTICAR,
+	EFFECT_GOLEM_METALLURGIST,
 	EFFECT_GOLEM_VANQUISHER,
 	EFFECT_GROVE_LION,
-	EFFECT_LADY_LOCKE_A,
-	EFFECT_LADY_LOCKE_B
-};
-
-//Granted stat buffs
-enum eBuff {
-	BUFF_NONE,
-	BUFF_ABJUDICATOR,
-	BUFF_ARAKI_HEADHUNTER,
-	BUFF_ARCHON_SPELLBINDER,
-	BUFF_ARROW_WHISTLER,
-	BUFF_ASTRAL_CRUSADER,
-	BUFF_AZURE_HORN_SHAMAN,
-	BUFF_BASTION,
-	BUFF_BLOOD_TAURA,
-	BUFF_CHAKKRAM,
-	BUFF_CONSUMING_REBIRTH,
-	BUFF_CRIMSON_OCULUS,
-	BUFF_DARK_NEMESIS,
-	BUFF_DARKFIRE_SACRIFICE,
-	BUFF_FIRST_SWORD_OF_AKRANE,
-	BUFF_GOLEM_METALLURGIST,
-	BUFF_LADY_LOCKE
+	EFFECT_LADY_LOCKE
 };
 
 //Spell effects
@@ -115,43 +113,20 @@ enum eSpell {
 	SPELL_DARKFIRE_SACRIFICE
 };
 
-//Skill class
-class Skill {
-public:
-	Skill();
-	Skill(eSkill _skill);
-	~Skill();
-	void GenerateSprite(std::string str);
-	bool IsOpeningGambit();
-	std::vector<Sprite> sprites;
-	eSkill skill;
-};
-
 //Effect class
 class Effect {
 public:
 	Effect();
-	Effect(eEffect _effect);
+	Effect(eEffect _effect, int _costBuff, int _atkBuff, int _hpBuff);
 	~Effect();
 	void GenerateSprite(std::string str);
-	Sprite sprites[2];
-	eEffect effect;
-	int count;
-};
-
-//Stat buff class
-class Buff {
-public:
-	Buff();
-	Buff(eBuff _buff, int _cost, int _atk, int _hp, bool _stacking);
-	~Buff();
-	void GenerateSprite(std::string str);
+	bool IsOpeningGambit();
 	Sprite sprite;
-	eBuff buff;
-	int cost;
-	int atk;
-	int hp;
-	bool stacking;
+	eEffect effect;
+	int costBuff;
+	int atkBuff;
+	int hpBuff;
+	int stacks;
 };
 
 //Spell class
@@ -170,13 +145,9 @@ class EffectList {
 public:
 	EffectList();
 	~EffectList();
-	Skill Find(eSkill skill);
 	Effect Find(eEffect effect);
-	Buff Find(eBuff buff);
 	SpellEffect Find(eSpell spell);
-	std::vector<Skill> skillList;
 	std::vector<Effect> effectList;
-	std::vector<Buff> buffList;
 	std::vector<SpellEffect> spellList;
 };
 

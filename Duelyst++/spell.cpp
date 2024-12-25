@@ -9,50 +9,20 @@ Spell::Spell(eFaction _faction,  eTarget _target, int _cost, std::string path, s
 	targetMode = _target;
 	cost = _cost;
 	name = _name;
-	if (path == "") { sprite.Resize(5, 5); }
-	else { sprite.CreateFromFile("resources/spells/" + path + ".txt"); }
+	if (path == "")
+		sprite.Resize(5, 5);
+	else
+		sprite.CreateFromFile("resources/spells/" + path + ".txt");
 	GenerateDetails();
 	game = nullptr;
 	owner = nullptr;
 }
 Spell::~Spell() {}
 
-//Add buff
-void Spell::AddBuff(eBuff buff) {
-	Buff _b = game->cardList.effectList.Find(buff);
-	for (int a = 0; a < buffs.size(); ++a) {
-		if (buffs[a].buff == buff) {
-			if (!_b.stacking) { return; }
-			buffs[a].cost += _b.cost;
-			UpdateStatBuffs();
-			return;
-		}
-	}
-	buffs.push_back(_b);
-	UpdateStatBuffs();
-}
-
-//Remove buff
-void Spell::RemoveBuff(eBuff buff, bool allStacks) {
-	Buff _b = game->cardList.effectList.Find(buff);
-	for (int a = 0; a < buffs.size(); ++a) {
-		if (buffs[a].buff == buff) {
-			if (allStacks) { buffs.erase(buffs.begin() + a); }
-			else {
-				buffs[a].cost -= _b.cost;
-				if (buffs[a].cost == 0) { buffs.erase(buffs.begin() + a); }
-			}
-			break;
-		}
-	}
-	UpdateStatBuffs();
-}
-
 void Spell::UpdateStatBuffs() {
-	int _cost = 0;
-	for (int a = 0; a < buffs.size(); ++a) { _cost += buffs[a].cost; }
-	Spell* o = dynamic_cast<Spell*>(original);
-	cost = max(o->cost + _cost, 0);
+	int costBuff = 0;
+	for (int i = 0; i < effects.size(); ++i) { costBuff += effects[i].costBuff; }
+	cost = max(original->cost + costBuff, 0);
 }
 
 //Generate sidebar details
@@ -62,7 +32,8 @@ void Spell::GenerateDetails() {
 	std::transform(name.begin(), name.end(), s.begin(), ::toupper);
 	s += " - SPELL";
 	header[0].CreateFromString(s);
-	for (int a = name.size(); a < header[0].buffer.size(); ++a) { header[0].buffer[a].Attributes = COLOR_GRAY; }
+	for (int i = name.size(); i < header[0].buffer.size(); ++i)
+		header[0].buffer[i].Attributes = COLOR_GRAY;
 	UpdateDetailStats();
 }
 
@@ -70,7 +41,9 @@ void Spell::GenerateDetails() {
 void Spell::UpdateDetailStats() {
 	std::string s = "COST:" + std::to_string(cost);
 	header[1].CreateFromString(s);
-	for (int a = 0; a < header[1].buffer.size(); ++a) { if (s[a] != ':') { header[1].buffer[a].Attributes = COLOR_LTBLUE; } }
+	for (int i = 0; i < header[1].buffer.size(); ++i)
+		if (s[i] != ':')
+			header[1].buffer[i].Attributes = COLOR_LTBLUE;
 }
 
 //Draw card details
@@ -80,19 +53,15 @@ void Spell::DrawDetails(Renderer& renderer, int& y) {
 	renderer.Render(header[0], 72, y); ++y;
 	UpdateDetailStats();
 	renderer.Render(header[1], 72, y); y+= 2;
-	for (int a = 0; a < spell.sprites.size(); ++a) {
-		renderer.Render(spell.sprites[a], 72, y);
-		if (a == spell.sprites.size() - 1) { ++y; }
+	for (int i = 0; i < spell.sprites.size(); ++i) {
+		renderer.Render(spell.sprites[i], 72, y);
+		if (i == spell.sprites.size() - 1)
+			++y;
 		++y;
 	}
-	for (int a = 0; a < buffs.size(); ++a) {
-		renderer.Render(buffs[a].sprite, 72, y); ++y;
-		std::string s = "";
-		if (buffs[a].cost != 0) { s += (buffs[a].cost > 0 ? "+" : "-") + std::to_string(abs(buffs[a].cost)) + " Cost"; }
-		Sprite _s = Sprite();
-		_s.CreateFromString(s);
-		_s.SetColor(COLOR_GRAY);
-		renderer.Render(_s, 72, y); y += 2;
+	for (int i = 0; i < effects.size(); ++i) {
+		renderer.Render(effects[i].sprite, 72, y);
+		y += effects[i].sprite.height + 2;
 	}
 	if (token != nullptr) {
 		if (y < 7) { y = 7; }
@@ -104,6 +73,9 @@ void Spell::DrawDetails(Renderer& renderer, int& y) {
 
 //On card use
 void Spell::OnUse(BoardTile* tile) {
+
+	/*
+
 	switch (spell.spell) {
 	case SPELL_BREATH_OF_THE_UNBORN:
 		for (int a = 0; a < game->minions.size(); ++a) {
@@ -170,10 +142,16 @@ void Spell::OnUse(BoardTile* tile) {
 		game->eventManager.SendOnSpellCast(this);
 		break;
 	}
+
+	*/
+
 }
 
 //Immediate callback
 void Spell::Callback(BoardTile* tile) {
+
+	/*
+
 	switch (spell.spell) {
 	case SPELL_DAEMONIC_LURE:
 		Minion* u = dynamic_cast<Minion*>(token);
@@ -184,10 +162,16 @@ void Spell::Callback(BoardTile* tile) {
 		break;
 	}
 	game->callback = EffectCallback();
+
+	*/
+
 }
 
 //Late callback
 void Spell::LateCallback() {
+
+	/*
+
 	switch (spell.spell) {
 	case SPELL_CONSUMING_REBIRTH:
 		if (game->lateCallback[0].tile->minion == nullptr) {
@@ -198,4 +182,7 @@ void Spell::LateCallback() {
 		}
 		break;
 	}
+
+	*/
+
 }

@@ -83,6 +83,9 @@ public:
 		divider.CreateFromString("컴TOKEN컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴");
 	}
 	~Card() {}
+	void AddEffect(eEffect effect);
+	void RemoveEffect(eEffect effect, bool allStacks);
+	virtual void UpdateStatBuffs() {}
 	virtual void DrawDetails(Renderer& renderer, int& y) {}
 	virtual void OnSummon(Minion* minion, bool fromActionBar) {}
 	virtual void OnDeath(Minion* minion) {}
@@ -104,6 +107,7 @@ public:
 	Card* original;
 	Card* token;
 	std::string name;
+	std::vector<Effect> effects;
 	Sprite sprite;
 	Sprite header[2];
 	Sprite divider;
@@ -117,10 +121,6 @@ public:
 	~Minion();
 	void Render(Renderer& renderer);
 	void SetPosition(int x, int y);
-	void AddBuff(eBuff buff);
-	void RemoveBuff(eBuff buff, bool allStacks);
-	void AddEffect(eEffect effect);
-	void RemoveEffect(eEffect effect, bool allStacks);
 	void Update(bool& shouldLoop);
 	void UpdateStatBuffs();
 	void UpdateStatSprites();
@@ -163,9 +163,6 @@ public:
 	bool hasCelerityAttacked;
 	bool hasForcefield;
 	BoardTile* curTile;
-	Skill skill;
-	std::vector<Effect> effects;
-	std::vector<Buff> buffs;
 	Sprite hpSprite;
 	Sprite atkSprite;
 };
@@ -176,8 +173,6 @@ public:
 	Spell();
 	Spell(eFaction _faction, eTarget _target, int _cost, std::string path, std::string _name);
 	~Spell();
-	void AddBuff(eBuff buff);
-	void RemoveBuff(eBuff buff, bool allStacks);
 	void UpdateStatBuffs();
 	void GenerateDetails();
 	void UpdateDetailStats();
@@ -187,7 +182,6 @@ public:
 	void LateCallback();
 	eTarget targetMode;
 	SpellEffect spell;
-	std::vector<Buff> buffs;
 };
 
 //Card list class

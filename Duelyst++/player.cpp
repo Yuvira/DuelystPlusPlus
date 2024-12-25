@@ -16,11 +16,7 @@ Player::~Player() {}
 void Player::Preset(CardList& cardList, Game* _game) {
 	game = _game;
 	deck.push_back(new Minion(*(dynamic_cast<Minion*>(cardList.Find("Argeon Highmayne")))));
-	for (int i = 0; i < 3; ++i) { deck.push_back(new Minion(*(dynamic_cast<Minion*>(cardList.Find("Lady Locke"))))); }
-	for (int i = 0; i < 3; ++i) { deck.push_back(new Minion(*(dynamic_cast<Minion*>(cardList.Find("Komodo Charger"))))); }
-	for (int i = 0; i < 3; ++i) { deck.push_back(new Minion(*(dynamic_cast<Minion*>(cardList.Find("Ephemeral Shroud"))))); }
-	for (int i = 0; i < 3; ++i) { deck.push_back(new Minion(*(dynamic_cast<Minion*>(cardList.Find("Araki Headhunter"))))); }
-	//for (int a = 0; a < 3; ++a) { deck.push_back(new Spell(*(dynamic_cast<Spell*>(cl.find("Dark Transformation"))))); }
+	for (int i = 0; i < 40; ++i) { deck.push_back(new Minion(*(dynamic_cast<Minion*>(cardList.Find("Komodo Charger"))))); }
 	for (int i = 0; i < deck.size(); ++i) {
 		deck[i]->game = game;
 		deck[i]->owner = this;

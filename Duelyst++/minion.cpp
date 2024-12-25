@@ -18,8 +18,10 @@ Minion::Minion(eFaction _faction, eTribe _tribe, int _cost, int _atk, int _hp, s
 	hasCelerityMoved = true;
 	hasCelerityAttacked = true;
 	hasForcefield = false;
-	if (path == "") { sprite.Resize(5, 5); }
-	else { sprite.CreateFromFile("resources/minions/" + path + ".txt"); }
+	if (path == "")
+		sprite.Resize(5, 5);
+	else
+		sprite.CreateFromFile("resources/minions/" + path + ".txt");
 	UpdateStatSprites();
 	GenerateDetails();
 	curTile = nullptr;
@@ -67,68 +69,6 @@ void Minion::SetPosition(int x, int y) {
 	}
 }
 
-//Add buff to list
-void Minion::AddBuff(eBuff buff) {
-	Buff buffObj = game->cardList.effectList.Find(buff);
-	for (int i = 0; i < buffs.size(); ++i) {
-		if (buffs[i].buff == buff) {
-			if (!buffObj.stacking) { return; }
-			buffs[i].cost += buffObj.cost;
-			buffs[i].atk += buffObj.atk;
-			buffs[i].hp += buffObj.hp;
-			UpdateStatBuffs();
-			return;
-		}
-	}
-	buffs.push_back(buffObj);
-	UpdateStatBuffs();
-}
-
-//Remove buff from list
-void Minion::RemoveBuff(eBuff buff, bool allStacks) {
-	Buff buffObj = game->cardList.effectList.Find(buff);
-	for (int i = 0; i < buffs.size(); ++i) {
-		if (buffs[i].buff == buff) {
-			if (allStacks) { buffs.erase(buffs.begin() + i); }
-			else {
-				buffs[i].cost -= buffObj.cost;
-				buffs[i].atk -= buffObj.atk;
-				buffs[i].hp -= buffObj.hp;
-				if (buffs[i].cost == 0 && buffs[i].atk == 0 && buffs[i].hp == 0) { buffs.erase(buffs.begin() + i); }
-			}
-			break;
-		}
-	}
-	UpdateStatBuffs();
-}
-
-//Add effect to list
-void Minion::AddEffect(eEffect effect) {
-	Effect effectObj = game->cardList.effectList.Find(effect);
-	for (int i = 0; i < effects.size(); ++i) {
-		if (effects[i].effect == effect) {
-			effects[i].count += effectObj.count;
-			return;
-		}
-	}
-	effects.push_back(effectObj);
-}
-
-//Remove effect from list
-void Minion::RemoveEffect(eEffect effect, bool allStacks) {
-	Effect effectObj = game->cardList.effectList.Find(effect);
-	for (int i = 0; i < effects.size(); ++i) {
-		if (effects[i].effect == effect) {
-			if (allStacks) { effects.erase(effects.begin() + i); }
-			else {
-				effects[i].count -= effectObj.count;
-				if (effects[i].count == 0) { effects.erase(effects.begin() + i); }
-			}
-			break;
-		}
-	}
-}
-
 //Check if minion has died
 void Minion::Update(bool& shouldLoop) {
 	if (hp < 1) {
@@ -144,10 +84,10 @@ void Minion::UpdateStatBuffs() {
 	int atkBuff = 0;
 	int hpBuff = 0;
 	int hpDelta = hp - hpMax;
-	for (int a = 0; a < buffs.size(); ++a) {
-		costBuff += buffs[a].cost;
-		atkBuff += buffs[a].atk;
-		hpBuff += buffs[a].hp;
+	for (int i = 0; i < effects.size(); ++i) {
+		costBuff += effects[i].costBuff;
+		atkBuff += effects[i].atkBuff;
+		hpBuff += effects[i].hpBuff;
 	}
 	Minion* orig = dynamic_cast<Minion*>(original);
 	cost = max(orig->cost + costBuff, 0);
@@ -245,42 +185,9 @@ void Minion::DrawDetails(Renderer& renderer, int& y) {
 	renderer.Render(header[0], 72, y); ++y;
 	UpdateDetailStats();
 	renderer.Render(header[1], 72, y); y+= 2;
-	for (int i = 0; i < skill.sprites.size(); ++i) {
-		renderer.Render(skill.sprites[i], 72, y);
-		if (i == skill.sprites.size() - 1)
-			++y;
-		++y;
-	}
 	for (int i = 0; i < effects.size(); ++i) {
-		switch (effects[i].effect) {
-		case EFFECT_DARKFIRE_SACRIFICE:
-			effects[i].sprites[1].buffer[23].Char.AsciiChar = std::to_string(effects[i].count * 2)[0];
-			break;
-		}
-		renderer.Render(effects[i].sprites[0], 72, y);
-		renderer.Render(effects[i].sprites[1], 72, y + 1);
-		y += 3;
-	}
-	for (int i = 0; i < buffs.size(); ++i) {
-		renderer.Render(buffs[i].sprite, 72, y); ++y;
-		std::string str = "";
-		if (buffs[i].hp == 0 && buffs[i].atk != 0)
-			str += (buffs[i].atk > 0 ? "+" : "-") + std::to_string(abs(buffs[i].atk)) + " Attack";
-		else if (buffs[i].atk == 0 && buffs[i].hp != 0)
-			str += (buffs[i].hp > 0 ? "+" : "-") + std::to_string(abs(buffs[i].hp)) + " Health";
-		else if (buffs[i].atk != 0 && buffs[i].hp != 0)
-			str += (buffs[i].atk > 0 ? "+" : "-") + std::to_string(buffs[i].atk) + (buffs[i].hp > 0 ? "/+" : "/-") + std::to_string(abs(buffs[i].hp));
-		else if (buffs[i].cost == 0)
-			str += "+0/+0";
-		if (buffs[i].cost != 0) {
-			if (str != "")
-				str += ", ";
-			str += (buffs[i].cost > 0 ? "+" : "-") + std::to_string(abs(buffs[i].cost)) + " Cost";
-		}
-		Sprite spr = Sprite();
-		spr.CreateFromString(str);
-		spr.SetColor(COLOR_GRAY);
-		renderer.Render(spr, 72, y); y += 2;
+		renderer.Render(effects[i].sprite, 72, y);
+		y += effects[i].sprite.height + 2;
 	}
 	if (token != nullptr) {
 		if (y < 7)
@@ -325,42 +232,43 @@ int Minion::MoveRange() {
 
 //Is minion flying
 bool Minion::IsFlying() {
-	switch (skill.skill) {
-	case SKILL_FLYING:
-	case SKILL_BLACK_LOCUST:
-	case SKILL_DUST_WAILER:
-		return true;
+	for (int i = 0; i < effects.size(); ++i) {
+		switch (effects[i].effect) {
+		case SKILL_FLYING:
+		case SKILL_BLACK_LOCUST:
+		case SKILL_DUST_WAILER:
+			return true;
+		}
 	}
 	return false;
 }
 
 //Is minion ranged
 bool Minion::IsRanged() {
-	switch (skill.skill) {
-	case SKILL_RANGED:
-	case SKILL_ARROW_WHISTLER:
-	case SKILL_CAPTAIN_HANK_HART:
-	case SKILL_JAX_TRUESIGHT:
-	case SKILL_LUX_IGNIS:
-		return true;
+	for (int i = 0; i < effects.size(); ++i) {
+		switch (effects[i].effect) {
+		case SKILL_RANGED:
+		case SKILL_ARROW_WHISTLER:
+		case SKILL_CAPTAIN_HANK_HART:
+		case SKILL_JAX_TRUESIGHT:
+		case SKILL_LUX_IGNIS:
+			return true;
+		}
 	}
 	return false;
 }
 
 //Does minion have provoke
 bool Minion::IsProvoking() {
-	switch (skill.skill) {
-	case SKILL_PROVOKE:
-	case SKILL_BLOOD_TAURA:
-	case SKILL_BONEREAPER:
-	case SKILL_GOLDEN_JUSTICAR:
-	case SKILL_LADY_LOCKE:
-		return true;
-	}
 	for (int i = 0; i < effects.size(); ++i) {
 		switch (effects[i].effect) {
+		case SKILL_PROVOKE:
+		case SKILL_BLOOD_TAURA:
+		case SKILL_BONEREAPER:
+		case SKILL_GOLDEN_JUSTICAR:
+		case SKILL_LADY_LOCKE:
 		case EFFECT_GOLEM_VANQUISHER:
-		case EFFECT_LADY_LOCKE_B:
+		case EFFECT_LADY_LOCKE:
 			return true;
 		}
 	}
@@ -380,21 +288,19 @@ bool Minion::IsProvoked() {
 
 //Does minion have celerity
 bool Minion::HasCelerity() {
-	switch (skill.skill) {
-	case SKILL_CELERITY:
-		return true;
+	for (int i = 0; i < effects.size(); ++i) {
+		switch (effects[i].effect) {
+		case SKILL_CELERITY:
+			return true;
+		}
 	}
-	return false;
 }
 
 //Does minion have a forcefield
 bool Minion::HasForcefield() {
-	switch (skill.skill) {
-	case SKILL_EXUN:
-		return true;
-	}
 	for (int i = 0; i < effects.size(); ++i) {
 		switch (effects[i].effect) {
+		case SKILL_EXUN:
 		case EFFECT_GROVE_LION:
 			return true;
 		}
@@ -404,9 +310,11 @@ bool Minion::HasForcefield() {
 
 //Does minion have rush
 bool Minion::HasRush() {
-	switch (skill.skill) {
-	case SKILL_RUSH:
-		return true;
+	for (int i = 0; i < effects.size(); ++i) {
+		switch (effects[i].effect) {
+		case SKILL_RUSH:
+			return true;
+		}
 	}
 	return false;
 }
@@ -414,6 +322,7 @@ bool Minion::HasRush() {
 //Attack enemy
 void Minion::Attack(Minion* target, bool counter) {
 	int damage = atk;
+	/*
 	switch (skill.skill) {
 	case SKILL_BLUETIP_SCORPION:
 		if (target->tribe != TRIBE_GENERAL)
@@ -424,6 +333,7 @@ void Minion::Attack(Minion* target, bool counter) {
 			damage *= 2;
 		break;
 	}
+	*/
 	target->DealDamage(this, damage);
 	game->eventManager.SendOnAttack(this, target, counter);
 	if (!counter) {
@@ -468,6 +378,8 @@ int Minion::DealDamage(Minion* source, int damage) {
 
 //Dispel minion
 void Minion::Dispel() {
+
+	/*
 
 	//Remove buffs granted to other units/cards
 	switch (skill.skill) {
@@ -543,7 +455,7 @@ void Minion::Dispel() {
 	case SKILL_GROVE_LION:
 		for (int a = 0; a < owner->general->effects.size(); ++a) {
 			if (owner->general->effects[a].effect == EFFECT_GROVE_LION) {
-				if (owner->general->effects[a].count == 1) {
+				if (owner->general->effects[a].stacks == 1) {
 					owner->general->hasForcefield = false;
 				}
 				owner->general->RemoveEffect(EFFECT_GROVE_LION, false);
@@ -579,6 +491,8 @@ void Minion::Dispel() {
 		}
 	}
 
+	*/
+
 	//Remove misc
 	hasCelerityMoved = true;
 	hasCelerityAttacked = true;
@@ -612,6 +526,8 @@ void Minion::OnSummon(Minion* minion, bool actionBar) {
 				}
 			}
 			if (HasForcefield()) { hasForcefield = true; }
+
+			/*
 
 			//From action bar (Opening Gambit)
 			if (actionBar) {
@@ -854,7 +770,11 @@ void Minion::OnSummon(Minion* minion, bool actionBar) {
 				break;
 			}
 
+			*/
+
 		}
+
+		/*
 
 		//When something else is summoned
 		else {
@@ -938,7 +858,7 @@ void Minion::OnSummon(Minion* minion, bool actionBar) {
 				case EFFECT_LADY_LOCKE_A:
 					if (minion->owner == owner) {
 						minion->AddEffect(EFFECT_LADY_LOCKE_B);
-						for (int b = 0; b < effects[a].count; ++b) { minion->AddBuff(BUFF_LADY_LOCKE); }
+						for (int b = 0; b < effects[a].stacks; ++b) { minion->AddBuff(BUFF_LADY_LOCKE); }
 					}
 					break;
 				}
@@ -947,12 +867,16 @@ void Minion::OnSummon(Minion* minion, bool actionBar) {
 
 		}
 
+		*/
+
 	}
 
 }
 
 //When a minion dies
 void Minion::OnDeath(Minion* minion) {
+
+	/*
 
 	//If on board
 	if (curTile != nullptr) {
@@ -1053,7 +977,7 @@ void Minion::OnDeath(Minion* minion) {
 			case SKILL_GROVE_LION:
 				for (int a = 0; a < owner->general->effects.size(); ++a) {
 					if (owner->general->effects[a].effect == EFFECT_GROVE_LION) {
-						if (owner->general->effects[a].count == 1) {
+						if (owner->general->effects[a].stacks == 1) {
 							owner->general->hasForcefield = false;
 						}
 						owner->general->RemoveEffect(EFFECT_GROVE_LION, false);
@@ -1083,10 +1007,14 @@ void Minion::OnDeath(Minion* minion) {
 
 	}
 
+	*/
+
 }
 
 //When a minion attacks
 void Minion::OnAttack(Minion* source, Minion* target, bool counter) {
+
+	/*
 
 	//If on board
 	if (curTile != nullptr) {
@@ -1116,10 +1044,14 @@ void Minion::OnAttack(Minion* source, Minion* target, bool counter) {
 
 	}
 
+	*/
+
 }
 
 //When a minion is damaged
 void Minion::OnDamage(Minion* source, Minion* target, int damage) {
+
+	/*
 
 	//If on board
 	if (curTile != nullptr) {
@@ -1190,10 +1122,14 @@ void Minion::OnDamage(Minion* source, Minion* target, int damage) {
 		}
 	}
 
+	*/
+
 }
 
 //When a minion is healed
 void Minion::OnHeal(Minion* source, Minion* target, int heal) {
+
+	/*
 
 	//If in hand/deck
 	if (curTile == nullptr) {
@@ -1207,10 +1143,14 @@ void Minion::OnHeal(Minion* source, Minion* target, int heal) {
 		}
 	}
 
+	*/
+
 }
 
 //When a minion moves or is moved
 void Minion::OnMove(Minion* minion, bool byEffect) {
+
+	/*
 
 	//If on board
 	if (curTile != nullptr) {
@@ -1233,10 +1173,14 @@ void Minion::OnMove(Minion* minion, bool byEffect) {
 
 	}
 
+	*/
+
 }
 
 //When a spell is cast
 void Minion::OnSpellCast(Spell* spell) {
+
+	/*
 
 	//If on board
 	if (curTile != nullptr) {
@@ -1259,10 +1203,14 @@ void Minion::OnSpellCast(Spell* spell) {
 
 	}
 
+	*/
+
 }
 
 //When a card is drawn
 void Minion::OnDraw(Card* card, bool fromDeck) {
+
+	/*
 
 	//If on board
 	if (curTile != nullptr) {
@@ -1301,7 +1249,7 @@ void Minion::OnDraw(Card* card, bool fromDeck) {
 			case EFFECT_DARKFIRE_SACRIFICE:
 				if (!fromDeck) {
 					if (card->owner == owner && card->cardType == CARD_UNIT) {
-						for (int b = 0; b < effects[a].count; ++b) {
+						for (int b = 0; b < effects[a].stacks; ++b) {
 							dynamic_cast<Minion*>(card)->AddBuff(BUFF_DARKFIRE_SACRIFICE);
 						}
 					}
@@ -1312,10 +1260,14 @@ void Minion::OnDraw(Card* card, bool fromDeck) {
 
 	}
 
+	*/
+
 }
 
 //When this card is replaced
 void Minion::OnReplace(Card* replaced) {
+
+	/*
 
 	//If this is replaced
 	if (replaced->cardType == CARD_UNIT) {
@@ -1339,6 +1291,8 @@ void Minion::OnReplace(Card* replaced) {
 		}
 	}
 
+	*/
+
 }
 
 //When a player's turn ends
@@ -1354,6 +1308,8 @@ void Minion::OnTurnEnd(Player* player) {
 
 	//Reset forcefield
 	if (HasForcefield()) { hasForcefield = true; }
+
+	/*
 
 	//If on board
 	if (curTile != nullptr) {
@@ -1437,10 +1393,14 @@ void Minion::OnTurnEnd(Player* player) {
 		break;
 	}
 
+	*/
+
 }
 
 //When a player's turn starts
 void Minion::OnTurnStart(Player* player) {
+
+	/*
 
 	//If on board
 	if (curTile != nullptr) {
@@ -1478,10 +1438,15 @@ void Minion::OnTurnStart(Player* player) {
 
 	}
 
+	*/
+
 }
 
 //Effect callback
 void Minion::Callback(BoardTile* tile) {
+
+	/*
+
 	switch (game->callback.skill) {
 	case SKILL_BLOODTEAR_ALCHEMIST:
 		if (tile->minion != nullptr) { tile->minion->DealDamage(this, 1); }
@@ -1521,4 +1486,7 @@ void Minion::Callback(BoardTile* tile) {
 		break;
 	}
 	game->callback = EffectCallback();
+
+	*/
+
 }
