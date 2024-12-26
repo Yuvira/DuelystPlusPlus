@@ -133,22 +133,19 @@ void SpellEffect::GenerateSprite(std::string str) {
 //Effect list constructor/deconstructor
 EffectList::EffectList() {
 
-	//Minion skills
+	//Keyword skills
+	effectList.push_back(Effect(SKILL_CELERITY, KEYWORD_CELERITY, 0, 0, 0, "{Celerity}"));
 	effectList.push_back(Effect(SKILL_FLYING, KEYWORD_FLYING, 0, 0, 0, "{Flying}"));
+	effectList.push_back(Effect(SKILL_FORCEFIELD, KEYWORD_FORCEFIELD, 0, 0, 0, "{Forcefield}"));
+	effectList.push_back(Effect(SKILL_PROVOKE, KEYWORD_PROVOKE, 0, 0, 0, "{Provoke}"));
+	effectList.push_back(Effect(SKILL_RANGED, KEYWORD_RANGED, 0, 0, 0, "{Ranged}"));
+	effectList.push_back(Effect(SKILL_RUSH, KEYWORD_RUSH, 0, 0, 0, "{Rush}"));
 
 	/*
 
 	//Minion skills
 	skillList.push_back(Skill(SKILL_DISPELLED));
 	skillList.back().GenerateSprite("{Dispelled}");
-	skillList.push_back(Skill(SKILL_CELERITY));
-	skillList.back().GenerateSprite("{Celerity}");
-	skillList.push_back(Skill(SKILL_PROVOKE));
-	skillList.back().GenerateSprite("{Provoke}");
-	skillList.push_back(Skill(SKILL_RANGED));
-	skillList.back().GenerateSprite("{Ranged}");
-	skillList.push_back(Skill(SKILL_RUSH));
-	skillList.back().GenerateSprite("{Rush}");
 	skillList.push_back(Skill(SKILL_ABJUDICATOR));
 	skillList.back().GenerateSprite("{Opening Gambit}: Lower the cost of all|spells in your action bar by 1");
 	buffList.push_back(Buff(BUFF_ABJUDICATOR, -1, 0, 0, true));
