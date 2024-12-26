@@ -32,7 +32,6 @@ void Card::AddEffect(Effect effect, Card* source) {
 		}
 	}
 	effects.push_back(effect);
-	effects.back().card = this;
 	effects.back().sources.push_back(source);
 	UpdateStatBuffs();
 }
@@ -64,9 +63,9 @@ void Card::RemoveEffect(Effect effect, Card* source, bool allStacks) {
 
 //When this is cast (before minion is summoned or spell effects occur)
 void Card::OnCast(Card* card, BoardTile* tile) {
-	for (int i = 0; i < effects.size(); ++i) {
-
-	}
+	for (int i = 0; i < effects.size(); ++i)
+		if (effects[i].OnCast)
+			effects[i].OnCast(&effects[i], this, card, tile);
 }
 
 #pragma endregion
@@ -80,6 +79,7 @@ CardList::CardList() {
 	generalList.push_back(Minion(FACTION_LYONAR, TRIBE_GENERAL, 0, 2, 25, "argeonhighmayne", "Argeon Highmayne"));
 
 	//Minions
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 3, "ashmephyt", "Ash Mephyt", FindEffect(SKILL_ASH_MEPHYT)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "dragonlark", "Dragonlark", FindEffect(SKILL_FLYING)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 5, 5, 5, "fireblazer", "Fireblazer", FindEffect(SKILL_PROVOKE)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "firespitter", "Fire Spitter", FindEffect(SKILL_RANGED)));
@@ -104,8 +104,6 @@ CardList::CardList() {
 	minionList.back().skill = effectList.Find(SKILL_ARCHON_SPELLBINDER);
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_WARMASTER, 4, 2, 4, "arrowwhistler", "Arrow Whistler"));
 	minionList.back().skill = effectList.Find(SKILL_ARROW_WHISTLER);
-	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 3, "ashmephyt", "Ash Mephyt"));
-	minionList.back().skill = effectList.Find(SKILL_ASH_MEPHYT);
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 7, 7, 6, "astralcrusader", "Astral Crusader"));
 	minionList.back().skill = effectList.Find(SKILL_ASTRAL_CRUSADER);
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 4, "azureherald", "Azure Herald"));
@@ -248,15 +246,15 @@ CardList::CardList() {
 
 	*/
 
-	//Set original references
-	for (int i = 0; i < cardList.size(); ++i) { cardList[i]->original = cardList[i]; }
-
 	//Generate card list
 	for (int i = 0; i < generalList.size(); ++i) { cardList.push_back(&generalList[i]); }
 	for (int i = 0; i < minionList.size(); ++i) { cardList.push_back(&minionList[i]); }
 	for (int i = 0; i < minionTokenList.size(); ++i) { cardList.push_back(&minionTokenList[i]); }
 	for (int i = 0; i < spellList.size(); ++i) { cardList.push_back(&spellList[i]); }
 	for (int i = 0; i < spellTokenList.size(); ++i) { cardList.push_back(&spellTokenList[i]); }
+
+	//Set original references
+	for (int i = 0; i < cardList.size(); ++i) { cardList[i]->original = cardList[i]; }
 
 }
 CardList::~CardList() {}

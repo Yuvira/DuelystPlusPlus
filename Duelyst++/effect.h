@@ -3,6 +3,7 @@
 #define __EFFECT_H__
 
 //Include
+#include <functional>
 #include "tile.h"
 
 //Definitions
@@ -12,13 +13,14 @@ class Card;
 
 //Keyword flags
 enum eKeywordFlags {
-	KEYWORD_NONE       = 0,
-	KEYWORD_CELERITY   = 1 << 0,
-	KEYWORD_FLYING     = 1 << 1,
-	KEYWORD_FORCEFIELD = 1 << 2,
-	KEYWORD_PROVOKE    = 1 << 3,
-	KEYWORD_RANGED     = 1 << 4,
-	KEYWORD_RUSH       = 1 << 5
+	KEYWORD_NONE           = 0,
+	KEYWORD_CELERITY       = 1 << 0,
+	KEYWORD_FLYING         = 1 << 1,
+	KEYWORD_FORCEFIELD     = 1 << 2,
+	KEYWORD_OPENING_GAMBIT = 1 << 3,
+	KEYWORD_PROVOKE        = 1 << 4,
+	KEYWORD_RANGED         = 1 << 5,
+	KEYWORD_RUSH           = 1 << 6
 };
 
 //Skills and effects
@@ -136,8 +138,8 @@ public:
 	int costBuff;
 	int atkBuff;
 	int hpBuff;
-	Card* card;
 	std::vector<Card*> sources;
+	std::function<void(Effect*, Card*, Card*, BoardTile*)> OnCast;
 };
 
 //Spell class

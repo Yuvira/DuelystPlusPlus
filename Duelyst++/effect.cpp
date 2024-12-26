@@ -1,5 +1,5 @@
 //Include
-#include "effect.h"
+#include "game.h"
 
 #pragma region Constructors
 
@@ -12,7 +12,6 @@ Effect::Effect(eEffect _effect, eKeywordFlags _keywords, int _costBuff, int _atk
 	costBuff = _costBuff;
 	atkBuff = _atkBuff;
 	hpBuff = _hpBuff;
-	card = nullptr;
 	if (description != "")
 		GenerateSprite(description);
 }
@@ -156,6 +155,21 @@ EffectList::EffectList() {
 	effectList.push_back(Effect(SKILL_RANGED, KEYWORD_RANGED, 0, 0, 0, "{Ranged}"));
 	effectList.push_back(Effect(SKILL_RUSH, KEYWORD_RUSH, 0, 0, 0, "{Rush}"));
 
+	//Ash Mephyt
+	effectList.push_back(Effect(SKILL_ASH_MEPHYT, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Summon two copies of|this minion on random spaces"));
+	effectList.back().OnCast = [](Effect* effect, Card* card, Card* source, BoardTile* tile) {
+		if (card == source && card->GetMinion() != nullptr) {
+			for (int i = 0; i < 2; ++i) {
+				BoardTile* newTile = card->game->map.GetRandom(tile);
+				if (newTile != nullptr) {
+					Minion* copy = new Minion(*(dynamic_cast<Minion*>(card->original)));
+					card->game->SetContext(copy, card->owner);
+					card->game->Summon(copy, newTile, false);
+				}
+			}
+		}
+	};
+
 	/*
 
 	//Minion skills
@@ -183,8 +197,6 @@ EffectList::EffectList() {
 	skillList.back().GenerateSprite("{Ranged}|Your other minions with {Ranged}|have +1 Attack");
 	buffList.push_back(Buff(BUFF_ARROW_WHISTLER, 0, 1, 0, true));
 	buffList.back().GenerateSprite("Whistling Arrows");
-	skillList.push_back(Skill(SKILL_ASH_MEPHYT));
-	skillList.back().GenerateSprite("{Opening Gambit}: Summon two copies of|this minion on random spaces");
 	skillList.push_back(Skill(SKILL_ASTRAL_CRUSADER));
 	skillList.back().GenerateSprite("Whenever you replace this card, it|costs 3 less and gains +3/+3");
 	buffList.push_back(Buff(BUFF_ASTRAL_CRUSADER, -3, 3, 3, true));

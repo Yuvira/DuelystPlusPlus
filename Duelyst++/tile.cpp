@@ -81,12 +81,13 @@ Map::Map() {
 }
 Map::~Map() {}
 
-//Get random empty tiles
-BoardTile* Map::GetRandom() {
+//Get random empty tile
+BoardTile* Map::GetRandom() { return GetRandom(nullptr); }
+BoardTile* Map::GetRandom(BoardTile* ignore) {
 	std::vector<BoardTile*> valid;
 	for (int i = 0; i < 9; ++i)
 		for (int j = 0; j < 5; ++j)
-			if (tiles[i][j].minion == nullptr)
+			if (tiles[i][j].minion == nullptr && &tiles[i][j] != ignore)
 				valid.push_back(&tiles[i][j]);
 	if (valid.size() > 0) {
 		int i = rand() % valid.size();

@@ -55,6 +55,7 @@ public:
 	Map();
 	~Map();
 	BoardTile* GetRandom();
+	BoardTile* GetRandom(BoardTile* ignore);
 	BoardTile* GetRandomCorner();
 	BoardTile* GetRandomNear(int x, int y);
 	BoardTile tiles[9][5];

@@ -515,16 +515,6 @@ void Minion::OnSummon(Minion* minion, bool actionBar) {
 						}
 					}
 					break;
-				case SKILL_ASH_MEPHYT:
-					for (int a = 0; a < 2; ++a) {
-						BoardTile* t = game->map.GetRandomNear(curTile->pos.x, curTile->pos.y);
-						if (t != nullptr) {
-							Minion* u2 = new Minion(*(dynamic_cast<Minion*>(original)));
-							game->SetContext(u2, owner);
-							game->Summon(u2, t->pos.x, t->pos.y, false);
-						}
-					}
-					break;
 				case SKILL_AZURE_HERALD:
 					owner->general->DealDamage(this, -3);
 					break;
