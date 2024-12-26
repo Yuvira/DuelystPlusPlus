@@ -8,6 +8,8 @@
 //Definitions
 class Card;
 
+#pragma region Enums
+
 //Keyword flags
 enum eKeywordFlags {
 	KEYWORD_NONE       = 0,
@@ -116,6 +118,8 @@ enum eSpell {
 	SPELL_DARK_TRANSFORMATION,
 	SPELL_DARKFIRE_SACRIFICE
 };
+
+#pragma endregion
 
 //Effect class
 class Effect {

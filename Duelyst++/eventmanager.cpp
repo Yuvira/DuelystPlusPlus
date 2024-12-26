@@ -1,10 +1,17 @@
 //Include
 #include "game.h"
 
+#pragma region Constructor
+
+//Event manager constructor
 EventManager::EventManager() {
 	game = nullptr;
 }
 EventManager::~EventManager() {}
+
+#pragma endregion
+
+#pragma region Events
 
 //Send onSummon events
 void EventManager::SendOnSummon(Minion* minion, bool actionBar) {
@@ -104,3 +111,5 @@ void EventManager::SendOnTurnStart(Player* player) {
 	for (int i = 0; i < game->players[1].hand.size(); ++i) { game->players[1].hand[i]->OnTurnStart(player); }
 	for (int i = 0; i < game->players[1].deck.size(); ++i) { game->players[1].deck[i]->OnTurnStart(player); }
 }
+
+#pragma endregion

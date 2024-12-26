@@ -10,11 +10,11 @@ class Renderer {
 public:
 	Renderer();
 	~Renderer();
+	void SetSize(COORD size);
 	void SwapBuffer();
+	void ClearScreen();
 	void Render(Sprite sprite);
 	void Render(Sprite sprite, int x, int y);
-	void ClearScreen();
-	void SetSize(COORD size);
 private:
 	HANDLE frameBuffer[2];
 	bool currentBuffer;

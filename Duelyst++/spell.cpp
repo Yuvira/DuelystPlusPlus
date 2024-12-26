@@ -1,7 +1,9 @@
 //Include
 #include "game.h"
 
-//Game constructor / destructor
+#pragma region Constructors / Initialization
+
+//Game constructors
 Spell::Spell() : Spell(FACTION_NEUTRAL, TARGET_ANY, 0, "", "???") {}
 Spell::Spell(eFaction _faction,  eTarget _target, int _cost, std::string path, std::string _name) {
 	cardType = CARD_SPELL;
@@ -19,13 +21,6 @@ Spell::Spell(eFaction _faction,  eTarget _target, int _cost, std::string path, s
 }
 Spell::~Spell() {}
 
-void Spell::UpdateStatBuffs() {
-	int costBuff = 0;
-	for (int i = 0; i < effects.size(); ++i)
-		costBuff += effects[i].costBuff * effects[i].sources.size();
-	cost = max(original->cost + costBuff, 0);
-}
-
 //Generate sidebar details
 void Spell::GenerateDetails() {
 	std::string s;
@@ -38,14 +33,9 @@ void Spell::GenerateDetails() {
 	UpdateDetailStats();
 }
 
-//Update card stats
-void Spell::UpdateDetailStats() {
-	std::string s = "COST:" + std::to_string(cost);
-	header[1].CreateFromString(s);
-	for (int i = 0; i < header[1].buffer.size(); ++i)
-		if (s[i] != ':')
-			header[1].buffer[i].Attributes = COLOR_LTBLUE;
-}
+#pragma endregion
+
+#pragma region Rendering
 
 //Draw card details
 void Spell::DrawDetails(Renderer& renderer, int& y) {
@@ -53,7 +43,7 @@ void Spell::DrawDetails(Renderer& renderer, int& y) {
 	renderer.Render(sprite, 66, y);
 	renderer.Render(header[0], 72, y); ++y;
 	UpdateDetailStats();
-	renderer.Render(header[1], 72, y); y+= 2;
+	renderer.Render(header[1], 72, y); y += 2;
 	for (int i = 0; i < spell.sprites.size(); ++i) {
 		renderer.Render(spell.sprites[i], 72, y);
 		if (i == spell.sprites.size() - 1)
@@ -71,6 +61,31 @@ void Spell::DrawDetails(Renderer& renderer, int& y) {
 		token->DrawDetails(renderer, y);
 	}
 }
+
+#pragma endregion
+
+#pragma region Updates
+
+//Update cost when buffs change
+void Spell::UpdateStatBuffs() {
+	int costBuff = 0;
+	for (int i = 0; i < effects.size(); ++i)
+		costBuff += effects[i].costBuff * effects[i].sources.size();
+	cost = max(original->cost + costBuff, 0);
+}
+
+//Update card stats
+void Spell::UpdateDetailStats() {
+	std::string s = "COST:" + std::to_string(cost);
+	header[1].CreateFromString(s);
+	for (int i = 0; i < header[1].buffer.size(); ++i)
+		if (s[i] != ':')
+			header[1].buffer[i].Attributes = COLOR_LTBLUE;
+}
+
+#pragma endregion
+
+#pragma region Events
 
 //On card use
 void Spell::OnUse(BoardTile* tile) {
@@ -187,3 +202,5 @@ void Spell::LateCallback() {
 	*/
 
 }
+
+#pragma endregion

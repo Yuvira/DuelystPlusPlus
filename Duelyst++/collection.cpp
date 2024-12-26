@@ -1,7 +1,9 @@
 //Include
 #include "collection.h"
 
-//Game constructor / destructor
+#pragma region Constructor
+
+//Game constructor
 Collection::Collection() {
 
 	//Border
@@ -25,35 +27,9 @@ Collection::Collection() {
 }
 Collection::~Collection() {}
 
-//Input
-void Collection::Input() {
+#pragma endregion
 
-	//Get keyPress
-	int asciiVal = _getch();
-
-	//Move pointer
-	if (asciiVal == 119 || asciiVal == 87) { MoveCursor(0, -1); }     //W
-	else if (asciiVal == 97 || asciiVal == 65) { MoveCursor(-1, 0); } //A
-	else if (asciiVal == 115 || asciiVal == 83) { MoveCursor(0, 1); } //S
-	else if (asciiVal == 100 || asciiVal == 68) { MoveCursor(1, 0); } //D
-
-	//Switch mode
-	else if (asciiVal == 80 || asciiVal == 112) { *modeSwitch = true; } //P
-
-}
-
-//Update loop
-void Collection::Update() {
-
-	//Clear tiles highlights
-	for (int i = 0; i < 9; ++i)
-		for (int j = 0; j < 6; ++j)
-			tiles[i][j].SetColor(COLOR_LTWHITE);
-
-	//Highlight cursor position
-	tiles[pos.x][pos.y].SetColor(COLOR_AQUA);
-
-}
+#pragma region Rendering
 
 //Render objects
 void Collection::RenderCollection(Renderer& renderer) {
@@ -96,6 +72,48 @@ void Collection::RenderSidebar(Renderer& renderer) {
 		cardList.cardList[i]->DrawDetails(renderer, y);
 }
 
+#pragma endregion
+
+#pragma region Input
+
+//Input
+void Collection::Input() {
+
+	//Get keyPress
+	int asciiVal = _getch();
+
+	//Move pointer
+	if (asciiVal == 119 || asciiVal == 87) { MoveCursor(0, -1); }     //W
+	else if (asciiVal == 97 || asciiVal == 65) { MoveCursor(-1, 0); } //A
+	else if (asciiVal == 115 || asciiVal == 83) { MoveCursor(0, 1); } //S
+	else if (asciiVal == 100 || asciiVal == 68) { MoveCursor(1, 0); } //D
+
+	//Switch mode
+	else if (asciiVal == 80 || asciiVal == 112) { *modeSwitch = true; } //P
+
+}
+
+#pragma endregion
+
+#pragma region Updates
+
+//Update loop
+void Collection::Update() {
+
+	//Clear tiles highlights
+	for (int i = 0; i < 9; ++i)
+		for (int j = 0; j < 6; ++j)
+			tiles[i][j].SetColor(COLOR_LTWHITE);
+
+	//Highlight cursor position
+	tiles[pos.x][pos.y].SetColor(COLOR_AQUA);
+
+}
+
+#pragma endregion
+
+#pragma region Movement
+
 //Move cursor position
 void Collection::MoveCursor(int x, int y) {
 	if (pos.x + x == 9) {
@@ -109,3 +127,5 @@ void Collection::MoveCursor(int x, int y) {
 	pos.x = (pos.x + x + 9) % 9;
 	pos.y = (pos.y + y + 6) % 6;
 }
+
+#pragma endregion

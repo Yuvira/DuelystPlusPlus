@@ -1,7 +1,9 @@
 //Include
 #include "game.h"
 
-//Game constructor / destructor
+#pragma region Constructor
+
+//Game constructor
 Player::Player() {
 	mana = 0;
 	manaMax = 0;
@@ -11,6 +13,10 @@ Player::Player() {
 	opponent = nullptr;
 }
 Player::~Player() {}
+
+#pragma endregion
+
+#pragma region Initialization
 
 //Preset deck
 void Player::Preset(CardList& cardList, Game* _game) {
@@ -41,15 +47,9 @@ void Player::Init(int _mana) {
 	deck.erase(deck.begin(), deck.begin() + 5);
 }
 
-//Update mana sprites
-void Player::UpdateMana(eColor color) {
-	for (int i = 0; i < mana; ++i)
-		uiCrystal[i].SetColor(color);
-	for (int i = mana; i < manaMax; ++i)
-		uiCrystal[i].SetColor(COLOR_LTWHITE);
-	for (int i = max(mana, manaMax); i < 9; ++i)
-		uiCrystal[i].SetColor(COLOR_GRAY);
-}
+#pragma endregion
+
+#pragma region Rendering
 
 //Render UI
 void Player::Render(Renderer& renderer, bool left) {
@@ -73,6 +73,24 @@ void Player::Render(Renderer& renderer, bool left) {
 	}
 
 }
+
+#pragma endregion
+
+#pragma region Updates
+
+//Update mana sprites
+void Player::UpdateMana(eColor color) {
+	for (int i = 0; i < mana; ++i)
+		uiCrystal[i].SetColor(color);
+	for (int i = mana; i < manaMax; ++i)
+		uiCrystal[i].SetColor(COLOR_LTWHITE);
+	for (int i = max(mana, manaMax); i < 9; ++i)
+		uiCrystal[i].SetColor(COLOR_GRAY);
+}
+
+#pragma endregion
+
+#pragma region Actions
 
 //Shuffle deck
 void Player::Shuffle() {
@@ -133,3 +151,5 @@ void Player::Replace(int idx) {
 		--replaces;
 	}
 }
+
+#pragma endregion

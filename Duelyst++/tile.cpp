@@ -1,22 +1,41 @@
 //Include
 #include "tile.h"
 
-//Tile constructor / destructor
+#pragma region Coords
+
+//Custom co-ord
+Coord::Coord() : Coord(0, 0) {}
+Coord::Coord(int _x, int _y) {
+	x = _x;
+	y = _y;
+}
+Coord::~Coord() {}
+
+#pragma endregion
+
+#pragma region Tiles
+
+//Tile constructor
 Tile::Tile() { 
 	border.CreateFromFile("resources/tile.txt");
 	SetColor(COLOR_LTWHITE);
 } 
 Tile::~Tile() {}
 
+//Select tiles
+void Tile::SetColor(eColor color) { border.SetColor(color); }
+
+#pragma endregion
+
+#pragma region Board Tiles
+
+//Board tile constructor
 BoardTile::BoardTile() : Tile() {
 	sprite.Resize(5, 5);
 	SetFeature(TILE_NONE);
 	minion = nullptr;
 }
 BoardTile::~BoardTile() {}
-
-//Select tiles
-void Tile::SetColor(eColor color) { border.SetColor(color); }
 
 //Set tiles feature
 void BoardTile::SetFeature(eFeature newFeature) {
@@ -41,7 +60,11 @@ void BoardTile::SetFeature(eFeature newFeature) {
 
 }
 
-//Map constructor / destructor
+#pragma endregion
+
+#pragma region Maps
+
+//Map constructor
 Map::Map() {
 	for (int i = 0; i < 9; ++i) {
 		for (int j = 0; j < 5; ++j) {
@@ -100,10 +123,4 @@ BoardTile* Map::GetRandomNear(int x, int y) {
 	return nullptr;
 }
 
-//Custom co-ord crap
-Coord::Coord() : Coord(0, 0) {}
-Coord::Coord(int _x, int _y) {
-	x = _x;
-	y = _y;
-}
-Coord::~Coord() {}
+#pragma endregion

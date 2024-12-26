@@ -1,7 +1,9 @@
 //Include
 #include "sprite.h"
 
-//Sprite constructor / destructor
+#pragma region Constructors
+
+//Sprite constructors
 Sprite::Sprite() : Sprite(1, 1) {}
 Sprite::Sprite(int _width, int _height) {
 	pos.X = 0;
@@ -12,6 +14,10 @@ Sprite::Sprite(int _width, int _height) {
 	Clear();
 }
 Sprite::~Sprite() { }
+
+#pragma endregion
+
+#pragma region Modifiers
 
 //Clear sprites
 void Sprite::Clear() {
@@ -36,6 +42,10 @@ void Sprite::SetColor(eColor color) {
 	for (int i = 0; i < buffer.size(); ++i)
 		buffer[i].Attributes = color;
 }
+
+#pragma endregion
+
+#pragma region Sprite Generators
 
 //Generate sprites from text file
 void Sprite::CreateFromFile(std::string filename) {
@@ -77,3 +87,5 @@ void Sprite::CreateFromString(std::string str, bool vertical) {
 		buffer[i].Attributes = COLOR_LTWHITE;
 	}
 }
+
+#pragma endregion

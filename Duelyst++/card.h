@@ -11,6 +11,8 @@ class Game;
 class Player;
 class Spell;
 
+#pragma region Enums
+
 //Card types
 enum eCard {
 	CARD_NONE,
@@ -75,6 +77,8 @@ enum eTribe {
 	TRIBE_WARMASTER
 };
 
+#pragma endregion
+
 //Card class
 class Card {
 public:
@@ -117,22 +121,22 @@ public:
 	Minion(eFaction _faction, eTribe _tribe, int _cost, int _atk, int _hp, std::string path, std::string _name);
 	Minion(eFaction _faction, eTribe _tribe, int _cost, int _atk, int _hp, std::string path, std::string _name, Effect effect);
 	~Minion();
+	void GenerateDetails();
 	void Render(Renderer& renderer);
-	void SetPosition(int x, int y);
+	void DrawDetails(Renderer& renderer, int& y);
 	void Update(bool& shouldLoop);
 	void UpdateStatBuffs();
 	void UpdateStatSprites();
-	void GenerateDetails();
 	void UpdateDetailStats();
-	void DrawDetails(Renderer& renderer, int& y);
+	void SetPosition(int x, int y);
+	void Attack(Minion* target, bool counter);
+	int DealDamage(Minion* source, int damage);
+	void Dispel();
 	bool CanAttack(Minion* target);
 	bool IsMoveable();
 	int MoveRange();
 	bool HasKeywords(eKeywordFlags keywords);
 	bool IsProvoked();
-	void Attack(Minion* target, bool counter);
-	int DealDamage(Minion* source, int damage);
-	void Dispel();
 	void OnSummon(Minion* minion, bool actionBar);
 	void OnDeath(Minion* minion);
 	void OnAttack(Minion* source, Minion* target, bool counter);
@@ -166,10 +170,10 @@ public:
 	Spell();
 	Spell(eFaction _faction, eTarget _target, int _cost, std::string path, std::string _name);
 	~Spell();
-	void UpdateStatBuffs();
 	void GenerateDetails();
-	void UpdateDetailStats();
 	void DrawDetails(Renderer& renderer, int& y);
+	void UpdateStatBuffs();
+	void UpdateDetailStats();
 	void OnUse(BoardTile* tile);
 	void Callback(BoardTile* tile);
 	void LateCallback();

@@ -1,7 +1,9 @@
 //Include
 #include "effect.h"
 
-//Effect constructor/deconstructor
+#pragma region Constructors
+
+//Effect constructors
 Effect::Effect() : Effect(EFFECT_NONE, KEYWORD_NONE, 0, 0, 0, "") {}
 Effect::Effect(eEffect _effect, eKeywordFlags _keywords, int _costBuff, int _atkBuff, int _hpBuff) : Effect(_effect, _keywords, _costBuff, _atkBuff, _hpBuff, "") {}
 Effect::Effect(eEffect _effect, eKeywordFlags _keywords, int _costBuff, int _atkBuff, int _hpBuff, std::string description) {
@@ -15,10 +17,14 @@ Effect::Effect(eEffect _effect, eKeywordFlags _keywords, int _costBuff, int _atk
 }
 Effect::~Effect() {}
 
-//Spell constructor/deconstructor
+//Spell constructors
 SpellEffect::SpellEffect() : SpellEffect(SPELL_NONE) {}
 SpellEffect::SpellEffect(eSpell _spell) { spell = _spell; }
 SpellEffect::~SpellEffect() {}
+
+#pragma endregion
+
+#pragma region Rendering
 
 //Generate effect sprite
 void Effect::GenerateSprite(std::string str) {
@@ -85,6 +91,25 @@ void Effect::GenerateSprite(std::string str) {
 
 }
 
+//Generate spell sprites
+void SpellEffect::GenerateSprite(std::string str) {
+	std::vector<std::string> lines;
+	lines.push_back("");
+	for (int i = 0; i < str.length(); ++i) {
+		if (str[i] == '|') { lines.push_back(""); }
+		else { lines.back() += str[i]; }
+	}
+	for (int i = 0; i < lines.size(); ++i) {
+		sprites.push_back(Sprite());
+		sprites.back().CreateFromString(lines[i]);
+		sprites.back().SetColor(COLOR_GRAY);
+	}
+}
+
+#pragma endregion
+
+#pragma region Utils
+
 //Is skill an opening gambit
 bool Effect::IsOpeningGambit() {
 	switch (effect) {
@@ -115,22 +140,11 @@ bool Effect::IsOpeningGambit() {
 	return false;
 }
 
-//Generate spell sprites
-void SpellEffect::GenerateSprite(std::string str) {
-	std::vector<std::string> lines;
-	lines.push_back("");
-	for (int i = 0; i < str.length(); ++i) {
-		if (str[i] == '|') { lines.push_back(""); }
-		else { lines.back() += str[i]; }
-	}
-	for (int i = 0; i < lines.size(); ++i) {
-		sprites.push_back(Sprite());
-		sprites.back().CreateFromString(lines[i]);
-		sprites.back().SetColor(COLOR_GRAY);
-	}
-}
+#pragma endregion
 
-//Effect list constructor/deconstructor
+#pragma region Effect List
+
+//Effect list constructor
 EffectList::EffectList() {
 
 	//Keyword skills
@@ -322,6 +336,10 @@ EffectList::EffectList() {
 }
 EffectList::~EffectList() {}
 
+#pragma endregion
+
+#pragma region Search Functions
+
 //Find effect by enum
 Effect EffectList::Find(eEffect effect) {
 	for (int i = 0; i < effectList.size(); ++i)
@@ -335,3 +353,5 @@ SpellEffect EffectList::Find(eSpell spell) {
 		if (spellList[i].spell == spell)
 			return spellList[i];
 }
+
+#pragma endregion

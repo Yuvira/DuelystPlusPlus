@@ -8,6 +8,8 @@
 #include <conio.h>
 #include "eventmanager.h"
 
+#pragma region Enums / Helpers
+
 //Input mode
 enum eMode {
 	MODE_NONE,
@@ -39,28 +41,28 @@ public:
 	int count;
 };
 
+#pragma endregion
+
 //Game class
 class Game {
 public:
 	Game();
 	~Game();
-	void Input();
-	void Update();
 	void RenderGame(Renderer& renderer);
 	void RenderSidebar(Renderer& renderer);
-	void ChangeTurn(bool _turn);
-	void SetContext(Card* card, Player* player);
-	void Summon(Card* card, int x, int y, bool actionBar);
+	void Input();
+	void Update();
 	void UseCard();
 	void UseEffect();
+	void Summon(Card* card, int x, int y, bool actionBar);
+	void MoveUnit();
+	void AttackUnit();
+	void ChangeTurn(bool _turn);
 	void SelectTile(BoardTile& tile);
 	void SelectCard();
-	void AttackUnit();
-	void MoveUnit();
 	void MoveCursor(int x, int y);
 	void MoveCursorHand(int x, int y);
 	void MoveSelect(int x, int y);
-	bool CanMove(int x, int y);
 	void HighlightTile(int x, int y, eColor color);
 	void HighlightMoveable(int x, int y);
 	void SearchMoveable(int x, int y, int range);
@@ -72,6 +74,8 @@ public:
 	void DrawPath(Renderer& renderer);
 	void DrawSword(int x, int y, Renderer& renderer);
 	void DrawArrow(int type, int x, int y, Renderer& renderer);
+	void SetContext(Card* card, Player* player);
+	bool CanMove(int x, int y);
 	std::vector<Card*> grave;
 	std::vector<Minion*> minions;
 	Sprite light;

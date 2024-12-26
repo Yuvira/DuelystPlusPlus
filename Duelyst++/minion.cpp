@@ -1,7 +1,9 @@
 //Include
 #include "game.h"
 
-//Game constructor / destructor
+#pragma region Constructors / Initialization
+
+//Minion constructors
 Minion::Minion() : Minion(FACTION_NEUTRAL, TRIBE_NONE, 0, 0, 0, "", "???") {}
 Minion::Minion(eFaction _faction, eTribe _tribe, int _cost, int _atk, int _hp, std::string path, std::string _name) {
 	cardType = CARD_UNIT;
@@ -33,88 +35,6 @@ Minion::Minion(eFaction _faction, eTribe _tribe, int _cost, int _atk, int _hp, s
 		AddEffect(effect, this);
 }
 Minion::~Minion() {}
-
-//Render sprites
-void Minion::Render(Renderer& renderer) {
-	hasAttacked ? sprite.SetColor(COLOR_GRAY) : sprite.SetColor(COLOR_LTWHITE);
-	renderer.Render(sprite);
-	renderer.Render(atkSprite);
-	renderer.Render(hpSprite);
-	if (hasForcefield) {
-		int x = sprite.pos.X;
-		int y = sprite.pos.Y;
-		renderer.Render(game->chars[7], x + 1, y + 1);
-		renderer.Render(game->chars[9], x + 2, y + 1);
-		renderer.Render(game->chars[6], x + 3, y + 1);
-		renderer.Render(game->chars[8], x + 1, y + 2);
-		renderer.Render(game->chars[8], x + 3, y + 2);
-		renderer.Render(game->chars[6], x + 1, y + 3);
-		renderer.Render(game->chars[9], x + 2, y + 3);
-		renderer.Render(game->chars[7], x + 3, y + 3);
-	}
-}
-
-//Set sprites position
-void Minion::SetPosition(int x, int y) {
-	if (curTile != nullptr) { curTile->minion = nullptr; }
-	int spriteX = (x * 7) + 2;
-	int spriteY = (y * 7) + 6;
-	sprite.pos.X = spriteX;
-	sprite.pos.Y = spriteY;
-	atkSprite.pos.X = spriteX;
-	atkSprite.pos.Y = spriteY + 4;
-	hpSprite.pos.X = (spriteX + 4) - (hpSprite.buffer.size() - 1);
-	hpSprite.pos.Y = spriteY + 4;
-	curTile = &game->map.tiles[x][y];
-	curTile->minion = this;
-	if (curTile->feature == TILE_MANA) {
-		curTile->SetFeature(TILE_NONE);
-		if (owner->mana < 9) { ++owner->mana; }
-	}
-}
-
-//Check if minion has died
-void Minion::Update(bool& shouldLoop) {
-	if (hp < 1) {
-		game->eventManager.SendOnDeath(this);
-		isDead = true;
-		shouldLoop = true;
-	}
-}
-
-//Update attack/health/cost when buffs change
-void Minion::UpdateStatBuffs() {
-	int costBuff = 0;
-	int atkBuff = 0;
-	int hpBuff = 0;
-	int hpDelta = hp - hpMax;
-	for (int i = 0; i < effects.size(); ++i) {
-		costBuff += effects[i].costBuff * effects[i].sources.size();
-		atkBuff += effects[i].atkBuff * effects[i].sources.size();
-		hpBuff += effects[i].hpBuff * effects[i].sources.size();
-	}
-	Minion* orig = dynamic_cast<Minion*>(original);
-	cost = max(orig->cost + costBuff, 0);
-	atk = max(orig->atk + atkBuff, 0);
-	hpMax = orig->hpMax + hpBuff;
-	hp = hpMax + hpDelta;
-}
-
-//Update HP & ATK sprites
-void Minion::UpdateStatSprites() {
-	std::string str = std::to_string(atk);
-	atkSprite.Resize(str.length(), 1);
-	for (int i = 0; i < str.length(); ++i)
-		atkSprite.buffer[i].Char.AsciiChar = str[i];
-	atkSprite.SetColor(COLOR_GREEN);
-	int width = hpSprite.buffer.size();
-	str = std::to_string(hp);
-	hpSprite.Resize(str.length(), 1);
-	for (int i = 0; i < str.length(); ++i)
-		hpSprite.buffer[i].Char.AsciiChar = str[i];
-	hpSprite.SetColor(COLOR_RED);
-	hpSprite.pos.X += width - str.length();
-}
 
 //Generate sidebar details
 void Minion::GenerateDetails() {
@@ -159,6 +79,97 @@ void Minion::GenerateDetails() {
 	UpdateDetailStats();
 }
 
+#pragma endregion
+
+#pragma region Rendering
+
+//Render sprites
+void Minion::Render(Renderer& renderer) {
+	hasAttacked ? sprite.SetColor(COLOR_GRAY) : sprite.SetColor(COLOR_LTWHITE);
+	renderer.Render(sprite);
+	renderer.Render(atkSprite);
+	renderer.Render(hpSprite);
+	if (hasForcefield) {
+		int x = sprite.pos.X;
+		int y = sprite.pos.Y;
+		renderer.Render(game->chars[7], x + 1, y + 1);
+		renderer.Render(game->chars[9], x + 2, y + 1);
+		renderer.Render(game->chars[6], x + 3, y + 1);
+		renderer.Render(game->chars[8], x + 1, y + 2);
+		renderer.Render(game->chars[8], x + 3, y + 2);
+		renderer.Render(game->chars[6], x + 1, y + 3);
+		renderer.Render(game->chars[9], x + 2, y + 3);
+		renderer.Render(game->chars[7], x + 3, y + 3);
+	}
+}
+
+//Draw card data
+void Minion::DrawDetails(Renderer& renderer, int& y) {
+	sprite.SetColor(COLOR_LTWHITE);
+	renderer.Render(sprite, 66, y);
+	renderer.Render(header[0], 72, y); ++y;
+	UpdateDetailStats();
+	renderer.Render(header[1], 72, y); y += 2;
+	for (int i = 0; i < effects.size(); ++i) {
+		renderer.Render(effects[i].sprite, 72, y);
+		y += effects[i].sprite.height + 2;
+	}
+	if (token != nullptr) {
+		if (y < 7)
+			y = 7;
+		renderer.Render(divider, 66, y);
+		y += 2;
+		token->DrawDetails(renderer, y);
+	}
+}
+
+#pragma endregion
+
+#pragma region Updates
+
+//Check if minion has died
+void Minion::Update(bool& shouldLoop) {
+	if (hp < 1) {
+		game->eventManager.SendOnDeath(this);
+		isDead = true;
+		shouldLoop = true;
+	}
+}
+
+//Update attack/health/cost when buffs change
+void Minion::UpdateStatBuffs() {
+	int costBuff = 0;
+	int atkBuff = 0;
+	int hpBuff = 0;
+	int hpDelta = hp - hpMax;
+	for (int i = 0; i < effects.size(); ++i) {
+		costBuff += effects[i].costBuff * effects[i].sources.size();
+		atkBuff += effects[i].atkBuff * effects[i].sources.size();
+		hpBuff += effects[i].hpBuff * effects[i].sources.size();
+	}
+	Minion* orig = dynamic_cast<Minion*>(original);
+	cost = max(orig->cost + costBuff, 0);
+	atk = max(orig->atk + atkBuff, 0);
+	hpMax = orig->hpMax + hpBuff;
+	hp = hpMax + hpDelta;
+}
+
+//Update HP & ATK sprites
+void Minion::UpdateStatSprites() {
+	std::string str = std::to_string(atk);
+	atkSprite.Resize(str.length(), 1);
+	for (int i = 0; i < str.length(); ++i)
+		atkSprite.buffer[i].Char.AsciiChar = str[i];
+	atkSprite.SetColor(COLOR_GREEN);
+	int width = hpSprite.buffer.size();
+	str = std::to_string(hp);
+	hpSprite.Resize(str.length(), 1);
+	for (int i = 0; i < str.length(); ++i)
+		hpSprite.buffer[i].Char.AsciiChar = str[i];
+	hpSprite.SetColor(COLOR_RED);
+	hpSprite.pos.X += width - str.length();
+}
+
 //Update card stats
 void Minion::UpdateDetailStats() {
 	eColor color = COLOR_LTBLUE;
@@ -182,75 +193,27 @@ void Minion::UpdateDetailStats() {
 	}
 }
 
-//Draw card data
-void Minion::DrawDetails(Renderer& renderer, int& y) {
-	sprite.SetColor(COLOR_LTWHITE);
-	renderer.Render(sprite, 66, y);
-	renderer.Render(header[0], 72, y); ++y;
-	UpdateDetailStats();
-	renderer.Render(header[1], 72, y); y+= 2;
-	for (int i = 0; i < effects.size(); ++i) {
-		renderer.Render(effects[i].sprite, 72, y);
-		y += effects[i].sprite.height + 2;
+#pragma endregion
+
+#pragma region Actions
+
+//Set sprite position
+void Minion::SetPosition(int x, int y) {
+	if (curTile != nullptr) { curTile->minion = nullptr; }
+	int spriteX = (x * 7) + 2;
+	int spriteY = (y * 7) + 6;
+	sprite.pos.X = spriteX;
+	sprite.pos.Y = spriteY;
+	atkSprite.pos.X = spriteX;
+	atkSprite.pos.Y = spriteY + 4;
+	hpSprite.pos.X = (spriteX + 4) - (hpSprite.buffer.size() - 1);
+	hpSprite.pos.Y = spriteY + 4;
+	curTile = &game->map.tiles[x][y];
+	curTile->minion = this;
+	if (curTile->feature == TILE_MANA) {
+		curTile->SetFeature(TILE_NONE);
+		if (owner->mana < 9) { ++owner->mana; }
 	}
-	if (token != nullptr) {
-		if (y < 7)
-			y = 7;
-		renderer.Render(divider, 66, y);
-		y += 2;
-		token->DrawDetails(renderer, y);
-	}
-}
-
-//Can minion attack target
-bool Minion::CanAttack(Minion* target) {
-	if (target != nullptr) {
-		if (atk > 0) {
-			if (HasKeywords(KEYWORD_RANGED))
-				return true;
-			else if (abs(curTile->pos.x - target->curTile->pos.x) < 2 && abs(curTile->pos.y - target->curTile->pos.y) < 2)
-				return true;
-		}
-	}
-	return false;
-}
-
-//Can minion move
-bool Minion::IsMoveable() {
-	if (tribe == TRIBE_STRUCTURE)
-		return false;
-	return true;
-}
-
-//Minion range
-int Minion::MoveRange() {
-	int range = 2;
-	for (int i = 0; i < effects.size(); ++i) {
-		switch (effects[i].effect) {
-		case EFFECT_GOLDEN_JUSTICAR:
-			range += 2;
-		}
-	}
-	return range;
-}
-
-//Check if minion has given keywords
-bool Minion::HasKeywords(eKeywordFlags keywords) {
-	int flags = KEYWORD_NONE;
-	for (int i = 0; i < effects.size(); ++i)
-		flags |= effects[i].keywords;
-	return (flags & keywords) == keywords;
-}
-
-//Is minion being provoked
-bool Minion::IsProvoked() {
-	for (int i = max(curTile->pos.x - 1, 0); i < min(curTile->pos.x + 2, 9); ++i)
-		for (int j = max(curTile->pos.y - 1, 0); j < min(curTile->pos.y + 2, 5); ++j)
-			if (game->map.tiles[i][j].minion != nullptr)
-				if (game->map.tiles[i][j].minion->owner != owner)
-					if (game->map.tiles[i][j].minion->HasKeywords(KEYWORD_PROVOKE))
-						return true;
-	return false;
 }
 
 //Attack enemy
@@ -398,7 +361,7 @@ void Minion::Dispel() {
 		}
 		break;
 	}
-	
+
 	//Remove skills and buffs on this
 	skill = game->cardList.effectList.Find(SKILL_DISPELLED);
 	for (int a = 0; a < effects.size(); ++a) {
@@ -436,6 +399,65 @@ void Minion::Dispel() {
 	UpdateStatBuffs();
 
 }
+
+#pragma endregion
+
+#pragma region Utils
+
+//Can minion attack target
+bool Minion::CanAttack(Minion* target) {
+	if (target != nullptr) {
+		if (atk > 0) {
+			if (HasKeywords(KEYWORD_RANGED))
+				return true;
+			else if (abs(curTile->pos.x - target->curTile->pos.x) < 2 && abs(curTile->pos.y - target->curTile->pos.y) < 2)
+				return true;
+		}
+	}
+	return false;
+}
+
+//Can minion move
+bool Minion::IsMoveable() {
+	if (tribe == TRIBE_STRUCTURE)
+		return false;
+	return true;
+}
+
+//Minion range
+int Minion::MoveRange() {
+	int range = 2;
+	for (int i = 0; i < effects.size(); ++i) {
+		switch (effects[i].effect) {
+		case EFFECT_GOLDEN_JUSTICAR:
+			range += 2;
+		}
+	}
+	return range;
+}
+
+//Check if minion has given keywords
+bool Minion::HasKeywords(eKeywordFlags keywords) {
+	int flags = KEYWORD_NONE;
+	for (int i = 0; i < effects.size(); ++i)
+		flags |= effects[i].keywords;
+	return (flags & keywords) == keywords;
+}
+
+//Is minion being provoked
+bool Minion::IsProvoked() {
+	for (int i = max(curTile->pos.x - 1, 0); i < min(curTile->pos.x + 2, 9); ++i)
+		for (int j = max(curTile->pos.y - 1, 0); j < min(curTile->pos.y + 2, 5); ++j)
+			if (game->map.tiles[i][j].minion != nullptr)
+				if (game->map.tiles[i][j].minion->owner != owner)
+					if (game->map.tiles[i][j].minion->HasKeywords(KEYWORD_PROVOKE))
+						return true;
+	return false;
+}
+
+#pragma endregion
+
+#pragma region Events
 
 //When a minion is summoned
 void Minion::OnSummon(Minion* minion, bool actionBar) {
@@ -1424,3 +1446,5 @@ void Minion::Callback(BoardTile* tile) {
 	*/
 
 }
+
+#pragma endregion

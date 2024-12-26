@@ -1,6 +1,8 @@
 //Include
 #include "game.h"
 
+#pragma region Helper Constructors
+
 //Callback stuff
 EffectCallback::EffectCallback() : EffectCallback(nullptr, nullptr, nullptr, EFFECT_NONE) {}
 EffectCallback::EffectCallback(Minion* _minion, Spell* _spell, BoardTile* _tile, eEffect _effect) {
@@ -11,7 +13,7 @@ EffectCallback::EffectCallback(Minion* _minion, Spell* _spell, BoardTile* _tile,
 }
 EffectCallback::~EffectCallback() {}
 
-//Path co-ordinate constructor / destructor
+//Path co-ordinate constructor
 PathCoord::PathCoord() : PathCoord(Coord(), 0, 0) {}
 PathCoord::PathCoord(Coord _pos, int _last, int _count) {
 	pos = _pos;
@@ -20,7 +22,11 @@ PathCoord::PathCoord(Coord _pos, int _last, int _count) {
 }
 PathCoord::~PathCoord() {}
 
-//Game constructor / destructor
+#pragma endregion
+
+#pragma region Game Constructor
+
+//Game constructor
 Game::Game() {
 
 	//Board border
@@ -70,6 +76,88 @@ Game::Game() {
 
 }
 Game::~Game() {}
+
+#pragma endregion
+
+#pragma region Rendering
+
+//Render objects
+void Game::RenderGame(Renderer& renderer) {
+
+	//Board
+	renderer.Render(board);
+
+	//Turn indicator
+	renderer.Render(light, 31, 2);
+
+	//Tiles
+	for (int i = 0; i < 9; ++i) {
+		for (int j = 0; j < 5; ++j) {
+			renderer.Render(map.tiles[i][j].border);
+			renderer.Render(map.tiles[i][j].sprite);
+		}
+	}
+
+	//Units
+	for (int i = 0; i < minions.size(); ++i)
+		minions[i]->Render(renderer);
+
+	//Move mode indicators
+	if (mode == MODE_MOVE) {
+		for (int i = 0; i < attackable.size(); ++i) {
+			if (attackable[i] == selectable[selectionIdx]) {
+				COORD coord = selectable[selectionIdx]->border.pos;
+				DrawSword(coord.X, coord.Y, renderer);
+				coord = activeUnit->curTile->border.pos;
+				if (selectable[selectionIdx]->minion->CanAttack(activeUnit))
+					DrawSword(coord.X, coord.Y, renderer);
+				goto end;
+			}
+		}
+		DrawPath(renderer);
+	end:;
+	}
+
+	//Hand
+	for (int i = 0; i < 7; ++i)
+		renderer.Render(hand[i].border);
+	for (int i = 0; i < players[turn].hand.size(); ++i) {
+		players[turn].hand[i]->sprite.SetColor(COLOR_LTWHITE);
+		renderer.Render(players[turn].hand[i]->sprite, (i * 7) + 9, 42);
+	}
+
+	//Player UI
+	players[0].Render(renderer, true);
+	players[1].Render(renderer, false);
+
+	//Sidebar
+	RenderSidebar(renderer);
+
+}
+
+//Render sidebar
+void Game::RenderSidebar(Renderer& renderer) {
+
+	//Vertical position
+	int y = 1;
+
+	//Minion on board
+	if (mode == MODE_NONE) {
+		if (map.tiles[pos.x][pos.y].minion != nullptr)
+			map.tiles[pos.x][pos.y].minion->DrawDetails(renderer, y);
+	}
+
+	//Minion in hand
+	else if (mode == MODE_HAND || mode == MODE_SELECT) {
+		if (handIdx < players[turn].hand.size())
+			players[turn].hand[handIdx]->DrawDetails(renderer, y);
+	}
+
+}
+
+#pragma endregion
+
+#pragma region Input
 
 //Input
 void Game::Input() {
@@ -137,7 +225,7 @@ void Game::Input() {
 				}
 			}
 			MoveUnit();
-			end:;
+		end:;
 		}
 
 	}
@@ -169,6 +257,10 @@ void Game::Input() {
 	if (asciiVal == 80 || asciiVal == 112) { *modeSwitch = false; } //P
 
 }
+
+#pragma endregion
+
+#pragma region Updates
 
 //Update loop
 void Game::Update() {
@@ -236,137 +328,9 @@ void Game::Update() {
 
 }
 
-//Render objects
-void Game::RenderGame(Renderer& renderer) {
+#pragma endregion
 
-	//Board
-	renderer.Render(board);
-
-	//Turn indicator
-	renderer.Render(light, 31, 2);
-
-	//Tiles
-	for (int i = 0; i < 9; ++i) {
-		for (int j = 0; j < 5; ++j) {
-			renderer.Render(map.tiles[i][j].border);
-			renderer.Render(map.tiles[i][j].sprite);
-		}
-	}
-
-	//Units
-	for (int i = 0; i < minions.size(); ++i)
-		minions[i]->Render(renderer);
-
-	//Move mode indicators
-	if (mode == MODE_MOVE) {
-		for (int i = 0; i < attackable.size(); ++i) {
-			if (attackable[i] == selectable[selectionIdx]) {
-				COORD coord = selectable[selectionIdx]->border.pos;
-				DrawSword(coord.X, coord.Y, renderer);
-				coord = activeUnit->curTile->border.pos;
-				if (selectable[selectionIdx]->minion->CanAttack(activeUnit))
-					DrawSword(coord.X, coord.Y, renderer);
-				goto end;
-			}
-		}
-		DrawPath(renderer);
-		end:;
-	}
-
-	//Hand
-	for (int i = 0; i < 7; ++i)
-		renderer.Render(hand[i].border);
-	for (int i = 0; i < players[turn].hand.size(); ++i) {
-		players[turn].hand[i]->sprite.SetColor(COLOR_LTWHITE);
-		renderer.Render(players[turn].hand[i]->sprite, (i * 7) + 9, 42);
-	}
-
-	//Player UI
-	players[0].Render(renderer, true);
-	players[1].Render(renderer, false);
-
-	//Sidebar
-	RenderSidebar(renderer);
-
-}
-
-//Render sidebar
-void Game::RenderSidebar(Renderer& renderer) {
-
-	//Vertical position
-	int y = 1;
-
-	//Minion on board
-	if (mode == MODE_NONE) {
-		if (map.tiles[pos.x][pos.y].minion != nullptr)
-			map.tiles[pos.x][pos.y].minion->DrawDetails(renderer, y);
-	}
-
-	//Minion in hand
-	else if (mode == MODE_HAND || mode == MODE_SELECT) {
-		if (handIdx < players[turn].hand.size())
-			players[turn].hand[handIdx]->DrawDetails(renderer, y);
-	}
-
-}
-
-//Change turn
-void Game::ChangeTurn(bool _turn) {
-
-	//Indicate turn is ending
-	endTurn = true;
-
-	//Do late callbacks
-	while (lateCallback.size() > 0) {
-		if (lateCallback[0].spell != nullptr)
-			lateCallback[0].spell->LateCallback();
-		lateCallback.erase(lateCallback.begin());
-		if (selectable.size() > 0)
-			return;
-	}
-
-	//Draw and reset replaces
-	if (turnCount > 0)
-		players[turn].Draw();
-	players[turn].replaces = 1;
-
-	//Change turn
-	turn = _turn;
-	if (!turn)
-		++turnCount;
-
-	//Refresh mana
-	if (turnCount > 1 && players[turn].manaMax < 9)
-		++players[turn].manaMax;
-	players[turn].mana = players[turn].manaMax;
-
-	//Set turn indicator
-	if (turn)
-		light.SetColor(COLOR_RED);
-	else
-		light.SetColor(COLOR_LTBLUE);
-
-	//End old turn, start new turn
-	eventManager.SendOnTurnEnd(&players[!turn]);
-	eventManager.SendOnTurnStart(&players[turn]);
-
-	//Turn has ended
-	endTurn = false;
-
-}
-
-//Set game context for new token cards
-void Game::SetContext(Card* card, Player* player) {
-	card->game = this;
-	card->owner = player;
-}
-
-//Summon at position
-void Game::Summon(Card* card, int x, int y, bool actionBar) {
-	minions.push_back(dynamic_cast<Minion*>(card));
-	minions.back()->SetPosition(x, y);
-	eventManager.SendOnSummon(minions.back(), actionBar);
-}
+#pragma region Actions
 
 //Use active card
 void Game::UseCard() {
@@ -415,6 +379,91 @@ void Game::UseEffect() {
 	else if (callback.spell != nullptr)
 		callback.spell->Callback(t);
 }
+
+//Summon at position
+void Game::Summon(Card* card, int x, int y, bool actionBar) {
+	minions.push_back(dynamic_cast<Minion*>(card));
+	minions.back()->SetPosition(x, y);
+	eventManager.SendOnSummon(minions.back(), actionBar);
+}
+
+//Move selected minion
+void Game::MoveUnit() {
+	if (selectable[selectionIdx]->minion == nullptr || selectable[selectionIdx] == &map.tiles[pos.x][pos.y]) {
+		if (selectable[selectionIdx] != &map.tiles[pos.x][pos.y]) {
+			activeUnit->SetPosition(selectable[selectionIdx]->pos.x, selectable[selectionIdx]->pos.y);
+			if (!activeUnit->hasCelerityMoved) { activeUnit->hasCelerityMoved = true; }
+			else { activeUnit->hasMoved = true; }
+			pos = selectable[selectionIdx]->pos;
+			eventManager.SendOnMove(activeUnit, false);
+		}
+		moveable.clear();
+		attackable.clear();
+		selectable.clear();
+		activeUnit = nullptr;
+		mode = MODE_NONE;
+	}
+}
+
+//Attack minion
+void Game::AttackUnit() {
+	activeUnit->Attack(selectable[selectionIdx]->minion, false);
+	pos = selectable[selectionIdx]->pos;
+	moveable.clear();
+	attackable.clear();
+	selectable.clear();
+	activeUnit = nullptr;
+	mode = MODE_NONE;
+}
+
+//Change turn
+void Game::ChangeTurn(bool _turn) {
+
+	//Indicate turn is ending
+	endTurn = true;
+
+	//Do late callbacks
+	while (lateCallback.size() > 0) {
+		if (lateCallback[0].spell != nullptr)
+			lateCallback[0].spell->LateCallback();
+		lateCallback.erase(lateCallback.begin());
+		if (selectable.size() > 0)
+			return;
+	}
+
+	//Draw and reset replaces
+	if (turnCount > 0)
+		players[turn].Draw();
+	players[turn].replaces = 1;
+
+	//Change turn
+	turn = _turn;
+	if (!turn)
+		++turnCount;
+
+	//Refresh mana
+	if (turnCount > 1 && players[turn].manaMax < 9)
+		++players[turn].manaMax;
+	players[turn].mana = players[turn].manaMax;
+
+	//Set turn indicator
+	if (turn)
+		light.SetColor(COLOR_RED);
+	else
+		light.SetColor(COLOR_LTBLUE);
+
+	//End old turn, start new turn
+	eventManager.SendOnTurnEnd(&players[!turn]);
+	eventManager.SendOnTurnStart(&players[turn]);
+
+	//Turn has ended
+	endTurn = false;
+
+}
+
+#pragma endregion
+
+#pragma region Selection / Movement
 
 //Select minion
 void Game::SelectTile(BoardTile& tile) {
@@ -468,38 +517,9 @@ void Game::SelectCard() {
 
 }
 
-//Move selected minion
-void Game::MoveUnit() {
-	if (selectable[selectionIdx]->minion == nullptr || selectable[selectionIdx] == &map.tiles[pos.x][pos.y]) {
-		if (selectable[selectionIdx] != &map.tiles[pos.x][pos.y]) {
-			activeUnit->SetPosition(selectable[selectionIdx]->pos.x, selectable[selectionIdx]->pos.y);
-			if (!activeUnit->hasCelerityMoved) { activeUnit->hasCelerityMoved = true; }
-			else { activeUnit->hasMoved = true; }
-			pos = selectable[selectionIdx]->pos;
-			eventManager.SendOnMove(activeUnit, false);
-		}
-		moveable.clear();
-		attackable.clear();
-		selectable.clear();
-		activeUnit = nullptr;
-		mode = MODE_NONE;
-	}
-}
-
-//Attack minion
-void Game::AttackUnit() {
-	activeUnit->Attack(selectable[selectionIdx]->minion, false);
-	pos = selectable[selectionIdx]->pos;
-	moveable.clear();
-	attackable.clear();
-	selectable.clear();
-	activeUnit = nullptr;
-	mode = MODE_NONE;
-}
-
 //Move cursor position
 void Game::MoveCursor(int x, int y) {
-	
+
 	//Move cursor
 	pos.x = (pos.x + x + 9) % 9;
 	if ((y == -1 && pos.y == 0) || (y == 1 && pos.y == 4)) {
@@ -565,19 +585,12 @@ void Game::MoveSelect(int x, int y) {
 			}
 		}
 	}
-	end:;
+end:;
 }
 
-//Check if tiles is moveable
-bool Game::CanMove(int x, int y) {
-	if (x > -1 && x < 9 && y > -1 && y < 5) {
-		if (map.tiles[x][y].minion == nullptr)
-			return true;
-		else if (map.tiles[x][y].minion->owner == map.tiles[pos.x][pos.y].minion->owner)
-			return true;
-	}
-	return false;
-}
+#pragma endregion
+
+#pragma region Highlighting
 
 //Highlight tiles
 void Game::HighlightTile(int x, int y, eColor color) {
@@ -624,7 +637,7 @@ void Game::HighlightSelectable(eTarget targetMode, Minion* minion) {
 	//Target type
 	switch (targetMode) {
 
-	//Empty tiles
+		//Empty tiles
 	case TARGET_TILE:
 		for (int i = 0; i < 9; ++i)
 			for (int j = 0; j < 5; ++j)
@@ -632,27 +645,27 @@ void Game::HighlightSelectable(eTarget targetMode, Minion* minion) {
 					selectable.push_back(&map.tiles[i][j]);
 		break;
 
-	//Any minion
+		//Any minion
 	case TARGET_UNIT:
 		for (int i = 0; i < minions.size(); ++i)
 			selectable.push_back(minions[i]->curTile);
 		break;
 
-	//Any (non-general) minion
+		//Any (non-general) minion
 	case TARGET_MINION:
 		for (int i = 0; i < minions.size(); ++i)
 			if (minions[i]->tribe != TRIBE_GENERAL)
 				selectable.push_back(minions[i]->curTile);
 		break;
 
-	//Enemies
+		//Enemies
 	case TARGET_ENEMY:
 		for (int i = 0; i < minions.size(); ++i)
 			if (minions[i]->owner != &players[turn])
 				selectable.push_back(minions[i]->curTile);
 		break;
 
-	//Allied minions
+		//Allied minions
 	case TARGET_ALLY_MINON:
 		for (int i = 0; i < minions.size(); ++i)
 			if (minions[i]->owner == &players[turn])
@@ -660,7 +673,7 @@ void Game::HighlightSelectable(eTarget targetMode, Minion* minion) {
 					selectable.push_back(minions[i]->curTile);
 		break;
 
-	//Enemy minions
+		//Enemy minions
 	case TARGET_ENEMY_MINION:
 		for (int i = 0; i < minions.size(); ++i)
 			if (minions[i]->owner != &players[turn])
@@ -668,7 +681,7 @@ void Game::HighlightSelectable(eTarget targetMode, Minion* minion) {
 					selectable.push_back(minions[i]->curTile);
 		break;
 
-	//Enemy minions
+		//Enemy minions
 	case TARGET_ENEMY_RANGED:
 		for (int i = 0; i < minions.size(); ++i)
 			if (minions[i]->owner != &players[turn])
@@ -677,14 +690,14 @@ void Game::HighlightSelectable(eTarget targetMode, Minion* minion) {
 						selectable.push_back(minions[i]->curTile);
 		break;
 
-	//Enemy general
+		//Enemy general
 	case TARGET_ENEMY_GENERAL:
 		for (int i = 0; i < minions.size(); ++i)
 			if (minions[i] == players[!turn].general)
 				selectable.push_back(minions[i]->curTile);
 		break;
 
-	//Spaces near minion
+		//Spaces near minion
 	case TARGET_NEAR_UNIT:
 		if (minion != nullptr)
 			for (int i = max(minion->curTile->pos.x - 1, 0); i < min(minion->curTile->pos.x + 2, 9); ++i)
@@ -693,7 +706,7 @@ void Game::HighlightSelectable(eTarget targetMode, Minion* minion) {
 						selectable.push_back(&map.tiles[i][j]);
 		break;
 
-	//Minons near minion
+		//Minons near minion
 	case TARGET_MINION_NEAR_UNIT:
 		if (minion != nullptr)
 			for (int i = max(minion->curTile->pos.x - 1, 0); i < min(minion->curTile->pos.x + 2, 9); ++i)
@@ -702,7 +715,7 @@ void Game::HighlightSelectable(eTarget targetMode, Minion* minion) {
 						selectable.push_back(&map.tiles[i][j]);
 		break;
 
-	//Empty tiles near minion
+		//Empty tiles near minion
 	case TARGET_TILE_NEAR_UNIT:
 		if (minion != nullptr)
 			for (int i = max(minion->curTile->pos.x - 1, 0); i < min(minion->curTile->pos.x + 2, 9); ++i)
@@ -711,7 +724,7 @@ void Game::HighlightSelectable(eTarget targetMode, Minion* minion) {
 						selectable.push_back(&map.tiles[i][j]);
 		break;
 
-	//Near allies (summon)
+		//Near allies (summon)
 	case TARGET_NEAR_ALLY:
 		for (int i = 0; i < minions.size(); ++i)
 			if (minions[i]->owner == &players[turn])
@@ -731,6 +744,10 @@ void Game::HighlightSelectable(eTarget targetMode, Minion* minion) {
 	}
 
 }
+
+#pragma endregion
+
+#pragma region Pathfinding
 
 //Get final path from list
 void Game::CreatePath() {
@@ -785,11 +802,15 @@ void Game::GeneratePaths() {
 			}
 			++count;
 		}
-		end:;
+	end:;
 		CreatePath();
 		pathList.clear();
 	}
 }
+
+#pragma endregion
+
+#pragma region Path Rendering
 
 //Draw arrow path
 void Game::DrawPath(Renderer& renderer) {
@@ -941,3 +962,26 @@ void Game::DrawArrow(int type, int x, int y, Renderer& renderer) {
 		renderer.Render(chars[0], x + 3, y);
 	}
 }
+
+#pragma endregion
+
+#pragma region Utils
+
+//Set game context for new token cards
+void Game::SetContext(Card* card, Player* player) {
+	card->game = this;
+	card->owner = player;
+}
+
+//Check if tiles is moveable
+bool Game::CanMove(int x, int y) {
+	if (x > -1 && x < 9 && y > -1 && y < 5) {
+		if (map.tiles[x][y].minion == nullptr)
+			return true;
+		else if (map.tiles[x][y].minion->owner == map.tiles[pos.x][pos.y].minion->owner)
+			return true;
+	}
+	return false;
+}
+
+#pragma endregion

@@ -1,7 +1,9 @@
 //Include
 #include "game.h"
 
-//Card constructor / destructor
+#pragma region Constructor
+
+//Card constructor
 Card::Card() {
 	faction = FACTION_NEUTRAL;
 	cardType = CARD_NONE;
@@ -15,6 +17,10 @@ Card::Card() {
 	divider.CreateFromString("컴TOKEN컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴");
 }
 Card::~Card() {}
+
+#pragma endregion
+
+#pragma region Card Effects
 
 //Add effect to list
 void Card::AddEffect(Effect effect, Card* source) {
@@ -51,7 +57,11 @@ void Card::RemoveEffect(Effect effect, Card* source, bool allStacks) {
 	UpdateStatBuffs();
 }
 
-//Card list constructor / destructor
+#pragma endregion
+
+#pragma region Card List
+
+//Card list constructor
 CardList::CardList() {
 
 	//Generals
@@ -239,6 +249,10 @@ CardList::CardList() {
 }
 CardList::~CardList() {}
 
+#pragma endregion
+
+#pragma region Search Functions
+
 //Find card by name
 Card* CardList::FindCard(std::string name) {
 	for (int i = 0; i < cardList.size(); ++i)
@@ -251,3 +265,5 @@ Card* CardList::FindCard(std::string name) {
 Effect CardList::FindEffect(eEffect effect) {
 	return effectList.Find(effect);
 }
+
+#pragma endregion
