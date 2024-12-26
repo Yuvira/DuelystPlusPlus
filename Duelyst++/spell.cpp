@@ -87,6 +87,20 @@ void Spell::UpdateDetailStats() {
 
 #pragma region Events
 
+//When a card is cast
+void Spell::OnCast(Card* card, BoardTile* tile) {
+
+	//Trigger any effects on this card
+	Card::OnCast(card, tile);
+
+	//Cast this
+	if (card == this) {
+		game->grave.push_back(this);
+		OnUse(tile);
+	}
+
+}
+
 //On card use
 void Spell::OnUse(BoardTile* tile) {
 

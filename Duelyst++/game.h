@@ -55,6 +55,7 @@ public:
 	void UseCard();
 	void UseEffect();
 	void Summon(Card* card, int x, int y, bool actionBar);
+	void Summon(Card* card, BoardTile* tile, bool actionBar);
 	void MoveUnit();
 	void AttackUnit();
 	void ChangeTurn(bool _turn);

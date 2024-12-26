@@ -1,7 +1,7 @@
 //Include
 #include "game.h"
 
-#pragma region Constructor
+#pragma region Card Constructor
 
 //Card constructor
 Card::Card() {
@@ -32,6 +32,7 @@ void Card::AddEffect(Effect effect, Card* source) {
 		}
 	}
 	effects.push_back(effect);
+	effects.back().card = this;
 	effects.back().sources.push_back(source);
 	UpdateStatBuffs();
 }
@@ -55,6 +56,17 @@ void Card::RemoveEffect(Effect effect, Card* source, bool allStacks) {
 		}
 	}
 	UpdateStatBuffs();
+}
+
+#pragma endregion
+
+#pragma region Events
+
+//When this is cast (before minion is summoned or spell effects occur)
+void Card::OnCast(Card* card, BoardTile* tile) {
+	for (int i = 0; i < effects.size(); ++i) {
+
+	}
 }
 
 #pragma endregion

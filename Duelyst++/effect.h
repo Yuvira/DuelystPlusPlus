@@ -136,6 +136,7 @@ public:
 	int costBuff;
 	int atkBuff;
 	int hpBuff;
+	Card* card;
 	std::vector<Card*> sources;
 };
 

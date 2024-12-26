@@ -13,6 +13,15 @@ EventManager::~EventManager() {}
 
 #pragma region Events
 
+//Send onSpellCast events
+void EventManager::SendOnCast(Card* card, BoardTile* tile) {
+	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnCast(card, tile); }
+	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnCast(card, tile); }
+	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnCast(card, tile); }
+	for (int i = 0; i < game->players[1].hand.size(); ++i) { game->players[1].hand[i]->OnCast(card, tile); }
+	for (int i = 0; i < game->players[1].deck.size(); ++i) { game->players[1].deck[i]->OnCast(card, tile); }
+}
+
 //Send onSummon events
 void EventManager::SendOnSummon(Minion* minion, bool actionBar) {
 	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnSummon(minion, actionBar); }

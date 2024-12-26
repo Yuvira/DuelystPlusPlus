@@ -338,32 +338,21 @@ void Game::UseCard() {
 	//Use mana
 	players[turn].mana -= activeCard->cost;
 
-	//Summon minion
-	if (activeCard->cardType == CARD_UNIT) {
-		pos = selectable[selectionIdx]->pos;
-		hand[handIdx + 1].SetColor(COLOR_LTWHITE);
-		selectable.clear();
-		selectionIdx = -1;
-		mode = MODE_NONE;
-		players[turn].hand.erase(players[turn].hand.begin() + handIdx);
-		Summon(activeCard, pos.x, pos.y, true);
-		activeCard = nullptr;
-		handIdx = -1;
-	}
+	//Set position and clear selectables
+	pos = selectable[selectionIdx]->pos;
+	hand[handIdx + 1].SetColor(COLOR_LTWHITE);
+	selectable.clear();
+	selectionIdx = -1;
+	mode = MODE_NONE;
 
-	//Use spell
-	else if (activeCard->cardType == CARD_SPELL) {
-		pos = selectable[selectionIdx]->pos;
-		hand[handIdx + 1].SetColor(COLOR_LTWHITE);
-		selectable.clear();
-		selectionIdx = -1;
-		mode = MODE_NONE;
-		players[turn].hand.erase(players[turn].hand.begin() + handIdx);
-		grave.push_back(activeCard);
-		dynamic_cast<Spell*>(activeCard)->OnUse(&map.tiles[pos.x][pos.y]);
-		activeCard = nullptr;
-		handIdx = -1;
-	}
+	//Cast card from hand
+	players[turn].hand.erase(players[turn].hand.begin() + handIdx);
+	eventManager.SendOnCast(activeCard, &map.tiles[pos.x][pos.y]);
+	activeCard->OnCast(activeCard, &map.tiles[pos.x][pos.y]);
+
+	//Reset active card / hand position
+	activeCard = nullptr;
+	handIdx = -1;
 
 }
 
@@ -384,6 +373,13 @@ void Game::UseEffect() {
 void Game::Summon(Card* card, int x, int y, bool actionBar) {
 	minions.push_back(dynamic_cast<Minion*>(card));
 	minions.back()->SetPosition(x, y);
+	eventManager.SendOnSummon(minions.back(), actionBar);
+}
+
+//Summon on tile
+void Game::Summon(Card* card, BoardTile* tile, bool actionBar) {
+	minions.push_back(dynamic_cast<Minion*>(card));
+	minions.back()->SetPosition(tile->pos.x, tile->pos.y);
 	eventManager.SendOnSummon(minions.back(), actionBar);
 }
 

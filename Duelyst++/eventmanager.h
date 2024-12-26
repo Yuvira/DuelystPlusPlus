@@ -13,6 +13,7 @@ class EventManager {
 public:
 	EventManager();
 	~EventManager();
+	void SendOnCast(Card* card, BoardTile* tile);
 	void SendOnSummon(Minion* minion, bool actionBar);
 	void SendOnDeath(Minion* minion);
 	void SendOnAttack(Minion* source, Minion* target, bool counter);

@@ -12,6 +12,7 @@ Effect::Effect(eEffect _effect, eKeywordFlags _keywords, int _costBuff, int _atk
 	costBuff = _costBuff;
 	atkBuff = _atkBuff;
 	hpBuff = _hpBuff;
+	card = nullptr;
 	if (description != "")
 		GenerateSprite(description);
 }
