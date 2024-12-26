@@ -6,7 +6,7 @@
 //Minion constructors
 Minion::Minion() : Minion(FACTION_NEUTRAL, TRIBE_NONE, 0, 0, 0, "", "???") {}
 Minion::Minion(eFaction _faction, eTribe _tribe, int _cost, int _atk, int _hp, std::string path, std::string _name) {
-	cardType = CARD_UNIT;
+	cardType = CARD_MINION;
 	faction = _faction;
 	tribe = _tribe;
 	cost = _cost;

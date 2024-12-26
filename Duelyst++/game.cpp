@@ -496,7 +496,7 @@ void Game::SelectTile(BoardTile& tile) {
 void Game::SelectCard() {
 
 	//Minion card
-	if (players[turn].hand[handIdx]->cardType == CARD_UNIT) {
+	if (players[turn].hand[handIdx]->cardType == CARD_MINION) {
 		if (players[turn].hand[handIdx]->cost <= players[turn].mana) {
 			HighlightSelectable(TARGET_NEAR_ALLY);
 			if (selectable.size() > 0) { activeCard = players[turn].hand[handIdx]; }

@@ -122,7 +122,7 @@ void Player::Draw() {
 //Add card to hand
 void Player::AddToHand(Card* card, bool cast) {
 	if (cast) {
-		if (card->cardType == CARD_UNIT)
+		if (card->cardType == CARD_MINION)
 			card = new Minion(*(dynamic_cast<Minion*>(card)));
 		else if (card->cardType == CARD_SPELL)
 			card = new Spell(*(dynamic_cast<Spell*>(card)));

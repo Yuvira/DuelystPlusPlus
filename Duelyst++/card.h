@@ -16,7 +16,7 @@ class Spell;
 //Card types
 enum eCard {
 	CARD_NONE,
-	CARD_UNIT,
+	CARD_MINION,
 	CARD_SPELL,
 	CARD_ARTIFACT
 };
