@@ -371,14 +371,18 @@ void Game::UseEffect() {
 
 //Summon at position
 void Game::Summon(Card* card, int x, int y, bool actionBar) {
-	minions.push_back(dynamic_cast<Minion*>(card));
+	if (!card->IsMinion())
+		return;
+	minions.push_back(card->GetMinion());
 	minions.back()->SetPosition(x, y);
 	eventManager.SendOnSummon(minions.back(), actionBar);
 }
 
 //Summon on tile
 void Game::Summon(Card* card, BoardTile* tile, bool actionBar) {
-	minions.push_back(dynamic_cast<Minion*>(card));
+	if (!card->IsMinion())
+		return;
+	minions.push_back(card->GetMinion());
 	minions.back()->SetPosition(tile->pos.x, tile->pos.y);
 	eventManager.SendOnSummon(minions.back(), actionBar);
 }
@@ -494,23 +498,10 @@ void Game::SelectTile(BoardTile& tile) {
 
 //Select card in hand
 void Game::SelectCard() {
-
-	//Minion card
-	if (players[turn].hand[handIdx]->cardType == CARD_MINION) {
-		if (players[turn].hand[handIdx]->cost <= players[turn].mana) {
-			HighlightSelectable(TARGET_NEAR_ALLY);
-			if (selectable.size() > 0) { activeCard = players[turn].hand[handIdx]; }
-		}
+	if (players[turn].hand[handIdx]->cost <= players[turn].mana) {
+		HighlightSelectable(players[turn].hand[handIdx]->targetMode);
+		if (selectable.size() > 0) { activeCard = players[turn].hand[handIdx]; }
 	}
-
-	//Spell card
-	if (players[turn].hand[handIdx]->cardType == CARD_SPELL) {
-		if (players[turn].hand[handIdx]->cost <= players[turn].mana) {
-			HighlightSelectable(dynamic_cast<Spell*>(players[turn].hand[handIdx])->targetMode);
-			if (selectable.size() > 0) { activeCard = players[turn].hand[handIdx]; }
-		}
-	}
-
 }
 
 //Move cursor position

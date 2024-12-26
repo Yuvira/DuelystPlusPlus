@@ -21,14 +21,12 @@ Player::~Player() {}
 //Preset deck
 void Player::Preset(CardList& cardList, Game* _game) {
 	game = _game;
-	deck.push_back(new Minion(*(dynamic_cast<Minion*>(cardList.FindCard("Argeon Highmayne")))));
-	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(dynamic_cast<Minion*>(cardList.FindCard("Komodo Charger"))))); }
-	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(dynamic_cast<Minion*>(cardList.FindCard("Sapphire Seer"))))); }
-	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(dynamic_cast<Minion*>(cardList.FindCard("Ash Mephyt"))))); }
-	for (int i = 0; i < deck.size(); ++i) {
-		deck[i]->game = game;
-		deck[i]->owner = this;
-	}
+	deck.push_back(new Minion(*(cardList.FindCard("Argeon Highmayne")->GetMinion())));
+	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(cardList.FindCard("Komodo Charger")->GetMinion()))); }
+	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(cardList.FindCard("Sapphire Seer")->GetMinion()))); }
+	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(cardList.FindCard("Ash Mephyt")->GetMinion()))); }
+	for (int i = 0; i < deck.size(); ++i)
+		game->SetContext(deck[i], this);
 }
 
 //Initialize deck/hand
@@ -123,9 +121,9 @@ void Player::Draw() {
 void Player::AddToHand(Card* card, bool cast) {
 	if (cast) {
 		if (card->cardType == CARD_MINION)
-			card = new Minion(*(dynamic_cast<Minion*>(card)));
+			card = new Minion(*(card->GetMinion()));
 		else if (card->cardType == CARD_SPELL)
-			card = new Spell(*(dynamic_cast<Spell*>(card)));
+			card = new Spell(*(card->GetSpell()));
 	}
 	game->SetContext(card, this);
 	if (hand.size() < 6) {

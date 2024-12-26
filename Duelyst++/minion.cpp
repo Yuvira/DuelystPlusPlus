@@ -9,6 +9,7 @@ Minion::Minion(eFaction _faction, eTribe _tribe, int _cost, int _atk, int _hp, s
 	cardType = CARD_MINION;
 	faction = _faction;
 	tribe = _tribe;
+	targetMode = TARGET_NEAR_ALLY;
 	cost = _cost;
 	atk = _atk;
 	hp = _hp;
@@ -147,10 +148,9 @@ void Minion::UpdateStatBuffs() {
 		atkBuff += effects[i].atkBuff * effects[i].sources.size();
 		hpBuff += effects[i].hpBuff * effects[i].sources.size();
 	}
-	Minion* orig = dynamic_cast<Minion*>(original);
-	cost = max(orig->cost + costBuff, 0);
-	atk = max(orig->atk + atkBuff, 0);
-	hpMax = orig->hpMax + hpBuff;
+	cost = max(original->GetMinion()->cost + costBuff, 0);
+	atk = max(original->GetMinion()->atk + atkBuff, 0);
+	hpMax = original->GetMinion()->hpMax + hpBuff;
 	hp = hpMax + hpDelta;
 }
 

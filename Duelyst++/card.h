@@ -100,8 +100,13 @@ public:
 	virtual void OnReplace(Card* replaced) {}
 	virtual void OnTurnEnd(Player* player) {}
 	virtual void OnTurnStart(Player* player) {}
+	virtual Minion* GetMinion() { return nullptr; }
+	virtual Spell* GetSpell() { return nullptr; }
+	bool IsMinion() { return GetMinion() != nullptr; }
+	bool IsSpell() { return GetSpell() != nullptr; }
 	eFaction faction;
 	eCard cardType;
+	eTarget targetMode;
 	bool isToken;
 	int cost;
 	Game* game;
@@ -151,6 +156,7 @@ public:
 	void OnTurnEnd(Player* player);
 	void OnTurnStart(Player* player);
 	void Callback(BoardTile* tile);
+	Minion* GetMinion() { return this; }
 	eTribe tribe;
 	int atk;
 	int hp;
@@ -180,7 +186,7 @@ public:
 	void OnUse(BoardTile* tile);
 	void Callback(BoardTile* tile);
 	void LateCallback();
-	eTarget targetMode;
+	Spell* GetSpell() { return this; }
 	SpellEffect spell;
 };
 

@@ -158,11 +158,11 @@ EffectList::EffectList() {
 	//Ash Mephyt
 	effectList.push_back(Effect(SKILL_ASH_MEPHYT, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Summon two copies of|this minion on random spaces"));
 	effectList.back().OnCast = [](Effect* effect, Card* card, Card* source, BoardTile* tile) {
-		if (card == source && card->GetMinion() != nullptr) {
+		if (card == source && card->IsMinion()) {
 			for (int i = 0; i < 2; ++i) {
 				BoardTile* newTile = card->game->map.GetRandom(tile);
 				if (newTile != nullptr) {
-					Minion* copy = new Minion(*(dynamic_cast<Minion*>(card->original)));
+					Minion* copy = new Minion(*(card->original->GetMinion()));
 					card->game->SetContext(copy, card->owner);
 					card->game->Summon(copy, newTile, false);
 				}
