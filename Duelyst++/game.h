@@ -18,16 +18,17 @@ enum eMode {
 	MODE_SELECT
 };
 
-//Minion effect callback class
+//Card effect callback class
 class EffectCallback {
 public:
 	EffectCallback();
-	EffectCallback(Minion* _minion, Spell* _spell, BoardTile* _tile, eEffect _effect);
+	EffectCallback(Card* _card, BoardTile* _tile);
 	~EffectCallback();
-	Minion* minion;
-	Spell* spell;
+	void Execute() { callback(card, tile); }
+	void Execute(BoardTile* _tile) { callback(card, _tile); }
+	Card* card;
 	BoardTile* tile;
-	eEffect effect;
+	std::function<void(Card*, BoardTile*)> callback;
 };
 
 //Pathing coords
@@ -54,8 +55,9 @@ public:
 	void Update();
 	void UseCard();
 	void UseEffect();
-	void Summon(Card* card, int x, int y, bool actionBar);
+	void PostCast();
 	void Summon(Card* card, BoardTile* tile, bool actionBar);
+	void Summon(Card* card, int x, int y, bool actionBar);
 	void MoveUnit();
 	void AttackUnit();
 	void ChangeTurn(bool _turn);
@@ -88,7 +90,7 @@ public:
 	Map map;
 	Tile hand[7];
 	EffectCallback callback;
-	std::vector<EffectCallback> lateCallback;
+	std::vector<EffectCallback> lateCallbacks;
 	std::vector<BoardTile*> highlighted;
 	std::vector<BoardTile*> moveable;
 	std::vector<BoardTile*> hostile;
@@ -100,6 +102,7 @@ public:
 	Card* activeCard;
 	eMode mode;
 	Coord pos;
+	Coord castPos;
 	int handIdx;
 	int selectionIdx;
 	bool turn;

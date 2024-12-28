@@ -62,10 +62,17 @@ void Card::RemoveEffect(Effect effect, Card* source, bool allStacks) {
 #pragma region Events
 
 //When this is cast (before minion is summoned or spell effects occur)
+void Card::OnPreCast(BoardTile* tile) {
+	for (int i = 0; i < effects.size(); ++i)
+		if (effects[i].OnPreCast)
+			effects[i].OnPreCast(this, tile);
+}
+
+//Whenever any card is cast
 void Card::OnCast(Card* card, BoardTile* tile) {
 	for (int i = 0; i < effects.size(); ++i)
 		if (effects[i].OnCast)
-			effects[i].OnCast(&effects[i], this, card, tile);
+			effects[i].OnCast(this, card, tile);
 }
 
 #pragma endregion
@@ -80,6 +87,7 @@ CardList::CardList() {
 
 	//Minions
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 3, "ashmephyt", "Ash Mephyt", FindEffect(SKILL_ASH_MEPHYT)));
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "bloodtearalchemist", "Bloodtear Alchemist", FindEffect(SKILL_BLOODTEAR_ALCHEMIST)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "dragonlark", "Dragonlark", FindEffect(SKILL_FLYING)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 5, 5, 5, "fireblazer", "Fireblazer", FindEffect(SKILL_PROVOKE)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "firespitter", "Fire Spitter", FindEffect(SKILL_RANGED)));

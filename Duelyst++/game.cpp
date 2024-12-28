@@ -4,12 +4,11 @@
 #pragma region Helper Constructors
 
 //Callback stuff
-EffectCallback::EffectCallback() : EffectCallback(nullptr, nullptr, nullptr, EFFECT_NONE) {}
-EffectCallback::EffectCallback(Minion* _minion, Spell* _spell, BoardTile* _tile, eEffect _effect) {
-	minion = _minion;
-	spell = _spell;
+EffectCallback::EffectCallback() : EffectCallback(nullptr, nullptr) {}
+EffectCallback::EffectCallback(Card* _card, BoardTile* _tile) {
+	card = _card;
 	tile = _tile;
-	effect = _effect;
+	callback = nullptr;
 }
 EffectCallback::~EffectCallback() {}
 
@@ -101,6 +100,10 @@ void Game::RenderGame(Renderer& renderer) {
 	//Units
 	for (int i = 0; i < minions.size(); ++i)
 		minions[i]->Render(renderer);
+
+	//Render active minion card while selecting opening gambit targets
+	if (activeCard != nullptr && activeCard->GetMinion() != nullptr && mode == MODE_SELECT && callback.callback)
+		activeCard->GetMinion()->Render(renderer);
 
 	//Move mode indicators
 	if (mode == MODE_MOVE) {
@@ -241,7 +244,7 @@ void Game::Input() {
 
 		//Use card at selection
 		else if (asciiVal == 32) {
-			if (callback.minion || callback.spell)
+			if (callback.callback)
 				UseEffect();
 			else
 				UseCard();
@@ -345,45 +348,51 @@ void Game::UseCard() {
 	selectionIdx = -1;
 	mode = MODE_NONE;
 
-	//Cast card from hand
+	//Remove from hand and do pre-cast effect targeting
 	players[turn].hand.erase(players[turn].hand.begin() + handIdx);
-	eventManager.SendOnCast(activeCard, &map.tiles[pos.x][pos.y]);
-	activeCard->OnCast(activeCard, &map.tiles[pos.x][pos.y]);
+	activeCard->OnPreCast(&map.tiles[pos.x][pos.y]);
+	if (activeCard->GetMinion() != nullptr)
+		activeCard->GetMinion()->SetPosition(pos.x, pos.y);
+	castPos = pos;
 
-	//Reset active card / hand position
-	activeCard = nullptr;
+	//Reset hand position
 	handIdx = -1;
+
+	//Do post-cast if we're not targeting anything
+	if (mode == MODE_NONE)
+		PostCast();
 
 }
 
 //Use active effect
 void Game::UseEffect() {
-	BoardTile* t = selectable[selectionIdx];
-	pos = t->pos;
+	BoardTile* tile = selectable[selectionIdx];
+	pos = tile->pos;
 	selectable.clear();
 	selectionIdx = -1;
 	mode = MODE_NONE;
-	if (callback.minion != nullptr)
-		callback.minion->Callback(t);
-	else if (callback.spell != nullptr)
-		callback.spell->Callback(t);
+	if (callback.callback) {
+		callback.Execute(tile);
+		callback = EffectCallback();
+	}
+	if (activeCard != nullptr)
+		PostCast();
 }
 
-//Summon at position
+//Send cast event after pre-cast effect targets have been set
+void Game::PostCast() {
+	eventManager.SendOnCast(activeCard, &map.tiles[castPos.x][castPos.y]);
+	activeCard->OnCast(activeCard, &map.tiles[castPos.x][castPos.y]);
+	activeCard = nullptr;
+}
+
+//Summon at tile / position
+void Game::Summon(Card* card, BoardTile* tile, bool actionBar) { Summon(card, tile->pos.x, tile->pos.y, actionBar); }
 void Game::Summon(Card* card, int x, int y, bool actionBar) {
 	if (!card->IsMinion())
 		return;
 	minions.push_back(card->GetMinion());
 	minions.back()->SetPosition(x, y);
-	eventManager.SendOnSummon(minions.back(), actionBar);
-}
-
-//Summon on tile
-void Game::Summon(Card* card, BoardTile* tile, bool actionBar) {
-	if (!card->IsMinion())
-		return;
-	minions.push_back(card->GetMinion());
-	minions.back()->SetPosition(tile->pos.x, tile->pos.y);
 	eventManager.SendOnSummon(minions.back(), actionBar);
 }
 
@@ -422,11 +431,11 @@ void Game::ChangeTurn(bool _turn) {
 	//Indicate turn is ending
 	endTurn = true;
 
-	//Do late callbacks
-	while (lateCallback.size() > 0) {
-		if (lateCallback[0].spell != nullptr)
-			lateCallback[0].spell->LateCallback();
-		lateCallback.erase(lateCallback.begin());
+	//Process end of turn events
+	while (lateCallbacks.size() > 0) {
+		if (lateCallbacks[0].callback)
+			lateCallbacks[0].Execute();
+		lateCallbacks.erase(lateCallbacks.begin());
 		if (selectable.size() > 0)
 			return;
 	}

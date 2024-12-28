@@ -525,10 +525,6 @@ void Minion::OnSummon(Minion* minion, bool actionBar) {
 				case SKILL_BLISTERING_SKORN:
 					for (int a = 0; a < game->minions.size(); ++a) { game->minions[a]->DealDamage(this, 1); }
 					break;
-				case SKILL_BLOODTEAR_ALCHEMIST:
-					game->HighlightSelectable(TARGET_ENEMY);
-					if (game->selectable.size() > 0) { game->callback = EffectCallback(this, nullptr, nullptr, SKILL_BLOODTEAR_ALCHEMIST); }
-					break;
 				case SKILL_CROSSBONES:
 					game->HighlightSelectable(TARGET_ENEMY_RANGED);
 					if (game->selectable.size() > 0) { game->callback = EffectCallback(this, nullptr, nullptr, SKILL_CROSSBONES); }
@@ -1406,9 +1402,6 @@ void Minion::Callback(BoardTile* tile) {
 	/*
 
 	switch (game->callback.skill) {
-	case SKILL_BLOODTEAR_ALCHEMIST:
-		if (tile->minion != nullptr) { tile->minion->DealDamage(this, 1); }
-		break;
 	case SKILL_CROSSBONES:
 		if (tile->minion != nullptr) { tile->minion->isDead = true; }
 		break;

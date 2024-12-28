@@ -157,8 +157,8 @@ EffectList::EffectList() {
 
 	//Ash Mephyt
 	effectList.push_back(Effect(SKILL_ASH_MEPHYT, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Summon two copies of|this minion on random spaces"));
-	effectList.back().OnCast = [](Effect* effect, Card* card, Card* source, BoardTile* tile) {
-		if (card == source && card->IsMinion()) {
+	effectList.back().OnPreCast = [](Card* card, BoardTile* tile) {
+		if (card->IsMinion()) {
 			for (int i = 0; i < 2; ++i) {
 				BoardTile* newTile = card->game->map.GetRandom(tile);
 				if (newTile != nullptr) {
@@ -167,6 +167,19 @@ EffectList::EffectList() {
 					card->game->Summon(copy, newTile, false);
 				}
 			}
+		}
+	};
+
+	//Bloodtear Alchemist
+	effectList.push_back(Effect(SKILL_BLOODTEAR_ALCHEMIST, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Deal 1 damage to|an enemy"));
+	effectList.back().OnPreCast = [](Card* card, BoardTile* tile) {
+		card->game->HighlightSelectable(TARGET_ENEMY);
+		if (card->game->selectable.size() > 0) {
+			card->game->callback = EffectCallback(card, nullptr);
+			card->game->callback.callback = [](Card* card, BoardTile* tile) {
+				if (tile->minion != nullptr)
+					tile->minion->DealDamage(card->GetMinion(), 1);
+			};
 		}
 	};
 
@@ -221,8 +234,6 @@ EffectList::EffectList() {
 	skillList.back().GenerateSprite("{Provoke}|This minion's cost is equal to your|General's Health");
 	buffList.push_back(Buff(BUFF_BLOOD_TAURA, -1, 0, 0, true));
 	buffList.back().GenerateSprite("Blood Taura");
-	skillList.push_back(Skill(SKILL_BLOODTEAR_ALCHEMIST));
-	skillList.back().GenerateSprite("{Opening Gambit}: Deal 1 damage to|an enemy");
 	skillList.push_back(Skill(SKILL_BLUETIP_SCORPION));
 	skillList.back().GenerateSprite("Deals double damage to minions");
 	skillList.push_back(Skill(SKILL_BONEREAPER));

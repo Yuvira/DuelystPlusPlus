@@ -139,7 +139,8 @@ public:
 	int atkBuff;
 	int hpBuff;
 	std::vector<Card*> sources;
-	std::function<void(Effect*, Card*, Card*, BoardTile*)> OnCast;
+	std::function<void(Card*, BoardTile*)> OnPreCast;
+	std::function<void(Card*, Card*, BoardTile*)> OnCast;
 };
 
 //Spell class

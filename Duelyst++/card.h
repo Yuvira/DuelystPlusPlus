@@ -86,6 +86,7 @@ public:
 	~Card();
 	void AddEffect(Effect effect, Card* source);
 	void RemoveEffect(Effect effect, Card* source, bool allStacks);
+	virtual void OnPreCast(BoardTile* tile);
 	virtual void OnCast(Card* card, BoardTile* tile);
 	virtual void UpdateStatBuffs() {}
 	virtual void DrawDetails(Renderer& renderer, int& y) {}
