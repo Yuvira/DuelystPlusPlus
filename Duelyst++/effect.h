@@ -138,13 +138,4 @@ public:
 	std::function<void(Card*, Card*, BoardTile*)> OnCast;
 };
 
-//Effect list class
-class EffectList {
-public:
-	EffectList();
-	~EffectList();
-	Effect Find(eEffect effect);
-	std::vector<Effect> effectList;
-};
-
 #endif

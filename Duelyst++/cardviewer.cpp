@@ -20,7 +20,7 @@ CardViewer::CardViewer() {
 	//Variables
 	pos = Coord(0, 0);
 	page = 0;
-	pageCount = (cardList.cardList.size() + 53) / 54;
+	pageCount = (collections.cardList.size() + 53) / 54;
 	pageNumber.CreateFromString(std::to_string(page + 1) + " / " + std::to_string(pageCount));
 	modeSwitch = nullptr;
 
@@ -43,15 +43,15 @@ void CardViewer::RenderCollection(Renderer& renderer) {
 			renderer.Render(tiles[i][j].border);
 
 	//Cards
-	for (int a = page * 54; a < min((page + 1) * 54, cardList.cardList.size()); ++a)
-		renderer.Render(cardList.cardList[a]->sprite, (((a - (page * 54)) % 9) * 7) + 2, (((a - (page * 54)) / 9) * 7) + 7);
+	for (int a = page * 54; a < min((page + 1) * 54, collections.cardList.size()); ++a)
+		renderer.Render(collections.cardList[a]->sprite, (((a - (page * 54)) % 9) * 7) + 2, (((a - (page * 54)) / 9) * 7) + 7);
 
 	//Card counts
-	count[0].CreateFromString("Generals  : " + std::to_string(cardList.generalList.size()));
-	count[1].CreateFromString("Units     : " + std::to_string(cardList.minionList.size()));
-	count[2].CreateFromString("Spells    : " + std::to_string(cardList.spellList.size()));
+	count[0].CreateFromString("Generals  : " + std::to_string(collections.generalList.size()));
+	count[1].CreateFromString("Units     : " + std::to_string(collections.minionList.size()));
+	count[2].CreateFromString("Spells    : " + std::to_string(collections.spellList.size()));
 	count[3].CreateFromString("Artifacts : 0");
-	count[4].CreateFromString("TOTAL : " + std::to_string(cardList.cardList.size()));
+	count[4].CreateFromString("TOTAL : " + std::to_string(collections.cardList.size()));
 	for (int i = 0; i < 4; ++i)
 		renderer.Render(count[i], 1, i + 1);
 	renderer.Render(count[4], 18, 1);
@@ -68,8 +68,8 @@ void CardViewer::RenderCollection(Renderer& renderer) {
 void CardViewer::RenderSidebar(Renderer& renderer) {
 	int y = 1;
 	int i = (pos.y * 9) + pos.x + (page * 54);
-	if (i < cardList.cardList.size())
-		cardList.cardList[i]->DrawDetails(renderer, y);
+	if (i < collections.cardList.size())
+		collections.cardList[i]->DrawDetails(renderer, y);
 }
 
 #pragma endregion

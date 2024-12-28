@@ -191,20 +191,4 @@ public:
 	Spell* GetSpell() { return this; }
 };
 
-//Card list class
-class CardList {
-public:
-	CardList();
-	~CardList();
-	Card* FindCard(std::string name);
-	Effect FindEffect(eEffect effect);
-	EffectList effectList;
-	std::vector<Card*> cardList;
-	std::vector<Minion> generalList;
-	std::vector<Minion> minionList;
-	std::vector<Minion> minionTokenList;
-	std::vector<Spell> spellList;
-	std::vector<Spell> spellTokenList;
-};
-
 #endif

@@ -18,7 +18,7 @@ public:
 	Sprite board;
 	Sprite count[5];
 	Sprite pageNumber;
-	CardList cardList;
+	Collections collections;
 	Tile tiles[9][7];
 	Coord pos;
 	int page;

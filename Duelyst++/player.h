@@ -4,14 +4,14 @@
 
 //Include
 #include <cstdlib>
-#include "card.h"
+#include "collections.h"
 
 //Player class
 class Player {
 public:
 	Player();
 	~Player();
-	void Preset(CardList& cardList, Game* _game);
+	void Preset(Collections& collections, Game* _game);
 	void Init(int _mana);
 	void UpdateMana(eColor color);
 	void Render(Renderer& renderer, bool left);

@@ -84,7 +84,7 @@ public:
 	Sprite light;
 	Sprite board;
 	Sprite chars[10];
-	CardList cardList;
+	Collections collections;
 	EventManager eventManager;
 	Player players[2];
 	Map map;

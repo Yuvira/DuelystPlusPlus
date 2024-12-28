@@ -49,7 +49,7 @@ Game::Game() {
 
 	//Initialize players
 	for (int i = 0; i < 2; ++i) {
-		players[i].Preset(cardList, this);
+		players[i].Preset(collections, this);
 		Summon(players[i].deck[0], i * 8, 2, false);
 		players[i].deck.erase(players[i].deck.begin());
 		players[i].general = minions.back();

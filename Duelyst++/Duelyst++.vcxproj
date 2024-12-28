@@ -116,6 +116,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="cardviewer.cpp" />
+    <ClCompile Include="collections.cpp" />
     <ClCompile Include="effect.cpp" />
     <ClCompile Include="eventmanager.cpp" />
     <ClCompile Include="game.cpp" />
@@ -126,11 +127,12 @@
     <ClCompile Include="sprite.cpp" />
     <ClCompile Include="tile.cpp" />
     <ClCompile Include="minion.cpp" />
-    <ClCompile Include="cardlist.cpp" />
+    <ClCompile Include="card.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="card.h" />
     <ClInclude Include="cardviewer.h" />
+    <ClInclude Include="collections.h" />
     <ClInclude Include="effect.h" />
     <ClInclude Include="eventmanager.h" />
     <ClInclude Include="game.h" />
