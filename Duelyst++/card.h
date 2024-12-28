@@ -178,6 +178,7 @@ class Spell : public Card {
 public:
 	Spell();
 	Spell(eFaction _faction, eTarget _target, int _cost, std::string path, std::string _name);
+	Spell(eFaction _faction, eTarget _target, int _cost, std::string path, std::string _name, Effect effect);
 	~Spell();
 	void GenerateDetails();
 	void DrawDetails(Renderer& renderer, int& y);
@@ -188,7 +189,6 @@ public:
 	void Callback(BoardTile* tile);
 	void LateCallback();
 	Spell* GetSpell() { return this; }
-	SpellEffect spell;
 };
 
 //Card list class

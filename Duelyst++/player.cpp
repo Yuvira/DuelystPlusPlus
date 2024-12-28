@@ -25,6 +25,7 @@ void Player::Preset(CardList& cardList, Game* _game) {
 	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(cardList.FindCard("Komodo Charger")->GetMinion()))); }
 	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(cardList.FindCard("Ash Mephyt")->GetMinion()))); }
 	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(cardList.FindCard("Bloodtear Alchemist")->GetMinion()))); }
+	for (int i = 0; i < 7; ++i) { deck.push_back(new Spell(*(cardList.FindCard("Breath of The Unborn")->GetSpell()))); }
 	for (int i = 0; i < deck.size(); ++i)
 		game->SetContext(deck[i], this);
 }

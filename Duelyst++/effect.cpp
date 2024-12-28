@@ -17,11 +17,6 @@ Effect::Effect(eEffect _effect, eKeywordFlags _keywords, int _costBuff, int _atk
 }
 Effect::~Effect() {}
 
-//Spell constructors
-SpellEffect::SpellEffect() : SpellEffect(SPELL_NONE) {}
-SpellEffect::SpellEffect(eSpell _spell) { spell = _spell; }
-SpellEffect::~SpellEffect() {}
-
 #pragma endregion
 
 #pragma region Rendering
@@ -91,21 +86,6 @@ void Effect::GenerateSprite(std::string str) {
 
 }
 
-//Generate spell sprites
-void SpellEffect::GenerateSprite(std::string str) {
-	std::vector<std::string> lines;
-	lines.push_back("");
-	for (int i = 0; i < str.length(); ++i) {
-		if (str[i] == '|') { lines.push_back(""); }
-		else { lines.back() += str[i]; }
-	}
-	for (int i = 0; i < lines.size(); ++i) {
-		sprites.push_back(Sprite());
-		sprites.back().CreateFromString(lines[i]);
-		sprites.back().SetColor(COLOR_GRAY);
-	}
-}
-
 #pragma endregion
 
 #pragma region Utils
@@ -155,6 +135,8 @@ EffectList::EffectList() {
 	effectList.push_back(Effect(SKILL_RANGED, KEYWORD_RANGED, 0, 0, 0, "{Ranged}"));
 	effectList.push_back(Effect(SKILL_RUSH, KEYWORD_RUSH, 0, 0, 0, "{Rush}"));
 
+#pragma region Minions
+
 	//Ash Mephyt
 	effectList.push_back(Effect(SKILL_ASH_MEPHYT, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Summon two copies of|this minion on random spaces"));
 	effectList.back().OnPreCast = [](Card* card, BoardTile* tile) {
@@ -182,6 +164,25 @@ EffectList::EffectList() {
 			};
 		}
 	};
+
+#pragma endregion
+
+#pragma region Spells
+
+	//Breath of The Unborn
+	effectList.push_back(Effect(SPELL_BREATH_OF_THE_UNBORN, KEYWORD_NONE, 0, 0, 0, "Deal 2 damage to all enemy|minions. Fully heal all friendly|minions"));
+	effectList.back().OnCast = [](Card* card, Card* source, BoardTile* tile) {
+		if (card == source) {
+			for (int a = 0; a < card->game->minions.size(); ++a) {
+				if (card->game->minions[a]->tribe != TRIBE_GENERAL) {
+					if (card->game->minions[a]->owner == card->owner) { card->game->minions[a]->DealDamage(nullptr, -999); }
+					else { card->game->minions[a]->DealDamage(nullptr, 2); }
+				}
+			}
+		}
+	};
+
+#pragma endregion
 
 	/*
 
@@ -336,8 +337,6 @@ EffectList::EffectList() {
 	skillList.back().GenerateSprite("{Ranged}|At the end of your turn, restore|2 Health to all nearby friendly minions");
 
 	//Spell effects
-	spellList.push_back(SpellEffect(SPELL_BREATH_OF_THE_UNBORN));
-	spellList.back().GenerateSprite("Deal 2 damage to all enemy|minions. Fully heal all friendly|minions");
 	spellList.push_back(SpellEffect(SPELL_CONSUMING_REBIRTH));
 	spellList.back().GenerateSprite("Destroy a friendly minion. At the end|of your turn, re-summon it on|the same space and give it +1/+1");
 	buffList.push_back(Buff(BUFF_CONSUMING_REBIRTH, 0, 1, 1, true));
@@ -369,13 +368,6 @@ Effect EffectList::Find(eEffect effect) {
 	for (int i = 0; i < effectList.size(); ++i)
 		if (effectList[i].effect == effect)
 			return effectList[i];
-}
-
-//Find spell by enum
-SpellEffect EffectList::Find(eSpell spell) {
-	for (int i = 0; i < spellList.size(); ++i)
-		if (spellList[i].spell == spell)
-			return spellList[i];
 }
 
 #pragma endregion

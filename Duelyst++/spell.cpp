@@ -5,7 +5,7 @@
 
 //Game constructors
 Spell::Spell() : Spell(FACTION_NEUTRAL, TARGET_ANY, 0, "", "???") {}
-Spell::Spell(eFaction _faction,  eTarget _target, int _cost, std::string path, std::string _name) {
+Spell::Spell(eFaction _faction, eTarget _target, int _cost, std::string path, std::string _name) {
 	cardType = CARD_SPELL;
 	faction = _faction;
 	targetMode = _target;
@@ -18,6 +18,10 @@ Spell::Spell(eFaction _faction,  eTarget _target, int _cost, std::string path, s
 	GenerateDetails();
 	game = nullptr;
 	owner = nullptr;
+}
+Spell::Spell(eFaction _faction, eTarget _target, int _cost, std::string path, std::string _name, Effect effect) : Spell(_faction, _target, _cost, path, _name) {
+	if (effect.effect != EFFECT_NONE)
+		AddEffect(effect, this);
 }
 Spell::~Spell() {}
 
@@ -44,12 +48,6 @@ void Spell::DrawDetails(Renderer& renderer, int& y) {
 	renderer.Render(header[0], 72, y); ++y;
 	UpdateDetailStats();
 	renderer.Render(header[1], 72, y); y += 2;
-	for (int i = 0; i < spell.sprites.size(); ++i) {
-		renderer.Render(spell.sprites[i], 72, y);
-		if (i == spell.sprites.size() - 1)
-			++y;
-		++y;
-	}
 	for (int i = 0; i < effects.size(); ++i) {
 		renderer.Render(effects[i].sprite, 72, y);
 		y += effects[i].sprite.height + 2;
@@ -94,10 +92,8 @@ void Spell::OnCast(Card* card, BoardTile* tile) {
 	Card::OnCast(card, tile);
 
 	//Cast this
-	if (card == this) {
+	if (card == this)
 		game->grave.push_back(this);
-		OnUse(tile);
-	}
 
 }
 
@@ -107,15 +103,6 @@ void Spell::OnUse(BoardTile* tile) {
 	/*
 
 	switch (spell.spell) {
-	case SPELL_BREATH_OF_THE_UNBORN:
-		for (int a = 0; a < game->minions.size(); ++a) {
-			if (game->minions[a]->tribe != TRIBE_GENERAL) {
-				if (game->minions[a]->owner == owner) { game->minions[a]->DealDamage(nullptr, -999); }
-				else { game->minions[a]->DealDamage(nullptr, 2); }
-			}
-		}
-		game->eventManager.SendOnSpellCast(this);
-		break;
 	case SPELL_CONSUMING_REBIRTH:
 		if (tile->minion != nullptr) {
 			token = tile->minion->original;

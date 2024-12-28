@@ -95,6 +95,9 @@ CardList::CardList() {
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "saberspinetiger", "Saberspine Tiger", FindEffect(SKILL_RUSH)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 2, "sapphireseer", "Sapphire Seer", FindEffect(SKILL_FORCEFIELD)));
 
+	//Spells
+	spellList.push_back(Spell(FACTION_ABYSSIAN, TARGET_MINION, 4, "breathoftheunborn", "Breath of The Unborn", FindEffect(SPELL_BREATH_OF_THE_UNBORN)));
+
 	/*
 
 	//Units
@@ -230,8 +233,6 @@ CardList::CardList() {
 	minionTokenList.back().isToken = true;
 
 	//Spells
-	spellList.push_back(Spell(FACTION_ABYSSIAN, TARGET_MINION, 4, "breathoftheunborn", "Breath of The Unborn"));
-	spellList.back().spell = effectList.Find(SPELL_BREATH_OF_THE_UNBORN);
 	spellList.push_back(Spell(FACTION_ABYSSIAN, TARGET_ALLY_MINON, 2, "consumingrebirth", "Consuming Rebirth"));
 	spellList.back().spell = effectList.Find(SPELL_CONSUMING_REBIRTH);
 	spellList.push_back(Spell(FACTION_ABYSSIAN, TARGET_ENEMY_MINION, 2, "daemoniclure", "Daemonic Lure"));
