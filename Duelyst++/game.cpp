@@ -26,7 +26,10 @@ PathCoord::~PathCoord() {}
 #pragma region Game Constructor
 
 //Game constructor
-Game::Game() {
+Game::Game(Collections* _collections) {
+
+	//Collections reference
+	collections = _collections;
 
 	//Board border
 	board.CreateFromFile("resources/board.txt");

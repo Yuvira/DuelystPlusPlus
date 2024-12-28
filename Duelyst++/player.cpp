@@ -19,13 +19,13 @@ Player::~Player() {}
 #pragma region Initialization
 
 //Preset deck
-void Player::Preset(Collections& collections, Game* _game) {
+void Player::Preset(Collections* collections, Game* _game) {
 	game = _game;
-	deck.push_back(new Minion(*(collections.FindCard("Argeon Highmayne")->GetMinion())));
-	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(collections.FindCard("Komodo Charger")->GetMinion()))); }
-	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(collections.FindCard("Ash Mephyt")->GetMinion()))); }
-	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(collections.FindCard("Bloodtear Alchemist")->GetMinion()))); }
-	for (int i = 0; i < 7; ++i) { deck.push_back(new Spell(*(collections.FindCard("Breath of The Unborn")->GetSpell()))); }
+	deck.push_back(new Minion(*(collections->FindCard("Argeon Highmayne")->GetMinion())));
+	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(collections->FindCard("Komodo Charger")->GetMinion()))); }
+	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(collections->FindCard("Ash Mephyt")->GetMinion()))); }
+	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(collections->FindCard("Bloodtear Alchemist")->GetMinion()))); }
+	for (int i = 0; i < 7; ++i) { deck.push_back(new Spell(*(collections->FindCard("Breath of The Unborn")->GetSpell()))); }
 	for (int i = 0; i < deck.size(); ++i)
 		game->SetContext(deck[i], this);
 }

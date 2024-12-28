@@ -8,7 +8,7 @@
 //Game class
 class CardViewer {
 public:
-	CardViewer();
+	CardViewer(Collections* _collections);
 	~CardViewer();
 	void Input();
 	void Update();
@@ -18,7 +18,7 @@ public:
 	Sprite board;
 	Sprite count[5];
 	Sprite pageNumber;
-	Collections collections;
+	Collections* collections;
 	Tile tiles[9][7];
 	Coord pos;
 	int page;

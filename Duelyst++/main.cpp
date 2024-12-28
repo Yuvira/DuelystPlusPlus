@@ -12,8 +12,12 @@ int main() {
 
 	//Variables
 	Renderer renderer;
-	CardViewer cardViewer;
-	Game game;
+	Collections collections;
+	CardViewer cardViewer = CardViewer(&collections);
+	Game game = Game(&collections);
+
+	//Set collections reference
+	game.collections = &collections;
 
 	//Switch
 	bool doGame = false;

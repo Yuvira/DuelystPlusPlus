@@ -47,7 +47,7 @@ public:
 //Game class
 class Game {
 public:
-	Game();
+	Game(Collections* _collections);
 	~Game();
 	void RenderGame(Renderer& renderer);
 	void RenderSidebar(Renderer& renderer);
@@ -84,7 +84,7 @@ public:
 	Sprite light;
 	Sprite board;
 	Sprite chars[10];
-	Collections collections;
+	Collections* collections;
 	EventManager eventManager;
 	Player players[2];
 	Map map;
