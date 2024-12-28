@@ -123,19 +123,22 @@ class Effect {
 public:
 	Effect();
 	Effect(eEffect _effect, eKeywordFlags _keywords, int _costBuff, int _atkBuff, int _hpBuff);
-	Effect(eEffect _effect, eKeywordFlags _keywords, int _costBuff, int _atkBuff, int _hpBuff, std::string description);
+	Effect(eEffect _effect, eKeywordFlags _keywords, int _costBuff, int _atkBuff, int _hpBuff, std::string _description);
 	~Effect();
-	void GenerateSprite(std::string str);
-	bool IsOpeningGambit();
+	void GenerateSprite();
 	Sprite sprite;
 	eEffect effect;
 	eKeywordFlags keywords;
+	std::string description;
 	int costBuff;
 	int atkBuff;
 	int hpBuff;
 	std::vector<Card*> sources;
 	std::function<void(Card*, BoardTile*)> OnPreCast;
 	std::function<void(Card*, Card*, BoardTile*)> OnCast;
+	std::string ValueString(int value);
+	int TextWidth(std::string str);
+	bool IsOpeningGambit();
 };
 
 #endif

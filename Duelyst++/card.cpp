@@ -27,12 +27,14 @@ void Card::AddEffect(Effect effect, Card* source) {
 	for (int i = 0; i < effects.size(); ++i) {
 		if (effects[i].effect == effect.effect) {
 			effects[i].sources.push_back(source);
+			effects[i].GenerateSprite();
 			UpdateStatBuffs();
 			return;
 		}
 	}
 	effects.push_back(effect);
 	effects.back().sources.push_back(source);
+	effects.back().GenerateSprite();
 	UpdateStatBuffs();
 }
 

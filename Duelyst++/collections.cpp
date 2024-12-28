@@ -18,6 +18,15 @@ Collections::Collections() {
 
 #pragma region Minions
 
+	//Abjudicator
+	effectList.push_back(Effect(SKILL_ABJUDICATOR, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Lower the cost of all|spells in your action bar by 1"));
+	effectList.back().OnPreCast = [](Card* card, BoardTile* tile) {
+		for (int i = 0; i < card->owner->hand.size(); ++i)
+			if (card->owner->hand[i]->cardType == CARD_SPELL)
+				card->owner->hand[i]->AddEffect(card->game->collections->FindEffect(EFFECT_ABJUDICATOR), card);
+	};
+	effectList.push_back(Effect(EFFECT_ABJUDICATOR, KEYWORD_NONE, -1, 0, 0, "Abjudicator"));
+
 	//Ash Mephyt
 	effectList.push_back(Effect(SKILL_ASH_MEPHYT, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Summon two copies of|this minion on random spaces"));
 	effectList.back().OnPreCast = [](Card* card, BoardTile* tile) {
@@ -70,10 +79,6 @@ Collections::Collections() {
 	//Minion skills
 	skillList.push_back(Skill(SKILL_DISPELLED));
 	skillList.back().GenerateSprite("{Dispelled}");
-	skillList.push_back(Skill(SKILL_ABJUDICATOR));
-	skillList.back().GenerateSprite("{Opening Gambit}: Lower the cost of all|spells in your action bar by 1");
-	buffList.push_back(Buff(BUFF_ABJUDICATOR, -1, 0, 0, true));
-	buffList.back().GenerateSprite("Abjudicator");
 	skillList.push_back(Skill(SKILL_AETHERMASTER));
 	skillList.back().GenerateSprite("You may replace an additional card|each turn");
 	skillList.push_back(Skill(SKILL_ALCUIN_LOREMASTER));
@@ -245,6 +250,7 @@ Collections::Collections() {
 	generalList.push_back(Minion(FACTION_LYONAR, TRIBE_GENERAL, 0, 2, 25, "argeonhighmayne", "Argeon Highmayne"));
 
 	//Minions
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_ARCANYST, 3, 3, 1, "abjudicator", "Abjudicator", FindEffect(SKILL_ABJUDICATOR)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 3, "ashmephyt", "Ash Mephyt", FindEffect(SKILL_ASH_MEPHYT)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "bloodtearalchemist", "Bloodtear Alchemist", FindEffect(SKILL_BLOODTEAR_ALCHEMIST)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "dragonlark", "Dragonlark", FindEffect(SKILL_FLYING)));
@@ -260,8 +266,6 @@ Collections::Collections() {
 	/*
 
 	//Units
-	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_ARCANYST, 3, 3, 1, "abjudicator", "Abjudicator"));
-	minionList.back().skill = effectList.Find(SKILL_ABJUDICATOR);
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_ARCANYST, 2, 1, 3, "aethermaster", "Aethermaster"));
 	minionList.back().skill = effectList.Find(SKILL_AETHERMASTER);
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_ARCANYST, 3, 3, 1, "alcuinloremaster", "Alcuin Loremaster"));

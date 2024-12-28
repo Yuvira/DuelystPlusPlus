@@ -50,7 +50,7 @@ void Spell::DrawDetails(Renderer& renderer, int& y) {
 	renderer.Render(header[1], 72, y); y += 2;
 	for (int i = 0; i < effects.size(); ++i) {
 		renderer.Render(effects[i].sprite, 72, y);
-		y += effects[i].sprite.height + 2;
+		y += effects[i].sprite.height + 1;
 	}
 	if (token != nullptr) {
 		if (y < 7) { y = 7; }

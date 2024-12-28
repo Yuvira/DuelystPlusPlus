@@ -113,7 +113,7 @@ void Minion::DrawDetails(Renderer& renderer, int& y) {
 	renderer.Render(header[1], 72, y); y += 2;
 	for (int i = 0; i < effects.size(); ++i) {
 		renderer.Render(effects[i].sprite, 72, y);
-		y += effects[i].sprite.height + 2;
+		y += effects[i].sprite.height + 1;
 	}
 	if (token != nullptr) {
 		if (y < 7)
@@ -500,13 +500,6 @@ void Minion::OnSummon(Minion* minion, bool actionBar) {
 			//From action bar (Opening Gambit)
 			if (actionBar) {
 				switch (skill.skill) {
-				case SKILL_ABJUDICATOR:
-					for (int a = 0; a < owner->hand.size(); ++a) {
-						if (owner->hand[a]->cardType == CARD_SPELL) {
-							dynamic_cast<Spell*>(owner->hand[a])->AddBuff(BUFF_ABJUDICATOR);
-						}
-					}
-					break;
 				case SKILL_ALCUIN_LOREMASTER:
 					for (int a = game->grave.size() - 1; a > -1; --a) {
 						if (game->grave[a]->cardType == CARD_SPELL) {
