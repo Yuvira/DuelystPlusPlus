@@ -45,7 +45,7 @@
     <ClCompile Include="spell.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="collection.cpp">
+    <ClCompile Include="cardviewer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="eventmanager.cpp">
@@ -71,7 +71,7 @@
     <ClInclude Include="effect.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="collection.h">
+    <ClInclude Include="cardviewer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="eventmanager.h">

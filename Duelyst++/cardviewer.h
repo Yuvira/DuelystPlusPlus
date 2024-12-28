@@ -1,15 +1,15 @@
 //Defines
-#ifndef __COLLECTION_H__
-#define __COLLECTION_H__
+#ifndef __CARD_VIEWER_H__
+#define __CARD_VIEWER_H__
 
 //Include
 #include "game.h"
 
 //Game class
-class Collection {
+class CardViewer {
 public:
-	Collection();
-	~Collection();
+	CardViewer();
+	~CardViewer();
 	void Input();
 	void Update();
 	void RenderCollection(Renderer& renderer);

@@ -1,10 +1,10 @@
 //Include
-#include "collection.h"
+#include "cardviewer.h"
 
 #pragma region Constructor
 
 //Game constructor
-Collection::Collection() {
+CardViewer::CardViewer() {
 
 	//Border
 	board.CreateFromFile("resources/border.txt");
@@ -25,14 +25,14 @@ Collection::Collection() {
 	modeSwitch = nullptr;
 
 }
-Collection::~Collection() {}
+CardViewer::~CardViewer() {}
 
 #pragma endregion
 
 #pragma region Rendering
 
 //Render objects
-void Collection::RenderCollection(Renderer& renderer) {
+void CardViewer::RenderCollection(Renderer& renderer) {
 
 	//Board
 	renderer.Render(board);
@@ -65,7 +65,7 @@ void Collection::RenderCollection(Renderer& renderer) {
 }
 
 //Render sidebar
-void Collection::RenderSidebar(Renderer& renderer) {
+void CardViewer::RenderSidebar(Renderer& renderer) {
 	int y = 1;
 	int i = (pos.y * 9) + pos.x + (page * 54);
 	if (i < cardList.cardList.size())
@@ -77,7 +77,7 @@ void Collection::RenderSidebar(Renderer& renderer) {
 #pragma region Input
 
 //Input
-void Collection::Input() {
+void CardViewer::Input() {
 
 	//Get keyPress
 	int asciiVal = _getch();
@@ -98,7 +98,7 @@ void Collection::Input() {
 #pragma region Updates
 
 //Update loop
-void Collection::Update() {
+void CardViewer::Update() {
 
 	//Clear tiles highlights
 	for (int i = 0; i < 9; ++i)
@@ -115,7 +115,7 @@ void Collection::Update() {
 #pragma region Movement
 
 //Move cursor position
-void Collection::MoveCursor(int x, int y) {
+void CardViewer::MoveCursor(int x, int y) {
 	if (pos.x + x == 9) {
 		page = (page + 1 + pageCount) % pageCount;
 		pageNumber.CreateFromString(std::to_string(page + 1) + " / " + std::to_string(pageCount));

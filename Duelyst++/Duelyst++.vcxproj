@@ -115,7 +115,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="collection.cpp" />
+    <ClCompile Include="cardviewer.cpp" />
     <ClCompile Include="effect.cpp" />
     <ClCompile Include="eventmanager.cpp" />
     <ClCompile Include="game.cpp" />
@@ -130,7 +130,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="card.h" />
-    <ClInclude Include="collection.h" />
+    <ClInclude Include="cardviewer.h" />
     <ClInclude Include="effect.h" />
     <ClInclude Include="eventmanager.h" />
     <ClInclude Include="game.h" />

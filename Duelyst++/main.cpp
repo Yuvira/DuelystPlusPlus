@@ -1,6 +1,6 @@
 //Include
 #include <ctime>
-#include "collection.h"
+#include "cardviewer.h"
 
 //Main
 int main() {
@@ -12,12 +12,12 @@ int main() {
 
 	//Variables
 	Renderer renderer;
-	Collection collection;
+	CardViewer cardViewer;
 	Game game;
 
 	//Switch
 	bool doGame = false;
-	collection.modeSwitch = &doGame;
+	cardViewer.modeSwitch = &doGame;
 	game.modeSwitch = &doGame;
 
 	//Loop
@@ -34,11 +34,11 @@ int main() {
 
 		//Collection
 		else {
-			collection.Update();
+			cardViewer.Update();
 			renderer.ClearScreen();
-			collection.RenderCollection(renderer);
+			cardViewer.RenderCollection(renderer);
 			renderer.SwapBuffer();
-			collection.Input();
+			cardViewer.Input();
 		}
 
 	}
