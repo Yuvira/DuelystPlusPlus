@@ -86,7 +86,8 @@ public:
 	~Card();
 	void AddEffect(Effect effect, Card* source);
 	void RemoveEffect(Effect effect, Card* source, bool allStacks);
-	virtual void PreCast(BoardTile* tile);
+	void PreCast(BoardTile* tile);
+	virtual void Resolve(BoardTile* tile);
 	virtual void OnCast(Card* card, BoardTile* tile);
 	virtual void OnSummon(Minion* minion, bool fromActionBar);
 	virtual void OnDeath(Minion* minion);
@@ -139,12 +140,12 @@ public:
 	void Attack(Minion* target, bool counter);
 	int DealDamage(Minion* source, int damage);
 	void Dispel();
+	void Resolve(BoardTile* tile);
 	bool CanAttack(Minion* target);
 	bool IsMoveable();
 	int MoveRange();
 	bool HasKeywords(eKeywordFlags keywords);
 	bool IsProvoked();
-	void OnCast(Card* card, BoardTile* tile);
 	void OnSummon(Minion* minion, bool fromActionBar);
 	void OnDeath(Minion* minion);
 	void OnAttack(Minion* source, Minion* target, bool counter);

@@ -402,6 +402,17 @@ void Minion::Dispel() {
 
 }
 
+//Summon minion on cast resolution
+void Minion::Resolve(BoardTile* tile) {
+
+	//Trigger any effects on this card
+	Card::Resolve(tile);
+
+	//Summon this
+	game->Summon(this, tile, true);
+
+}
+
 #pragma endregion
 
 #pragma region Utils
@@ -460,18 +471,6 @@ bool Minion::IsProvoked() {
 #pragma endregion
 
 #pragma region Events
-
-//When a card is cast
-void Minion::OnCast(Card* card, BoardTile* tile) {
-
-	//Trigger any effects on this card
-	Card::OnCast(card, tile);
-
-	//Summon this
-	if (card == this)
-		game->Summon(this, tile, true);
-	
-}
 
 //When a minion is summoned
 void Minion::OnSummon(Minion* minion, bool fromActionBar) {

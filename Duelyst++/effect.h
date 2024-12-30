@@ -146,6 +146,7 @@ public:
 	std::vector<Card*> sources;
 	std::function<void(Card*, BoardTile*)> OnPreCastThis;
 	std::function<void(Card*)> OnDispelThis;
+	std::function<void(Card*, BoardTile*)> OnResolveThis;
 	std::function<void(Card*, Card*, BoardTile*)> OnCast;
 	std::function<void(Card*, Minion*, bool)> OnSummon;
 	std::function<void(Card*, Minion*)> OnDeath;

@@ -70,6 +70,13 @@ void Card::PreCast(BoardTile* tile) {
 			effects[i].OnPreCastThis(this, tile);
 }
 
+//When this resolves (after OnCast events have been sent)
+void Card::Resolve(BoardTile* tile) {
+	for (int i = 0; i < effects.size(); ++i)
+		if (effects[i].OnResolveThis)
+			effects[i].OnResolveThis(this, tile);
+}
+
 //Whenever any card is cast
 void Card::OnCast(Card* card, BoardTile* tile) {
 	for (int i = 0; i < effects.size(); ++i)

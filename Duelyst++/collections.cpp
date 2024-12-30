@@ -90,25 +90,21 @@ Collections::Collections() {
 
 	//Breath of The Unborn
 	effectList.push_back(Effect(SPELL_BREATH_OF_THE_UNBORN, KEYWORD_NONE, 0, 0, 0, "Deal 2 damage to all enemy|minions. Fully heal all friendly|minions"));
-	effectList.back().OnCast = [](Card* card, Card* source, BoardTile* tile) {
-		if (card == source) {
-			for (int a = 0; a < card->game->minions.size(); ++a) {
-				if (card->game->minions[a]->tribe != TRIBE_GENERAL) {
-					if (card->game->minions[a]->owner == card->owner) { card->game->minions[a]->DealDamage(nullptr, -999); }
-					else { card->game->minions[a]->DealDamage(nullptr, 2); }
-				}
+	effectList.back().OnResolveThis = [](Card* card, BoardTile* tile) {
+		for (int a = 0; a < card->game->minions.size(); ++a) {
+			if (card->game->minions[a]->tribe != TRIBE_GENERAL) {
+				if (card->game->minions[a]->owner == card->owner) { card->game->minions[a]->DealDamage(nullptr, -999); }
+				else { card->game->minions[a]->DealDamage(nullptr, 2); }
 			}
 		}
 	};
 
 	//Dark Seed
 	effectList.push_back(Effect(SPELL_DARK_SEED, KEYWORD_NONE, 0, 0, 0, "Deal 1 damage to the enemy general|for each card in the opponent's|action bar"));
-	effectList.back().OnCast = [](Card* card, Card* source, BoardTile* tile) {
-		if (card == source) {
-			if (tile->minion != nullptr) {
-				int damage = card->owner == &card->game->players[0] ? card->game->players[1].hand.size() : card->game->players[0].hand.size();
-				tile->minion->DealDamage(nullptr, damage);
-			}
+	effectList.back().OnResolveThis = [](Card* card, BoardTile* tile) {
+		if (tile->minion != nullptr) {
+			int damage = card->owner == &card->game->players[0] ? card->game->players[1].hand.size() : card->game->players[0].hand.size();
+			tile->minion->DealDamage(nullptr, damage);
 		}
 	};
 
