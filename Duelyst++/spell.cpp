@@ -120,13 +120,6 @@ void Spell::OnUse(BoardTile* tile) {
 		}
 		else { tile->minion->DealDamage(nullptr, 1); }
 		break;
-	case SPELL_DARK_SEED:
-		if (tile->minion != nullptr) {
-			int damage = owner == &game->players[0] ? game->players[1].hand.size() : game->players[0].hand.size();
-			tile->minion->DealDamage(nullptr, damage);
-		}
-		game->eventManager.SendOnSpellCast(this);
-		break;
 	case SPELL_DARK_TRANSFORMATION:
 		if (true) { //Need this to initialize variable
 			Minion* u1 = tile->minion;

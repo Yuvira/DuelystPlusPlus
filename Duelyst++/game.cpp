@@ -386,6 +386,8 @@ void Game::UseEffect() {
 void Game::PostCast() {
 	eventManager.SendOnCast(activeCard, &map.tiles[castPos.x][castPos.y]);
 	activeCard->OnCast(activeCard, &map.tiles[castPos.x][castPos.y]);
+	if (activeCard->cardType == CARD_SPELL)
+		spellHistory.push_back(activeCard->original->GetSpell());
 	activeCard = nullptr;
 }
 

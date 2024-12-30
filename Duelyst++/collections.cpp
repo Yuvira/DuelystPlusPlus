@@ -73,6 +73,17 @@ Collections::Collections() {
 		}
 	};
 
+	//Alcuin Loremaster
+	effectList.push_back(Effect(SKILL_ALCUIN_LOREMASTER, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Put a copy of the most|recently cast spell into your|action bar"));
+	effectList.back().OnPreCastThis = [](Card* card, BoardTile* tile) {
+		for (int i = card->game->spellHistory.size() - 1; i >= 0; --i) {
+			if (card->game->spellHistory[i]->cardType == CARD_SPELL) {
+				card->owner->AddToHand(card->game->spellHistory[i]->original, true);
+				break;
+			}
+		}
+	};
+
 #pragma endregion
 
 #pragma region Spells
@@ -90,6 +101,17 @@ Collections::Collections() {
 		}
 	};
 
+	//Dark Seed
+	effectList.push_back(Effect(SPELL_DARK_SEED, KEYWORD_NONE, 0, 0, 0, "Deal 1 damage to the enemy general|for each card in the opponent's|action bar"));
+	effectList.back().OnCast = [](Card* card, Card* source, BoardTile* tile) {
+		if (card == source) {
+			if (tile->minion != nullptr) {
+				int damage = card->owner == &card->game->players[0] ? card->game->players[1].hand.size() : card->game->players[0].hand.size();
+				tile->minion->DealDamage(nullptr, damage);
+			}
+		}
+	};
+
 #pragma endregion
 
 	/*
@@ -97,8 +119,6 @@ Collections::Collections() {
 	//Minion skills
 	skillList.push_back(Skill(SKILL_DISPELLED));
 	skillList.back().GenerateSprite("{Dispelled}");
-	skillList.push_back(Skill(SKILL_ALCUIN_LOREMASTER));
-	skillList.back().GenerateSprite("{Opening Gambit}: Put a copy of the most|recently cast spell into your|action bar");
 	skillList.push_back(Skill(SKILL_ALTER_REXX));
 	skillList.back().GenerateSprite("Whenever you summon MECHAZ0R, put a|MECHAZ0R in your action bar");
 	skillList.push_back(Skill(SKILL_ARAKI_HEADHUNTER));
@@ -245,8 +265,6 @@ Collections::Collections() {
 	buffList.back().GenerateSprite("Consuming Rebirth");
 	spellList.push_back(SpellEffect(SPELL_DAEMONIC_LURE));
 	spellList.back().GenerateSprite("Deal 1 damage to an enemy minion and|teleport it anywhere");
-	spellList.push_back(SpellEffect(SPELL_DARK_SEED));
-	spellList.back().GenerateSprite("Deal 1 damage to the enemy general|for each card in the opponent's|action bar");
 	spellList.push_back(SpellEffect(SPELL_DARK_TRANSFORMATION));
 	spellList.back().GenerateSprite("Destroy an enemy minion and summon|a 1/1 Wraithling on that space");
 	spellList.push_back(SpellEffect(SPELL_DARKFIRE_SACRIFICE));
@@ -268,6 +286,7 @@ Collections::Collections() {
 	//Minions
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_ARCANYST, 3, 3, 1, "abjudicator", "Abjudicator", FindEffect(SKILL_ABJUDICATOR)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_ARCANYST, 2, 1, 3, "aethermaster", "Aethermaster", FindEffect(SKILL_AETHERMASTER)));
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_ARCANYST, 3, 3, 1, "alcuinloremaster", "Alcuin Loremaster", FindEffect(SKILL_ALCUIN_LOREMASTER)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 3, "ashmephyt", "Ash Mephyt", FindEffect(SKILL_ASH_MEPHYT)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "bloodtearalchemist", "Bloodtear Alchemist", FindEffect(SKILL_BLOODTEAR_ALCHEMIST)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "dragonlark", "Dragonlark", FindEffect(SKILL_FLYING)));
@@ -279,12 +298,11 @@ Collections::Collections() {
 
 	//Spells
 	spellList.push_back(Spell(FACTION_ABYSSIAN, TARGET_MINION, 4, "breathoftheunborn", "Breath of The Unborn", FindEffect(SPELL_BREATH_OF_THE_UNBORN)));
+	spellList.push_back(Spell(FACTION_ABYSSIAN, TARGET_ENEMY_GENERAL, 4, "darkseed", "Dark Seed", FindEffect(SPELL_DARK_SEED)));
 
 	/*
 
 	//Units
-	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_ARCANYST, 3, 3, 1, "alcuinloremaster", "Alcuin Loremaster"));
-	minionList.back().skill = effectList.Find(SKILL_ALCUIN_LOREMASTER);
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_MECH, 5, 5, 5, "alterrexx", "Alter Rexx"));
 	minionList.back().skill = effectList.Find(SKILL_ALTER_REXX);
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 3, "arakiheadhunter", "Araki Headhunter"));
@@ -415,8 +433,6 @@ Collections::Collections() {
 	spellList.back().spell = effectList.Find(SPELL_CONSUMING_REBIRTH);
 	spellList.push_back(Spell(FACTION_ABYSSIAN, TARGET_ENEMY_MINION, 2, "daemoniclure", "Daemonic Lure"));
 	spellList.back().spell = effectList.Find(SPELL_DAEMONIC_LURE);
-	spellList.push_back(Spell(FACTION_ABYSSIAN, TARGET_ENEMY_GENERAL, 4, "darkseed", "Dark Seed"));
-	spellList.back().spell = effectList.Find(SPELL_DARK_SEED);
 	spellList.push_back(Spell(FACTION_ABYSSIAN, TARGET_ENEMY_MINION, 5, "darktransformation", "Dark Transformation"));
 	spellList.back().spell = effectList.Find(SPELL_DARK_TRANSFORMATION);
 	spellList.push_back(Spell(FACTION_ABYSSIAN, TARGET_ALLY_MINON, 0, "darkfiresacrifice", "Darkfire Sacrifice"));

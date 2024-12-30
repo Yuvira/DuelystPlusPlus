@@ -505,14 +505,6 @@ void Minion::OnSummon(Minion* minion, bool fromActionBar) {
 			//From action bar (Opening Gambit)
 			if (actionBar) {
 				switch (skill.skill) {
-				case SKILL_ALCUIN_LOREMASTER:
-					for (int a = game->grave.size() - 1; a > -1; --a) {
-						if (game->grave[a]->cardType == CARD_SPELL) {
-							owner->AddToHand(game->grave[a]->original, true);
-							break;
-						}
-					}
-					break;
 				case SKILL_AZURE_HERALD:
 					owner->general->DealDamage(this, -3);
 					break;

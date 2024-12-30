@@ -80,6 +80,7 @@ public:
 	void SetContext(Card* card, Player* player);
 	bool CanMove(int x, int y);
 	std::vector<Card*> grave;
+	std::vector<Spell*> spellHistory;
 	std::vector<Minion*> minions;
 	Sprite light;
 	Sprite board;
