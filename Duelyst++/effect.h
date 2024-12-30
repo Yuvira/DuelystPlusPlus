@@ -153,7 +153,6 @@ public:
 	std::function<void(Card*, Player*)> OnTurnStart;
 	std::string ValueString(int value);
 	int TextWidth(std::string str);
-	bool IsOpeningGambit();
 };
 
 #endif
