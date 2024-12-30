@@ -64,10 +64,10 @@ void Card::RemoveEffect(Effect effect, Card* source, bool allStacks) {
 #pragma region Events
 
 //When this is cast (before minion is summoned or spell effects occur)
-void Card::OnPreCast(BoardTile* tile) {
+void Card::PreCast(BoardTile* tile) {
 	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i].OnPreCast)
-			effects[i].OnPreCast(this, tile);
+		if (effects[i].OnPreCastThis)
+			effects[i].OnPreCastThis(this, tile);
 }
 
 //Whenever any card is cast
@@ -75,6 +75,34 @@ void Card::OnCast(Card* card, BoardTile* tile) {
 	for (int i = 0; i < effects.size(); ++i)
 		if (effects[i].OnCast)
 			effects[i].OnCast(this, card, tile);
+}
+
+//Whenever a minion is summoned
+void Card::OnSummon(Minion* minion, bool fromActionBar) {
+	for (int i = 0; i < effects.size(); ++i)
+		if (effects[i].OnSummon)
+			effects[i].OnSummon(this, minion, fromActionBar);
+}
+
+//Whenever a minion dies
+void Card::OnDeath(Minion* minion) {
+	for (int i = 0; i < effects.size(); ++i)
+		if (effects[i].OnDeath)
+			effects[i].OnDeath(this, minion);
+}
+
+//Whenever a minion dies
+void Card::OnTurnEnd(Player* player) {
+	for (int i = 0; i < effects.size(); ++i)
+		if (effects[i].OnTurnEnd)
+			effects[i].OnTurnEnd(this, player);
+}
+
+//Whenever a minion dies
+void Card::OnTurnStart(Player* player) {
+	for (int i = 0; i < effects.size(); ++i)
+		if (effects[i].OnTurnStart)
+			effects[i].OnTurnStart(this, player);
 }
 
 #pragma endregion

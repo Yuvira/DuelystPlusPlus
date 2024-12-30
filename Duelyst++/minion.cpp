@@ -280,9 +280,6 @@ void Minion::Dispel() {
 
 	//Remove buffs granted to other units/cards
 	switch (skill.skill) {
-	case SKILL_AETHERMASTER:
-		owner->replaces = max(owner->replaces - 1, 0);
-		break;
 	case SKILL_ARCHON_SPELLBINDER:
 		for (int a = 0; a < owner->opponent->hand.size(); ++a) {
 			if (owner->opponent->hand[a]->cardType == CARD_SPELL) {
@@ -390,6 +387,11 @@ void Minion::Dispel() {
 
 	*/
 
+	//Dispel effects
+	for (int i = 0; i < effects.size(); ++i)
+		if (effects[i].OnDispelThis)
+			effects[i].OnDispelThis(this);
+
 	//Remove misc
 	hasCelerityMoved = true;
 	hasCelerityAttacked = true;
@@ -472,7 +474,10 @@ void Minion::OnCast(Card* card, BoardTile* tile) {
 }
 
 //When a minion is summoned
-void Minion::OnSummon(Minion* minion, bool actionBar) {
+void Minion::OnSummon(Minion* minion, bool fromActionBar) {
+
+	//Trigger any effects on this card
+	Card::OnSummon(minion, fromActionBar);
 
 	//If on board
 	if (curTile != nullptr) {
@@ -634,9 +639,6 @@ void Minion::OnSummon(Minion* minion, bool actionBar) {
 
 			//Summoned from anywhere (apply global effects)
 			switch (skill.skill) {
-			case SKILL_AETHERMASTER:
-				++owner->replaces;
-				break;
 			case SKILL_ARCHON_SPELLBINDER:
 				for (int a = 0; a < owner->opponent->hand.size(); ++a) {
 					if (owner->opponent->hand[a]->cardType == CARD_SPELL) {
@@ -823,6 +825,9 @@ void Minion::OnSummon(Minion* minion, bool actionBar) {
 //When a minion dies
 void Minion::OnDeath(Minion* minion) {
 
+	//Trigger any effects on this card
+	Card::OnDeath(minion);
+
 	/*
 
 	//If on board
@@ -831,9 +836,6 @@ void Minion::OnDeath(Minion* minion) {
 		//When this minion dies (Dying Wish)
 		if (minion == this) {
 			switch (skill.skill) {
-			case SKILL_AETHERMASTER:
-				owner->replaces = max(owner->replaces - 1, 0);
-				break;
 			case SKILL_ARCHON_SPELLBINDER:
 				for (int a = 0; a < owner->opponent->hand.size(); ++a) {
 					if (owner->opponent->hand[a]->cardType == CARD_SPELL) {
@@ -1245,6 +1247,9 @@ void Minion::OnReplace(Card* replaced) {
 //When a player's turn ends
 void Minion::OnTurnEnd(Player* player) {
 
+	//Trigger any effects on this card
+	Card::OnTurnEnd(player);
+
 	//Refresh
 	hasMoved = false;
 	hasAttacked = false;
@@ -1266,9 +1271,6 @@ void Minion::OnTurnEnd(Player* player) {
 
 			//Skills
 			switch (skill.skill) {
-			case SKILL_AETHERMASTER:
-				++owner->replaces;
-				break;
 			case SKILL_BASTION:
 				for (int a = 0; a < game->minions.size(); ++a) {
 					if (game->minions[a]->owner == owner && game->minions[a] != this) {
@@ -1346,6 +1348,9 @@ void Minion::OnTurnEnd(Player* player) {
 
 //When a player's turn starts
 void Minion::OnTurnStart(Player* player) {
+
+	//Trigger any effects on this card
+	Card::OnTurnStart(player);
 
 	/*
 

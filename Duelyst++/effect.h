@@ -8,6 +8,7 @@
 
 //Definitions
 class Card;
+class Player;
 
 #pragma region Enums
 
@@ -25,6 +26,8 @@ enum eKeywordFlags {
 
 //Skills and effects
 enum eEffect {
+
+	//Effects
 	EFFECT_NONE,
 	EFFECT_DISPELLED,
 	EFFECT_ABJUDICATOR,
@@ -46,6 +49,8 @@ enum eEffect {
 	EFFECT_GOLEM_VANQUISHER,
 	EFFECT_GROVE_LION,
 	EFFECT_LADY_LOCKE,
+
+	//Skills
 	SKILL_CELERITY,
 	SKILL_FLYING,
 	SKILL_FORCEFIELD,
@@ -108,12 +113,15 @@ enum eEffect {
 	SKILL_LADY_LOCKE,
 	SKILL_LIGHTBENDER,
 	SKILL_LUX_IGNIS,
+
+	//Spells
 	SPELL_BREATH_OF_THE_UNBORN,
 	SPELL_CONSUMING_REBIRTH,
 	SPELL_DAEMONIC_LURE,
 	SPELL_DARK_SEED,
 	SPELL_DARK_TRANSFORMATION,
 	SPELL_DARKFIRE_SACRIFICE
+
 };
 
 #pragma endregion
@@ -134,8 +142,13 @@ public:
 	int atkBuff;
 	int hpBuff;
 	std::vector<Card*> sources;
-	std::function<void(Card*, BoardTile*)> OnPreCast;
+	std::function<void(Card*, BoardTile*)> OnPreCastThis;
+	std::function<void(Card*)> OnDispelThis;
 	std::function<void(Card*, Card*, BoardTile*)> OnCast;
+	std::function<void(Card*, Minion*, bool)> OnSummon;
+	std::function<void(Card*, Minion*)> OnDeath;
+	std::function<void(Card*, Player*)> OnTurnEnd;
+	std::function<void(Card*, Player*)> OnTurnStart;
 	std::string ValueString(int value);
 	int TextWidth(std::string str);
 	bool IsOpeningGambit();

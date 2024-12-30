@@ -353,7 +353,7 @@ void Game::UseCard() {
 
 	//Remove from hand and do pre-cast effect targeting
 	players[turn].hand.erase(players[turn].hand.begin() + handIdx);
-	activeCard->OnPreCast(&map.tiles[pos.x][pos.y]);
+	activeCard->PreCast(&map.tiles[pos.x][pos.y]);
 	if (activeCard->GetMinion() != nullptr)
 		activeCard->GetMinion()->SetPosition(pos.x, pos.y);
 	castPos = pos;

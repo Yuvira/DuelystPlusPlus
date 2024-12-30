@@ -86,12 +86,14 @@ public:
 	~Card();
 	void AddEffect(Effect effect, Card* source);
 	void RemoveEffect(Effect effect, Card* source, bool allStacks);
-	virtual void OnPreCast(BoardTile* tile);
+	virtual void PreCast(BoardTile* tile);
 	virtual void OnCast(Card* card, BoardTile* tile);
+	virtual void OnSummon(Minion* minion, bool fromActionBar);
+	virtual void OnDeath(Minion* minion);
+	virtual void OnTurnEnd(Player* player);
+	virtual void OnTurnStart(Player* player);
 	virtual void UpdateStatBuffs() {}
 	virtual void DrawDetails(Renderer& renderer, int& y) {}
-	virtual void OnSummon(Minion* minion, bool fromActionBar) {}
-	virtual void OnDeath(Minion* minion) {}
 	virtual void OnAttack(Minion* source, Minion* target, bool counter) {}
 	virtual void OnDamage(Minion* source, Minion* target, int damage) {}
 	virtual void OnHeal(Minion* source, Minion* target, int heal) {}
@@ -99,8 +101,6 @@ public:
 	virtual void OnSpellCast(Spell* spell) {}
 	virtual void OnDraw(Card* card, bool fromDeck) {}
 	virtual void OnReplace(Card* replaced) {}
-	virtual void OnTurnEnd(Player* player) {}
-	virtual void OnTurnStart(Player* player) {}
 	virtual Minion* GetMinion() { return nullptr; }
 	virtual Spell* GetSpell() { return nullptr; }
 	bool IsMinion() { return GetMinion() != nullptr; }
@@ -145,7 +145,7 @@ public:
 	bool HasKeywords(eKeywordFlags keywords);
 	bool IsProvoked();
 	void OnCast(Card* card, BoardTile* tile);
-	void OnSummon(Minion* minion, bool actionBar);
+	void OnSummon(Minion* minion, bool fromActionBar);
 	void OnDeath(Minion* minion);
 	void OnAttack(Minion* source, Minion* target, bool counter);
 	void OnDamage(Minion* source, Minion* target, int damage);

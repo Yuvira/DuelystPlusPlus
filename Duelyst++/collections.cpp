@@ -20,16 +20,34 @@ Collections::Collections() {
 
 	//Abjudicator
 	effectList.push_back(Effect(SKILL_ABJUDICATOR, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Lower the cost of all|spells in your action bar by 1"));
-	effectList.back().OnPreCast = [](Card* card, BoardTile* tile) {
+	effectList.back().OnPreCastThis = [](Card* card, BoardTile* tile) {
 		for (int i = 0; i < card->owner->hand.size(); ++i)
 			if (card->owner->hand[i]->cardType == CARD_SPELL)
 				card->owner->hand[i]->AddEffect(card->game->collections->FindEffect(EFFECT_ABJUDICATOR), card);
 	};
 	effectList.push_back(Effect(EFFECT_ABJUDICATOR, KEYWORD_NONE, -1, 0, 0, "Abjudicator"));
 
+	//Aethermaster
+	effectList.push_back(Effect(SKILL_AETHERMASTER, KEYWORD_NONE, 0, 0, 0, "You may replace an additional card|each turn"));
+	effectList.back().OnDispelThis = [](Card* card) {
+		card->owner->replaces = max(card->owner->replaces - 1, 0);
+	};
+	effectList.back().OnSummon = [](Card* card, Minion* source, bool fromActionBar) {
+		if (card == source)
+			++card->owner->replaces;
+	};
+	effectList.back().OnDeath = [](Card* card, Minion* source) {
+		if (card == source)
+			card->owner->replaces = max(card->owner->replaces - 1, 0);
+	};
+	effectList.back().OnTurnEnd = [](Card* card, Player* player) {
+		if (card->GetMinion() != nullptr && card->GetMinion()->curTile != nullptr && card->owner == player)
+			++card->owner->replaces;
+	};
+
 	//Ash Mephyt
 	effectList.push_back(Effect(SKILL_ASH_MEPHYT, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Summon two copies of|this minion on random spaces"));
-	effectList.back().OnPreCast = [](Card* card, BoardTile* tile) {
+	effectList.back().OnPreCastThis = [](Card* card, BoardTile* tile) {
 		if (card->IsMinion()) {
 			for (int i = 0; i < 2; ++i) {
 				BoardTile* newTile = card->game->map.GetRandom(tile);
@@ -44,7 +62,7 @@ Collections::Collections() {
 
 	//Bloodtear Alchemist
 	effectList.push_back(Effect(SKILL_BLOODTEAR_ALCHEMIST, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Deal 1 damage to|an enemy"));
-	effectList.back().OnPreCast = [](Card* card, BoardTile* tile) {
+	effectList.back().OnPreCastThis = [](Card* card, BoardTile* tile) {
 		card->game->HighlightSelectable(TARGET_ENEMY);
 		if (card->game->selectable.size() > 0) {
 			card->game->callback = EffectCallback(card, nullptr);
@@ -79,8 +97,6 @@ Collections::Collections() {
 	//Minion skills
 	skillList.push_back(Skill(SKILL_DISPELLED));
 	skillList.back().GenerateSprite("{Dispelled}");
-	skillList.push_back(Skill(SKILL_AETHERMASTER));
-	skillList.back().GenerateSprite("You may replace an additional card|each turn");
 	skillList.push_back(Skill(SKILL_ALCUIN_LOREMASTER));
 	skillList.back().GenerateSprite("{Opening Gambit}: Put a copy of the most|recently cast spell into your|action bar");
 	skillList.push_back(Skill(SKILL_ALTER_REXX));
@@ -251,6 +267,7 @@ Collections::Collections() {
 
 	//Minions
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_ARCANYST, 3, 3, 1, "abjudicator", "Abjudicator", FindEffect(SKILL_ABJUDICATOR)));
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_ARCANYST, 2, 1, 3, "aethermaster", "Aethermaster", FindEffect(SKILL_AETHERMASTER)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 3, "ashmephyt", "Ash Mephyt", FindEffect(SKILL_ASH_MEPHYT)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "bloodtearalchemist", "Bloodtear Alchemist", FindEffect(SKILL_BLOODTEAR_ALCHEMIST)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "dragonlark", "Dragonlark", FindEffect(SKILL_FLYING)));
@@ -266,8 +283,6 @@ Collections::Collections() {
 	/*
 
 	//Units
-	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_ARCANYST, 2, 1, 3, "aethermaster", "Aethermaster"));
-	minionList.back().skill = effectList.Find(SKILL_AETHERMASTER);
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_ARCANYST, 3, 3, 1, "alcuinloremaster", "Alcuin Loremaster"));
 	minionList.back().skill = effectList.Find(SKILL_ALCUIN_LOREMASTER);
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_MECH, 5, 5, 5, "alterrexx", "Alter Rexx"));
