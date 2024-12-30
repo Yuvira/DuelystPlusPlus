@@ -132,8 +132,8 @@ enum eEffect {
 class Effect {
 public:
 	Effect();
-	Effect(eEffect _effect, eKeywordFlags _keywords, int _costBuff, int _atkBuff, int _hpBuff);
-	Effect(eEffect _effect, eKeywordFlags _keywords, int _costBuff, int _atkBuff, int _hpBuff, std::string _description);
+	Effect(eEffect _effect, eKeywordFlags _keywords, int _costBuff, int _atkBuff, int _hpBuff, bool _isContinuous);
+	Effect(eEffect _effect, eKeywordFlags _keywords, int _costBuff, int _atkBuff, int _hpBuff, bool _isContinuous, std::string _description);
 	~Effect();
 	void GenerateSprite();
 	Sprite sprite;
@@ -143,6 +143,7 @@ public:
 	int costBuff;
 	int atkBuff;
 	int hpBuff;
+	bool isContinuous;
 	std::vector<Card*> sources;
 	std::function<void(Card*, BoardTile*)> OnPreCastThis;
 	std::function<void(Card*)> OnDispelThis;

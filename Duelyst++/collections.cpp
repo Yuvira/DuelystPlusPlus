@@ -9,26 +9,26 @@ Collections::Collections() {
 #pragma region Effects
 
 	//Keyword skills
-	effectList.push_back(Effect(SKILL_CELERITY, KEYWORD_CELERITY, 0, 0, 0, "{Celerity}"));
-	effectList.push_back(Effect(SKILL_FLYING, KEYWORD_FLYING, 0, 0, 0, "{Flying}"));
-	effectList.push_back(Effect(SKILL_FORCEFIELD, KEYWORD_FORCEFIELD, 0, 0, 0, "{Forcefield}"));
-	effectList.push_back(Effect(SKILL_PROVOKE, KEYWORD_PROVOKE, 0, 0, 0, "{Provoke}"));
-	effectList.push_back(Effect(SKILL_RANGED, KEYWORD_RANGED, 0, 0, 0, "{Ranged}"));
-	effectList.push_back(Effect(SKILL_RUSH, KEYWORD_RUSH, 0, 0, 0, "{Rush}"));
+	effectList.push_back(Effect(SKILL_CELERITY, KEYWORD_CELERITY, 0, 0, 0, false, "{Celerity}"));
+	effectList.push_back(Effect(SKILL_FLYING, KEYWORD_FLYING, 0, 0, 0, false, "{Flying}"));
+	effectList.push_back(Effect(SKILL_FORCEFIELD, KEYWORD_FORCEFIELD, 0, 0, 0, false, "{Forcefield}"));
+	effectList.push_back(Effect(SKILL_PROVOKE, KEYWORD_PROVOKE, 0, 0, 0, false, "{Provoke}"));
+	effectList.push_back(Effect(SKILL_RANGED, KEYWORD_RANGED, 0, 0, 0, false, "{Ranged}"));
+	effectList.push_back(Effect(SKILL_RUSH, KEYWORD_RUSH, 0, 0, 0, false, "{Rush}"));
 
 #pragma region Minions
 
 	//Abjudicator
-	effectList.push_back(Effect(SKILL_ABJUDICATOR, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Lower the cost of all|spells in your action bar by 1"));
+	effectList.push_back(Effect(SKILL_ABJUDICATOR, KEYWORD_OPENING_GAMBIT, 0, 0, 0, false, "{Opening Gambit}: Lower the cost of all|spells in your action bar by 1"));
 	effectList.back().OnPreCastThis = [](Card* card, BoardTile* tile) {
 		for (int i = 0; i < card->owner->hand.size(); ++i)
 			if (card->owner->hand[i]->cardType == CARD_SPELL)
 				card->owner->hand[i]->AddEffect(card->game->collections->FindEffect(EFFECT_ABJUDICATOR), card);
 	};
-	effectList.push_back(Effect(EFFECT_ABJUDICATOR, KEYWORD_NONE, -1, 0, 0, "Abjudicator"));
+	effectList.push_back(Effect(EFFECT_ABJUDICATOR, KEYWORD_NONE, -1, 0, 0, false, "Abjudicator"));
 
 	//Aethermaster
-	effectList.push_back(Effect(SKILL_AETHERMASTER, KEYWORD_NONE, 0, 0, 0, "You may replace an additional card|each turn"));
+	effectList.push_back(Effect(SKILL_AETHERMASTER, KEYWORD_NONE, 0, 0, 0, false, "You may replace an additional card|each turn"));
 	effectList.back().OnDispelThis = [](Card* card) {
 		card->owner->replaces = max(card->owner->replaces - 1, 0);
 	};
@@ -46,7 +46,7 @@ Collections::Collections() {
 	};
 
 	//Ash Mephyt
-	effectList.push_back(Effect(SKILL_ASH_MEPHYT, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Summon two copies of|this minion on random spaces"));
+	effectList.push_back(Effect(SKILL_ASH_MEPHYT, KEYWORD_OPENING_GAMBIT, 0, 0, 0, false, "{Opening Gambit}: Summon two copies of|this minion on random spaces"));
 	effectList.back().OnPreCastThis = [](Card* card, BoardTile* tile) {
 		if (card->IsMinion()) {
 			for (int i = 0; i < 2; ++i) {
@@ -61,7 +61,7 @@ Collections::Collections() {
 	};
 
 	//Bloodtear Alchemist
-	effectList.push_back(Effect(SKILL_BLOODTEAR_ALCHEMIST, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Deal 1 damage to|an enemy"));
+	effectList.push_back(Effect(SKILL_BLOODTEAR_ALCHEMIST, KEYWORD_OPENING_GAMBIT, 0, 0, 0, false, "{Opening Gambit}: Deal 1 damage to|an enemy"));
 	effectList.back().OnPreCastThis = [](Card* card, BoardTile* tile) {
 		card->game->HighlightSelectable(TARGET_ENEMY);
 		if (card->game->selectable.size() > 0) {
@@ -74,7 +74,7 @@ Collections::Collections() {
 	};
 
 	//Alcuin Loremaster
-	effectList.push_back(Effect(SKILL_ALCUIN_LOREMASTER, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Put a copy of the most|recently cast spell into your|action bar"));
+	effectList.push_back(Effect(SKILL_ALCUIN_LOREMASTER, KEYWORD_OPENING_GAMBIT, 0, 0, 0, false, "{Opening Gambit}: Put a copy of the most|recently cast spell into your|action bar"));
 	effectList.back().OnPreCastThis = [](Card* card, BoardTile* tile) {
 		for (int i = card->game->spellHistory.size() - 1; i >= 0; --i) {
 			if (card->game->spellHistory[i]->cardType == CARD_SPELL) {
@@ -89,7 +89,7 @@ Collections::Collections() {
 #pragma region Spells
 
 	//Breath of The Unborn
-	effectList.push_back(Effect(SPELL_BREATH_OF_THE_UNBORN, KEYWORD_NONE, 0, 0, 0, "Deal 2 damage to all enemy|minions. Fully heal all friendly|minions"));
+	effectList.push_back(Effect(SPELL_BREATH_OF_THE_UNBORN, KEYWORD_NONE, 0, 0, 0, false, "Deal 2 damage to all enemy|minions. Fully heal all friendly|minions"));
 	effectList.back().OnResolveThis = [](Card* card, BoardTile* tile) {
 		for (int a = 0; a < card->game->minions.size(); ++a) {
 			if (card->game->minions[a]->tribe != TRIBE_GENERAL) {
@@ -100,7 +100,7 @@ Collections::Collections() {
 	};
 
 	//Dark Seed
-	effectList.push_back(Effect(SPELL_DARK_SEED, KEYWORD_NONE, 0, 0, 0, "Deal 1 damage to the enemy general|for each card in the opponent's|action bar"));
+	effectList.push_back(Effect(SPELL_DARK_SEED, KEYWORD_NONE, 0, 0, 0, false, "Deal 1 damage to the enemy general|for each card in the opponent's|action bar"));
 	effectList.back().OnResolveThis = [](Card* card, BoardTile* tile) {
 		if (tile->minion != nullptr) {
 			int damage = card->owner == &card->game->players[0] ? card->game->players[1].hand.size() : card->game->players[0].hand.size();
