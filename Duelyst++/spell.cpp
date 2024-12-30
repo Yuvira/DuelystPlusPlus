@@ -21,7 +21,7 @@ Spell::Spell(eFaction _faction, eTarget _target, int _cost, std::string path, st
 }
 Spell::Spell(eFaction _faction, eTarget _target, int _cost, std::string path, std::string _name, Effect effect) : Spell(_faction, _target, _cost, path, _name) {
 	if (effect.effect != EFFECT_NONE)
-		AddEffect(effect, this);
+		AddEffect(effect, nullptr);
 }
 Spell::~Spell() {}
 

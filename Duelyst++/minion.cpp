@@ -33,7 +33,7 @@ Minion::Minion(eFaction _faction, eTribe _tribe, int _cost, int _atk, int _hp, s
 }
 Minion::Minion(eFaction _faction, eTribe _tribe, int _cost, int _atk, int _hp, std::string path, std::string _name, Effect effect) : Minion(_faction, _tribe, _cost, _atk, _hp, path, _name) {
 	if (effect.effect != EFFECT_NONE)
-		AddEffect(effect, this);
+		AddEffect(effect, nullptr);
 }
 Minion::~Minion() {}
 
