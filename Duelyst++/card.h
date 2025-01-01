@@ -104,23 +104,26 @@ public:
 
 	//Effects
 	void AddEffect(Effect effect, Effect* source);
+	void RemoveEffect(Effect* effect);
 	void RemoveEffectsFromSource(Effect* source);
+	void RemoveEffectAt(std::vector<int> indices);
 
 	//Actions
 	void PreCast(BoardTile* tile);
 	virtual void Resolve(BoardTile* tile);
 
 	//Events
-	virtual void OnCast(Card* card, BoardTile* tile);
-	virtual void OnSummon(Minion* minion, bool fromActionBar);
-	virtual void OnDeath(Minion* minion);
-	virtual void OnAttack(Minion* source, Minion* target, bool counter);
-	virtual void OnDamage(Card* source, Minion* target, int damage);
-	virtual void OnHeal(Card* source, Minion* target, int heal);
-	virtual void OnMove(Minion* minion, bool byEffect);
-	virtual void OnDraw(Card* card, bool fromDeck);
-	virtual void OnReplace(Card* replaced);
-	virtual void OnTurnStart(Player* player);
+	void OnCast(Card* card, BoardTile* tile);
+	void OnSummon(Minion* minion, bool fromActionBar);
+	void OnDeath(Minion* minion);
+	void OnAttack(Minion* source, Minion* target, bool counter);
+	void OnDamage(Card* source, Minion* target, int damage);
+	void OnHeal(Card* source, Minion* target, int heal);
+	void OnMove(Minion* minion, bool byEffect);
+	void OnDraw(Card* card, bool fromDeck);
+	void OnReplace(Card* replaced);
+	void OnEffectsChanged(Card* card);
+	void OnTurnStart(Player* player);
 	virtual void OnTurnEnd(Player* player);
 
 	//Utils
@@ -145,7 +148,7 @@ public:
 	Card* original;
 	Card* token;
 	std::string name;
-	std::vector<Effect> effects;
+	std::vector<Effect*> effects;
 	Sprite sprite;
 	Sprite header[2];
 	Sprite details;
@@ -179,6 +182,7 @@ public:
 	void Attack(Minion* target, bool counter);
 	int DealDamage(Minion* source, int damage);
 	void Dispel();
+	void AddEffects();
 
 	//Utils
 	bool CanAttack(Minion* target);

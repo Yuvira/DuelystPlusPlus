@@ -32,19 +32,14 @@ Collections::Collections() {
 
 	//Aethermaster
 	effectList.push_back(Effect(SKILL_AETHERMASTER, KEYWORD_NONE, 0, 0, 0, "You may replace an additional card|each turn"));
-	effectList.back().OnDispelThis = [](EffectContext context) {
+	effectList.back().OnAddThis = [](EffectContext context) {
+		++context.card->owner->replaces;
+	};
+	effectList.back().OnRemoveThis = [](EffectContext context) {
 		context.card->owner->replaces = max(context.card->owner->replaces - 1, 0);
 	};
-	effectList.back().OnSummon = [](EffectContext context, Minion* source, bool fromActionBar) {
-		if (context.card == source)
-			++context.card->owner->replaces;
-	};
-	effectList.back().OnDeath = [](EffectContext context, Minion* source) {
-		if (context.card == source)
-			context.card->owner->replaces = max(context.card->owner->replaces - 1, 0);
-	};
 	effectList.back().OnTurnEnd = [](EffectContext context, Player* player) {
-		if (context.card->GetMinion() != nullptr && context.card->GetMinion()->curTile != nullptr && context.card->owner == player)
+		if (context.card->IsOnBoard() && context.card->owner == player)
 			++context.card->owner->replaces;
 	};
 

@@ -26,6 +26,7 @@ Effect::Effect(eEffect _effect, eKeywordFlags _keywords, int _costBuff, int _atk
 	costBuff = _costBuff;
 	atkBuff = _atkBuff;
 	hpBuff = _hpBuff;
+	source = nullptr;
 }
 Effect::~Effect() {}
 

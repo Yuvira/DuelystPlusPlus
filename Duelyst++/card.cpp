@@ -44,10 +44,10 @@ void Card::UpdateDetails() {
 	//Create pointer list
 	std::vector<Effect*> effectRefs;
 	for (int i = 0; i < effects.size(); ++i)
-		effectRefs.push_back(&effects[i]);
+		effectRefs.push_back(effects[i]);
 
 	//Loop by removing elements from list until list is empty
-	for ( ; !effectRefs.empty(); effectRefs.erase(effectRefs.begin())) {
+	for (; !effectRefs.empty(); effectRefs.erase(effectRefs.begin())) {
 
 		//Get current effect
 		Effect* effect = effectRefs.front();
@@ -86,9 +86,9 @@ void Card::UpdateDetails() {
 			std::string str = "";
 			if (effect->atkBuff != 0 && effect->hpBuff != 0)
 				str += ValueString(effect->atkBuff * stacks) + "/" + ValueString(effect->hpBuff * stacks);
-			else if (effect->hpBuff != 0)
-				str += ValueString(effect->atkBuff * stacks) + " Attack";
 			else if (effect->atkBuff != 0)
+				str += ValueString(effect->atkBuff * stacks) + " Attack";
+			else if (effect->hpBuff != 0)
 				str += ValueString(effect->hpBuff * stacks) + " Health";
 			if (effect->costBuff != 0) {
 				if (str != "")
@@ -136,20 +136,51 @@ void Card::UpdateDetails() {
 
 //Add effect to list
 void Card::AddEffect(Effect effect, Effect* source) {
-	effects.push_back(effect);
-	effects.back().source = source;
+	for (int i = 0; i < effects.size(); ++i)
+		if (effects[i]->effect == effect.effect && effects[i]->source == source)
+			return;
+	effects.push_back(new Effect(effect));
+	effects.back()->source = source;
+	if (IsOnBoard() && effects.back()->OnAddThis)
+		effects.back()->OnAddThis(EffectContext(effects.back(), this, game));
+	if (game != nullptr)
+		game->eventManager.SendOnEffectsChanged(this);
 	UpdateDetails();
 	UpdateStatBuffs();
 }
 
 //Remove effect from list
-void Card::RemoveEffectsFromSource(Effect* source) {
+void Card::RemoveEffect(Effect* effect) {
 	for (int i = 0; i < effects.size(); ++i) {
-		if (effects[i].source == source) {
-			effects.erase(effects.begin() + i);
-			--i;
+		if (effects[i] == effect) {
+			RemoveEffectAt({i});
+			return;
 		}
 	}
+}
+
+//Remove all effects from a given source
+void Card::RemoveEffectsFromSource(Effect* source) {
+	std::vector<int> indices;
+	for (int i = 0; i < effects.size(); ++i)
+		if (effects[i]->source == source)
+			indices.push_back(i);
+	RemoveEffectAt(indices);
+}
+
+//Remove effects at indices
+void Card::RemoveEffectAt(std::vector<int> indices) {
+	if (indices.empty())
+		return;
+	std::vector<Effect*> removed;
+	for (int i = indices.size() - 1; i >= 0; --i) {
+		removed.push_back(effects[indices[i]]);
+		effects.erase(effects.begin() + indices[i]);
+	}
+	for (int i = 0; i < removed.size(); ++i)
+		if (removed[i]->OnRemoveThis)
+			removed[i]->OnRemoveThis(EffectContext(removed[i], this, game));
+	game->eventManager.SendOnEffectsChanged(this);
 	UpdateDetails();
 	UpdateStatBuffs();
 }
@@ -161,92 +192,99 @@ void Card::RemoveEffectsFromSource(Effect* source) {
 //When this is cast (before minion is summoned or spell effects occur)
 void Card::PreCast(BoardTile* tile) {
 	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i].OnPreCastThis)
-			effects[i].OnPreCastThis(EffectContext(&effects[i], this, game), tile);
+		if (effects[i]->OnPreCastThis)
+			effects[i]->OnPreCastThis(EffectContext(effects[i], this, game), tile);
 }
 
 //When this resolves (after OnCast events have been sent)
 void Card::Resolve(BoardTile* tile) {
 	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i].OnResolveThis)
-			effects[i].OnResolveThis(EffectContext(&effects[i], this, game), tile);
+		if (effects[i]->OnResolveThis)
+			effects[i]->OnResolveThis(EffectContext(effects[i], this, game), tile);
 }
 
 //Whenever any card is cast
 void Card::OnCast(Card* card, BoardTile* tile) {
 	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i].OnCast)
-			effects[i].OnCast(EffectContext(&effects[i], this, game), card, tile);
+		if (effects[i]->OnCast)
+			effects[i]->OnCast(EffectContext(effects[i], this, game), card, tile);
 }
 
 //Whenever a minion is summoned
 void Card::OnSummon(Minion* minion, bool fromActionBar) {
 	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i].OnSummon)
-			effects[i].OnSummon(EffectContext(&effects[i], this, game), minion, fromActionBar);
+		if (effects[i]->OnSummon)
+			effects[i]->OnSummon(EffectContext(effects[i], this, game), minion, fromActionBar);
 }
 
 //Whenever a minion dies
 void Card::OnDeath(Minion* minion) {
 	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i].OnDeath)
-			effects[i].OnDeath(EffectContext(&effects[i], this, game), minion);
+		if (effects[i]->OnDeath)
+			effects[i]->OnDeath(EffectContext(effects[i], this, game), minion);
 }
 
 //Whenever a minion attacks another minion
 void Card::OnAttack(Minion* source, Minion* target, bool counter) {
 	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i].OnAttack)
-			effects[i].OnAttack(EffectContext(&effects[i], this, game), source, target, counter);
+		if (effects[i]->OnAttack)
+			effects[i]->OnAttack(EffectContext(effects[i], this, game), source, target, counter);
 }
 
 //Whenever a minion is damaged
 void Card::OnDamage(Card* source, Minion* target, int damage) {
 	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i].OnDamage)
-			effects[i].OnDamage(EffectContext(&effects[i], this, game), source, target, damage);
+		if (effects[i]->OnDamage)
+			effects[i]->OnDamage(EffectContext(effects[i], this, game), source, target, damage);
 }
 
 //Whenever a minion is healed
 void Card::OnHeal(Card* source, Minion* target, int heal) {
 	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i].OnHeal)
-			effects[i].OnHeal(EffectContext(&effects[i], this, game), source, target, heal);
+		if (effects[i]->OnHeal)
+			effects[i]->OnHeal(EffectContext(effects[i], this, game), source, target, heal);
 }
 
 //Whenever a minion is moved
 void Card::OnMove(Minion* minion, bool byEffect) {
 	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i].OnMove)
-			effects[i].OnMove(EffectContext(&effects[i], this, game), minion, byEffect);
+		if (effects[i]->OnMove)
+			effects[i]->OnMove(EffectContext(effects[i], this, game), minion, byEffect);
 }
 
 //Whenever a card is added to an action bar
 void Card::OnDraw(Card* card, bool fromDeck) {
 	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i].OnDraw)
-			effects[i].OnDraw(EffectContext(&effects[i], this, game), card, fromDeck);
+		if (effects[i]->OnDraw)
+			effects[i]->OnDraw(EffectContext(effects[i], this, game), card, fromDeck);
 }
 
 //Whenever a card is replaced
 void Card::OnReplace(Card* replaced) {
 	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i].OnReplace)
-			effects[i].OnReplace(EffectContext(&effects[i], this, game), replaced);
+		if (effects[i]->OnReplace)
+			effects[i]->OnReplace(EffectContext(effects[i], this, game), replaced);
+}
+
+//Whenever the effects on a card change
+void Card::OnEffectsChanged(Card* card) {
+	for (int i = 0; i < effects.size(); ++i)
+		if (effects[i]->OnEffectsChanged)
+			effects[i]->OnEffectsChanged(EffectContext(effects[i], this, game), card);
 }
 
 //Whenever a player's turn starts
 void Card::OnTurnStart(Player* player) {
 	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i].OnTurnStart)
-			effects[i].OnTurnStart(EffectContext(&effects[i], this, game), player);
+		if (effects[i]->OnTurnStart)
+			effects[i]->OnTurnStart(EffectContext(effects[i], this, game), player);
 }
 
 //Whenever a player's turn ends
 void Card::OnTurnEnd(Player* player) {
 	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i].OnTurnEnd)
-			effects[i].OnTurnEnd(EffectContext(&effects[i], this, game), player);
+		if (effects[i]->OnTurnEnd)
+			effects[i]->OnTurnEnd(EffectContext(effects[i], this, game), player);
 }
 
 #pragma endregion

@@ -94,6 +94,15 @@ void EventManager::SendOnReplace(Card* card) {
 	for (int i = 0; i < game->players[1].deck.size(); ++i) { game->players[1].deck[i]->OnReplace(card); }
 }
 
+//Send onEffectsChanged events
+void EventManager::SendOnEffectsChanged(Card* card) {
+	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnEffectsChanged(card); }
+	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnEffectsChanged(card); }
+	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnEffectsChanged(card); }
+	for (int i = 0; i < game->players[1].hand.size(); ++i) { game->players[1].hand[i]->OnEffectsChanged(card); }
+	for (int i = 0; i < game->players[1].deck.size(); ++i) { game->players[1].deck[i]->OnEffectsChanged(card); }
+}
+
 //Send onTurnEnd events
 void EventManager::SendOnTurnEnd(Player* player) {
 	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnTurnEnd(player); }

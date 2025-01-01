@@ -65,7 +65,7 @@ void Spell::DrawDetails(Renderer& renderer, int& y) {
 void Spell::UpdateStatBuffs() {
 	int costBuff = 0;
 	for (int i = 0; i < effects.size(); ++i)
-		costBuff += effects[i].costBuff;
+		costBuff += effects[i]->costBuff;
 	cost = max(original->cost + costBuff, 0);
 }
 

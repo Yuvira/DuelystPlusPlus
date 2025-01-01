@@ -129,6 +129,7 @@ void Minion::DrawDetails(Renderer& renderer, int& y) {
 void Minion::Update(bool& shouldLoop) {
 	if (hp < 1) {
 		game->eventManager.SendOnDeath(this);
+		for (; !effects.empty(); RemoveEffect(effects.front())) {}
 		isDead = true;
 		shouldLoop = true;
 	}
@@ -141,9 +142,9 @@ void Minion::UpdateStatBuffs() {
 	int hpBuff = 0;
 	int hpDelta = hp - hpMax;
 	for (int i = 0; i < effects.size(); ++i) {
-		costBuff += effects[i].costBuff;
-		atkBuff += effects[i].atkBuff;
-		hpBuff += effects[i].hpBuff;
+		costBuff += effects[i]->costBuff;
+		atkBuff += effects[i]->atkBuff;
+		hpBuff += effects[i]->hpBuff;
 	}
 	cost = max(original->GetMinion()->cost + costBuff, 0);
 	atk = max(original->GetMinion()->atk + atkBuff, 0);
@@ -261,15 +262,13 @@ int Minion::DealDamage(Minion* source, int damage) {
 //Dispel minion
 void Minion::Dispel() {
 
-	//Dispel effects
-	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i].OnDispelThis)
-			effects[i].OnDispelThis(EffectContext(&effects[i], this, game));
-
 	//Remove effects
-	for (int i = 0; i < effects.size(); ++i)
-		if (!effects[i].IsContinuous())
-			effects.erase(effects.begin() + i);
+	for (int i = 0; i < effects.size(); ++i) {
+		if (!effects[i]->IsContinuous()) {
+			RemoveEffect(effects[i]);
+			--i;
+		}
+	}
 
 	//Add dispelled effect
 	AddEffect(game->collections->FindEffect(EFFECT_DISPELLED), nullptr);
@@ -282,6 +281,13 @@ void Minion::Dispel() {
 	//Update
 	UpdateStatBuffs();
 
+}
+
+//Trigger OnAddThis on effects when summoned
+void Minion::AddEffects() {
+	for (int i = 0; i < effects.size(); ++i)
+		if (effects[i]->OnAddThis)
+			effects[i]->OnAddThis(EffectContext(effects[i], this, game));
 }
 
 #pragma endregion
@@ -312,7 +318,7 @@ bool Minion::IsMoveable() {
 int Minion::MoveRange() {
 	int range = 2;
 	for (int i = 0; i < effects.size(); ++i) {
-		switch (effects[i].effect) {
+		switch (effects[i]->effect) {
 		case EFFECT_GOLDEN_JUSTICAR:
 			range += 2;
 		}
@@ -324,7 +330,7 @@ int Minion::MoveRange() {
 bool Minion::HasKeywords(int keywords) {
 	int flags = KEYWORD_NONE;
 	for (int i = 0; i < effects.size(); ++i)
-		flags |= effects[i].keywords;
+		flags |= effects[i]->keywords;
 	return (flags & keywords) == keywords;
 }
 

@@ -22,6 +22,7 @@ public:
 	void SendOnMove(Minion* minion, bool byEffect);
 	void SendOnDraw(Card* card, bool fromDeck);
 	void SendOnReplace(Card* card);
+	void SendOnEffectsChanged(Card*);
 	void SendOnTurnEnd(Player* player);
 	void SendOnTurnStart(Player* player);
 	Game* game;

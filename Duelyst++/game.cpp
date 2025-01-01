@@ -396,6 +396,7 @@ void Game::Summon(Card* card, int x, int y, bool actionBar) {
 		return;
 	minions.push_back(card->GetMinion());
 	minions.back()->SetPosition(x, y);
+	minions.back()->AddEffects();
 	eventManager.SendOnSummon(minions.back(), actionBar);
 }
 
@@ -906,6 +907,8 @@ void Game::DrawArrow(int type, int x, int y, Renderer& renderer) {
 void Game::SetContext(Card* card, Player* player) {
 	card->game = this;
 	card->owner = player;
+	for (int i = 0; i < card->effects.size(); ++i)
+		card->effects[i] = new Effect(*card->effects[i]);
 }
 
 //Check if tiles is moveable

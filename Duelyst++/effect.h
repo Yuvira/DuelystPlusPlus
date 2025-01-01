@@ -155,9 +155,10 @@ public:
 	int atkBuff;
 	int hpBuff;
 	Effect* source;
+	std::function<void(EffectContext)> OnAddThis;
+	std::function<void(EffectContext)> OnRemoveThis;
 	std::function<void(EffectContext, BoardTile*)> OnPreCastThis;
 	std::function<void(EffectContext, BoardTile*)> OnResolveThis;
-	std::function<void(EffectContext)> OnDispelThis;
 	std::function<void(EffectContext, Card*, BoardTile*)> OnCast;
 	std::function<void(EffectContext, Minion*, bool)> OnSummon;
 	std::function<void(EffectContext, Minion*)> OnDeath;
@@ -167,6 +168,7 @@ public:
 	std::function<void(EffectContext, Minion*, bool)> OnMove;
 	std::function<void(EffectContext, Card*, bool)> OnDraw;
 	std::function<void(EffectContext, Card*)> OnReplace;
+	std::function<void(EffectContext, Card*)> OnEffectsChanged;
 	std::function<void(EffectContext, Player*)> OnTurnStart;
 	std::function<void(EffectContext, Player*)> OnTurnEnd;
 	bool IsContinuous() { return source != nullptr; }
