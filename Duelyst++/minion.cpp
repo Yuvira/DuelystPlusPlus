@@ -9,7 +9,7 @@ Minion::Minion(eFaction _faction, eTribe _tribe, int _cost, int _atk, int _hp, s
 	cardType = CARD_MINION;
 	faction = _faction;
 	tribe = _tribe;
-	targetMode = TARGET_NEAR_ALLY;
+	targetMode = TargetMode(TARGET_MODE_NEAR_ALLIES, TARGET_FILTER_EMPTY);
 	cost = _cost;
 	atk = _atk;
 	hp = _hp;
@@ -335,7 +335,7 @@ int Minion::MoveRange() {
 }
 
 //Check if minion has given keywords
-bool Minion::HasKeywords(eKeywordFlags keywords) {
+bool Minion::HasKeywords(int keywords) {
 	int flags = KEYWORD_NONE;
 	for (int i = 0; i < effects.size(); ++i)
 		flags |= effects[i].keywords;

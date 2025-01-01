@@ -11,7 +11,7 @@ class Game;
 class Player;
 class Spell;
 
-#pragma region Enums
+#pragma region Enums / Helpers
 
 //Card types
 enum eCard {
@@ -30,26 +30,24 @@ enum eRarity {
 	RARITY_LEGENDARY
 };
 
-//Targeting types
-enum eTarget {
-	TARGET_ANY,
-	TARGET_TILE,
-	TARGET_UNIT,
-	TARGET_MINION,
-	TARGET_GENERAL,
-	TARGET_ALLY,
-	TARGET_ALLY_MINON,
-	TARGET_ALLY_GENERAL,
-	TARGET_ENEMY,
-	TARGET_ENEMY_MINION,
-	TARGET_ENEMY_RANGED,
-	TARGET_ENEMY_GENERAL,
-	TARGET_NEAR_ANY,
-	TARGET_NEAR_TILE,
-	TARGET_MINION_NEAR_TILE,
-	TARGET_TILE_NEAR_TILE,
-	TARGET_NEAR_ALLY,
-	TARGET_NEAR_ENEMY
+//Targeting modes
+enum eTargetMode {
+	TARGET_MODE_ALL,
+	TARGET_MODE_NEAR_TILE,
+	TARGET_MODE_NEAR_UNITS,
+	TARGET_MODE_NEAR_ALLIES,
+	TARGET_MODE_NEAR_ENEMIES
+};
+
+//Targeting filters
+enum eTargetFilters {
+	TARGET_FILTER_NONE    = 0,
+	TARGET_FILTER_EMPTY   = 1 << 0,
+	TARGET_FILTER_UNIT    = 1 << 1,
+	TARGET_FILTER_MINION  = 1 << 2,
+	TARGET_FILTER_GENERAL = 1 << 3,
+	TARGET_FILTER_ALLY    = 1 << 4,
+	TARGET_FILTER_ENEMY   = 1 << 5
 };
 
 //Factions
@@ -75,6 +73,18 @@ enum eTribe {
 	TRIBE_VESPYR,
 	TRIBE_STRUCTURE,
 	TRIBE_WARMASTER
+};
+
+//Targeting mode
+class TargetMode {
+public:
+	TargetMode();
+	TargetMode(eTargetMode _mode, int _filters);
+	~TargetMode();
+	bool HasFilters(int flags) { return (filters & flags) == flags; }
+	bool HasAny(int flags) { return (filters & flags) != TARGET_FILTER_NONE; }
+	eTargetMode mode;
+	int filters;
 };
 
 #pragma endregion
@@ -121,7 +131,7 @@ public:
 	//Properties
 	eFaction faction;
 	eCard cardType;
-	eTarget targetMode;
+	TargetMode targetMode;
 	bool isToken;
 	int cost;
 	Game* game;
@@ -168,7 +178,7 @@ public:
 	bool CanAttack(Minion* target);
 	bool IsMoveable();
 	int MoveRange();
-	bool HasKeywords(eKeywordFlags keywords);
+	bool HasKeywords(int keywords);
 	bool IsProvoked();
 
 	//Event overrides
@@ -201,8 +211,8 @@ public:
 
 	//Constructors / Initialization
 	Spell();
-	Spell(eFaction _faction, eTarget _target, int _cost, std::string path, std::string _name);
-	Spell(eFaction _faction, eTarget _target, int _cost, std::string path, std::string _name, Effect effect);
+	Spell(eFaction _faction, TargetMode _targetMode, int _cost, std::string path, std::string _name);
+	Spell(eFaction _faction, TargetMode _targetMode, int _cost, std::string path, std::string _name, Effect effect);
 	~Spell();
 	void GenerateDetails();
 

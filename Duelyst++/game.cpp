@@ -3,7 +3,7 @@
 
 #pragma region Helper Constructors
 
-//Callback stuff
+//Callback constructor
 EffectCallback::EffectCallback() : EffectCallback(nullptr, nullptr) {}
 EffectCallback::EffectCallback(Card* _card, BoardTile* _tile) {
 	card = _card;
@@ -629,113 +629,49 @@ void Game::SearchMoveable(int x, int y, int range) {
 }
 
 //Highlight targetable tiles
-void Game::HighlightSelectable(eTarget targetMode) { HighlightSelectable(targetMode, nullptr); }
-void Game::HighlightSelectable(eTarget targetMode, BoardTile* tile) {
+void Game::HighlightSelectable(TargetMode targetMode) { HighlightSelectable(targetMode, nullptr); }
+void Game::HighlightSelectable(TargetMode targetMode, BoardTile* tile) {
 
 	//Clear
 	selectable.clear();
 
-	//Target type
-	switch (targetMode) {
-
-		//Empty tiles
-	case TARGET_TILE:
+	//All tiles
+	if (targetMode.mode == TARGET_MODE_ALL) {
 		for (int i = 0; i < 9; ++i)
 			for (int j = 0; j < 5; ++j)
-				if (map.tiles[i][j].minion == nullptr)
-					selectable.push_back(&map.tiles[i][j]);
-		break;
+				selectable.push_back(&map.tiles[i][j]);
+	}
 
-		//Any battle unit (minion or general)
-	case TARGET_UNIT:
-		for (int i = 0; i < minions.size(); ++i)
-			selectable.push_back(minions[i]->curTile);
-		break;
-
-		//Any minion
-	case TARGET_MINION:
-		for (int i = 0; i < minions.size(); ++i)
-			if (minions[i]->tribe != TRIBE_GENERAL)
-				selectable.push_back(minions[i]->curTile);
-		break;
-
-		//Enemies
-	case TARGET_ENEMY:
-		for (int i = 0; i < minions.size(); ++i)
-			if (minions[i]->owner != &players[turn])
-				selectable.push_back(minions[i]->curTile);
-		break;
-
-		//Allied minions
-	case TARGET_ALLY_MINON:
-		for (int i = 0; i < minions.size(); ++i)
-			if (minions[i]->owner == &players[turn])
-				if (minions[i]->tribe != TRIBE_GENERAL)
-					selectable.push_back(minions[i]->curTile);
-		break;
-
-		//Enemy minions
-	case TARGET_ENEMY_MINION:
-		for (int i = 0; i < minions.size(); ++i)
-			if (minions[i]->owner != &players[turn])
-				if (minions[i]->tribe != TRIBE_GENERAL)
-					selectable.push_back(minions[i]->curTile);
-		break;
-
-		//Enemy minions
-	case TARGET_ENEMY_RANGED:
-		for (int i = 0; i < minions.size(); ++i)
-			if (minions[i]->owner != &players[turn])
-				if (minions[i]->tribe != TRIBE_GENERAL)
-					if (minions[i]->HasKeywords(KEYWORD_RANGED))
-						selectable.push_back(minions[i]->curTile);
-		break;
-
-		//Enemy general
-	case TARGET_ENEMY_GENERAL:
-		for (int i = 0; i < minions.size(); ++i)
-			if (minions[i] == players[!turn].general)
-				selectable.push_back(minions[i]->curTile);
-		break;
-
-		//Spaces near tile
-	case TARGET_NEAR_TILE:
+	//Tiles near given tile
+	else if (targetMode.mode == TARGET_MODE_NEAR_TILE) {
 		if (tile != nullptr)
-			for (int i = max(tile->pos.x - 1, 0); i < min(tile->pos.x + 2, 9); ++i)
-				for (int j = max(tile->pos.y - 1, 0); j < min(tile->pos.y + 2, 5); ++j)
+			for (int i = max(tile->pos.x - 1, 0); i <= min(tile->pos.x + 1, 9); ++i)
+				for (int j = max(tile->pos.y - 1, 0); j <= min(tile->pos.y + 1, 5); ++j)
 					if (i != tile->pos.x || j != tile->pos.y)
 						selectable.push_back(&map.tiles[i][j]);
-		break;
+	}
 
-		//Minons near tile
-	case TARGET_MINION_NEAR_TILE:
-		if (tile != nullptr)
-			for (int i = max(tile->pos.x - 1, 0); i < min(tile->pos.x + 2, 9); ++i)
-				for (int j = max(tile->pos.y - 1, 0); j < min(tile->pos.y + 2, 5); ++j)
-					if (map.tiles[i][j].minion != nullptr && (i != tile->pos.x || j != tile->pos.y) && map.tiles[i][j].minion->tribe != TRIBE_GENERAL)
-						selectable.push_back(&map.tiles[i][j]);
-		break;
-
-		//Empty tiles near tile
-	case TARGET_TILE_NEAR_TILE:
-		if (tile != nullptr)
-			for (int i = max(tile->pos.x - 1, 0); i < min(tile->pos.x + 2, 9); ++i)
-				for (int j = max(tile->pos.y - 1, 0); j < min(tile->pos.y + 2, 5); ++j)
-					if (map.tiles[i][j].minion == nullptr)
-						selectable.push_back(&map.tiles[i][j]);
-		break;
-
-		//Near allies (summon)
-	case TARGET_NEAR_ALLY:
+	//Tiles near units
+	else if (targetMode.mode == TARGET_MODE_NEAR_UNITS || targetMode.mode == TARGET_MODE_NEAR_ALLIES || targetMode.mode == TARGET_MODE_NEAR_ENEMIES) {
 		for (int i = 0; i < minions.size(); ++i)
-			if (minions[i]->owner == &players[turn])
-				for (int j = max(minions[i]->curTile->pos.x - 1, 0); j < min(minions[i]->curTile->pos.x + 2, 9); ++j)
-					for (int k = max(minions[i]->curTile->pos.y - 1, 0); k < min(minions[i]->curTile->pos.y + 2, 5); ++k)
-						if (map.tiles[j][k].minion == nullptr)
-							if (map.tiles[j][k].border.buffer[0].Attributes != COLOR_GREEN)
-								selectable.push_back(&map.tiles[j][k]);
-		break;
+			if (targetMode.mode == TARGET_MODE_NEAR_UNITS || (targetMode.mode == TARGET_MODE_NEAR_ALLIES && minions[i]->owner == &players[turn]) || (targetMode.mode == TARGET_MODE_NEAR_ENEMIES && minions[i]->owner == &players[!turn]))
+				for (int j = max(minions[i]->curTile->pos.x - 1, 0); j <= min(minions[i]->curTile->pos.x + 1, 9); ++j)
+					for (int k = max(minions[i]->curTile->pos.y - 1, 0); k <= min(minions[i]->curTile->pos.y + 1, 5); ++k)
+						if (std::find(selectable.begin(), selectable.end(), &map.tiles[j][k]) == selectable.end())
+							selectable.push_back(&map.tiles[j][k]);
+	}
 
+	//Apply filters
+	for (int i = 0; i < selectable.size(); ++i) {
+		if ((targetMode.HasFilters(TARGET_FILTER_EMPTY) && selectable[i]->minion != nullptr)
+			|| (targetMode.HasAny(TARGET_FILTER_UNIT | TARGET_FILTER_MINION | TARGET_FILTER_GENERAL | TARGET_FILTER_ALLY | TARGET_FILTER_ENEMY) && selectable[i]->minion == nullptr)
+			|| (targetMode.HasFilters(TARGET_FILTER_MINION) && selectable[i]->minion->tribe == TRIBE_GENERAL)
+			|| (targetMode.HasFilters(TARGET_FILTER_GENERAL) && selectable[i]->minion->tribe != TRIBE_GENERAL)
+			|| (targetMode.HasFilters(TARGET_FILTER_ALLY) && selectable[i]->minion->owner != &players[turn])
+			|| (targetMode.HasFilters(TARGET_FILTER_ENEMY) && selectable[i]->minion->owner == &players[turn])) {
+			selectable.erase(selectable.begin() + i);
+			--i;
+		}
 	}
 
 	//If selectable tiles found, highlight first and switch to select mode

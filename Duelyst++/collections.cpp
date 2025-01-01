@@ -77,7 +77,7 @@ Collections::Collections() {
 	//Bloodtear Alchemist
 	effectList.push_back(Effect(SKILL_BLOODTEAR_ALCHEMIST, KEYWORD_OPENING_GAMBIT, 0, 0, 0, false, "{Opening Gambit}: Deal 1 damage to|an enemy"));
 	effectList.back().OnPreCastThis = [](Card* card, BoardTile* tile) {
-		card->game->HighlightSelectable(TARGET_ENEMY);
+		card->game->HighlightSelectable(TargetMode(TARGET_MODE_ALL, TARGET_FILTER_ENEMY));
 		if (card->game->selectable.size() > 0) {
 			card->game->callback = EffectCallback(card, nullptr);
 			card->game->callback.callback = [](Card* card, BoardTile* tile) {
@@ -90,7 +90,7 @@ Collections::Collections() {
 	//Ephemeral Shroud
 	effectList.push_back(Effect(SKILL_EPHEMERAL_SHROUD, KEYWORD_OPENING_GAMBIT, 0, 0, 0, false, "{Opening Gambit}: Dispel 1 nearby space"));
 	effectList.back().OnPreCastThis = [](Card* card, BoardTile* tile) {
-		card->game->HighlightSelectable(TARGET_NEAR_TILE, tile);
+		card->game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, TARGET_FILTER_NONE), tile);
 		if (card->game->selectable.size() > 0) {
 			card->game->callback = EffectCallback(card, nullptr);
 			card->game->callback.callback = [](Card* card, BoardTile* tile) {
@@ -307,8 +307,8 @@ Collections::Collections() {
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 1, "ephemeralshroud", "Ephemeral Shroud", FindEffect(SKILL_EPHEMERAL_SHROUD)));
 
 	//Spells
-	spellList.push_back(Spell(FACTION_ABYSSIAN, TARGET_MINION, 4, "breathoftheunborn", "Breath of The Unborn", FindEffect(SPELL_BREATH_OF_THE_UNBORN)));
-	spellList.push_back(Spell(FACTION_ABYSSIAN, TARGET_ENEMY_GENERAL, 4, "darkseed", "Dark Seed", FindEffect(SPELL_DARK_SEED)));
+	spellList.push_back(Spell(FACTION_ABYSSIAN, TargetMode(TARGET_MODE_ALL, TARGET_FILTER_UNIT), 4, "breathoftheunborn", "Breath of The Unborn", FindEffect(SPELL_BREATH_OF_THE_UNBORN)));
+	spellList.push_back(Spell(FACTION_ABYSSIAN, TargetMode(TARGET_MODE_ALL, TARGET_FILTER_ENEMY | TARGET_FILTER_GENERAL), 4, "darkseed", "Dark Seed", FindEffect(SPELL_DARK_SEED)));
 
 	/*
 

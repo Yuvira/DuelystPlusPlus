@@ -1,6 +1,18 @@
 //Include
 #include "game.h"
 
+#pragma region Helper Constructors
+
+//Targeting mode constructor
+TargetMode::TargetMode() : TargetMode(TARGET_MODE_ALL, TARGET_FILTER_NONE) {}
+TargetMode::TargetMode(eTargetMode _mode, int _filters) {
+	mode = _mode;
+	filters = _filters;
+}
+TargetMode::~TargetMode() {}
+
+#pragma endregion
+
 #pragma region Card Constructor
 
 //Card constructor
