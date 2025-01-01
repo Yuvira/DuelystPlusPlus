@@ -145,19 +145,16 @@ public:
 class Effect {
 public:
 	Effect();
-	Effect(eEffect _effect, eKeywordFlags _keywords, int _costBuff, int _atkBuff, int _hpBuff, bool _isContinuous);
-	Effect(eEffect _effect, eKeywordFlags _keywords, int _costBuff, int _atkBuff, int _hpBuff, bool _isContinuous, std::string _description);
+	Effect(eEffect _effect, eKeywordFlags _keywords, int _costBuff, int _atkBuff, int _hpBuff);
+	Effect(eEffect _effect, eKeywordFlags _keywords, int _costBuff, int _atkBuff, int _hpBuff, std::string _description);
 	~Effect();
-	void GenerateSprite();
-	Sprite sprite;
 	eEffect effect;
 	eKeywordFlags keywords;
 	std::string description;
 	int costBuff;
 	int atkBuff;
 	int hpBuff;
-	bool isContinuous;
-	std::vector<Effect*> sources;
+	Effect* source;
 	std::function<void(EffectContext, BoardTile*)> OnPreCastThis;
 	std::function<void(EffectContext, BoardTile*)> OnResolveThis;
 	std::function<void(EffectContext)> OnDispelThis;
@@ -172,8 +169,7 @@ public:
 	std::function<void(EffectContext, Card*)> OnReplace;
 	std::function<void(EffectContext, Player*)> OnTurnStart;
 	std::function<void(EffectContext, Player*)> OnTurnEnd;
-	std::string ValueString(int value);
-	int TextWidth(std::string str);
+	bool IsContinuous() { return source != nullptr; }
 };
 
 #endif

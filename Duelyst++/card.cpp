@@ -32,40 +32,125 @@ Card::~Card() {}
 
 #pragma endregion
 
+#pragma region Updates & Rendering
+
+//Update effect details
+void Card::UpdateDetails() {
+
+	//Text lines
+	std::vector<std::string> lines;
+	lines.push_back("");
+
+	//Create pointer list
+	std::vector<Effect*> effectRefs;
+	for (int i = 0; i < effects.size(); ++i)
+		effectRefs.push_back(&effects[i]);
+
+	//Loop by removing elements from list until list is empty
+	for ( ; !effectRefs.empty(); effectRefs.erase(effectRefs.begin())) {
+
+		//Get current effect
+		Effect* effect = effectRefs.front();
+
+		//Add newline if this isn't the first effect in the list
+		if (lines.size() > 1 || lines[0].length() > 0) {
+			lines.push_back("");
+			lines.push_back("");
+		}
+
+		//Add description to lines
+		int headerIdx = lines.size() - 1;
+		for (int i = 0; i < effect->description.length(); ++i) {
+			if (effect->description[i] == '|')
+				lines.push_back("");
+			else
+				lines.back() += effect->description[i];
+		}
+
+		//Stack count
+		int stacks = 1;
+		if (effectRefs.size() > 1) {
+			for (int i = 1; i < effectRefs.size(); ++i) {
+				if (effectRefs[i]->effect == effect->effect) {
+					effectRefs.erase(effectRefs.begin() + i);
+					++stacks;
+					--i;
+				}
+			}
+			if (stacks > 1)
+				lines[headerIdx] += " {[x" + std::to_string(stacks) + "]}";
+		}
+
+		//Add buffs line if applicable
+		if (effect->costBuff != 0 || effect->atkBuff != 0 || effect->hpBuff != 0) {
+			std::string str = "";
+			if (effect->atkBuff != 0 && effect->hpBuff != 0)
+				str += ValueString(effect->atkBuff * stacks) + "/" + ValueString(effect->hpBuff * stacks);
+			else if (effect->hpBuff != 0)
+				str += ValueString(effect->atkBuff * stacks) + " Attack";
+			else if (effect->atkBuff != 0)
+				str += ValueString(effect->hpBuff * stacks) + " Health";
+			if (effect->costBuff != 0) {
+				if (str != "")
+					str += ", ";
+				str += ValueString(effect->costBuff * stacks) + " Cost";
+			}
+			str = "{" + str + "}";
+			lines.push_back(str);
+		}
+
+	}
+
+	//Resize and clear
+	int maxWidth = 0;
+	for (int i = 0; i < lines.size(); ++i)
+		maxWidth = max(maxWidth, TextWidth(lines[i]));
+	details.Resize(maxWidth, lines.size());
+
+	//Generate sprite
+	int idxDelta = 0;
+	WORD color = COLOR_GRAY;
+	for (int i = 0; i < lines.size(); ++i) {
+		for (int j = 0; j < lines[i].length(); ++j) {
+			if (lines[i][j] == '{') {
+				color = COLOR_LTWHITE;
+				++idxDelta;
+			}
+			else if (lines[i][j] == '}') {
+				color = COLOR_GRAY;
+				++idxDelta;
+			}
+			else {
+				details.buffer[(j + (i * details.width)) - idxDelta].Char.AsciiChar = lines[i][j];
+				details.buffer[(j + (i * details.width)) - idxDelta].Attributes = color;
+			}
+		}
+		idxDelta = 0;
+	}
+
+}
+
+#pragma endregion
+
 #pragma region Card Effects
 
 //Add effect to list
 void Card::AddEffect(Effect effect, Effect* source) {
-	for (int i = 0; i < effects.size(); ++i) {
-		if (effects[i].effect == effect.effect) {
-			effects[i].sources.push_back(source);
-			effects[i].GenerateSprite();
-			UpdateStatBuffs();
-			return;
-		}
-	}
 	effects.push_back(effect);
-	effects.back().sources.push_back(source);
-	effects.back().GenerateSprite();
+	effects.back().source = source;
+	UpdateDetails();
 	UpdateStatBuffs();
 }
 
 //Remove effect from list
-void Card::RemoveEffect(eEffect effect, Effect* source) {
+void Card::RemoveEffectsFromSource(Effect* source) {
 	for (int i = 0; i < effects.size(); ++i) {
-		if (effects[i].effect == effect) {
-			for (int j = 0; j < effects[i].sources.size(); ++j) {
-				if (effects[i].sources[j] == source) {
-					effects[i].sources.erase(effects[i].sources.begin() + j);
-					--j;
-				}
-			}
-			if (effects[i].sources.size() == 0) {
-				effects.erase(effects.begin() + i);
-				break;
-			}
+		if (effects[i].source == source) {
+			effects.erase(effects.begin() + i);
+			--i;
 		}
 	}
+	UpdateDetails();
 	UpdateStatBuffs();
 }
 
@@ -162,6 +247,22 @@ void Card::OnTurnEnd(Player* player) {
 	for (int i = 0; i < effects.size(); ++i)
 		if (effects[i].OnTurnEnd)
 			effects[i].OnTurnEnd(EffectContext(&effects[i], this, game), player);
+}
+
+#pragma endregion
+
+#pragma region Utils
+
+//Get value with +/- indicator converted to string
+std::string Card::ValueString(int value) { return (value > 0 ? "+" : "-") + std::to_string(abs(value)); }
+
+//Get width of text ignoring style tags
+int Card::TextWidth(std::string str) {
+	int width = 0;
+	for (int i = 0; i < str.length(); ++i)
+		if (str[i] != '{' && str[i] != '}')
+			++width;
+	return width;
 }
 
 #pragma endregion

@@ -906,10 +906,6 @@ void Game::DrawArrow(int type, int x, int y, Renderer& renderer) {
 void Game::SetContext(Card* card, Player* player) {
 	card->game = this;
 	card->owner = player;
-	for (int i = 0; i < card->effects.size(); ++i)
-		for (int j = 0; j < card->effects[i].sources.size(); ++j)
-			if (card->effects[i].sources[j] == nullptr)
-				card->effects[i].sources[j] = &card->effects[i];
 }
 
 //Check if tiles is moveable

@@ -48,10 +48,7 @@ void Spell::DrawDetails(Renderer& renderer, int& y) {
 	renderer.Render(header[0], 72, y); ++y;
 	UpdateDetailStats();
 	renderer.Render(header[1], 72, y); y += 2;
-	for (int i = 0; i < effects.size(); ++i) {
-		renderer.Render(effects[i].sprite, 72, y);
-		y += effects[i].sprite.height + 1;
-	}
+	renderer.Render(details, 72, y); y += details.height + 1;
 	if (token != nullptr) {
 		if (y < 7) { y = 7; }
 		renderer.Render(divider, 66, y);
@@ -68,7 +65,7 @@ void Spell::DrawDetails(Renderer& renderer, int& y) {
 void Spell::UpdateStatBuffs() {
 	int costBuff = 0;
 	for (int i = 0; i < effects.size(); ++i)
-		costBuff += effects[i].costBuff * effects[i].sources.size();
+		costBuff += effects[i].costBuff;
 	cost = max(original->cost + costBuff, 0);
 }
 

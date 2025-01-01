@@ -97,9 +97,14 @@ public:
 	Card();
 	~Card();
 
+	//Updates & Rendering
+	void UpdateDetails();
+	virtual void UpdateStatBuffs() {}
+	virtual void DrawDetails(Renderer& renderer, int& y) {}
+
 	//Effects
 	void AddEffect(Effect effect, Effect* source);
-	void RemoveEffect(eEffect effect, Effect* source);
+	void RemoveEffectsFromSource(Effect* source);
 
 	//Actions
 	void PreCast(BoardTile* tile);
@@ -118,9 +123,10 @@ public:
 	virtual void OnTurnStart(Player* player);
 	virtual void OnTurnEnd(Player* player);
 
-	//Virtual functions
-	virtual void UpdateStatBuffs() {}
-	virtual void DrawDetails(Renderer& renderer, int& y) {}
+	//Utils
+	virtual bool IsOnBoard() { return false; }
+	std::string ValueString(int value);
+	int TextWidth(std::string str);
 
 	//Subclass getters
 	virtual Minion* GetMinion() { return nullptr; }
@@ -142,6 +148,7 @@ public:
 	std::vector<Effect> effects;
 	Sprite sprite;
 	Sprite header[2];
+	Sprite details;
 	Sprite divider;
 
 };
@@ -179,6 +186,7 @@ public:
 	int MoveRange();
 	bool HasKeywords(int keywords);
 	bool IsProvoked();
+	bool IsOnBoard() { return curTile != nullptr; }
 
 	//Action & Event Overrides
 	void Resolve(BoardTile* tile);

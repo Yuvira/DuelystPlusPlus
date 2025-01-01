@@ -111,10 +111,7 @@ void Minion::DrawDetails(Renderer& renderer, int& y) {
 	renderer.Render(header[0], 72, y); ++y;
 	UpdateDetailStats();
 	renderer.Render(header[1], 72, y); y += 2;
-	for (int i = 0; i < effects.size(); ++i) {
-		renderer.Render(effects[i].sprite, 72, y);
-		y += effects[i].sprite.height + 1;
-	}
+	renderer.Render(details, 72, y); y += details.height + 1;
 	if (token != nullptr) {
 		if (y < 7)
 			y = 7;
@@ -144,9 +141,9 @@ void Minion::UpdateStatBuffs() {
 	int hpBuff = 0;
 	int hpDelta = hp - hpMax;
 	for (int i = 0; i < effects.size(); ++i) {
-		costBuff += effects[i].costBuff * effects[i].sources.size();
-		atkBuff += effects[i].atkBuff * effects[i].sources.size();
-		hpBuff += effects[i].hpBuff * effects[i].sources.size();
+		costBuff += effects[i].costBuff;
+		atkBuff += effects[i].atkBuff;
+		hpBuff += effects[i].hpBuff;
 	}
 	cost = max(original->GetMinion()->cost + costBuff, 0);
 	atk = max(original->GetMinion()->atk + atkBuff, 0);
@@ -271,7 +268,7 @@ void Minion::Dispel() {
 
 	//Remove effects
 	for (int i = 0; i < effects.size(); ++i)
-		if (!effects[i].isContinuous)
+		if (!effects[i].IsContinuous())
 			effects.erase(effects.begin() + i);
 
 	//Add dispelled effect
