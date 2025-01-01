@@ -136,9 +136,10 @@ void Card::UpdateDetails() {
 
 //Add effect to list
 void Card::AddEffect(Effect effect, Effect* source) {
-	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i]->effect == effect.effect && effects[i]->source == source)
-			return;
+	if (source != nullptr)
+		for (int i = 0; i < effects.size(); ++i)
+			if (effects[i]->effect == effect.effect && effects[i]->source == source)
+				return;
 	effects.push_back(new Effect(effect));
 	effects.back()->source = source;
 	if (IsOnBoard() && effects.back()->OnAddThis)
