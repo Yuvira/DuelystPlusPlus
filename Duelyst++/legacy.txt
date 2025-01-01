@@ -1,0 +1,989 @@
+Attack
+
+	switch (skill.skill) {
+	case SKILL_BLUETIP_SCORPION:
+		if (target->tribe != TRIBE_GENERAL)
+			damage *= 2;
+		break;
+	case SKILL_FACESTRIKER:
+		if (target->tribe == TRIBE_GENERAL)
+			damage *= 2;
+		break;
+	}
+
+OnSpellCast
+
+	//If on board
+	if (curTile != nullptr) {
+		
+		//If ally spell cast
+		if (spell->owner == owner) {
+			switch (skill.skill) {
+			case SKILL_FIRESTARTER:
+				if (true) {
+					BoardTile* t = game->map.GetRandomNear(curTile->pos.x, curTile->pos.y);
+					if (t != nullptr) {
+						Minion* u = new Minion(*(dynamic_cast<Minion*>(token)));
+						game->SetContext(u, owner);
+						game->Summon(u, t->pos.x, t->pos.y, false);
+					}
+				}
+				break;
+			}
+		}
+
+	}
+	
+Dispel
+
+	//Remove buffs granted to other units/cards
+	switch (skill.skill) {
+	case SKILL_ARCHON_SPELLBINDER:
+		for (int a = 0; a < owner->opponent->hand.size(); ++a) {
+			if (owner->opponent->hand[a]->cardType == CARD_SPELL) {
+				dynamic_cast<Spell*>(owner->opponent->hand[a])->RemoveBuff(BUFF_ARCHON_SPELLBINDER, false);
+			}
+		}
+		for (int a = 0; a < owner->opponent->deck.size(); ++a) {
+			if (owner->opponent->deck[a]->cardType == CARD_SPELL) {
+				dynamic_cast<Spell*>(owner->opponent->deck[a])->RemoveBuff(BUFF_ARCHON_SPELLBINDER, false);
+			}
+		}
+		break;
+	case SKILL_ARROW_WHISTLER:
+		for (int a = 0; a < game->minions.size(); ++a) {
+			if (game->minions[a]->owner == owner) {
+				if (game->minions[a] != this) {
+					if (game->minions[a]->IsRanged()) {
+						game->minions[a]->RemoveBuff(BUFF_ARROW_WHISTLER, false);
+					}
+				}
+			}
+		}
+		break;
+	case SKILL_FIRST_SWORD_OF_AKRANE:
+		for (int a = 0; a < game->minions.size(); ++a) {
+			if (game->minions[a]->owner == owner) {
+				if (game->minions[a]->tribe != TRIBE_GENERAL) {
+					if (game->minions[a] != this) {
+						game->minions[a]->RemoveBuff(BUFF_FIRST_SWORD_OF_AKRANE, false);
+					}
+				}
+			}
+		}
+		break;
+	case SKILL_GOLDEN_JUSTICAR:
+		for (int a = 0; a < game->minions.size(); ++a) {
+			if (game->minions[a]->owner == owner) {
+				if (game->minions[a] != this) {
+					if (game->minions[a]->IsProvoking()) {
+						game->minions[a]->RemoveEffect(EFFECT_GOLDEN_JUSTICAR, false);
+					}
+				}
+			}
+		}
+		break;
+	case SKILL_GOLEM_METALLURGIST:
+		for (int a = 0; a < owner->hand.size(); ++a) {
+			if (owner->hand[a]->cardType == CARD_UNIT) {
+				dynamic_cast<Minion*>(owner->hand[a])->RemoveBuff(BUFF_GOLEM_METALLURGIST, false);
+			}
+		}
+		for (int a = 0; a < owner->deck.size(); ++a) {
+			if (owner->deck[a]->cardType == CARD_UNIT) {
+				dynamic_cast<Minion*>(owner->deck[a])->RemoveBuff(BUFF_GOLEM_METALLURGIST, false);
+			}
+		}
+		break;
+	case SKILL_GOLEM_VANQUISHER:
+		for (int a = 0; a < game->minions.size(); ++a) {
+			if (game->minions[a]->owner == owner) {
+				if (game->minions[a] != this) {
+					game->minions[a]->RemoveEffect(EFFECT_GOLEM_VANQUISHER, false);
+				}
+			}
+		}
+		break;
+	case SKILL_GROVE_LION:
+		for (int a = 0; a < owner->general->effects.size(); ++a) {
+			if (owner->general->effects[a].effect == EFFECT_GROVE_LION) {
+				if (owner->general->effects[a].stacks == 1) {
+					owner->general->hasForcefield = false;
+				}
+				owner->general->RemoveEffect(EFFECT_GROVE_LION, false);
+				break;
+			}
+		}
+		break;
+	}
+	
+Summon This
+
+			//From action bar (Opening Gambit)
+			if (actionBar) {
+				switch (skill.skill) {
+				case SKILL_AZURE_HERALD:
+					owner->general->DealDamage(this, -3);
+					break;
+				case SKILL_BLAZE_HOUND:
+					game->players[0].Draw();
+					game->players[1].Draw();
+					break;
+				case SKILL_BLISTERING_SKORN:
+					for (int a = 0; a < game->minions.size(); ++a) { game->minions[a]->DealDamage(this, 1); }
+					break;
+				case SKILL_CROSSBONES:
+					game->HighlightSelectable(TARGET_ENEMY_RANGED);
+					if (game->selectable.size() > 0) { game->callback = EffectCallback(this, nullptr, nullptr, SKILL_CROSSBONES); }
+					break;
+				case SKILL_DANCING_BLADES:
+					if (true) {
+						int _x = curTile->pos.x;
+						&game->players[0] == owner ? ++_x : --_x;
+						if (_x > -1 && _x < 9) {
+							if (game->map.tiles[_x][curTile->pos.y].minion != nullptr) {
+								if (game->map.tiles[_x][curTile->pos.y].minion->tribe != TRIBE_GENERAL) {
+									game->map.tiles[_x][curTile->pos.y].minion->DealDamage(this, 3);
+								}
+							}
+						}
+					}
+					break;
+				case SKILL_DEATHBLIGHTER:
+					for (int a = max(curTile->pos.x - 1, 0); a < min(curTile->pos.x + 2, 9); ++a) {
+						for (int b = max(curTile->pos.y - 1, 0); b < min(curTile->pos.y + 2, 5); ++b) {
+							if (game->map.tiles[a][b].minion != nullptr) {
+								if (game->map.tiles[a][b].minion->owner != owner) {
+									if (game->map.tiles[a][b].minion->tribe != TRIBE_GENERAL) {
+										game->map.tiles[a][b].minion->DealDamage(this, 3);
+									}
+								}
+							}
+						}
+					}
+					break;
+				case SKILL_DUST_WAILER:
+					if (&game->players[0] == owner && curTile->pos.x < 8) {
+						for (int a = curTile->pos.x + 1; a < 9; ++a) {
+							if (game->map.tiles[a][curTile->pos.y].minion != nullptr) {
+								game->map.tiles[a][curTile->pos.y].minion->DealDamage(this, 3);
+							}
+						}
+					}
+					else if (&game->players[1] == owner && curTile->pos.x > 0) {
+						for (int a = curTile->pos.x - 1; a > -1; --a) {
+							if (game->map.tiles[a][curTile->pos.y].minion != nullptr) {
+								game->map.tiles[a][curTile->pos.y].minion->DealDamage(this, 3);
+							}
+						}
+					}
+					break;
+				case SKILL_EMERALD_REJUVENATOR:
+					owner->general->DealDamage(this, -4);
+					owner->opponent->general->DealDamage(this, -4);
+					break;
+				case SKILL_FLAMEBLOOD_WARLOCK:
+					owner->general->DealDamage(this, 3);
+					owner->opponent->general->DealDamage(this, 3);
+					break;
+				case SKILL_FROSTBONE_NAGA:
+					for (int a = max(curTile->pos.x - 1, 0); a < min(curTile->pos.x + 2, 9); ++a) {
+						for (int b = max(curTile->pos.y - 1, 0); b < min(curTile->pos.y + 2, 5); ++b) {
+							if (game->map.tiles[a][b].minion != nullptr) {
+								if (game->map.tiles[a][b].minion != this) {
+									game->map.tiles[a][b].minion->DealDamage(this, 2);
+								}
+							}
+						}
+					}
+					break;
+				case SKILL_GHOST_LYNX:
+					game->HighlightSelectable(TARGET_MINION_NEAR_UNIT, this);
+					if (game->selectable.size() > 0) { game->callback = EffectCallback(this, nullptr, nullptr, SKILL_GHOST_LYNX); }
+					break;
+				case SKILL_HEALING_MYSTIC:
+					game->HighlightSelectable(TARGET_UNIT, this);
+					if (game->selectable.size() > 0) { game->callback = EffectCallback(this, nullptr, nullptr, SKILL_HEALING_MYSTIC); }
+					break;
+				case SKILL_JAX_TRUESIGHT:
+					for (int a = 0; a < 9; a += 8) {
+						for (int b = 0; b < 5; b += 4) {
+							if (game->map.tiles[a][b].minion == nullptr) {
+								Minion* u2 = new Minion(*(dynamic_cast<Minion*>(token)));
+								game->SetContext(u2, owner);
+								game->Summon(u2, a, b, false);
+							}
+						}
+					}
+					break;
+				case SKILL_KEEPER_OF_THE_VALE:
+					for (int a = 0; a < game->grave.size(); ++a) {
+						if (game->grave[a]->cardType == CARD_UNIT && !game->grave[a]->isToken && game->grave[a]->owner == owner) {
+							game->HighlightSelectable(TARGET_TILE_NEAR_UNIT, this);
+							if (game->selectable.size() > 0) { game->callback = EffectCallback(this, nullptr, nullptr, SKILL_KEEPER_OF_THE_VALE); }
+							break;
+						}
+					}
+					break;
+				case SKILL_LADY_LOCKE:
+					owner->general->AddEffect(EFFECT_LADY_LOCKE_A);
+					break;
+				case SKILL_LIGHTBENDER:
+					for (int a = max(curTile->pos.x - 1, 0); a < min(curTile->pos.x + 2, 9); ++a) {
+						for (int b = max(curTile->pos.y - 1, 0); b < min(curTile->pos.y + 2, 5); ++b) {
+							if (game->map.tiles[a][b].minion != nullptr) {
+								if (game->map.tiles[a][b].minion != this) {
+									game->map.tiles[a][b].minion->Dispel();
+								}
+							}
+						}
+					}
+					break;
+				}
+			}
+
+			//Summoned from anywhere (apply global effects)
+			switch (skill.skill) {
+			case SKILL_ARCHON_SPELLBINDER:
+				for (int a = 0; a < owner->opponent->hand.size(); ++a) {
+					if (owner->opponent->hand[a]->cardType == CARD_SPELL) {
+						dynamic_cast<Spell*>(owner->opponent->hand[a])->AddBuff(BUFF_ARCHON_SPELLBINDER);
+					}
+				}
+				for (int a = 0; a < owner->opponent->deck.size(); ++a) {
+					if (owner->opponent->deck[a]->cardType == CARD_SPELL) {
+						dynamic_cast<Spell*>(owner->opponent->deck[a])->AddBuff(BUFF_ARCHON_SPELLBINDER);
+					}
+				}
+				break;
+			case SKILL_ARROW_WHISTLER:
+				for (int a = 0; a < game->minions.size(); ++a) {
+					if (game->minions[a]->owner == owner) {
+						if (game->minions[a] != this) {
+							if (game->minions[a]->IsRanged()) {
+								game->minions[a]->AddBuff(BUFF_ARROW_WHISTLER);
+							}
+						}
+					}
+				}
+				break;
+			case SKILL_FIRST_SWORD_OF_AKRANE:
+				for (int a = 0; a < game->minions.size(); ++a) {
+					if (game->minions[a]->owner == owner) {
+						if (game->minions[a]->tribe != TRIBE_GENERAL) {
+							if (game->minions[a] != this) {
+								game->minions[a]->AddBuff(BUFF_FIRST_SWORD_OF_AKRANE);
+							}
+						}
+					}
+				}
+				break;
+			case SKILL_GOLDEN_JUSTICAR:
+				for (int a = 0; a < game->minions.size(); ++a) {
+					if (game->minions[a]->owner == owner) {
+						if (game->minions[a] != this) {
+							if (game->minions[a]->IsProvoking()) {
+								game->minions[a]->AddEffect(EFFECT_GOLDEN_JUSTICAR);
+							}
+						}
+					}
+				}
+				break;
+			case SKILL_GOLEM_METALLURGIST:
+				for (int a = 0; a < owner->hand.size(); ++a) {
+					if (owner->hand[a]->cardType == CARD_UNIT) {
+						Minion* u = dynamic_cast<Minion*>(owner->hand[a]);
+						if (u->tribe == TRIBE_GOLEM) {
+							u->AddBuff(BUFF_GOLEM_METALLURGIST);
+						}
+					}
+				}
+				for (int a = 0; a < owner->deck.size(); ++a) {
+					if (owner->deck[a]->cardType == CARD_UNIT) {
+						Minion* u = dynamic_cast<Minion*>(owner->deck[a]);
+						if (u->tribe == TRIBE_GOLEM) {
+							u->AddBuff(BUFF_GOLEM_METALLURGIST);
+						}
+					}
+				}
+				break;
+			case SKILL_GOLEM_VANQUISHER:
+				for (int a = 0; a < game->minions.size(); ++a) {
+					if (game->minions[a]->owner == owner) {
+						if (game->minions[a] != this) {
+							if (game->minions[a]->tribe == TRIBE_GOLEM) {
+								game->minions[a]->AddEffect(EFFECT_GOLEM_VANQUISHER);
+							}
+						}
+					}
+				}
+				break;
+			case SKILL_GROVE_LION:
+				owner->general->AddEffect(EFFECT_GROVE_LION);
+				owner->general->hasForcefield = true;
+				break;
+			}
+			
+Summon Any
+
+		//When something else is summoned
+		else {
+
+			//Skills
+			switch (skill.skill) {
+			case SKILL_ARAKI_HEADHUNTER:
+				if (minion->owner == owner) {
+					if (actionBar && minion->skill.IsOpeningGambit()) {
+						AddBuff(BUFF_ARAKI_HEADHUNTER);
+					}
+				}
+				break;
+			case SKILL_ARROW_WHISTLER:
+				if (minion->owner == owner) {
+					if (minion->IsRanged()) {
+						minion->AddBuff(BUFF_ARROW_WHISTLER);
+					}
+				}
+				break;
+			case SKILL_CRIMSON_OCULUS:
+				if (minion->owner != owner) { AddBuff(BUFF_CRIMSON_OCULUS); }
+				break;
+			case SKILL_FIRST_SWORD_OF_AKRANE:
+				if (minion->owner == owner) {
+					minion->AddBuff(BUFF_FIRST_SWORD_OF_AKRANE);
+				}
+				break;
+			case SKILL_GOLDEN_JUSTICAR:
+				if (minion->owner == owner) {
+					if (minion->IsProvoking()) {
+						minion->AddEffect(EFFECT_GOLDEN_JUSTICAR);
+					}
+				}
+				break;
+			case SKILL_GOLEM_METALLURGIST:
+				if (minion->owner == owner) {
+					if (minion->tribe == TRIBE_GOLEM) {
+						minion->RemoveBuff(BUFF_GOLEM_METALLURGIST, true);
+						for (int b = 0; b < owner->hand.size(); ++b) {
+							if (owner->hand[b]->cardType == CARD_UNIT) {
+								dynamic_cast<Minion*>(owner->hand[b])->RemoveBuff(BUFF_GOLEM_METALLURGIST, true);
+							}
+						}
+						for (int b = 0; b < owner->deck.size(); ++b) {
+							if (owner->deck[b]->cardType == CARD_UNIT) {
+								dynamic_cast<Minion*>(owner->deck[b])->RemoveBuff(BUFF_GOLEM_METALLURGIST, true);
+							}
+						}
+					}
+				}
+				break;
+			case SKILL_GOLEM_VANQUISHER:
+				if (minion->owner == owner) {
+					if (minion->tribe == TRIBE_GOLEM) {
+						minion->AddEffect(EFFECT_GOLEM_VANQUISHER);
+					}
+				}
+				break;
+			}
+
+			//Effects
+			for (int a = 0; a < effects.size(); ++a) {
+				switch (effects[a].effect) {
+				case EFFECT_DARKFIRE_SACRIFICE:
+					if (minion->owner == owner) {
+						RemoveEffect(EFFECT_DARKFIRE_SACRIFICE, true);
+						minion->RemoveBuff(BUFF_DARKFIRE_SACRIFICE, true);
+						for (int b = 0; b < owner->hand.size(); ++b) {
+							if (owner->hand[b]->cardType == CARD_UNIT) {
+								dynamic_cast<Minion*>(owner->hand[b])->RemoveBuff(BUFF_DARKFIRE_SACRIFICE, true);
+							}
+						}
+						for (int b = 0; b < owner->deck.size(); ++b) {
+							if (owner->deck[b]->cardType == CARD_UNIT) {
+								dynamic_cast<Minion*>(owner->deck[b])->RemoveBuff(BUFF_DARKFIRE_SACRIFICE, true);
+							}
+						}
+					}
+					break;
+				case EFFECT_LADY_LOCKE_A:
+					if (minion->owner == owner) {
+						minion->AddEffect(EFFECT_LADY_LOCKE_B);
+						for (int b = 0; b < effects[a].stacks; ++b) { minion->AddBuff(BUFF_LADY_LOCKE); }
+					}
+					break;
+				}
+
+			}
+
+		}
+		
+Death
+
+	//If on board
+	if (curTile != nullptr) {
+
+		//When this minion dies (Dying Wish)
+		if (minion == this) {
+			switch (skill.skill) {
+			case SKILL_ARCHON_SPELLBINDER:
+				for (int a = 0; a < owner->opponent->hand.size(); ++a) {
+					if (owner->opponent->hand[a]->cardType == CARD_SPELL) {
+						dynamic_cast<Spell*>(owner->opponent->hand[a])->RemoveBuff(BUFF_ARCHON_SPELLBINDER, false);
+					}
+				}
+				for (int a = 0; a < owner->opponent->deck.size(); ++a) {
+					if (owner->opponent->deck[a]->cardType == CARD_SPELL) {
+						dynamic_cast<Spell*>(owner->opponent->deck[a])->RemoveBuff(BUFF_ARCHON_SPELLBINDER, false);
+					}
+				}
+				break;
+			case SKILL_ARROW_WHISTLER:
+				for (int a = 0; a < game->minions.size(); ++a) {
+					if (game->minions[a]->owner == owner) {
+						if (game->minions[a] != this) {
+							if (game->minions[a]->IsRanged()) {
+								game->minions[a]->RemoveBuff(BUFF_ARROW_WHISTLER, false);
+							}
+						}
+					}
+				}
+				break;
+			case SKILL_AZURE_HORN_SHAMAN:
+				for (int a = max(curTile->pos.x - 1, 0); a < min(curTile->pos.x + 2, 9); ++a) {
+					for (int b = max(curTile->pos.y - 1, 0); b < min(curTile->pos.y + 2, 5); ++b) {
+						if (game->map.tiles[a][b].minion != nullptr && game->map.tiles[a][b].minion->owner == owner) {
+							if (game->map.tiles[a][b].minion != owner->general) {
+								game->map.tiles[a][b].minion->AddBuff(BUFF_AZURE_HORN_SHAMAN);
+							}
+						}
+					}
+				}
+				break;
+			case SKILL_DIOLTAS:
+				if (true) {
+					BoardTile* t = game->map.GetRandomNear(owner->general->curTile->pos.x, owner->general->curTile->pos.y);
+					if (t != nullptr) {
+						Minion* u2 = new Minion(*(dynamic_cast<Minion*>(token)));
+						game->SetContext(u2, owner);
+						game->Summon(u2, t->pos.x, t->pos.y, false);
+					}
+				}
+				break;
+			case SKILL_FIRST_SWORD_OF_AKRANE:
+				for (int a = 0; a < game->minions.size(); ++a) {
+					if (game->minions[a]->owner == owner) {
+						if (game->minions[a]->tribe != TRIBE_GENERAL) {
+							if (game->minions[a] != this) {
+								game->minions[a]->RemoveBuff(BUFF_FIRST_SWORD_OF_AKRANE, false);
+							}
+						}
+					}
+				}
+				break;
+			case SKILL_GOLDEN_JUSTICAR:
+				for (int a = 0; a < game->minions.size(); ++a) {
+					if (game->minions[a]->owner == owner) {
+						if (game->minions[a] != this) {
+							if (game->minions[a]->IsProvoking()) {
+								game->minions[a]->RemoveEffect(EFFECT_GOLDEN_JUSTICAR, false);
+							}
+						}
+					}
+				}
+				break;
+			case SKILL_GOLEM_METALLURGIST:
+				for (int a = 0; a < owner->hand.size(); ++a) {
+					if (owner->hand[a]->cardType == CARD_UNIT) {
+						dynamic_cast<Minion*>(owner->hand[a])->RemoveBuff(BUFF_GOLEM_METALLURGIST, false);
+					}
+				}
+				for (int a = 0; a < owner->deck.size(); ++a) {
+					if (owner->deck[a]->cardType == CARD_UNIT) {
+						dynamic_cast<Minion*>(owner->deck[a])->RemoveBuff(BUFF_GOLEM_METALLURGIST, false);
+					}
+				}
+				break;
+			case SKILL_GOLEM_VANQUISHER:
+				for (int a = 0; a < game->minions.size(); ++a) {
+					if (game->minions[a]->owner == owner) {
+						if (game->minions[a] != this) {
+							game->minions[a]->RemoveEffect(EFFECT_GOLEM_VANQUISHER, false);
+						}
+					}
+				}
+				break;
+			case SKILL_GROVE_LION:
+				for (int a = 0; a < owner->general->effects.size(); ++a) {
+					if (owner->general->effects[a].effect == EFFECT_GROVE_LION) {
+						if (owner->general->effects[a].stacks == 1) {
+							owner->general->hasForcefield = false;
+						}
+						owner->general->RemoveEffect(EFFECT_GROVE_LION, false);
+						break;
+					}
+				}
+				break;
+			case SKILL_IRONCLAD:
+				for (int a = 0; a < game->minions.size(); ++a) {
+					if (game->minions[a]->owner != owner) {
+						game->minions[a]->Dispel();
+					}
+				}
+				break;
+			case SKILL_JAXI:
+				if (true) {
+					BoardTile* t = game->map.GetRandomCorner();
+					if (t != nullptr) {
+						Minion* u2 = new Minion(*(dynamic_cast<Minion*>(token)));
+						game->SetContext(u2, owner);
+						game->Summon(u2, t->pos.x, t->pos.y, false);
+					}
+				}
+				break;
+			}
+		}
+
+	}
+	
+Attack
+
+	//If on board
+	if (curTile != nullptr) {
+
+		//If ally attacked
+		if (source->owner == owner) {
+
+			//Skills
+			switch (skill.skill) {
+			case SKILL_DAY_WATCHER:
+				if (!counter) {
+					if (source->tribe != TRIBE_GENERAL) {
+						owner->general->DealDamage(this, -1);
+					}
+				}
+				break;
+			}
+
+		}
+
+		//If any attacked
+		switch (skill.skill) {
+		case SKILL_EXUN:
+			if ((source == this || target == this) && !counter) { owner->Draw(); }
+			break;
+		}
+
+	}
+	
+Damage
+
+	//If on board
+	if (curTile != nullptr) {
+
+		//If this dealt damage
+		if (source == this) {
+			switch (skill.skill) {
+			case SKILL_CAPTAIN_HANK_HART:
+				if (hp > 0) { DealDamage(this, -damage); }
+				break;
+			case SKILL_ENVYBAER:
+				if (true) {
+					BoardTile* t = game->map.GetRandomCorner();
+					if (t != nullptr) {
+						target->SetPosition(t->pos.x, t->pos.y);
+						game->eventManager.SendOnMove(target, true);
+					}
+				}
+				break;
+			}
+		}
+
+		//If this was damaged
+		if (target == this) {
+			switch (skill.skill) {
+			case SKILL_CHAOS_ELEMENTAL:
+				if (true) {
+					BoardTile* t = game->map.GetRandom();
+					if (t != nullptr) {
+						SetPosition(t->pos.x, t->pos.y);
+						game->eventManager.SendOnMove(this, true);
+					}
+				}
+				break;
+			case SKILL_ECLIPSE:
+				owner->opponent->general->DealDamage(this, damage);
+				break;
+			case SKILL_KHYMERA:
+				BoardTile* t = game->map.GetRandomNear(curTile->pos.x, curTile->pos.y);
+				if (t != nullptr) {
+					int i = rand() % game->cardList.minionTokenList.size();
+					Minion* u2 = new Minion(*(dynamic_cast<Minion*>(&game->cardList.minionTokenList[i])));
+					game->SetContext(u2, owner);
+					game->Summon(u2, t->pos.x, t->pos.y, false);
+				}
+				break;
+			}
+		}
+
+	}
+
+	//If in hand/deck
+	else {
+		switch (skill.skill) {
+		case SKILL_BLOOD_TAURA:
+			if (target == owner->general) {
+				RemoveBuff(BUFF_BLOOD_TAURA, true);
+				for (int a = 0; a < 25 - owner->general->hp; ++a) { AddBuff(BUFF_BLOOD_TAURA); }
+			}
+			break;
+		case SKILL_CHAKKRAM:
+			if (target == owner->general) {
+				if (&game->players[game->turn] != owner) {
+					AddBuff(BUFF_CHAKKRAM);
+				}
+			}
+			break;
+		}
+	}
+	
+Heal
+
+	//If in hand/deck
+	if (curTile == nullptr) {
+		switch (skill.skill) {
+		case SKILL_BLOOD_TAURA:
+			if (target == owner->general) {
+				RemoveBuff(BUFF_BLOOD_TAURA, true);
+				for (int a = 0; a < 25 - owner->general->hp; ++a) { AddBuff(BUFF_BLOOD_TAURA); }
+			}
+			break;
+		}
+	}
+	
+Move
+
+	//If on board
+	if (curTile != nullptr) {
+
+		//If this moved
+		if (minion == this) {
+			switch (skill.skill) {
+			case SKILL_BLACK_LOCUST:
+				if (!byEffect) {
+					BoardTile* t = game->map.GetRandomNear(curTile->pos.x, curTile->pos.y);
+					if (t != nullptr) {
+						Minion* u2 = new Minion(*(dynamic_cast<Minion*>(original)));
+						game->SetContext(u2, owner);
+						game->Summon(u2, t->pos.x, t->pos.y, false);
+					}
+				}
+				break;
+			}
+		}
+
+	}
+	
+Draw
+
+	//If on board
+	if (curTile != nullptr) {
+
+		//Skills
+		switch (skill.skill) {
+		case SKILL_ARCHON_SPELLBINDER:
+			if (!fromDeck) {
+				if (card->owner != owner && card->cardType == CARD_SPELL) {
+					dynamic_cast<Spell*>(card)->AddBuff(BUFF_ARCHON_SPELLBINDER);
+				}
+			}
+			break;
+		case SKILL_DECIMUS:
+			if (fromDeck) {
+				if (card->owner != owner) {
+					owner->opponent->general->DealDamage(this, 2);
+				}
+			}
+			break;
+		case SKILL_GOLEM_METALLURGIST:
+			if (!fromDeck) {
+				if (card->owner == owner && card->cardType == CARD_UNIT) {
+					Minion* u = dynamic_cast<Minion*>(card);
+					if (u->tribe == TRIBE_GOLEM) {
+						dynamic_cast<Minion*>(card)->AddBuff(BUFF_DARKFIRE_SACRIFICE);
+					}
+				}
+			}
+			break;
+		}
+
+		//Effects
+		for (int a = 0; a < effects.size(); ++a) {
+			switch (effects[a].effect) {
+			case EFFECT_DARKFIRE_SACRIFICE:
+				if (!fromDeck) {
+					if (card->owner == owner && card->cardType == CARD_UNIT) {
+						for (int b = 0; b < effects[a].stacks; ++b) {
+							dynamic_cast<Minion*>(card)->AddBuff(BUFF_DARKFIRE_SACRIFICE);
+						}
+					}
+				}
+				break;
+			}
+		}
+
+	}
+	
+Replace
+
+	//If this is replaced
+	if (replaced->cardType == CARD_UNIT) {
+		if (dynamic_cast<Minion*>(replaced) == this) {
+			switch (skill.skill) {
+			case SKILL_ASTRAL_CRUSADER:
+				AddBuff(BUFF_ASTRAL_CRUSADER);
+				break;
+			case SKILL_DREAMGAZER:
+				if (true) {
+					BoardTile* t = game->map.GetRandomNear(owner->general->curTile->pos.x, owner->general->curTile->pos.y);
+					if (t != nullptr) {
+						Minion* u = new Minion(*(dynamic_cast<Minion*>(original)));
+						game->SetContext(u, owner);
+						game->Summon(u, t->pos.x, t->pos.y, false);
+						owner->general->DealDamage(this, 2);
+					}
+				}
+				break;
+			}
+		}
+	}
+	
+Turn End
+
+	//If on board
+	if (curTile != nullptr) {
+
+		//When this minion's player ends turn
+		if (player == owner) {
+
+			//Skills
+			switch (skill.skill) {
+			case SKILL_BASTION:
+				for (int a = 0; a < game->minions.size(); ++a) {
+					if (game->minions[a]->owner == owner && game->minions[a] != this) {
+						if (game->minions[a] != owner->general) {
+							game->minions[a]->AddBuff(BUFF_BASTION);
+						}
+					}
+				}
+				break;
+			case SKILL_BONEREAPER:
+				for (int a = max(curTile->pos.x - 1, 0); a < min(curTile->pos.x + 2, 9); ++a) {
+					for (int b = max(curTile->pos.y - 1, 0); b < min(curTile->pos.y + 2, 5); ++b) {
+						if (game->map.tiles[a][b].minion != nullptr) {
+							if (game->map.tiles[a][b].minion->owner != owner) {
+								if (game->map.tiles[a][b].minion->tribe != TRIBE_GENERAL) {
+									game->map.tiles[a][b].minion->DealDamage(this, 2);
+								}
+							}
+						}
+					}
+				}
+				break;
+			case SKILL_GOLEM_METALLURGIST:
+				for (int a = 0; a < owner->hand.size(); ++a) {
+					if (owner->hand[a]->cardType == CARD_UNIT) {
+						dynamic_cast<Minion*>(owner->hand[a])->RemoveBuff(BUFF_GOLEM_METALLURGIST, true);
+					}
+				}
+				for (int a = 0; a < owner->deck.size(); ++a) {
+					if (owner->deck[a]->cardType == CARD_UNIT) {
+						dynamic_cast<Minion*>(owner->deck[a])->RemoveBuff(BUFF_GOLEM_METALLURGIST, true);
+					}
+				}
+				break;
+			case SKILL_LUX_IGNIS:
+				for (int a = max(curTile->pos.x - 1, 0); a < min(curTile->pos.x + 2, 9); ++a) {
+					for (int b = max(curTile->pos.y - 1, 0); b < min(curTile->pos.y + 2, 5); ++b) {
+						if (game->map.tiles[a][b].minion != nullptr) {
+							if (game->map.tiles[a][b].minion->owner == owner) {
+								if (game->map.tiles[a][b].minion != this) {
+									if (game->map.tiles[a][b].minion != owner->general) {
+										game->map.tiles[a][b].minion->DealDamage(this, -2);
+									}
+								}
+							}
+						}
+					}
+				}
+				break;
+			}
+
+			//Effects
+			for (int a = 0; a < effects.size(); ++a) {
+				switch (effects[a].effect) {
+				case EFFECT_LADY_LOCKE_A:
+					RemoveEffect(EFFECT_LADY_LOCKE_A, true);
+					break;
+				}
+			}
+
+		}
+
+	}
+
+	//Anywhere
+	switch (skill.skill) {
+	case SKILL_CHAKKRAM:
+		if (player == owner) { RemoveBuff(BUFF_CHAKKRAM, true); }
+		break;
+	}
+	
+Turn Start
+
+	//If on board
+	if (curTile != nullptr) {
+
+		//If this minion's player started turn
+		if (player == owner) {
+
+			//Skills
+			switch (skill.skill) {
+			case SKILL_DARK_NEMESIS:
+				owner->opponent->general->DealDamage(this, 4);
+				AddBuff(BUFF_DARK_NEMESIS);
+				break;
+			case SKILL_GOLEM_METALLURGIST:
+				for (int a = 0; a < owner->hand.size(); ++a) {
+					if (owner->hand[a]->cardType == CARD_UNIT) {
+						Minion* u = dynamic_cast<Minion*>(owner->hand[a]);
+						if (u->tribe == TRIBE_GOLEM) {
+							u->AddBuff(BUFF_GOLEM_METALLURGIST);
+						}
+					}
+				}
+				for (int a = 0; a < owner->deck.size(); ++a) {
+					if (owner->deck[a]->cardType == CARD_UNIT) {
+						Minion* u = dynamic_cast<Minion*>(owner->deck[a]);
+						if (u->tribe == TRIBE_GOLEM) {
+							u->AddBuff(BUFF_GOLEM_METALLURGIST);
+						}
+					}
+				}
+				break;
+			}
+
+		}
+
+	}
+	
+Callback
+
+	switch (game->callback.skill) {
+	case SKILL_CROSSBONES:
+		if (tile->minion != nullptr) { tile->minion->isDead = true; }
+		break;
+	case SKILL_GHOST_LYNX:
+		if (true) {
+			BoardTile* t2 = game->map.GetRandom();
+			if (t2 != nullptr) { tile->minion->SetPosition(t2->pos.x, t2->pos.y); }
+			game->eventManager.SendOnMove(t2->minion, true);
+		}
+		break;
+	case SKILL_HEALING_MYSTIC:
+		if (tile->minion != nullptr) { tile->minion->DealDamage(this, -2); }
+		break;
+	case SKILL_KEEPER_OF_THE_VALE:
+		if (tile->minion == nullptr) {
+			std::vector<Card*> cv;
+			for (int a = 0; a < game->grave.size(); ++a) {
+				if (game->grave[a]->cardType == CARD_UNIT && !game->grave[a]->isToken && game->grave[a]->owner == owner) {
+					cv.push_back(game->grave[a]);
+				}
+			}
+			if (cv.size() > 0) {
+				int i = rand() % cv.size();
+				Minion* u2 = new Minion(*(dynamic_cast<Minion*>(cv[i]->original)));
+				game->SetContext(u2, owner);
+				game->Summon(u2, tile->pos.x, tile->pos.y, false);
+			}
+		}
+		break;
+	}
+	game->callback = EffectCallback();
+
+	switch (spell.spell) {
+	case SPELL_DAEMONIC_LURE:
+		Minion* u = dynamic_cast<Minion*>(token);
+		u->SetPosition(tile->pos.x, tile->pos.y);
+		u->DealDamage(nullptr, 1);
+		game->eventManager.SendOnMove(u, true);
+		game->eventManager.SendOnSpellCast(this);
+		break;
+	}
+	game->callback = EffectCallback();
+	
+LateCallback
+
+	switch (spell.spell) {
+	case SPELL_CONSUMING_REBIRTH:
+		if (game->lateCallback[0].tile->minion == nullptr) {
+			Minion* t = new Minion(*(dynamic_cast<Minion*>(token)));
+			game->SetContext(t, owner);
+			game->Summon(t, game->lateCallback[0].tile->pos.x, game->lateCallback[0].tile->pos.y, false);
+			game->minions.back()->AddBuff(BUFF_CONSUMING_REBIRTH);
+		}
+		break;
+	}
+	
+Use Spell
+
+	switch (spell.spell) {
+	case SPELL_CONSUMING_REBIRTH:
+		if (tile->minion != nullptr) {
+			token = tile->minion->original;
+			tile->minion->isDead = true;
+			game->eventManager.SendOnDeath(tile->minion);
+			game->lateCallback.push_back(EffectCallback(nullptr, this, tile->minion->curTile, SKILL_NONE));
+		}
+		game->eventManager.SendOnSpellCast(this);
+		break;
+	case SPELL_DAEMONIC_LURE:
+		game->HighlightSelectable(TARGET_TILE);
+		if (game->selectable.size() > 0) {
+			game->callback = EffectCallback(nullptr, this, nullptr, SKILL_NONE);
+			token = tile->minion;
+		}
+		else { tile->minion->DealDamage(nullptr, 1); }
+		break;
+	case SPELL_DARK_TRANSFORMATION:
+		if (true) { //Need this to initialize variable
+			Minion* u1 = tile->minion;
+			if (u1 != nullptr) {
+				tile->minion->isDead = true;
+				Minion* u2 = new Minion(*(dynamic_cast<Minion*>(token)));
+				game->SetContext(u2, owner);
+				game->Summon(u2, tile->pos.x, tile->pos.y, false);
+				game->eventManager.SendOnDeath(u1);
+			}
+		}
+		game->eventManager.SendOnSpellCast(this);
+		break;
+	case SPELL_DARKFIRE_SACRIFICE:
+		if (tile->minion != nullptr) {
+			tile->minion->isDead = true;
+			game->eventManager.SendOnDeath(tile->minion);
+			owner->general->AddEffect(EFFECT_DARKFIRE_SACRIFICE);
+			for (int a = 0; a < owner->hand.size(); ++a) {
+				if (owner->hand[a]->cardType == CARD_UNIT) {
+					dynamic_cast<Minion*>(owner->hand[a])->AddBuff(BUFF_DARKFIRE_SACRIFICE);
+				}
+			}
+			for (int a = 0; a < owner->deck.size(); ++a) {
+				if (owner->deck[a]->cardType == CARD_UNIT) {
+					dynamic_cast<Minion*>(owner->deck[a])->AddBuff(BUFF_DARKFIRE_SACRIFICE);
+				}
+			}
+		}
+		game->eventManager.SendOnSpellCast(this);
+		break;
+	}

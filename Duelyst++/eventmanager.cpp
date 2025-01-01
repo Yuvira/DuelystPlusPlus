@@ -76,15 +76,6 @@ void EventManager::SendOnMove(Minion* minion, bool byEffect) {
 	for (int i = 0; i < game->players[1].deck.size(); ++i) { game->players[1].deck[i]->OnMove(minion, byEffect); }
 }
 
-//Send onSpellCast events
-void EventManager::SendOnSpellCast(Spell* spell) {
-	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnSpellCast(spell); }
-	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnSpellCast(spell); }
-	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnSpellCast(spell); }
-	for (int i = 0; i < game->players[1].hand.size(); ++i) { game->players[1].hand[i]->OnSpellCast(spell); }
-	for (int i = 0; i < game->players[1].deck.size(); ++i) { game->players[1].deck[i]->OnSpellCast(spell); }
-}
-
 //Send onDraw events
 void EventManager::SendOnDraw(Card* card, bool fromDeck) {
 	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnDraw(card, fromDeck); }

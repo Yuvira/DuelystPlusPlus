@@ -22,7 +22,7 @@ Player::~Player() {}
 void Player::Preset(Collections* collections, Game* _game) {
 	game = _game;
 	deck.push_back(new Minion(*(collections->FindCard("Argeon Highmayne")->GetMinion())));
-	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(collections->FindCard("Aethermaster")->GetMinion()))); }
+	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(collections->FindCard("Alcuin Loremaster")->GetMinion()))); }
 	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(collections->FindCard("Ephemeral Shroud")->GetMinion()))); }
 	for (int i = 0; i < 7; ++i) { deck.push_back(new Spell(*(collections->FindCard("Dark Seed")->GetSpell()))); }
 	for (int i = 0; i < deck.size(); ++i)

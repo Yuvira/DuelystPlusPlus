@@ -108,10 +108,10 @@ Collections::Collections() {
 	//Breath of The Unborn
 	effectList.push_back(Effect(SPELL_BREATH_OF_THE_UNBORN, KEYWORD_NONE, 0, 0, 0, false, "Deal 2 damage to all enemy|minions. Fully heal all friendly|minions"));
 	effectList.back().OnResolveThis = [](Card* card, BoardTile* tile) {
-		for (int a = 0; a < card->game->minions.size(); ++a) {
-			if (card->game->minions[a]->tribe != TRIBE_GENERAL) {
-				if (card->game->minions[a]->owner == card->owner) { card->game->minions[a]->DealDamage(nullptr, -999); }
-				else { card->game->minions[a]->DealDamage(nullptr, 2); }
+		for (int i = 0; i < card->game->minions.size(); ++i) {
+			if (card->game->minions[i]->tribe != TRIBE_GENERAL) {
+				if (card->game->minions[i]->owner == card->owner) { card->game->minions[i]->DealDamage(nullptr, -999); }
+				else { card->game->minions[i]->DealDamage(nullptr, 2); }
 			}
 		}
 	};

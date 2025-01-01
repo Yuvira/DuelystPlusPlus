@@ -86,114 +86,13 @@ void Spell::UpdateDetailStats() {
 #pragma region Events
 
 //When a card is cast
-void Spell::OnCast(Card* card, BoardTile* tile) {
+void Spell::Resolve(BoardTile* tile) {
 
 	//Trigger any effects on this card
-	Card::OnCast(card, tile);
+	Card::Resolve(tile);
 
 	//Cast this
-	if (card == this)
-		game->grave.push_back(this);
-
-}
-
-//On card use
-void Spell::OnUse(BoardTile* tile) {
-
-	/*
-
-	switch (spell.spell) {
-	case SPELL_CONSUMING_REBIRTH:
-		if (tile->minion != nullptr) {
-			token = tile->minion->original;
-			tile->minion->isDead = true;
-			game->eventManager.SendOnDeath(tile->minion);
-			game->lateCallback.push_back(EffectCallback(nullptr, this, tile->minion->curTile, SKILL_NONE));
-		}
-		game->eventManager.SendOnSpellCast(this);
-		break;
-	case SPELL_DAEMONIC_LURE:
-		game->HighlightSelectable(TARGET_TILE);
-		if (game->selectable.size() > 0) {
-			game->callback = EffectCallback(nullptr, this, nullptr, SKILL_NONE);
-			token = tile->minion;
-		}
-		else { tile->minion->DealDamage(nullptr, 1); }
-		break;
-	case SPELL_DARK_TRANSFORMATION:
-		if (true) { //Need this to initialize variable
-			Minion* u1 = tile->minion;
-			if (u1 != nullptr) {
-				tile->minion->isDead = true;
-				Minion* u2 = new Minion(*(dynamic_cast<Minion*>(token)));
-				game->SetContext(u2, owner);
-				game->Summon(u2, tile->pos.x, tile->pos.y, false);
-				game->eventManager.SendOnDeath(u1);
-			}
-		}
-		game->eventManager.SendOnSpellCast(this);
-		break;
-	case SPELL_DARKFIRE_SACRIFICE:
-		if (tile->minion != nullptr) {
-			tile->minion->isDead = true;
-			game->eventManager.SendOnDeath(tile->minion);
-			owner->general->AddEffect(EFFECT_DARKFIRE_SACRIFICE);
-			for (int a = 0; a < owner->hand.size(); ++a) {
-				if (owner->hand[a]->cardType == CARD_UNIT) {
-					dynamic_cast<Minion*>(owner->hand[a])->AddBuff(BUFF_DARKFIRE_SACRIFICE);
-				}
-			}
-			for (int a = 0; a < owner->deck.size(); ++a) {
-				if (owner->deck[a]->cardType == CARD_UNIT) {
-					dynamic_cast<Minion*>(owner->deck[a])->AddBuff(BUFF_DARKFIRE_SACRIFICE);
-				}
-			}
-		}
-		game->eventManager.SendOnSpellCast(this);
-		break;
-	}
-
-	*/
-
-}
-
-//Immediate callback
-void Spell::Callback(BoardTile* tile) {
-
-	/*
-
-	switch (spell.spell) {
-	case SPELL_DAEMONIC_LURE:
-		Minion* u = dynamic_cast<Minion*>(token);
-		u->SetPosition(tile->pos.x, tile->pos.y);
-		u->DealDamage(nullptr, 1);
-		game->eventManager.SendOnMove(u, true);
-		game->eventManager.SendOnSpellCast(this);
-		break;
-	}
-	game->callback = EffectCallback();
-
-	*/
-
-}
-
-//Late callback
-void Spell::LateCallback() {
-
-	/*
-
-	switch (spell.spell) {
-	case SPELL_CONSUMING_REBIRTH:
-		if (game->lateCallback[0].tile->minion == nullptr) {
-			Minion* t = new Minion(*(dynamic_cast<Minion*>(token)));
-			game->SetContext(t, owner);
-			game->Summon(t, game->lateCallback[0].tile->pos.x, game->lateCallback[0].tile->pos.y, false);
-			game->minions.back()->AddBuff(BUFF_CONSUMING_REBIRTH);
-		}
-		break;
-	}
-
-	*/
+	game->grave.push_back(this);
 
 }
 

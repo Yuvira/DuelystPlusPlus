@@ -20,7 +20,6 @@ public:
 	void SendOnDamage(Minion* source, Minion* target, int damage);
 	void SendOnHeal(Minion* source, Minion* target, int heal);
 	void SendOnMove(Minion* minion, bool byEffect);
-	void SendOnSpellCast(Spell* spell);
 	void SendOnDraw(Card* card, bool fromDeck);
 	void SendOnReplace(Card* card);
 	void SendOnTurnEnd(Player* player);
