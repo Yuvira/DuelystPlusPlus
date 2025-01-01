@@ -17,7 +17,7 @@ EffectContext::~EffectContext() {}
 #pragma region Constructors
 
 //Effect constructors
-Effect::Effect() : Effect(EFFECT_NONE, KEYWORD_NONE, 0, 0, 0, false, "") {}
+Effect::Effect() : Effect(EFFECT_NONE, KEYWORD_NONE, 0, 0, 0, "") {}
 Effect::Effect(eEffect _effect, eKeywordFlags _keywords, int _costBuff, int _atkBuff, int _hpBuff) : Effect(_effect, _keywords, _costBuff, _atkBuff, _hpBuff, "") {}
 Effect::Effect(eEffect _effect, eKeywordFlags _keywords, int _costBuff, int _atkBuff, int _hpBuff, std::string _description) {
 	effect = _effect;
