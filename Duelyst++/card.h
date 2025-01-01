@@ -109,14 +109,14 @@ public:
 	virtual void OnCast(Card* card, BoardTile* tile);
 	virtual void OnSummon(Minion* minion, bool fromActionBar);
 	virtual void OnDeath(Minion* minion);
-	virtual void OnTurnEnd(Player* player);
+	virtual void OnAttack(Minion* source, Minion* target, bool counter);
+	virtual void OnDamage(Card* source, Minion* target, int damage);
+	virtual void OnHeal(Card* source, Minion* target, int heal);
+	virtual void OnMove(Minion* minion, bool byEffect);
+	virtual void OnDraw(Card* card, bool fromDeck);
+	virtual void OnReplace(Card* replaced);
 	virtual void OnTurnStart(Player* player);
-	virtual void OnAttack(Minion* source, Minion* target, bool counter) {}
-	virtual void OnDamage(Minion* source, Minion* target, int damage) {}
-	virtual void OnHeal(Minion* source, Minion* target, int heal) {}
-	virtual void OnMove(Minion* minion, bool byEffect) {}
-	virtual void OnDraw(Card* card, bool fromDeck) {}
-	virtual void OnReplace(Card* replaced) {}
+	virtual void OnTurnEnd(Player* player);
 
 	//Virtual functions
 	virtual void UpdateStatBuffs() {}
@@ -172,7 +172,6 @@ public:
 	void Attack(Minion* target, bool counter);
 	int DealDamage(Minion* source, int damage);
 	void Dispel();
-	void Resolve(BoardTile* tile);
 
 	//Utils
 	bool CanAttack(Minion* target);
@@ -181,8 +180,8 @@ public:
 	bool HasKeywords(int keywords);
 	bool IsProvoked();
 
-	//Event overrides
-	void OnSummon(Minion* minion, bool fromActionBar);
+	//Action & Event Overrides
+	void Resolve(BoardTile* tile);
 	void OnTurnEnd(Player* player);
 
 	//Getter
@@ -223,7 +222,7 @@ public:
 	void UpdateStatBuffs();
 	void UpdateDetailStats();
 
-	//Actions
+	//Action & Event Overrides
 	void Resolve(BoardTile* tile);
 
 	//Getter

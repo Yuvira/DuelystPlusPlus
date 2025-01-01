@@ -83,7 +83,7 @@ void Spell::UpdateDetailStats() {
 
 #pragma endregion
 
-#pragma region Events
+#pragma region Action & Event Overrides
 
 //When a card is cast
 void Spell::Resolve(BoardTile* tile) {
@@ -93,6 +93,7 @@ void Spell::Resolve(BoardTile* tile) {
 
 	//Cast this
 	game->grave.push_back(this);
+	game->spellHistory.push_back(this);
 
 }
 

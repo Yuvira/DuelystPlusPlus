@@ -287,17 +287,6 @@ void Minion::Dispel() {
 
 }
 
-//Summon minion on cast resolution
-void Minion::Resolve(BoardTile* tile) {
-
-	//Trigger any effects on this card
-	Card::Resolve(tile);
-
-	//Summon this
-	game->Summon(this, tile, true);
-
-}
-
 #pragma endregion
 
 #pragma region Utils
@@ -355,38 +344,23 @@ bool Minion::IsProvoked() {
 
 #pragma endregion
 
-#pragma region Events
+#pragma region Action & Event Overrides
 
-//When a minion is summoned
-void Minion::OnSummon(Minion* minion, bool fromActionBar) {
+//Summon minion on cast resolution
+void Minion::Resolve(BoardTile* tile) {
 
 	//Trigger any effects on this card
-	Card::OnSummon(minion, fromActionBar);
+	Card::Resolve(tile);
 
-	//If on board
-	if (curTile != nullptr) {
+	//Summon this
+	game->Summon(this, tile, true);
 
-		//When this is summoned
-		if (minion == this) {
-
-			//Exhaust
-			hasMoved = true;
-			hasAttacked = true;
-			hasCelerityMoved = true;
-			hasCelerityAttacked = true;
-			if (HasKeywords(KEYWORD_RUSH)) {
-				hasMoved = false;
-				hasAttacked = false;
-				if (HasKeywords(KEYWORD_CELERITY)) {
-					hasCelerityMoved = false;
-					hasCelerityAttacked = false;
-				}
-			}
-			if (HasKeywords(KEYWORD_FORCEFIELD)) { hasForcefield = true; }
-
-		}
-
-	}
+	//Exhaust
+	hasMoved = !HasKeywords(KEYWORD_RUSH);
+	hasAttacked = !HasKeywords(KEYWORD_RUSH);
+	hasCelerityMoved = !HasKeywords(KEYWORD_RUSH) || !HasKeywords(KEYWORD_CELERITY);
+	hasCelerityAttacked = !HasKeywords(KEYWORD_RUSH) || !HasKeywords(KEYWORD_CELERITY);
+	hasForcefield = HasKeywords(KEYWORD_FORCEFIELD);
 
 }
 
@@ -399,13 +373,9 @@ void Minion::OnTurnEnd(Player* player) {
 	//Refresh
 	hasMoved = false;
 	hasAttacked = false;
-	if (HasKeywords(KEYWORD_CELERITY)) {
-		hasCelerityMoved = false;
-		hasCelerityAttacked = false;
-	}
-
-	//Reset forcefield
-	if (HasKeywords(KEYWORD_FORCEFIELD)) { hasForcefield = true; }
+	hasCelerityMoved = !HasKeywords(KEYWORD_CELERITY);
+	hasCelerityAttacked = !HasKeywords(KEYWORD_CELERITY);
+	hasForcefield = HasKeywords(KEYWORD_FORCEFIELD);
 
 }
 

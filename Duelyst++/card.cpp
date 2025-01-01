@@ -110,18 +110,60 @@ void Card::OnDeath(Minion* minion) {
 			effects[i].OnDeath(this, minion);
 }
 
-//Whenever a minion dies
-void Card::OnTurnEnd(Player* player) {
+//Whenever a minion attacks another minion
+void Card::OnAttack(Minion* source, Minion* target, bool counter) {
 	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i].OnTurnEnd)
-			effects[i].OnTurnEnd(this, player);
+		if (effects[i].OnAttack)
+			effects[i].OnAttack(this, source, target, counter);
 }
 
-//Whenever a minion dies
+//Whenever a minion is damaged
+void Card::OnDamage(Card* source, Minion* target, int damage) {
+	for (int i = 0; i < effects.size(); ++i)
+		if (effects[i].OnDamage)
+			effects[i].OnDamage(this, source, target, damage);
+}
+
+//Whenever a minion is healed
+void Card::OnHeal(Card* source, Minion* target, int heal) {
+	for (int i = 0; i < effects.size(); ++i)
+		if (effects[i].OnHeal)
+			effects[i].OnHeal(this, source, target, heal);
+}
+
+//Whenever a minion is moved
+void Card::OnMove(Minion* minion, bool byEffect) {
+	for (int i = 0; i < effects.size(); ++i)
+		if (effects[i].OnMove)
+			effects[i].OnMove(this, minion, byEffect);
+}
+
+//Whenever a card is added to an action bar
+void Card::OnDraw(Card* card, bool fromDeck) {
+	for (int i = 0; i < effects.size(); ++i)
+		if (effects[i].OnDraw)
+			effects[i].OnDraw(this, card, fromDeck);
+}
+
+//Whenever a card is replaced
+void Card::OnReplace(Card* replaced) {
+	for (int i = 0; i < effects.size(); ++i)
+		if (effects[i].OnReplace)
+			effects[i].OnReplace(this, replaced);
+}
+
+//Whenever a player's turn starts
 void Card::OnTurnStart(Player* player) {
 	for (int i = 0; i < effects.size(); ++i)
 		if (effects[i].OnTurnStart)
 			effects[i].OnTurnStart(this, player);
+}
+
+//Whenever a player's turn ends
+void Card::OnTurnEnd(Player* player) {
+	for (int i = 0; i < effects.size(); ++i)
+		if (effects[i].OnTurnEnd)
+			effects[i].OnTurnEnd(this, player);
 }
 
 #pragma endregion
