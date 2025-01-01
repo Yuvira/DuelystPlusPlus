@@ -331,13 +331,6 @@ Summon Any
 
 			//Skills
 			switch (skill.skill) {
-			case SKILL_ARAKI_HEADHUNTER:
-				if (minion->owner == owner) {
-					if (actionBar && minion->skill.IsOpeningGambit()) {
-						AddBuff(BUFF_ARAKI_HEADHUNTER);
-					}
-				}
-				break;
 			case SKILL_ARROW_WHISTLER:
 				if (minion->owner == owner) {
 					if (minion->IsRanged()) {

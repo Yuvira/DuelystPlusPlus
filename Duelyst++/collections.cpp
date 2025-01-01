@@ -54,6 +54,14 @@ Collections::Collections() {
 		}
 	};
 
+	//Araki Headhunter
+	effectList.push_back(Effect(SKILL_ARAKI_HEADHUNTER, KEYWORD_NONE, 0, 0, 0, "Whenever you summon a minion with|Opening Gambit from your action bar,|gain +2 Attack"));
+	effectList.back().OnSummon = [](EffectContext context, Minion* source, bool fromActionBar) {
+		if (context.card->IsOnBoard() && context.card != source && context.card->owner == source->owner && source->HasKeywords(KEYWORD_OPENING_GAMBIT) && fromActionBar)
+			context.card->AddEffect(context.game->collections->FindEffect(EFFECT_ARAKI_HEADHUNTER), nullptr);
+	};
+	effectList.push_back(Effect(EFFECT_ARAKI_HEADHUNTER, KEYWORD_NONE, 0, 2, 0, "Headhunter"));
+
 	//Ash Mephyt
 	effectList.push_back(Effect(SKILL_ASH_MEPHYT, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Summon two copies of|this minion on random spaces"));
 	effectList.back().OnPreCastThis = [](EffectContext context, BoardTile* tile) {
@@ -127,10 +135,6 @@ Collections::Collections() {
 	//Minion skills
 	skillList.push_back(Skill(SKILL_ALTER_REXX));
 	skillList.back().GenerateSprite("Whenever you summon MECHAZ0R, put a|MECHAZ0R in your action bar");
-	skillList.push_back(Skill(SKILL_ARAKI_HEADHUNTER));
-	skillList.back().GenerateSprite("Whenever you summon a minion with|Opening Gambit from your action bar,|gain +2 Attack");
-	buffList.push_back(Buff(BUFF_ARAKI_HEADHUNTER, 0, 2, 0, true));
-	buffList.back().GenerateSprite("Headhunter");
 	skillList.push_back(Skill(SKILL_ARCHON_SPELLBINDER));
 	skillList.back().GenerateSprite("Your opponent's non-Bloodborn spells|cost 1 more to cast");
 	buffList.push_back(Buff(BUFF_ARCHON_SPELLBINDER, 1, 0, 0, true));
@@ -291,6 +295,7 @@ Collections::Collections() {
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_ARCANYST, 3, 3, 1, "abjudicator", "Abjudicator", FindEffect(SKILL_ABJUDICATOR)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_ARCANYST, 2, 1, 3, "aethermaster", "Aethermaster", FindEffect(SKILL_AETHERMASTER)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_ARCANYST, 3, 3, 1, "alcuinloremaster", "Alcuin Loremaster", FindEffect(SKILL_ALCUIN_LOREMASTER)));
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 3, "arakiheadhunter", "Araki Headhunter", FindEffect(SKILL_ARAKI_HEADHUNTER)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 3, "ashmephyt", "Ash Mephyt", FindEffect(SKILL_ASH_MEPHYT)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "bloodtearalchemist", "Bloodtear Alchemist", FindEffect(SKILL_BLOODTEAR_ALCHEMIST)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "dragonlark", "Dragonlark", FindEffect(SKILL_FLYING)));
@@ -310,8 +315,6 @@ Collections::Collections() {
 	//Units
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_MECH, 5, 5, 5, "alterrexx", "Alter Rexx"));
 	minionList.back().skill = effectList.Find(SKILL_ALTER_REXX);
-	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 3, "arakiheadhunter", "Araki Headhunter"));
-	minionList.back().skill = effectList.Find(SKILL_ARAKI_HEADHUNTER);
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_ARCANYST, 6, 7, 7, "archonspellbinder", "Archon Spellbinder"));
 	minionList.back().skill = effectList.Find(SKILL_ARCHON_SPELLBINDER);
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_WARMASTER, 4, 2, 4, "arrowwhistler", "Arrow Whistler"));
