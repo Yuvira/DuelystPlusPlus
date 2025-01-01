@@ -359,38 +359,20 @@ void Minion::Dispel() {
 		break;
 	}
 
-	//Remove skills and buffs on this
-	skill = game->cardList.effectList.Find(SKILL_DISPELLED);
-	for (int a = 0; a < effects.size(); ++a) {
-		switch (effects[a].effect) {
-		case EFFECT_DARKFIRE_SACRIFICE:
-		case EFFECT_GOLEM_VANQUISHER:
-		case EFFECT_GROVE_LION:
-		case EFFECT_LADY_LOCKE_A:
-			break;
-		default:
-			effects.erase(effects.begin() + a);
-			--a;
-			break;
-		}
-	}
-	for (int a = 0; a < buffs.size(); ++a) {
-		switch (buffs[a].buff) {
-		case BUFF_FIRST_SWORD_OF_AKRANE:
-			break;
-		default:
-			buffs.erase(buffs.begin() + a);
-			--a;
-			break;
-		}
-	}
-
 	*/
 
 	//Dispel effects
 	for (int i = 0; i < effects.size(); ++i)
 		if (effects[i].OnDispelThis)
 			effects[i].OnDispelThis(this);
+
+	//Remove effects
+	for (int i = 0; i < effects.size(); ++i)
+		if (!effects[i].isContinuous)
+			effects.erase(effects.begin() + i);
+
+	//Add dispelled effect
+	AddEffect(game->collections->FindEffect(EFFECT_DISPELLED), this);
 
 	//Remove misc
 	hasCelerityMoved = true;
@@ -563,10 +545,6 @@ void Minion::OnSummon(Minion* minion, bool fromActionBar) {
 				case SKILL_EMERALD_REJUVENATOR:
 					owner->general->DealDamage(this, -4);
 					owner->opponent->general->DealDamage(this, -4);
-					break;
-				case SKILL_EPHEMERAL_SHROUD:
-					game->HighlightSelectable(TARGET_NEAR_UNIT, this);
-					if (game->selectable.size() > 0) { game->callback = EffectCallback(this, nullptr, nullptr, SKILL_EPHEMERAL_SHROUD); }
 					break;
 				case SKILL_FLAMEBLOOD_WARLOCK:
 					owner->general->DealDamage(this, 3);
@@ -1393,10 +1371,6 @@ void Minion::Callback(BoardTile* tile) {
 	switch (game->callback.skill) {
 	case SKILL_CROSSBONES:
 		if (tile->minion != nullptr) { tile->minion->isDead = true; }
-		break;
-	case SKILL_EPHEMERAL_SHROUD:
-		tile->SetFeature(TILE_NONE);
-		if (tile->minion != nullptr) { tile->minion->Dispel(); }
 		break;
 	case SKILL_GHOST_LYNX:
 		if (true) {

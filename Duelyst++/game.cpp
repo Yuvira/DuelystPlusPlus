@@ -630,7 +630,7 @@ void Game::SearchMoveable(int x, int y, int range) {
 
 //Highlight targetable tiles
 void Game::HighlightSelectable(eTarget targetMode) { HighlightSelectable(targetMode, nullptr); }
-void Game::HighlightSelectable(eTarget targetMode, Minion* minion) {
+void Game::HighlightSelectable(eTarget targetMode, BoardTile* tile) {
 
 	//Clear
 	selectable.clear();
@@ -646,13 +646,13 @@ void Game::HighlightSelectable(eTarget targetMode, Minion* minion) {
 					selectable.push_back(&map.tiles[i][j]);
 		break;
 
-		//Any minion
+		//Any battle unit (minion or general)
 	case TARGET_UNIT:
 		for (int i = 0; i < minions.size(); ++i)
 			selectable.push_back(minions[i]->curTile);
 		break;
 
-		//Any (non-general) minion
+		//Any minion
 	case TARGET_MINION:
 		for (int i = 0; i < minions.size(); ++i)
 			if (minions[i]->tribe != TRIBE_GENERAL)
@@ -698,29 +698,29 @@ void Game::HighlightSelectable(eTarget targetMode, Minion* minion) {
 				selectable.push_back(minions[i]->curTile);
 		break;
 
-		//Spaces near minion
-	case TARGET_NEAR_UNIT:
-		if (minion != nullptr)
-			for (int i = max(minion->curTile->pos.x - 1, 0); i < min(minion->curTile->pos.x + 2, 9); ++i)
-				for (int j = max(minion->curTile->pos.y - 1, 0); j < min(minion->curTile->pos.y + 2, 5); ++j)
-					if (i != minion->curTile->pos.x || j != minion->curTile->pos.y)
+		//Spaces near tile
+	case TARGET_NEAR_TILE:
+		if (tile != nullptr)
+			for (int i = max(tile->pos.x - 1, 0); i < min(tile->pos.x + 2, 9); ++i)
+				for (int j = max(tile->pos.y - 1, 0); j < min(tile->pos.y + 2, 5); ++j)
+					if (i != tile->pos.x || j != tile->pos.y)
 						selectable.push_back(&map.tiles[i][j]);
 		break;
 
-		//Minons near minion
-	case TARGET_MINION_NEAR_UNIT:
-		if (minion != nullptr)
-			for (int i = max(minion->curTile->pos.x - 1, 0); i < min(minion->curTile->pos.x + 2, 9); ++i)
-				for (int j = max(minion->curTile->pos.y - 1, 0); j < min(minion->curTile->pos.y + 2, 5); ++j)
-					if (map.tiles[i][j].minion != nullptr && map.tiles[i][j].minion != minion && map.tiles[i][j].minion->tribe != TRIBE_GENERAL)
+		//Minons near tile
+	case TARGET_MINION_NEAR_TILE:
+		if (tile != nullptr)
+			for (int i = max(tile->pos.x - 1, 0); i < min(tile->pos.x + 2, 9); ++i)
+				for (int j = max(tile->pos.y - 1, 0); j < min(tile->pos.y + 2, 5); ++j)
+					if (map.tiles[i][j].minion != nullptr && (i != tile->pos.x || j != tile->pos.y) && map.tiles[i][j].minion->tribe != TRIBE_GENERAL)
 						selectable.push_back(&map.tiles[i][j]);
 		break;
 
-		//Empty tiles near minion
-	case TARGET_TILE_NEAR_UNIT:
-		if (minion != nullptr)
-			for (int i = max(minion->curTile->pos.x - 1, 0); i < min(minion->curTile->pos.x + 2, 9); ++i)
-				for (int j = max(minion->curTile->pos.y - 1, 0); j < min(minion->curTile->pos.y + 2, 5); ++j)
+		//Empty tiles near tile
+	case TARGET_TILE_NEAR_TILE:
+		if (tile != nullptr)
+			for (int i = max(tile->pos.x - 1, 0); i < min(tile->pos.x + 2, 9); ++i)
+				for (int j = max(tile->pos.y - 1, 0); j < min(tile->pos.y + 2, 5); ++j)
 					if (map.tiles[i][j].minion == nullptr)
 						selectable.push_back(&map.tiles[i][j]);
 		break;

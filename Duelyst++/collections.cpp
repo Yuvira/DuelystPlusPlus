@@ -16,6 +16,9 @@ Collections::Collections() {
 	effectList.push_back(Effect(SKILL_RANGED, KEYWORD_RANGED, 0, 0, 0, false, "{Ranged}"));
 	effectList.push_back(Effect(SKILL_RUSH, KEYWORD_RUSH, 0, 0, 0, false, "{Rush}"));
 
+	//Dispelled
+	effectList.push_back(Effect(EFFECT_DISPELLED, KEYWORD_NONE, 0, 0, 0, false, "{Dispelled}"));
+
 #pragma region Minions
 
 	//Abjudicator
@@ -43,6 +46,17 @@ Collections::Collections() {
 	effectList.back().OnTurnEnd = [](Card* card, Player* player) {
 		if (card->GetMinion() != nullptr && card->GetMinion()->curTile != nullptr && card->owner == player)
 			++card->owner->replaces;
+	};
+
+	//Alcuin Loremaster
+	effectList.push_back(Effect(SKILL_ALCUIN_LOREMASTER, KEYWORD_OPENING_GAMBIT, 0, 0, 0, false, "{Opening Gambit}: Put a copy of the most|recently cast spell into your|action bar"));
+	effectList.back().OnPreCastThis = [](Card* card, BoardTile* tile) {
+		for (int i = card->game->spellHistory.size() - 1; i >= 0; --i) {
+			if (card->game->spellHistory[i]->cardType == CARD_SPELL) {
+				card->owner->AddToHand(card->game->spellHistory[i]->original, true);
+				break;
+			}
+		}
 	};
 
 	//Ash Mephyt
@@ -73,14 +87,17 @@ Collections::Collections() {
 		}
 	};
 
-	//Alcuin Loremaster
-	effectList.push_back(Effect(SKILL_ALCUIN_LOREMASTER, KEYWORD_OPENING_GAMBIT, 0, 0, 0, false, "{Opening Gambit}: Put a copy of the most|recently cast spell into your|action bar"));
+	//Ephemeral Shroud
+	effectList.push_back(Effect(SKILL_EPHEMERAL_SHROUD, KEYWORD_OPENING_GAMBIT, 0, 0, 0, false, "{Opening Gambit}: Dispel 1 nearby space"));
 	effectList.back().OnPreCastThis = [](Card* card, BoardTile* tile) {
-		for (int i = card->game->spellHistory.size() - 1; i >= 0; --i) {
-			if (card->game->spellHistory[i]->cardType == CARD_SPELL) {
-				card->owner->AddToHand(card->game->spellHistory[i]->original, true);
-				break;
-			}
+		card->game->HighlightSelectable(TARGET_NEAR_TILE, tile);
+		if (card->game->selectable.size() > 0) {
+			card->game->callback = EffectCallback(card, nullptr);
+			card->game->callback.callback = [](Card* card, BoardTile* tile) {
+				tile->SetFeature(TILE_NONE);
+				if (tile->minion != nullptr)
+					tile->minion->Dispel();
+			};
 		}
 	};
 
@@ -113,8 +130,6 @@ Collections::Collections() {
 	/*
 
 	//Minion skills
-	skillList.push_back(Skill(SKILL_DISPELLED));
-	skillList.back().GenerateSprite("{Dispelled}");
 	skillList.push_back(Skill(SKILL_ALTER_REXX));
 	skillList.back().GenerateSprite("Whenever you summon MECHAZ0R, put a|MECHAZ0R in your action bar");
 	skillList.push_back(Skill(SKILL_ARAKI_HEADHUNTER));
@@ -195,8 +210,6 @@ Collections::Collections() {
 	skillList.back().GenerateSprite("{Opening Gambit}: Restore 4 Health to|BOTH Generals");
 	skillList.push_back(Skill(SKILL_ENVYBAER));
 	skillList.back().GenerateSprite("Whenever this minion damages an enemy,|teleport that enemy to a random corner");
-	skillList.push_back(Skill(SKILL_EPHEMERAL_SHROUD));
-	skillList.back().GenerateSprite("{Opening Gambit}: Dispel 1 nearby space");
 	skillList.push_back(Skill(SKILL_EXUN));
 	skillList.back().GenerateSprite("{Forcefield}|Whenever this minion attacks or is|attacked, draw a card");
 	skillList.push_back(Skill(SKILL_FACESTRIKER));
@@ -291,6 +304,7 @@ Collections::Collections() {
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 3, "komodocharger", "Komodo Charger"));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "saberspinetiger", "Saberspine Tiger", FindEffect(SKILL_RUSH)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 2, "sapphireseer", "Sapphire Seer", FindEffect(SKILL_FORCEFIELD)));
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 1, "ephemeralshroud", "Ephemeral Shroud", FindEffect(SKILL_EPHEMERAL_SHROUD)));
 
 	//Spells
 	spellList.push_back(Spell(FACTION_ABYSSIAN, TARGET_MINION, 4, "breathoftheunborn", "Breath of The Unborn", FindEffect(SPELL_BREATH_OF_THE_UNBORN)));
@@ -367,8 +381,6 @@ Collections::Collections() {
 	minionList.back().skill = effectList.Find(SKILL_EMERALD_REJUVENATOR);
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 5, 3, 10, "envybaer", "Envybaer"));
 	minionList.back().skill = effectList.Find(SKILL_ENVYBAER);
-	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 1, "ephemeralshroud", "Ephemeral Shroud"));
-	minionList.back().skill = effectList.Find(SKILL_EPHEMERAL_SHROUD);
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 7, 5, 5, "exun", "E'Xun"));
 	minionList.back().skill = effectList.Find(SKILL_EXUN);
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 6, 4, 6, "facestriker", "Facestriker"));

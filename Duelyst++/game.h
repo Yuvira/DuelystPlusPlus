@@ -70,7 +70,7 @@ public:
 	void HighlightMoveable(int x, int y);
 	void SearchMoveable(int x, int y, int range);
 	void HighlightSelectable(eTarget targetMode);
-	void HighlightSelectable(eTarget targetMode, Minion* minion);
+	void HighlightSelectable(eTarget targetMode, BoardTile* tile);
 	void CreatePath();
 	bool AddToPaths(int x, int y, int last, int count);
 	void GeneratePaths();
