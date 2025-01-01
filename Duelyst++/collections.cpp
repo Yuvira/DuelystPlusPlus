@@ -23,37 +23,37 @@ Collections::Collections() {
 
 	//Abjudicator
 	effectList.push_back(Effect(SKILL_ABJUDICATOR, KEYWORD_OPENING_GAMBIT, 0, 0, 0, false, "{Opening Gambit}: Lower the cost of all|spells in your action bar by 1"));
-	effectList.back().OnPreCastThis = [](Card* card, BoardTile* tile) {
-		for (int i = 0; i < card->owner->hand.size(); ++i)
-			if (card->owner->hand[i]->cardType == CARD_SPELL)
-				card->owner->hand[i]->AddEffect(card->game->collections->FindEffect(EFFECT_ABJUDICATOR), card);
+	effectList.back().OnPreCastThis = [](EffectContext context, BoardTile* tile) {
+		for (int i = 0; i < context.card->owner->hand.size(); ++i)
+			if (context.card->owner->hand[i]->cardType == CARD_SPELL)
+				context.card->owner->hand[i]->AddEffect(context.game->collections->FindEffect(EFFECT_ABJUDICATOR), context.effect);
 	};
 	effectList.push_back(Effect(EFFECT_ABJUDICATOR, KEYWORD_NONE, -1, 0, 0, false, "Abjudicator"));
 
 	//Aethermaster
 	effectList.push_back(Effect(SKILL_AETHERMASTER, KEYWORD_NONE, 0, 0, 0, false, "You may replace an additional card|each turn"));
-	effectList.back().OnDispelThis = [](Card* card) {
-		card->owner->replaces = max(card->owner->replaces - 1, 0);
+	effectList.back().OnDispelThis = [](EffectContext context) {
+		context.card->owner->replaces = max(context.card->owner->replaces - 1, 0);
 	};
-	effectList.back().OnSummon = [](Card* card, Minion* source, bool fromActionBar) {
-		if (card == source)
-			++card->owner->replaces;
+	effectList.back().OnSummon = [](EffectContext context, Minion* source, bool fromActionBar) {
+		if (context.card == source)
+			++context.card->owner->replaces;
 	};
-	effectList.back().OnDeath = [](Card* card, Minion* source) {
-		if (card == source)
-			card->owner->replaces = max(card->owner->replaces - 1, 0);
+	effectList.back().OnDeath = [](EffectContext context, Minion* source) {
+		if (context.card == source)
+			context.card->owner->replaces = max(context.card->owner->replaces - 1, 0);
 	};
-	effectList.back().OnTurnEnd = [](Card* card, Player* player) {
-		if (card->GetMinion() != nullptr && card->GetMinion()->curTile != nullptr && card->owner == player)
-			++card->owner->replaces;
+	effectList.back().OnTurnEnd = [](EffectContext context, Player* player) {
+		if (context.card->GetMinion() != nullptr && context.card->GetMinion()->curTile != nullptr && context.card->owner == player)
+			++context.card->owner->replaces;
 	};
 
 	//Alcuin Loremaster
 	effectList.push_back(Effect(SKILL_ALCUIN_LOREMASTER, KEYWORD_OPENING_GAMBIT, 0, 0, 0, false, "{Opening Gambit}: Put a copy of the most|recently cast spell into your|action bar"));
-	effectList.back().OnPreCastThis = [](Card* card, BoardTile* tile) {
-		for (int i = card->game->spellHistory.size() - 1; i >= 0; --i) {
-			if (card->game->spellHistory[i]->cardType == CARD_SPELL) {
-				card->owner->AddToHand(card->game->spellHistory[i]->original, true);
+	effectList.back().OnPreCastThis = [](EffectContext context, BoardTile* tile) {
+		for (int i = context.game->spellHistory.size() - 1; i >= 0; --i) {
+			if (context.game->spellHistory[i]->cardType == CARD_SPELL) {
+				context.card->owner->AddToHand(context.game->spellHistory[i]->original, true);
 				break;
 			}
 		}
@@ -61,14 +61,14 @@ Collections::Collections() {
 
 	//Ash Mephyt
 	effectList.push_back(Effect(SKILL_ASH_MEPHYT, KEYWORD_OPENING_GAMBIT, 0, 0, 0, false, "{Opening Gambit}: Summon two copies of|this minion on random spaces"));
-	effectList.back().OnPreCastThis = [](Card* card, BoardTile* tile) {
-		if (card->IsMinion()) {
+	effectList.back().OnPreCastThis = [](EffectContext context, BoardTile* tile) {
+		if (context.card->IsMinion()) {
 			for (int i = 0; i < 2; ++i) {
-				BoardTile* newTile = card->game->map.GetRandom(tile);
+				BoardTile* newTile = context.game->map.GetRandom(tile);
 				if (newTile != nullptr) {
-					Minion* copy = new Minion(*(card->original->GetMinion()));
-					card->game->SetContext(copy, card->owner);
-					card->game->Summon(copy, newTile, false);
+					Minion* copy = new Minion(*(context.card->original->GetMinion()));
+					context.game->SetContext(copy, context.card->owner);
+					context.game->Summon(copy, newTile, false);
 				}
 			}
 		}
@@ -76,24 +76,24 @@ Collections::Collections() {
 
 	//Bloodtear Alchemist
 	effectList.push_back(Effect(SKILL_BLOODTEAR_ALCHEMIST, KEYWORD_OPENING_GAMBIT, 0, 0, 0, false, "{Opening Gambit}: Deal 1 damage to|an enemy"));
-	effectList.back().OnPreCastThis = [](Card* card, BoardTile* tile) {
-		card->game->HighlightSelectable(TargetMode(TARGET_MODE_ALL, TARGET_FILTER_ENEMY));
-		if (card->game->selectable.size() > 0) {
-			card->game->callback = EffectCallback(card, nullptr);
-			card->game->callback.callback = [](Card* card, BoardTile* tile) {
+	effectList.back().OnPreCastThis = [](EffectContext context, BoardTile* tile) {
+		context.game->HighlightSelectable(TargetMode(TARGET_MODE_ALL, TARGET_FILTER_ENEMY));
+		if (context.game->selectable.size() > 0) {
+			context.game->callback = EffectCallback(context, nullptr);
+			context.game->callback.callback = [](EffectContext context, BoardTile* tile) {
 				if (tile->minion != nullptr)
-					tile->minion->DealDamage(card->GetMinion(), 1);
+					tile->minion->DealDamage(context.card->GetMinion(), 1);
 			};
 		}
 	};
 
 	//Ephemeral Shroud
 	effectList.push_back(Effect(SKILL_EPHEMERAL_SHROUD, KEYWORD_OPENING_GAMBIT, 0, 0, 0, false, "{Opening Gambit}: Dispel 1 nearby space"));
-	effectList.back().OnPreCastThis = [](Card* card, BoardTile* tile) {
-		card->game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, TARGET_FILTER_NONE), tile);
-		if (card->game->selectable.size() > 0) {
-			card->game->callback = EffectCallback(card, nullptr);
-			card->game->callback.callback = [](Card* card, BoardTile* tile) {
+	effectList.back().OnPreCastThis = [](EffectContext context, BoardTile* tile) {
+		context.game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, TARGET_FILTER_NONE), tile);
+		if (context.game->selectable.size() > 0) {
+			context.game->callback = EffectCallback(context, nullptr);
+			context.game->callback.callback = [](EffectContext context, BoardTile* tile) {
 				tile->SetFeature(TILE_NONE);
 				if (tile->minion != nullptr)
 					tile->minion->Dispel();
@@ -107,20 +107,20 @@ Collections::Collections() {
 
 	//Breath of The Unborn
 	effectList.push_back(Effect(SPELL_BREATH_OF_THE_UNBORN, KEYWORD_NONE, 0, 0, 0, false, "Deal 2 damage to all enemy|minions. Fully heal all friendly|minions"));
-	effectList.back().OnResolveThis = [](Card* card, BoardTile* tile) {
-		for (int i = 0; i < card->game->minions.size(); ++i) {
-			if (card->game->minions[i]->tribe != TRIBE_GENERAL) {
-				if (card->game->minions[i]->owner == card->owner) { card->game->minions[i]->DealDamage(nullptr, -999); }
-				else { card->game->minions[i]->DealDamage(nullptr, 2); }
+	effectList.back().OnResolveThis = [](EffectContext context, BoardTile* tile) {
+		for (int i = 0; i < context.game->minions.size(); ++i) {
+			if (context.game->minions[i]->tribe != TRIBE_GENERAL) {
+				if (context.game->minions[i]->owner == context.card->owner) { context.game->minions[i]->DealDamage(nullptr, -999); }
+				else { context.game->minions[i]->DealDamage(nullptr, 2); }
 			}
 		}
 	};
 
 	//Dark Seed
 	effectList.push_back(Effect(SPELL_DARK_SEED, KEYWORD_NONE, 0, 0, 0, false, "Deal 1 damage to the enemy general|for each card in the opponent's|action bar"));
-	effectList.back().OnResolveThis = [](Card* card, BoardTile* tile) {
+	effectList.back().OnResolveThis = [](EffectContext context, BoardTile* tile) {
 		if (tile->minion != nullptr) {
-			int damage = card->owner == &card->game->players[0] ? card->game->players[1].hand.size() : card->game->players[0].hand.size();
+			int damage = context.card->owner == &context.game->players[0] ? context.game->players[1].hand.size() : context.game->players[0].hand.size();
 			tile->minion->DealDamage(nullptr, damage);
 		}
 	};

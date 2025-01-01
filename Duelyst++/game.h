@@ -22,13 +22,13 @@ enum eMode {
 class EffectCallback {
 public:
 	EffectCallback();
-	EffectCallback(Card* _card, BoardTile* _tile);
+	EffectCallback(EffectContext _context, BoardTile* _tile);
 	~EffectCallback();
-	void Execute() { callback(card, tile); }
-	void Execute(BoardTile* _tile) { callback(card, _tile); }
-	Card* card;
+	void Execute() { callback(context, tile); }
+	void Execute(BoardTile* _tile) { callback(context, _tile); }
+	EffectContext context;
 	BoardTile* tile;
-	std::function<void(Card*, BoardTile*)> callback;
+	std::function<void(EffectContext, BoardTile*)> callback;
 };
 
 //Pathing coords

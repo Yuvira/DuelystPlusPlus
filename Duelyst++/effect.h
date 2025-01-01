@@ -8,9 +8,11 @@
 
 //Definitions
 class Card;
+class Effect;
+class Game;
 class Player;
 
-#pragma region Enums
+#pragma region Enums / Helpers
 
 //Keyword flags
 enum eKeywordFlags {
@@ -126,6 +128,17 @@ enum eEffect {
 
 };
 
+//Self reference container for passing to lambdas
+class EffectContext {
+public:
+	EffectContext();
+	EffectContext(Effect* _effect, Card* _card, Game* _game);
+	~EffectContext();
+	Effect* effect;
+	Card* card;
+	Game* game;
+};
+
 #pragma endregion
 
 //Effect class
@@ -144,21 +157,21 @@ public:
 	int atkBuff;
 	int hpBuff;
 	bool isContinuous;
-	std::vector<Card*> sources;
-	std::function<void(Card*, BoardTile*)> OnPreCastThis;
-	std::function<void(Card*, BoardTile*)> OnResolveThis;
-	std::function<void(Card*)> OnDispelThis;
-	std::function<void(Card*, Card*, BoardTile*)> OnCast;
-	std::function<void(Card*, Minion*, bool)> OnSummon;
-	std::function<void(Card*, Minion*)> OnDeath;
-	std::function<void(Card*, Minion*, Minion*, bool)> OnAttack;
-	std::function<void(Card*, Card*, Minion*, int)> OnDamage;
-	std::function<void(Card*, Card*, Minion*, int)> OnHeal;
-	std::function<void(Card*, Minion*, bool)> OnMove;
-	std::function<void(Card*, Card*, bool)> OnDraw;
-	std::function<void(Card*, Card*)> OnReplace;
-	std::function<void(Card*, Player*)> OnTurnStart;
-	std::function<void(Card*, Player*)> OnTurnEnd;
+	std::vector<Effect*> sources;
+	std::function<void(EffectContext, BoardTile*)> OnPreCastThis;
+	std::function<void(EffectContext, BoardTile*)> OnResolveThis;
+	std::function<void(EffectContext)> OnDispelThis;
+	std::function<void(EffectContext, Card*, BoardTile*)> OnCast;
+	std::function<void(EffectContext, Minion*, bool)> OnSummon;
+	std::function<void(EffectContext, Minion*)> OnDeath;
+	std::function<void(EffectContext, Minion*, Minion*, bool)> OnAttack;
+	std::function<void(EffectContext, Card*, Minion*, int)> OnDamage;
+	std::function<void(EffectContext, Card*, Minion*, int)> OnHeal;
+	std::function<void(EffectContext, Minion*, bool)> OnMove;
+	std::function<void(EffectContext, Card*, bool)> OnDraw;
+	std::function<void(EffectContext, Card*)> OnReplace;
+	std::function<void(EffectContext, Player*)> OnTurnStart;
+	std::function<void(EffectContext, Player*)> OnTurnEnd;
 	std::string ValueString(int value);
 	int TextWidth(std::string str);
 };

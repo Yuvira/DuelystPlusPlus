@@ -98,8 +98,8 @@ public:
 	~Card();
 
 	//Effects
-	void AddEffect(Effect effect, Card* source);
-	void RemoveEffect(Effect effect, Card* source, bool allStacks);
+	void AddEffect(Effect effect, Effect* source);
+	void RemoveEffect(eEffect effect, Effect* source);
 
 	//Actions
 	void PreCast(BoardTile* tile);

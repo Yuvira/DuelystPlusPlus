@@ -1,6 +1,19 @@
 //Include
 #include "game.h"
 
+#pragma region Helper Constructors
+
+//Self reference constructor
+EffectContext::EffectContext() : EffectContext(nullptr, nullptr, nullptr) {}
+EffectContext::EffectContext(Effect* _effect, Card* _card, Game* _game) {
+	effect = _effect;
+	card = _card;
+	game = _game;
+}
+EffectContext::~EffectContext() {}
+
+#pragma endregion
+
 #pragma region Constructors
 
 //Effect constructors

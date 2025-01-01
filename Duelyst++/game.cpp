@@ -4,9 +4,9 @@
 #pragma region Helper Constructors
 
 //Callback constructor
-EffectCallback::EffectCallback() : EffectCallback(nullptr, nullptr) {}
-EffectCallback::EffectCallback(Card* _card, BoardTile* _tile) {
-	card = _card;
+EffectCallback::EffectCallback() : EffectCallback(EffectContext(), nullptr) {}
+EffectCallback::EffectCallback(EffectContext _context, BoardTile* _tile) {
+	context = _context;
 	tile = _tile;
 	callback = nullptr;
 }
@@ -909,7 +909,7 @@ void Game::SetContext(Card* card, Player* player) {
 	for (int i = 0; i < card->effects.size(); ++i)
 		for (int j = 0; j < card->effects[i].sources.size(); ++j)
 			if (card->effects[i].sources[j] == nullptr)
-				card->effects[i].sources[j] = card;
+				card->effects[i].sources[j] = &card->effects[i];
 }
 
 //Check if tiles is moveable

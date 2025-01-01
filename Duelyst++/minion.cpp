@@ -267,7 +267,7 @@ void Minion::Dispel() {
 	//Dispel effects
 	for (int i = 0; i < effects.size(); ++i)
 		if (effects[i].OnDispelThis)
-			effects[i].OnDispelThis(this);
+			effects[i].OnDispelThis(EffectContext(&effects[i], this, game));
 
 	//Remove effects
 	for (int i = 0; i < effects.size(); ++i)
@@ -275,7 +275,7 @@ void Minion::Dispel() {
 			effects.erase(effects.begin() + i);
 
 	//Add dispelled effect
-	AddEffect(game->collections->FindEffect(EFFECT_DISPELLED), this);
+	AddEffect(game->collections->FindEffect(EFFECT_DISPELLED), nullptr);
 
 	//Remove misc
 	hasCelerityMoved = true;
