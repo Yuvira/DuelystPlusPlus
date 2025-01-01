@@ -643,8 +643,8 @@ void Game::HighlightSelectable(TargetMode targetMode, BoardTile* tile) {
 	//Tiles near given tile
 	else if (targetMode.mode == TARGET_MODE_NEAR_TILE) {
 		if (tile != nullptr)
-			for (int i = max(tile->pos.x - 1, 0); i <= min(tile->pos.x + 1, 9); ++i)
-				for (int j = max(tile->pos.y - 1, 0); j <= min(tile->pos.y + 1, 5); ++j)
+			for (int i = max(tile->pos.x - 1, 0); i < min(tile->pos.x + 2, 9); ++i)
+				for (int j = max(tile->pos.y - 1, 0); j < min(tile->pos.y + 2, 5); ++j)
 					if (i != tile->pos.x || j != tile->pos.y)
 						selectable.push_back(&map.tiles[i][j]);
 	}
@@ -653,8 +653,8 @@ void Game::HighlightSelectable(TargetMode targetMode, BoardTile* tile) {
 	else if (targetMode.mode == TARGET_MODE_NEAR_UNITS || targetMode.mode == TARGET_MODE_NEAR_ALLIES || targetMode.mode == TARGET_MODE_NEAR_ENEMIES) {
 		for (int i = 0; i < minions.size(); ++i)
 			if (targetMode.mode == TARGET_MODE_NEAR_UNITS || (targetMode.mode == TARGET_MODE_NEAR_ALLIES && minions[i]->owner == &players[turn]) || (targetMode.mode == TARGET_MODE_NEAR_ENEMIES && minions[i]->owner == &players[!turn]))
-				for (int j = max(minions[i]->curTile->pos.x - 1, 0); j <= min(minions[i]->curTile->pos.x + 1, 9); ++j)
-					for (int k = max(minions[i]->curTile->pos.y - 1, 0); k <= min(minions[i]->curTile->pos.y + 1, 5); ++k)
+				for (int j = max(minions[i]->curTile->pos.x - 1, 0); j < min(minions[i]->curTile->pos.x + 2, 9); ++j)
+					for (int k = max(minions[i]->curTile->pos.y - 1, 0); k < min(minions[i]->curTile->pos.y + 2, 5); ++k)
 						if (std::find(selectable.begin(), selectable.end(), &map.tiles[j][k]) == selectable.end())
 							selectable.push_back(&map.tiles[j][k]);
 	}
