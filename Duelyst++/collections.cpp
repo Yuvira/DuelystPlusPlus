@@ -62,6 +62,53 @@ Collections::Collections() {
 	};
 	effectList.push_back(Effect(EFFECT_ARAKI_HEADHUNTER, KEYWORD_NONE, 0, 2, 0, "Headhunter"));
 
+	//Archon Spellbinder
+	effectList.push_back(Effect(SKILL_ARCHON_SPELLBINDER, KEYWORD_NONE, 0, 0, 0, "Your opponent's non-Bloodborn spells|cost 1 more to cast"));
+	effectList.back().OnAddThis = [](EffectContext context) {
+		for (int i = 0; i < context.card->owner->opponent->hand.size(); ++i)
+			if (context.card->owner->opponent->hand[i]->cardType == CARD_SPELL)
+				context.card->owner->opponent->hand[i]->AddEffect(context.game->collections->FindEffect(EFFECT_ARCHON_SPELLBINDER), context.effect);
+		for (int i = 0; i < context.card->owner->opponent->deck.size(); ++i)
+			if (context.card->owner->opponent->deck[i]->cardType == CARD_SPELL)
+				context.card->owner->opponent->deck[i]->AddEffect(context.game->collections->FindEffect(EFFECT_ARCHON_SPELLBINDER), context.effect);
+	};
+	effectList.back().OnRemoveThis = [](EffectContext context) {
+		for (int i = 0; i < context.card->owner->opponent->hand.size(); ++i)
+			context.card->owner->opponent->hand[i]->RemoveEffectsFromSource(context.effect);
+		for (int i = 0; i < context.card->owner->opponent->deck.size(); ++i)
+			context.card->owner->opponent->deck[i]->RemoveEffectsFromSource(context.effect);
+	};
+	effectList.back().OnDraw = [](EffectContext context, Card* card, bool fromDeck) {
+		if (context.card->IsOnBoard() && !fromDeck && card->owner != context.card->owner && card->cardType == CARD_SPELL)
+			card->AddEffect(context.game->collections->FindEffect(EFFECT_ARCHON_SPELLBINDER), context.effect);
+	};
+	effectList.push_back(Effect(EFFECT_ARCHON_SPELLBINDER, KEYWORD_NONE, 1, 0, 0, "{Spellbound}"));
+
+	//Arrow Whistler
+	effectList.push_back(Effect(SKILL_ARROW_WHISTLER, KEYWORD_RANGED, 0, 0, 0, "{Ranged}|Your other minions with {Ranged}|have +1 Attack"));
+	effectList.back().OnAddThis = [](EffectContext context) {
+		for (int i = 0; i < context.game->minions.size(); ++i)
+			if (context.card->owner == context.game->minions[i]->owner && context.game->minions[i] != context.card && context.game->minions[i]->tribe != TRIBE_GENERAL && context.game->minions[i]->HasKeywords(KEYWORD_RANGED))
+				context.game->minions[i]->AddEffect(context.game->collections->FindEffect(EFFECT_ARROW_WHISTLER), context.effect);
+	};
+	effectList.back().OnRemoveThis = [](EffectContext context) {
+		for (int i = 0; i < context.game->minions.size(); ++i)
+			context.game->minions[i]->RemoveEffectsFromSource(context.effect);
+	};
+	effectList.back().OnSummon = [](EffectContext context, Minion* source, bool fromActionBar) {
+		if (context.card->IsOnBoard() && context.card != source && context.card->owner == source->owner && source->HasKeywords(KEYWORD_RANGED))
+			source->AddEffect(context.game->collections->FindEffect(EFFECT_ARROW_WHISTLER), context.effect);
+	};
+	effectList.back().OnEffectsChanged = [](EffectContext context, Card* card) {
+		if (context.card->IsOnBoard() && card->IsOnBoard() && context.card->owner == card->owner && context.card != card) {
+			if (card->GetMinion()->HasKeywords(KEYWORD_RANGED))
+				card->AddEffect(context.game->collections->FindEffect(EFFECT_ARROW_WHISTLER), context.effect);
+			else
+				card->RemoveEffectsFromSource(context.effect);
+		}
+	};
+	effectList.push_back(Effect(EFFECT_ARROW_WHISTLER, KEYWORD_NONE, 0, 1, 0, "{Whistling Arrows}"));
+
 	//Ash Mephyt
 	effectList.push_back(Effect(SKILL_ASH_MEPHYT, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Summon two copies of|this minion on random spaces"));
 	effectList.back().OnPreCastThis = [](EffectContext context, BoardTile* tile) {
@@ -135,14 +182,6 @@ Collections::Collections() {
 	//Minion skills
 	skillList.push_back(Skill(SKILL_ALTER_REXX));
 	skillList.back().GenerateSprite("Whenever you summon MECHAZ0R, put a|MECHAZ0R in your action bar");
-	skillList.push_back(Skill(SKILL_ARCHON_SPELLBINDER));
-	skillList.back().GenerateSprite("Your opponent's non-Bloodborn spells|cost 1 more to cast");
-	buffList.push_back(Buff(BUFF_ARCHON_SPELLBINDER, 1, 0, 0, true));
-	buffList.back().GenerateSprite("Spellbound");
-	skillList.push_back(Skill(SKILL_ARROW_WHISTLER));
-	skillList.back().GenerateSprite("{Ranged}|Your other minions with {Ranged}|have +1 Attack");
-	buffList.push_back(Buff(BUFF_ARROW_WHISTLER, 0, 1, 0, true));
-	buffList.back().GenerateSprite("Whistling Arrows");
 	skillList.push_back(Skill(SKILL_ASTRAL_CRUSADER));
 	skillList.back().GenerateSprite("Whenever you replace this card, it|costs 3 less and gains +3/+3");
 	buffList.push_back(Buff(BUFF_ASTRAL_CRUSADER, -3, 3, 3, true));
@@ -296,6 +335,8 @@ Collections::Collections() {
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_ARCANYST, 2, 1, 3, "aethermaster", "Aethermaster", FindEffect(SKILL_AETHERMASTER)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_ARCANYST, 3, 3, 1, "alcuinloremaster", "Alcuin Loremaster", FindEffect(SKILL_ALCUIN_LOREMASTER)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 3, "arakiheadhunter", "Araki Headhunter", FindEffect(SKILL_ARAKI_HEADHUNTER)));
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_ARCANYST, 6, 7, 7, "archonspellbinder", "Archon Spellbinder", FindEffect(SKILL_ARCHON_SPELLBINDER)));
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_WARMASTER, 4, 2, 4, "arrowwhistler", "Arrow Whistler", FindEffect(SKILL_ARROW_WHISTLER)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 3, "ashmephyt", "Ash Mephyt", FindEffect(SKILL_ASH_MEPHYT)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "bloodtearalchemist", "Bloodtear Alchemist", FindEffect(SKILL_BLOODTEAR_ALCHEMIST)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "dragonlark", "Dragonlark", FindEffect(SKILL_FLYING)));
@@ -315,10 +356,6 @@ Collections::Collections() {
 	//Units
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_MECH, 5, 5, 5, "alterrexx", "Alter Rexx"));
 	minionList.back().skill = effectList.Find(SKILL_ALTER_REXX);
-	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_ARCANYST, 6, 7, 7, "archonspellbinder", "Archon Spellbinder"));
-	minionList.back().skill = effectList.Find(SKILL_ARCHON_SPELLBINDER);
-	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_WARMASTER, 4, 2, 4, "arrowwhistler", "Arrow Whistler"));
-	minionList.back().skill = effectList.Find(SKILL_ARROW_WHISTLER);
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 7, 7, 6, "astralcrusader", "Astral Crusader"));
 	minionList.back().skill = effectList.Find(SKILL_ASTRAL_CRUSADER);
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 4, "azureherald", "Azure Herald"));

@@ -38,29 +38,6 @@ Dispel
 
 	//Remove buffs granted to other units/cards
 	switch (skill.skill) {
-	case SKILL_ARCHON_SPELLBINDER:
-		for (int a = 0; a < owner->opponent->hand.size(); ++a) {
-			if (owner->opponent->hand[a]->cardType == CARD_SPELL) {
-				dynamic_cast<Spell*>(owner->opponent->hand[a])->RemoveBuff(BUFF_ARCHON_SPELLBINDER, false);
-			}
-		}
-		for (int a = 0; a < owner->opponent->deck.size(); ++a) {
-			if (owner->opponent->deck[a]->cardType == CARD_SPELL) {
-				dynamic_cast<Spell*>(owner->opponent->deck[a])->RemoveBuff(BUFF_ARCHON_SPELLBINDER, false);
-			}
-		}
-		break;
-	case SKILL_ARROW_WHISTLER:
-		for (int a = 0; a < game->minions.size(); ++a) {
-			if (game->minions[a]->owner == owner) {
-				if (game->minions[a] != this) {
-					if (game->minions[a]->IsRanged()) {
-						game->minions[a]->RemoveBuff(BUFF_ARROW_WHISTLER, false);
-					}
-				}
-			}
-		}
-		break;
 	case SKILL_FIRST_SWORD_OF_AKRANE:
 		for (int a = 0; a < game->minions.size(); ++a) {
 			if (game->minions[a]->owner == owner) {
@@ -244,29 +221,6 @@ Summon This
 
 			//Summoned from anywhere (apply global effects)
 			switch (skill.skill) {
-			case SKILL_ARCHON_SPELLBINDER:
-				for (int a = 0; a < owner->opponent->hand.size(); ++a) {
-					if (owner->opponent->hand[a]->cardType == CARD_SPELL) {
-						dynamic_cast<Spell*>(owner->opponent->hand[a])->AddBuff(BUFF_ARCHON_SPELLBINDER);
-					}
-				}
-				for (int a = 0; a < owner->opponent->deck.size(); ++a) {
-					if (owner->opponent->deck[a]->cardType == CARD_SPELL) {
-						dynamic_cast<Spell*>(owner->opponent->deck[a])->AddBuff(BUFF_ARCHON_SPELLBINDER);
-					}
-				}
-				break;
-			case SKILL_ARROW_WHISTLER:
-				for (int a = 0; a < game->minions.size(); ++a) {
-					if (game->minions[a]->owner == owner) {
-						if (game->minions[a] != this) {
-							if (game->minions[a]->IsRanged()) {
-								game->minions[a]->AddBuff(BUFF_ARROW_WHISTLER);
-							}
-						}
-					}
-				}
-				break;
 			case SKILL_FIRST_SWORD_OF_AKRANE:
 				for (int a = 0; a < game->minions.size(); ++a) {
 					if (game->minions[a]->owner == owner) {
@@ -331,13 +285,6 @@ Summon Any
 
 			//Skills
 			switch (skill.skill) {
-			case SKILL_ARROW_WHISTLER:
-				if (minion->owner == owner) {
-					if (minion->IsRanged()) {
-						minion->AddBuff(BUFF_ARROW_WHISTLER);
-					}
-				}
-				break;
 			case SKILL_CRIMSON_OCULUS:
 				if (minion->owner != owner) { AddBuff(BUFF_CRIMSON_OCULUS); }
 				break;
@@ -418,29 +365,6 @@ Death
 		//When this minion dies (Dying Wish)
 		if (minion == this) {
 			switch (skill.skill) {
-			case SKILL_ARCHON_SPELLBINDER:
-				for (int a = 0; a < owner->opponent->hand.size(); ++a) {
-					if (owner->opponent->hand[a]->cardType == CARD_SPELL) {
-						dynamic_cast<Spell*>(owner->opponent->hand[a])->RemoveBuff(BUFF_ARCHON_SPELLBINDER, false);
-					}
-				}
-				for (int a = 0; a < owner->opponent->deck.size(); ++a) {
-					if (owner->opponent->deck[a]->cardType == CARD_SPELL) {
-						dynamic_cast<Spell*>(owner->opponent->deck[a])->RemoveBuff(BUFF_ARCHON_SPELLBINDER, false);
-					}
-				}
-				break;
-			case SKILL_ARROW_WHISTLER:
-				for (int a = 0; a < game->minions.size(); ++a) {
-					if (game->minions[a]->owner == owner) {
-						if (game->minions[a] != this) {
-							if (game->minions[a]->IsRanged()) {
-								game->minions[a]->RemoveBuff(BUFF_ARROW_WHISTLER, false);
-							}
-						}
-					}
-				}
-				break;
 			case SKILL_AZURE_HORN_SHAMAN:
 				for (int a = max(curTile->pos.x - 1, 0); a < min(curTile->pos.x + 2, 9); ++a) {
 					for (int b = max(curTile->pos.y - 1, 0); b < min(curTile->pos.y + 2, 5); ++b) {
@@ -683,13 +607,6 @@ Draw
 
 		//Skills
 		switch (skill.skill) {
-		case SKILL_ARCHON_SPELLBINDER:
-			if (!fromDeck) {
-				if (card->owner != owner && card->cardType == CARD_SPELL) {
-					dynamic_cast<Spell*>(card)->AddBuff(BUFF_ARCHON_SPELLBINDER);
-				}
-			}
-			break;
 		case SKILL_DECIMUS:
 			if (fromDeck) {
 				if (card->owner != owner) {
