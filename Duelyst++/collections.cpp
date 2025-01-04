@@ -124,6 +124,14 @@ Collections::Collections() {
 		}
 	};
 
+	//Astral Crusader
+	effectList.push_back(Effect(SKILL_ASTRAL_CRUSADER, KEYWORD_NONE, 0, 0, 0, "Whenever you replace this card, it|costs 3 less and gains +3/+3"));
+	effectList.back().OnReplace = [](EffectContext context, Card* card) {
+		if (context.card == card)
+			card->AddEffect(context.game->collections->FindEffect(EFFECT_ASTRAL_CRUSADER), nullptr);
+	};
+	effectList.push_back(Effect(EFFECT_ASTRAL_CRUSADER, KEYWORD_NONE, -3, 3, 3, "{Astral Crusader}"));
+
 	//Bloodtear Alchemist
 	effectList.push_back(Effect(SKILL_BLOODTEAR_ALCHEMIST, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Deal 1 damage to|an enemy"));
 	effectList.back().OnPreCastThis = [](EffectContext context, BoardTile* tile) {
@@ -182,10 +190,6 @@ Collections::Collections() {
 	//Minion skills
 	skillList.push_back(Skill(SKILL_ALTER_REXX));
 	skillList.back().GenerateSprite("Whenever you summon MECHAZ0R, put a|MECHAZ0R in your action bar");
-	skillList.push_back(Skill(SKILL_ASTRAL_CRUSADER));
-	skillList.back().GenerateSprite("Whenever you replace this card, it|costs 3 less and gains +3/+3");
-	buffList.push_back(Buff(BUFF_ASTRAL_CRUSADER, -3, 3, 3, true));
-	buffList.back().GenerateSprite("Astral Crusader");
 	skillList.push_back(Skill(SKILL_AZURE_HERALD));
 	skillList.back().GenerateSprite("{Opening Gambit}: Restore 3 Health to|your General");
 	skillList.push_back(Skill(SKILL_AZURE_HORN_SHAMAN));
@@ -338,6 +342,7 @@ Collections::Collections() {
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_ARCANYST, 6, 7, 7, "archonspellbinder", "Archon Spellbinder", FindEffect(SKILL_ARCHON_SPELLBINDER)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_WARMASTER, 4, 2, 4, "arrowwhistler", "Arrow Whistler", FindEffect(SKILL_ARROW_WHISTLER)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 3, "ashmephyt", "Ash Mephyt", FindEffect(SKILL_ASH_MEPHYT)));
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 7, 7, 6, "astralcrusader", "Astral Crusader", FindEffect(SKILL_ASTRAL_CRUSADER)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "bloodtearalchemist", "Bloodtear Alchemist", FindEffect(SKILL_BLOODTEAR_ALCHEMIST)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "dragonlark", "Dragonlark", FindEffect(SKILL_FLYING)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 5, 5, 5, "fireblazer", "Fireblazer", FindEffect(SKILL_PROVOKE)));
@@ -356,8 +361,6 @@ Collections::Collections() {
 	//Units
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_MECH, 5, 5, 5, "alterrexx", "Alter Rexx"));
 	minionList.back().skill = effectList.Find(SKILL_ALTER_REXX);
-	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 7, 7, 6, "astralcrusader", "Astral Crusader"));
-	minionList.back().skill = effectList.Find(SKILL_ASTRAL_CRUSADER);
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 4, "azureherald", "Azure Herald"));
 	minionList.back().skill = effectList.Find(SKILL_AZURE_HERALD);
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 4, "azurehornshaman", "Azure Horn Shaman"));
