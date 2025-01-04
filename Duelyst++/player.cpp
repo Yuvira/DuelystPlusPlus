@@ -24,7 +24,7 @@ void Player::Preset(Collections* collections, Game* _game) {
 	deck.push_back(new Minion(*(collections->FindCard("Argeon Highmayne")->GetMinion())));
 	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(collections->FindCard("Ephemeral Shroud")->GetMinion()))); }
 	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(collections->FindCard("Arrow Whistler")->GetMinion()))); }
-	for (int i = 0; i < 3; ++i) { deck.push_back(new Minion(*(collections->FindCard("Astral Crusader")->GetMinion()))); }
+	for (int i = 0; i < 3; ++i) { deck.push_back(new Minion(*(collections->FindCard("Azure Herald")->GetMinion()))); }
 	//for (int i = 0; i < 7; ++i) { deck.push_back(new Spell(*(collections->FindCard("Dark Seed")->GetSpell()))); }
 	for (int i = 0; i < deck.size(); ++i)
 		game->SetContext(deck[i], this);

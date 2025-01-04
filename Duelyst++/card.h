@@ -180,7 +180,7 @@ public:
 	//Actions
 	void SetPosition(int x, int y);
 	void Attack(Minion* target, bool counter);
-	int DealDamage(Minion* source, int damage);
+	int DealDamage(Card* source, int damage);
 	void Dispel();
 	void AddEffects();
 

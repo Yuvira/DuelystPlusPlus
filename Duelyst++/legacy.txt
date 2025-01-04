@@ -99,9 +99,6 @@ Summon This
 			//From action bar (Opening Gambit)
 			if (actionBar) {
 				switch (skill.skill) {
-				case SKILL_AZURE_HERALD:
-					owner->general->DealDamage(this, -3);
-					break;
 				case SKILL_BLAZE_HOUND:
 					game->players[0].Draw();
 					game->players[1].Draw();
@@ -649,9 +646,6 @@ Replace
 	if (replaced->cardType == CARD_UNIT) {
 		if (dynamic_cast<Minion*>(replaced) == this) {
 			switch (skill.skill) {
-			case SKILL_ASTRAL_CRUSADER:
-				AddBuff(BUFF_ASTRAL_CRUSADER);
-				break;
 			case SKILL_DREAMGAZER:
 				if (true) {
 					BoardTile* t = game->map.GetRandomNear(owner->general->curTile->pos.x, owner->general->curTile->pos.y);

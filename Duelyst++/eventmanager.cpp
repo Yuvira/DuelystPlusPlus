@@ -50,7 +50,7 @@ void EventManager::SendOnAttack(Minion* source, Minion* target, bool counter) {
 }
 
 //Send onDamage events
-void EventManager::SendOnDamage(Minion* source, Minion* target, int damage) {
+void EventManager::SendOnDamage(Card* source, Minion* target, int damage) {
 	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnDamage(source, target, damage); }
 	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnDamage(source, target, damage); }
 	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnDamage(source, target, damage); }
@@ -59,7 +59,7 @@ void EventManager::SendOnDamage(Minion* source, Minion* target, int damage) {
 }
 
 //Send onHeal events
-void EventManager::SendOnHeal(Minion* source, Minion* target, int heal) {
+void EventManager::SendOnHeal(Card* source, Minion* target, int heal) {
 	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnHeal(source, target, heal); }
 	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnHeal(source, target, heal); }
 	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnHeal(source, target, heal); }

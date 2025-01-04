@@ -132,6 +132,12 @@ Collections::Collections() {
 	};
 	effectList.push_back(Effect(EFFECT_ASTRAL_CRUSADER, KEYWORD_NONE, -3, 3, 3, "{Astral Crusader}"));
 
+	//Azure Herald
+	effectList.push_back(Effect(SKILL_AZURE_HERALD, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Restore 3 Health to|your General"));
+	effectList.back().OnPreCastThis = [](EffectContext context, BoardTile* tile) {
+		context.card->owner->general->DealDamage(context.card, -3);
+	};
+
 	//Bloodtear Alchemist
 	effectList.push_back(Effect(SKILL_BLOODTEAR_ALCHEMIST, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Deal 1 damage to|an enemy"));
 	effectList.back().OnPreCastThis = [](EffectContext context, BoardTile* tile) {
@@ -140,7 +146,7 @@ Collections::Collections() {
 			context.game->callback = EffectCallback(context, nullptr);
 			context.game->callback.callback = [](EffectContext context, BoardTile* tile) {
 				if (tile->minion != nullptr)
-					tile->minion->DealDamage(context.card->GetMinion(), 1);
+					tile->minion->DealDamage(context.card, 1);
 			};
 		}
 	};
@@ -168,8 +174,8 @@ Collections::Collections() {
 	effectList.back().OnResolveThis = [](EffectContext context, BoardTile* tile) {
 		for (int i = 0; i < context.game->minions.size(); ++i) {
 			if (context.game->minions[i]->tribe != TRIBE_GENERAL) {
-				if (context.game->minions[i]->owner == context.card->owner) { context.game->minions[i]->DealDamage(nullptr, -999); }
-				else { context.game->minions[i]->DealDamage(nullptr, 2); }
+				if (context.game->minions[i]->owner == context.card->owner) { context.game->minions[i]->DealDamage(context.card, -999); }
+				else { context.game->minions[i]->DealDamage(context.card, 2); }
 			}
 		}
 	};
@@ -179,7 +185,7 @@ Collections::Collections() {
 	effectList.back().OnResolveThis = [](EffectContext context, BoardTile* tile) {
 		if (tile->minion != nullptr) {
 			int damage = context.card->owner == &context.game->players[0] ? context.game->players[1].hand.size() : context.game->players[0].hand.size();
-			tile->minion->DealDamage(nullptr, damage);
+			tile->minion->DealDamage(context.card, damage);
 		}
 	};
 
@@ -190,8 +196,6 @@ Collections::Collections() {
 	//Minion skills
 	skillList.push_back(Skill(SKILL_ALTER_REXX));
 	skillList.back().GenerateSprite("Whenever you summon MECHAZ0R, put a|MECHAZ0R in your action bar");
-	skillList.push_back(Skill(SKILL_AZURE_HERALD));
-	skillList.back().GenerateSprite("{Opening Gambit}: Restore 3 Health to|your General");
 	skillList.push_back(Skill(SKILL_AZURE_HORN_SHAMAN));
 	skillList.back().GenerateSprite("{Dying Wish}: Give +4 Health to friendly|minions around it");
 	buffList.push_back(Buff(BUFF_AZURE_HORN_SHAMAN, 0, 0, 4, true));
@@ -343,6 +347,7 @@ Collections::Collections() {
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_WARMASTER, 4, 2, 4, "arrowwhistler", "Arrow Whistler", FindEffect(SKILL_ARROW_WHISTLER)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 3, "ashmephyt", "Ash Mephyt", FindEffect(SKILL_ASH_MEPHYT)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 7, 7, 6, "astralcrusader", "Astral Crusader", FindEffect(SKILL_ASTRAL_CRUSADER)));
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 4, "azureherald", "Azure Herald", FindEffect(SKILL_AZURE_HERALD)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "bloodtearalchemist", "Bloodtear Alchemist", FindEffect(SKILL_BLOODTEAR_ALCHEMIST)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "dragonlark", "Dragonlark", FindEffect(SKILL_FLYING)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 5, 5, 5, "fireblazer", "Fireblazer", FindEffect(SKILL_PROVOKE)));
@@ -361,8 +366,6 @@ Collections::Collections() {
 	//Units
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_MECH, 5, 5, 5, "alterrexx", "Alter Rexx"));
 	minionList.back().skill = effectList.Find(SKILL_ALTER_REXX);
-	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 4, "azureherald", "Azure Herald"));
-	minionList.back().skill = effectList.Find(SKILL_AZURE_HERALD);
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 4, "azurehornshaman", "Azure Horn Shaman"));
 	minionList.back().skill = effectList.Find(SKILL_AZURE_HORN_SHAMAN);
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_STRUCTURE, 3, 0, 5, "bastion", "Bastion"));

@@ -236,7 +236,7 @@ void Minion::Attack(Minion* target, bool counter) {
 }
 
 //Deal damage to this
-int Minion::DealDamage(Minion* source, int damage) {
+int Minion::DealDamage(Card* source, int damage) {
 	if (damage < 0) {
 		if (hp - damage > hpMax) {
 			damage = -(hpMax - hp);
