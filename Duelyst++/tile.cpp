@@ -111,10 +111,10 @@ BoardTile* Map::GetRandomCorner() {
 }
 
 //Get random empty tiles
-BoardTile* Map::GetRandomNear(int x, int y) {
+BoardTile* Map::GetRandomNear(BoardTile* tile) {
 	std::vector<BoardTile*> valid;
-	for (int i = max(x - 1, 0); i < min(x + 2, 9); ++i)
-		for (int j = max(y - 1, 0); j < min(y + 2, 5); ++j)
+	for (int i = max(tile->pos.x - 1, 0); i < min(tile->pos.x + 2, 9); ++i)
+		for (int j = max(tile->pos.y - 1, 0); j < min(tile->pos.y + 2, 5); ++j)
 			if (tiles[i][j].minion == nullptr)
 				valid.push_back(&tiles[i][j]);
 	if (valid.size() > 0) {
@@ -122,6 +122,15 @@ BoardTile* Map::GetRandomNear(int x, int y) {
 		return valid[i];
 	}
 	return nullptr;
+}
+
+//Get tiles near a given tile
+std::vector<BoardTile*> Map::GetNear(BoardTile* tile) {
+	std::vector<BoardTile*> valid;
+	for (int i = max(tile->pos.x - 1, 0); i < min(tile->pos.x + 2, 9); ++i)
+		for (int j = max(tile->pos.y - 1, 0); j < min(tile->pos.y + 2, 5); ++j)
+			valid.push_back(&tiles[i][j]);
+	return valid;
 }
 
 #pragma endregion
