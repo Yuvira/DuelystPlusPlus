@@ -3,6 +3,7 @@
 #define __COLLECTIONS_H__
 
 //Include
+#include <ranges>
 #include "card.h"
 
 //Collections class

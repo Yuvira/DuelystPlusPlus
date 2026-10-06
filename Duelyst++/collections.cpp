@@ -24,9 +24,9 @@ Collections::Collections() {
 	//Abjudicator
 	effectList.push_back(Effect(SKILL_ABJUDICATOR, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Lower the cost of all spells in your action bar by 1"));
 	effectList.back().OnPreCastThis = [](EffectContext context, BoardTile* tile) {
-		for (int i = 0; i < context.card->owner->hand.size(); ++i)
-			if (context.card->owner->hand[i]->cardType == CARD_SPELL)
-				context.card->owner->hand[i]->AddEffect(context.game->collections->FindEffect(EFFECT_ABJUDICATOR), context.effect);
+		for (Card* card : context.card->owner->hand)
+			if (card->cardType == CARD_SPELL)
+				card->AddEffect(context.game->collections->FindEffect(EFFECT_ABJUDICATOR), context.effect);
 	};
 	effectList.push_back(Effect(EFFECT_ABJUDICATOR, KEYWORD_NONE, -1, 0, 0, "Abjudicator"));
 
@@ -44,9 +44,9 @@ Collections::Collections() {
 	//Alcuin Loremaster
 	effectList.push_back(Effect(SKILL_ALCUIN_LOREMASTER, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Put a copy of the most recently cast spell into your action bar"));
 	effectList.back().OnPreCastThis = [](EffectContext context, BoardTile* tile) {
-		for (int i = context.game->spellHistory.size() - 1; i >= 0; --i) {
-			if (context.game->spellHistory[i]->cardType == CARD_SPELL) {
-				context.card->owner->AddToHand(context.game->spellHistory[i]->original, true);
+		for (Spell* spell : context.game->spellHistory | std::views::reverse) {
+			if (spell->cardType == CARD_SPELL) {
+				context.card->owner->AddToHand(spell->original, true);
 				break;
 			}
 		}
@@ -63,18 +63,18 @@ Collections::Collections() {
 	//Archon Spellbinder
 	effectList.push_back(Effect(SKILL_ARCHON_SPELLBINDER, KEYWORD_NONE, 0, 0, 0, "Your opponent's non-Bloodborn spells cost 1 more to cast"));
 	effectList.back().OnAddThis = [](EffectContext context) {
-		for (int i = 0; i < context.card->owner->opponent->hand.size(); ++i)
-			if (context.card->owner->opponent->hand[i]->cardType == CARD_SPELL)
-				context.card->owner->opponent->hand[i]->AddEffect(context.game->collections->FindEffect(EFFECT_ARCHON_SPELLBINDER), context.effect);
-		for (int i = 0; i < context.card->owner->opponent->deck.size(); ++i)
-			if (context.card->owner->opponent->deck[i]->cardType == CARD_SPELL)
-				context.card->owner->opponent->deck[i]->AddEffect(context.game->collections->FindEffect(EFFECT_ARCHON_SPELLBINDER), context.effect);
+		for (Card* card : context.card->owner->opponent->hand)
+			if (card->cardType == CARD_SPELL)
+				card->AddEffect(context.game->collections->FindEffect(EFFECT_ARCHON_SPELLBINDER), context.effect);
+		for (Card* card : context.card->owner->opponent->deck)
+			if (card->cardType == CARD_SPELL)
+				card->AddEffect(context.game->collections->FindEffect(EFFECT_ARCHON_SPELLBINDER), context.effect);
 	};
 	effectList.back().OnRemoveThis = [](EffectContext context) {
-		for (int i = 0; i < context.card->owner->opponent->hand.size(); ++i)
-			context.card->owner->opponent->hand[i]->RemoveEffectsFromSource(context.effect);
-		for (int i = 0; i < context.card->owner->opponent->deck.size(); ++i)
-			context.card->owner->opponent->deck[i]->RemoveEffectsFromSource(context.effect);
+		for (Card* card : context.card->owner->opponent->hand)
+			card->RemoveEffectsFromSource(context.effect);
+		for (Card* card : context.card->owner->opponent->deck)
+			card->RemoveEffectsFromSource(context.effect);
 	};
 	effectList.back().OnDraw = [](EffectContext context, Card* card, bool fromDeck) {
 		if (context.card->IsOnBoard() && !fromDeck && card->owner != context.card->owner && card->cardType == CARD_SPELL)
@@ -85,13 +85,13 @@ Collections::Collections() {
 	//Arrow Whistler
 	effectList.push_back(Effect(SKILL_ARROW_WHISTLER, KEYWORD_RANGED, 0, 0, 0, "{Ranged}|Your other minions with {Ranged} have +1 Attack"));
 	effectList.back().OnAddThis = [](EffectContext context) {
-		for (int i = 0; i < context.game->minions.size(); ++i)
-			if (context.card->owner == context.game->minions[i]->owner && context.game->minions[i] != context.card && context.game->minions[i]->tribe != TRIBE_GENERAL && context.game->minions[i]->HasKeywords(KEYWORD_RANGED))
-				context.game->minions[i]->AddEffect(context.game->collections->FindEffect(EFFECT_ARROW_WHISTLER), context.effect);
+		for (Minion* minion : context.game->minions)
+			if (context.card->owner == minion->owner && minion != context.card && minion->tribe != TRIBE_GENERAL && minion->HasKeywords(KEYWORD_RANGED))
+				minion->AddEffect(context.game->collections->FindEffect(EFFECT_ARROW_WHISTLER), context.effect);
 	};
 	effectList.back().OnRemoveThis = [](EffectContext context) {
-		for (int i = 0; i < context.game->minions.size(); ++i)
-			context.game->minions[i]->RemoveEffectsFromSource(context.effect);
+		for (Minion* minion : context.game->minions)
+			minion->RemoveEffectsFromSource(context.effect);
 	};
 	effectList.back().OnSummon = [](EffectContext context, Minion* source, bool fromActionBar) {
 		if (context.card->IsOnBoard() && context.card != source && context.card->owner == source->owner && source->HasKeywords(KEYWORD_RANGED))
