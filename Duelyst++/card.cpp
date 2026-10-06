@@ -94,7 +94,9 @@ void Card::UpdateDetails() {
 			else
 				word += effect->description[i];
 		}
-		if (TextWidth(line) + TextWidth(word) + 1 > MAX_DESCRIPTION_WIDTH) {
+		if (line.length() == 0)
+			lines.push_back(word);
+		else if (TextWidth(line) + TextWidth(word) + 1 > MAX_DESCRIPTION_WIDTH) {
 			lines.push_back(line);
 			lines.push_back(word);
 		}
