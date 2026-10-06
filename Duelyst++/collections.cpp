@@ -22,7 +22,7 @@ Collections::Collections() {
 #pragma region Minions
 
 	//Abjudicator
-	effectList.push_back(Effect(SKILL_ABJUDICATOR, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Lower the cost of all|spells in your action bar by 1"));
+	effectList.push_back(Effect(SKILL_ABJUDICATOR, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Lower the cost of all spells in your action bar by 1"));
 	effectList.back().OnPreCastThis = [](EffectContext context, BoardTile* tile) {
 		for (int i = 0; i < context.card->owner->hand.size(); ++i)
 			if (context.card->owner->hand[i]->cardType == CARD_SPELL)
@@ -31,7 +31,7 @@ Collections::Collections() {
 	effectList.push_back(Effect(EFFECT_ABJUDICATOR, KEYWORD_NONE, -1, 0, 0, "Abjudicator"));
 
 	//Aethermaster
-	effectList.push_back(Effect(SKILL_AETHERMASTER, KEYWORD_NONE, 0, 0, 0, "You may replace an additional card|each turn"));
+	effectList.push_back(Effect(SKILL_AETHERMASTER, KEYWORD_NONE, 0, 0, 0, "You may replace an additional card each turn"));
 	effectList.back().OnAddThis = [](EffectContext context) {
 		++context.card->owner->replaces;
 	};
@@ -44,7 +44,7 @@ Collections::Collections() {
 	};
 
 	//Alcuin Loremaster
-	effectList.push_back(Effect(SKILL_ALCUIN_LOREMASTER, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Put a copy of the most|recently cast spell into your|action bar"));
+	effectList.push_back(Effect(SKILL_ALCUIN_LOREMASTER, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Put a copy of the most recently cast spell into your action bar"));
 	effectList.back().OnPreCastThis = [](EffectContext context, BoardTile* tile) {
 		for (int i = context.game->spellHistory.size() - 1; i >= 0; --i) {
 			if (context.game->spellHistory[i]->cardType == CARD_SPELL) {
@@ -55,7 +55,7 @@ Collections::Collections() {
 	};
 
 	//Araki Headhunter
-	effectList.push_back(Effect(SKILL_ARAKI_HEADHUNTER, KEYWORD_NONE, 0, 0, 0, "Whenever you summon a minion with|Opening Gambit from your action bar,|gain +2 Attack"));
+	effectList.push_back(Effect(SKILL_ARAKI_HEADHUNTER, KEYWORD_NONE, 0, 0, 0, "Whenever you summon a minion with {Opening Gambit} from your action bar, gain +2 Attack"));
 	effectList.back().OnSummon = [](EffectContext context, Minion* source, bool fromActionBar) {
 		if (context.card->IsOnBoard() && context.card != source && context.card->owner == source->owner && source->HasKeywords(KEYWORD_OPENING_GAMBIT) && fromActionBar)
 			context.card->AddEffect(context.game->collections->FindEffect(EFFECT_ARAKI_HEADHUNTER), nullptr);
@@ -63,7 +63,7 @@ Collections::Collections() {
 	effectList.push_back(Effect(EFFECT_ARAKI_HEADHUNTER, KEYWORD_NONE, 0, 2, 0, "Headhunter"));
 
 	//Archon Spellbinder
-	effectList.push_back(Effect(SKILL_ARCHON_SPELLBINDER, KEYWORD_NONE, 0, 0, 0, "Your opponent's non-Bloodborn spells|cost 1 more to cast"));
+	effectList.push_back(Effect(SKILL_ARCHON_SPELLBINDER, KEYWORD_NONE, 0, 0, 0, "Your opponent's non-Bloodborn spells cost 1 more to cast"));
 	effectList.back().OnAddThis = [](EffectContext context) {
 		for (int i = 0; i < context.card->owner->opponent->hand.size(); ++i)
 			if (context.card->owner->opponent->hand[i]->cardType == CARD_SPELL)
@@ -85,7 +85,7 @@ Collections::Collections() {
 	effectList.push_back(Effect(EFFECT_ARCHON_SPELLBINDER, KEYWORD_NONE, 1, 0, 0, "{Spellbound}"));
 
 	//Arrow Whistler
-	effectList.push_back(Effect(SKILL_ARROW_WHISTLER, KEYWORD_RANGED, 0, 0, 0, "{Ranged}|Your other minions with {Ranged}|have +1 Attack"));
+	effectList.push_back(Effect(SKILL_ARROW_WHISTLER, KEYWORD_RANGED, 0, 0, 0, "{Ranged}|Your other minions with {Ranged} have +1 Attack"));
 	effectList.back().OnAddThis = [](EffectContext context) {
 		for (int i = 0; i < context.game->minions.size(); ++i)
 			if (context.card->owner == context.game->minions[i]->owner && context.game->minions[i] != context.card && context.game->minions[i]->tribe != TRIBE_GENERAL && context.game->minions[i]->HasKeywords(KEYWORD_RANGED))
@@ -110,7 +110,7 @@ Collections::Collections() {
 	effectList.push_back(Effect(EFFECT_ARROW_WHISTLER, KEYWORD_NONE, 0, 1, 0, "{Whistling Arrows}"));
 
 	//Ash Mephyt
-	effectList.push_back(Effect(SKILL_ASH_MEPHYT, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Summon two copies of|this minion on random spaces"));
+	effectList.push_back(Effect(SKILL_ASH_MEPHYT, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Summon two copies of this minion on random spaces"));
 	effectList.back().OnPreCastThis = [](EffectContext context, BoardTile* tile) {
 		if (context.card->IsMinion()) {
 			for (int i = 0; i < 2; ++i) {
@@ -125,7 +125,7 @@ Collections::Collections() {
 	};
 
 	//Astral Crusader
-	effectList.push_back(Effect(SKILL_ASTRAL_CRUSADER, KEYWORD_NONE, 0, 0, 0, "Whenever you replace this card, it|costs 3 less and gains +3/+3"));
+	effectList.push_back(Effect(SKILL_ASTRAL_CRUSADER, KEYWORD_NONE, 0, 0, 0, "Whenever you replace this card, it costs 3 less and gains +3/+3"));
 	effectList.back().OnReplace = [](EffectContext context, Card* card) {
 		if (context.card == card)
 			card->AddEffect(context.game->collections->FindEffect(EFFECT_ASTRAL_CRUSADER), nullptr);
@@ -133,13 +133,13 @@ Collections::Collections() {
 	effectList.push_back(Effect(EFFECT_ASTRAL_CRUSADER, KEYWORD_NONE, -3, 3, 3, "{Astral Crusader}"));
 
 	//Azure Herald
-	effectList.push_back(Effect(SKILL_AZURE_HERALD, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Restore 3 Health to|your General"));
+	effectList.push_back(Effect(SKILL_AZURE_HERALD, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Restore 3 Health to your General"));
 	effectList.back().OnPreCastThis = [](EffectContext context, BoardTile* tile) {
 		context.card->owner->general->DealDamage(context.card, -3);
 	};
 
 	//Bloodtear Alchemist
-	effectList.push_back(Effect(SKILL_BLOODTEAR_ALCHEMIST, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Deal 1 damage to|an enemy"));
+	effectList.push_back(Effect(SKILL_BLOODTEAR_ALCHEMIST, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Deal 1 damage to an enemy"));
 	effectList.back().OnPreCastThis = [](EffectContext context, BoardTile* tile) {
 		context.game->HighlightSelectable(TargetMode(TARGET_MODE_ALL, TARGET_FILTER_ENEMY));
 		if (context.game->selectable.size() > 0) {
@@ -170,7 +170,7 @@ Collections::Collections() {
 #pragma region Spells
 
 	//Breath of The Unborn
-	effectList.push_back(Effect(SPELL_BREATH_OF_THE_UNBORN, KEYWORD_NONE, 0, 0, 0, "Deal 2 damage to all enemy|minions. Fully heal all friendly|minions"));
+	effectList.push_back(Effect(SPELL_BREATH_OF_THE_UNBORN, KEYWORD_NONE, 0, 0, 0, "Deal 2 damage to all enemy minions. Fully heal all friendly minions"));
 	effectList.back().OnResolveThis = [](EffectContext context, BoardTile* tile) {
 		for (int i = 0; i < context.game->minions.size(); ++i) {
 			if (context.game->minions[i]->tribe != TRIBE_GENERAL) {
@@ -181,7 +181,7 @@ Collections::Collections() {
 	};
 
 	//Dark Seed
-	effectList.push_back(Effect(SPELL_DARK_SEED, KEYWORD_NONE, 0, 0, 0, "Deal 1 damage to the enemy general|for each card in the opponent's|action bar"));
+	effectList.push_back(Effect(SPELL_DARK_SEED, KEYWORD_NONE, 0, 0, 0, "Deal 1 damage to the enemy general for each card in the opponent's action bar"));
 	effectList.back().OnResolveThis = [](EffectContext context, BoardTile* tile) {
 		if (tile->minion != nullptr) {
 			int damage = context.card->owner == &context.game->players[0] ? context.game->players[1].hand.size() : context.game->players[0].hand.size();

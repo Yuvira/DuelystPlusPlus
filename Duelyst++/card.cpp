@@ -1,6 +1,9 @@
 //Include
 #include "game.h"
 
+//Constants
+const int MAX_DESCRIPTION_WIDTH = 42;
+
 #pragma region Helper Constructors
 
 //Targeting mode constructor
@@ -39,7 +42,6 @@ void Card::UpdateDetails() {
 
 	//Text lines
 	std::vector<std::string> lines;
-	lines.push_back("");
 
 	//Create pointer list
 	std::vector<Effect*> effectRefs;
@@ -53,19 +55,51 @@ void Card::UpdateDetails() {
 		Effect* effect = effectRefs.front();
 
 		//Add newline if this isn't the first effect in the list
-		if (lines.size() > 1 || lines[0].length() > 0) {
+		if (lines.size() > 0)
 			lines.push_back("");
-			lines.push_back("");
-		}
 
 		//Add description to lines
 		int headerIdx = lines.size() - 1;
+		std::string line = "";
+		std::string word = "";
 		for (int i = 0; i < effect->description.length(); ++i) {
-			if (effect->description[i] == '|')
-				lines.push_back("");
+			if (line.length() == 0 && (effect->description[i] == '|' || effect->description[i] == ' ')) {
+				if (effect->description[i] == '|')
+					lines.push_back(word);
+				else if (effect->description[i] == ' ')
+					line += word;
+				word = "";
+			}
+			else if (effect->description[i] == '|') {
+				if (TextWidth(line) + TextWidth(word) + 1 > MAX_DESCRIPTION_WIDTH) {
+					lines.push_back(line);
+					lines.push_back(word);
+				}
+				else {
+					line += ' ' + word;
+					lines.push_back(line);
+				}
+				line = "";
+				word = "";
+			}
+			else if (effect->description[i] == ' ') {
+				if (TextWidth(line) + TextWidth(word) + 1 > MAX_DESCRIPTION_WIDTH) {
+					lines.push_back(line);
+					line = word;
+				}
+				else
+					line += ' ' + word;
+				word = "";
+			}
 			else
-				lines.back() += effect->description[i];
+				word += effect->description[i];
 		}
+		if (TextWidth(line) + TextWidth(word) + 1 > MAX_DESCRIPTION_WIDTH) {
+			lines.push_back(line);
+			lines.push_back(word);
+		}
+		else
+			lines.push_back(line + ' ' + word);
 
 		//Stack count
 		int stacks = 1;
