@@ -148,6 +148,31 @@ Collections::Collections() {
 	};
 	effectList.push_back(Effect(EFFECT_AZURE_HORN_SHAMAN, KEYWORD_NONE, 0, 0, 4, "{Azure Horn Shaman}"));
 
+	//Bastion
+	effectList.push_back(Effect(SKILL_BASTION, KEYWORD_NONE, 0, 0, 0, "At the end of your turn, give other friendly minions +1 Health"));
+	effectList.back().OnTurnEnd = [](EffectContext context, Player* player) {
+		if (context.card->IsOnBoard() && context.card->owner == player)
+			for (Minion* minion : context.game->minions)
+				if (minion->owner == context.card->owner && minion != context.card && minion->tribe != TRIBE_GENERAL)
+					minion->AddEffect(context.game->collections->FindEffect(EFFECT_BASTION), nullptr);
+	};
+	effectList.push_back(Effect(EFFECT_BASTION, KEYWORD_NONE, 0, 0, 1, "{Bastion}"));
+
+	//Blaze Hound
+	effectList.push_back(Effect(SKILL_BLAZE_HOUND, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Both players draw a card"));
+	effectList.back().OnPreCastThis = [](EffectContext context, BoardTile* tile) {
+		context.game->players[0].Draw();
+		context.game->players[1].Draw();
+	};
+
+	//Blistering Skorn
+	effectList.push_back(Effect(SKILL_BLISTERING_SKORN, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Deal 1 damage to everything (including itself)"));
+	effectList.back().OnPreCastThis = [](EffectContext context, BoardTile* tile) {
+		for (Minion* minion : context.game->minions)
+			minion->DealDamage(context.card, 1);
+		if (context.card->IsMinion())
+			context.card->GetMinion()->DealDamage(context.card, 1);
+	};
 
 	//Bloodtear Alchemist
 	effectList.push_back(Effect(SKILL_BLOODTEAR_ALCHEMIST, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Deal 1 damage to an enemy"));
@@ -360,6 +385,9 @@ Collections::Collections() {
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 7, 7, 6, "astralcrusader", "Astral Crusader", FindEffect(SKILL_ASTRAL_CRUSADER)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 4, "azureherald", "Azure Herald", FindEffect(SKILL_AZURE_HERALD)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 4, "azurehornshaman", "Azure Horn Shaman", FindEffect(SKILL_AZURE_HORN_SHAMAN)));
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_STRUCTURE, 3, 0, 5, "bastion", "Bastion", FindEffect(SKILL_BASTION)));
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 3, 4, 3, "blazehound", "Blaze Hound", FindEffect(SKILL_BLAZE_HOUND)));
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 4, 4, 5, "blisteringskorn", "Blistering Skorn", FindEffect(SKILL_BLISTERING_SKORN)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "bloodtearalchemist", "Bloodtear Alchemist", FindEffect(SKILL_BLOODTEAR_ALCHEMIST)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "dragonlark", "Dragonlark", FindEffect(SKILL_FLYING)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 5, 5, 5, "fireblazer", "Fireblazer", FindEffect(SKILL_PROVOKE)));
