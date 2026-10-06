@@ -22,6 +22,7 @@ public:
 	int mana;
 	int manaMax;
 	int replaces;
+	int maxReplaces;
 	Sprite uiReplace;
 	Sprite uiCrystal[9];
 	Minion* general;

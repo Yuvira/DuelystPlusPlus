@@ -8,6 +8,7 @@ Player::Player() {
 	mana = 0;
 	manaMax = 0;
 	replaces = 0;
+	maxReplaces = 1;
 	game = nullptr;
 	general = nullptr;
 	opponent = nullptr;
@@ -35,7 +36,7 @@ void Player::Preset(Collections* collections, Game* game) {
 void Player::Init(int mana) {
 	this->mana = mana;
 	manaMax = mana;
-	replaces = 1;
+	replaces = maxReplaces;
 	for (int i = 0; i < 9; ++i) {
 		uiCrystal[i].buffer[0].Char.AsciiChar = '';
 		uiCrystal[i].SetColor(COLOR_GRAY);

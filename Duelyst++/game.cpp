@@ -430,7 +430,7 @@ void Game::AttackUnit() {
 }
 
 //Change turn
-void Game::ChangeTurn(bool _turn) {
+void Game::ChangeTurn(bool newTurn) {
 
 	//Indicate turn is ending
 	endTurn = true;
@@ -447,10 +447,10 @@ void Game::ChangeTurn(bool _turn) {
 	//Draw and reset replaces
 	if (turnCount > 0)
 		players[turn].Draw();
-	players[turn].replaces = 1;
+	players[turn].replaces = players[turn].maxReplaces;
 
 	//Change turn
-	turn = _turn;
+	turn = newTurn;
 	if (!turn)
 		++turnCount;
 
