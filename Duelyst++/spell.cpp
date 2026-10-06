@@ -5,12 +5,12 @@
 
 //Game constructors
 Spell::Spell() : Spell(FACTION_NEUTRAL, TargetMode(TARGET_MODE_ALL, TARGET_FILTER_NONE), 0, "", "???") {}
-Spell::Spell(eFaction _faction, TargetMode _targetMode, int _cost, std::string path, std::string _name) {
+Spell::Spell(eFaction faction, TargetMode targetMode, int cost, std::string path, std::string name) {
 	cardType = CARD_SPELL;
-	faction = _faction;
-	targetMode = _targetMode;
-	cost = _cost;
-	name = _name;
+	this->faction = faction;
+	this->targetMode = targetMode;
+	this->cost = cost;
+	this->name = name;
 	if (path == "")
 		sprite.Resize(5, 5);
 	else
@@ -19,7 +19,7 @@ Spell::Spell(eFaction _faction, TargetMode _targetMode, int _cost, std::string p
 	game = nullptr;
 	owner = nullptr;
 }
-Spell::Spell(eFaction _faction, TargetMode _targetMode, int _cost, std::string path, std::string _name, Effect effect) : Spell(_faction, _targetMode, _cost, path, _name) {
+Spell::Spell(eFaction faction, TargetMode targetMode, int cost, std::string path, std::string name, Effect effect) : Spell(faction, targetMode, cost, path, name) {
 	if (effect.effect != EFFECT_NONE)
 		AddEffect(effect, nullptr);
 }

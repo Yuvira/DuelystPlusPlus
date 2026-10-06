@@ -11,8 +11,8 @@ class Player {
 public:
 	Player();
 	~Player();
-	void Preset(Collections* collections, Game* _game);
-	void Init(int _mana);
+	void Preset(Collections* collections, Game* game);
+	void Init(int mana);
 	void UpdateMana(eColor color);
 	void Render(Renderer& renderer, bool left);
 	void Shuffle();

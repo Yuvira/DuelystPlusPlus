@@ -79,7 +79,7 @@ enum eTribe {
 class TargetMode {
 public:
 	TargetMode();
-	TargetMode(eTargetMode _mode, int _filters);
+	TargetMode(eTargetMode mode, int filters);
 	~TargetMode();
 	bool HasFilters(int flags) { return (filters & flags) == flags; }
 	bool HasAny(int flags) { return (filters & flags) != TARGET_FILTER_NONE; }
@@ -162,8 +162,8 @@ public:
 
 	//Constructors / Initialization
 	Minion();
-	Minion(eFaction _faction, eTribe _tribe, int _cost, int _atk, int _hp, std::string path, std::string _name);
-	Minion(eFaction _faction, eTribe _tribe, int _cost, int _atk, int _hp, std::string path, std::string _name, Effect effect);
+	Minion(eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name);
+	Minion(eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name, Effect effect);
 	~Minion();
 	void GenerateDetails();
 
@@ -222,8 +222,8 @@ public:
 
 	//Constructors / Initialization
 	Spell();
-	Spell(eFaction _faction, TargetMode _targetMode, int _cost, std::string path, std::string _name);
-	Spell(eFaction _faction, TargetMode _targetMode, int _cost, std::string path, std::string _name, Effect effect);
+	Spell(eFaction faction, TargetMode targetMode, int cost, std::string path, std::string name);
+	Spell(eFaction faction, TargetMode targetMode, int cost, std::string path, std::string name, Effect effect);
 	~Spell();
 	void GenerateDetails();
 

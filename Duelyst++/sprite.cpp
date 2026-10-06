@@ -5,11 +5,11 @@
 
 //Sprite constructors
 Sprite::Sprite() : Sprite(1, 1) {}
-Sprite::Sprite(int _width, int _height) {
+Sprite::Sprite(int width, int height) {
 	pos.X = 0;
 	pos.Y = 0;
-	width = _width;
-	height = _height;
+	this->width = width;
+	this->height = height;
 	for (int i = 0; i < (width * height); ++i) { buffer.push_back(CHAR_INFO()); }
 	Clear();
 }

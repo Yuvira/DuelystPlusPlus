@@ -132,7 +132,7 @@ enum eEffect {
 class EffectContext {
 public:
 	EffectContext();
-	EffectContext(Effect* _effect, Card* _card, Game* _game);
+	EffectContext(Effect* effect, Card* card, Game* game);
 	~EffectContext();
 	Effect* effect;
 	Card* card;
@@ -145,8 +145,8 @@ public:
 class Effect {
 public:
 	Effect();
-	Effect(eEffect _effect, eKeywordFlags _keywords, int _costBuff, int _atkBuff, int _hpBuff);
-	Effect(eEffect _effect, eKeywordFlags _keywords, int _costBuff, int _atkBuff, int _hpBuff, std::string _description);
+	Effect(eEffect effect, eKeywordFlags keywords, int costBuff, int atkBuff, int hpBuff);
+	Effect(eEffect effect, eKeywordFlags keywords, int costBuff, int atkBuff, int hpBuff, std::string description);
 	~Effect();
 	eEffect effect;
 	eKeywordFlags keywords;

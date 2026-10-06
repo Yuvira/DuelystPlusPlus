@@ -5,19 +5,19 @@
 
 //Callback constructor
 EffectCallback::EffectCallback() : EffectCallback(EffectContext(), nullptr) {}
-EffectCallback::EffectCallback(EffectContext _context, BoardTile* _tile) {
-	context = _context;
-	tile = _tile;
+EffectCallback::EffectCallback(EffectContext context, BoardTile* tile) {
+	this->context = context;
+	this->tile = tile;
 	callback = nullptr;
 }
 EffectCallback::~EffectCallback() {}
 
 //Path co-ordinate constructor
 PathCoord::PathCoord() : PathCoord(Coord(), 0, 0) {}
-PathCoord::PathCoord(Coord _pos, int _last, int _count) {
-	pos = _pos;
-	last = _last;
-	count = _count;
+PathCoord::PathCoord(Coord pos, int last, int count) {
+	this->pos = pos;
+	this->last = last;
+	this->count = count;
 }
 PathCoord::~PathCoord() {}
 
@@ -26,10 +26,10 @@ PathCoord::~PathCoord() {}
 #pragma region Game Constructor
 
 //Game constructor
-Game::Game(Collections* _collections) {
+Game::Game(Collections* collections) {
 
 	//Collections reference
-	collections = _collections;
+	this->collections = collections;
 
 	//Board border
 	board.CreateFromFile("resources/board.txt");

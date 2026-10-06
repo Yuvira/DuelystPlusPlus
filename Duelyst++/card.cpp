@@ -8,9 +8,9 @@ const int MAX_DESCRIPTION_WIDTH = 42;
 
 //Targeting mode constructor
 TargetMode::TargetMode() : TargetMode(TARGET_MODE_ALL, TARGET_FILTER_NONE) {}
-TargetMode::TargetMode(eTargetMode _mode, int _filters) {
-	mode = _mode;
-	filters = _filters;
+TargetMode::TargetMode(eTargetMode mode, int filters) {
+	this->mode = mode;
+	this->filters = filters;
 }
 TargetMode::~TargetMode() {}
 

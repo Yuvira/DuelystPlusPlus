@@ -22,10 +22,10 @@ enum eMode {
 class EffectCallback {
 public:
 	EffectCallback();
-	EffectCallback(EffectContext _context, BoardTile* _tile);
+	EffectCallback(EffectContext context, BoardTile* tile);
 	~EffectCallback();
 	void Execute() { callback(context, tile); }
-	void Execute(BoardTile* _tile) { callback(context, _tile); }
+	void Execute(BoardTile* target) { callback(context, target); }
 	EffectContext context;
 	BoardTile* tile;
 	std::function<void(EffectContext, BoardTile*)> callback;
@@ -35,7 +35,7 @@ public:
 class PathCoord {
 public:
 	PathCoord();
-	PathCoord(Coord _pos, int _last, int _count);
+	PathCoord(Coord pos, int last, int count);
 	~PathCoord();
 	Coord pos;
 	int last;
@@ -47,7 +47,7 @@ public:
 //Game class
 class Game {
 public:
-	Game(Collections* _collections);
+	Game(Collections* collections);
 	~Game();
 	void RenderGame(Renderer& renderer);
 	void RenderSidebar(Renderer& renderer);

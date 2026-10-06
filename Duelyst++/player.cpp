@@ -19,21 +19,21 @@ Player::~Player() {}
 #pragma region Initialization
 
 //Preset deck
-void Player::Preset(Collections* collections, Game* _game) {
-	game = _game;
+void Player::Preset(Collections* collections, Game* game) {
+	this->game = game;
 	deck.push_back(new Minion(*(collections->FindCard("Argeon Highmayne")->GetMinion())));
 	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(collections->FindCard("Ephemeral Shroud")->GetMinion()))); }
 	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(collections->FindCard("Arrow Whistler")->GetMinion()))); }
 	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(collections->FindCard("Azure Horn Shaman")->GetMinion()))); }
 	//for (int i = 0; i < 7; ++i) { deck.push_back(new Spell(*(collections->FindCard("Dark Seed")->GetSpell()))); }
 	for (int i = 0; i < deck.size(); ++i)
-		game->SetContext(deck[i], this);
+		this->game->SetContext(deck[i], this);
 }
 
 //Initialize deck/hand
-void Player::Init(int _mana) {
-	mana = _mana;
-	manaMax = _mana;
+void Player::Init(int mana) {
+	this->mana = mana;
+	manaMax = mana;
 	replaces = 1;
 	for (int i = 0; i < 9; ++i) {
 		uiCrystal[i].buffer[0].Char.AsciiChar = '';

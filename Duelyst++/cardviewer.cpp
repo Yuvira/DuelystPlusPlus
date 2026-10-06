@@ -4,10 +4,10 @@
 #pragma region Constructor
 
 //Game constructor
-CardViewer::CardViewer(Collections* _collections) {
+CardViewer::CardViewer(Collections* collections) {
 
 	//Collections reference
-	collections = _collections;
+	this->collections = collections;
 
 	//Border
 	board.CreateFromFile("resources/border.txt");
@@ -23,7 +23,7 @@ CardViewer::CardViewer(Collections* _collections) {
 	//Variables
 	pos = Coord(0, 0);
 	page = 0;
-	pageCount = (collections->cardList.size() + 53) / 54;
+	pageCount = (this->collections->cardList.size() + 53) / 54;
 	pageNumber.CreateFromString(std::to_string(page + 1) + " / " + std::to_string(pageCount));
 	modeSwitch = nullptr;
 

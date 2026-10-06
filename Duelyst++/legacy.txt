@@ -362,17 +362,6 @@ Death
 		//When this minion dies (Dying Wish)
 		if (minion == this) {
 			switch (skill.skill) {
-			case SKILL_AZURE_HORN_SHAMAN:
-				for (int a = max(curTile->pos.x - 1, 0); a < min(curTile->pos.x + 2, 9); ++a) {
-					for (int b = max(curTile->pos.y - 1, 0); b < min(curTile->pos.y + 2, 5); ++b) {
-						if (game->map.tiles[a][b].minion != nullptr && game->map.tiles[a][b].minion->owner == owner) {
-							if (game->map.tiles[a][b].minion != owner->general) {
-								game->map.tiles[a][b].minion->AddBuff(BUFF_AZURE_HORN_SHAMAN);
-							}
-						}
-					}
-				}
-				break;
 			case SKILL_DIOLTAS:
 				if (true) {
 					BoardTile* t = game->map.GetRandomNear(owner->general->curTile->pos.x, owner->general->curTile->pos.y);

@@ -5,16 +5,16 @@
 
 //Minion constructors
 Minion::Minion() : Minion(FACTION_NEUTRAL, TRIBE_NONE, 0, 0, 0, "", "???") {}
-Minion::Minion(eFaction _faction, eTribe _tribe, int _cost, int _atk, int _hp, std::string path, std::string _name) {
+Minion::Minion(eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name) {
 	cardType = CARD_MINION;
-	faction = _faction;
-	tribe = _tribe;
+	this->faction = faction;
+	this->tribe = tribe;
 	targetMode = TargetMode(TARGET_MODE_NEAR_ALLIES, TARGET_FILTER_EMPTY);
-	cost = _cost;
-	atk = _atk;
-	hp = _hp;
-	hpMax = _hp;
-	name = _name;
+	this->cost = cost;
+	this->atk = atk;
+	this->hp = hp;
+	hpMax = hp;
+	this->name = name;
 	isDead = false;
 	hasMoved = false;
 	hasAttacked = false;
@@ -31,7 +31,7 @@ Minion::Minion(eFaction _faction, eTribe _tribe, int _cost, int _atk, int _hp, s
 	game = nullptr;
 	owner = nullptr;
 }
-Minion::Minion(eFaction _faction, eTribe _tribe, int _cost, int _atk, int _hp, std::string path, std::string _name, Effect effect) : Minion(_faction, _tribe, _cost, _atk, _hp, path, _name) {
+Minion::Minion(eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name, Effect effect) : Minion(faction, tribe, cost, atk, hp, path, name) {
 	if (effect.effect != EFFECT_NONE)
 		AddEffect(effect, nullptr);
 }

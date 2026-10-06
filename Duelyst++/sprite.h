@@ -32,7 +32,7 @@ enum eColor {
 class Sprite {
 public:
 	Sprite();
-	Sprite(int _width, int _height);
+	Sprite(int width, int height);
 	~Sprite();
 	void Clear();
 	void Resize(int newWidth, int newHeight);

@@ -8,7 +8,7 @@
 //Game class
 class CardViewer {
 public:
-	CardViewer(Collections* _collections);
+	CardViewer(Collections* collections);
 	~CardViewer();
 	void Input();
 	void Update();
