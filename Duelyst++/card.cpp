@@ -59,7 +59,7 @@ void Card::UpdateDetails() {
 			lines.push_back("");
 
 		//Add description to lines
-		int headerIdx = lines.size() - 1;
+		int headerIdx = lines.size();
 		std::string line = "";
 		std::string word = "";
 		for (int i = 0; i < effect->description.length(); ++i) {
@@ -113,7 +113,7 @@ void Card::UpdateDetails() {
 					--i;
 				}
 			}
-			if (stacks > 1)
+			if (stacks > 1 && headerIdx < lines.size())
 				lines[headerIdx] += " {[x" + std::to_string(stacks) + "]}";
 		}
 
