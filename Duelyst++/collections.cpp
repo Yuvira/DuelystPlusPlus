@@ -138,6 +138,17 @@ Collections::Collections() {
 		context.card->owner->general->DealDamage(context.card, -3);
 	};
 
+	//Azure Horn Shaman
+	effectList.push_back(Effect(SKILL_AZURE_HORN_SHAMAN, KEYWORD_NONE, 0, 0, 0, "{Dying Wish}: Give +4 Health to friendly minions around it"));
+	effectList.back().OnDeath = [](EffectContext context, Minion* source) {
+		if (context.card == source)
+			for (BoardTile* tile : context.game->map.GetNear(source->curTile))
+				if (tile->minion != nullptr && tile->minion->owner == context.card->owner && tile->minion->tribe != TRIBE_GENERAL)
+					tile->minion->AddEffect(context.game->collections->FindEffect(EFFECT_AZURE_HORN_SHAMAN), nullptr);
+	};
+	effectList.push_back(Effect(EFFECT_AZURE_HORN_SHAMAN, KEYWORD_NONE, 0, 0, 4, "{Azure Horn Shaman}"));
+
+
 	//Bloodtear Alchemist
 	effectList.push_back(Effect(SKILL_BLOODTEAR_ALCHEMIST, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Deal 1 damage to an enemy"));
 	effectList.back().OnPreCastThis = [](EffectContext context, BoardTile* tile) {
@@ -348,6 +359,7 @@ Collections::Collections() {
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 3, "ashmephyt", "Ash Mephyt", FindEffect(SKILL_ASH_MEPHYT)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 7, 7, 6, "astralcrusader", "Astral Crusader", FindEffect(SKILL_ASTRAL_CRUSADER)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 4, "azureherald", "Azure Herald", FindEffect(SKILL_AZURE_HERALD)));
+	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 4, "azurehornshaman", "Azure Horn Shaman", FindEffect(SKILL_AZURE_HORN_SHAMAN)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "bloodtearalchemist", "Bloodtear Alchemist", FindEffect(SKILL_BLOODTEAR_ALCHEMIST)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "dragonlark", "Dragonlark", FindEffect(SKILL_FLYING)));
 	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 5, 5, 5, "fireblazer", "Fireblazer", FindEffect(SKILL_PROVOKE)));
