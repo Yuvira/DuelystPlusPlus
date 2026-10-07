@@ -262,6 +262,16 @@ Collections::Collections() {
 	effects[EFFECT_CHAKKRAM] = Effect(EFFECT_CHAKKRAM, KEYWORD_NONE, "{Chakkram}");
 	effects[EFFECT_CHAKKRAM].costBuff = -2;
 
+	//Chaos Elemental
+	effects[SKILL_CHAOS_ELEMENTAL] = Effect(SKILL_CHAOS_ELEMENTAL, KEYWORD_NONE, "Whenever this minion takes damage, it randomly teleports");
+	effects[SKILL_CHAOS_ELEMENTAL].OnDamage = [](EffectContext context, Card* source, Minion* target, int damage) {
+		if (context.card == target) {
+			BoardTile* tile = context.game->map.GetRandom(context.card->GetMinion()->curTile);
+			if (tile != nullptr)
+				context.card->GetMinion()->MoveToPosition(tile->pos.x, tile->pos.y, true);
+		}
+	};
+
 	//Dancing Blades
 	effects[SKILL_DANCING_BLADES] = Effect(SKILL_DANCING_BLADES, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Deal 3 damage to ANY minion in front of this");
 	effects[SKILL_DANCING_BLADES].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
@@ -489,6 +499,7 @@ Collections::Collections() {
 	minionList.push_back(Minion(CARD_BRIGHTMOSS_GOLEM, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_GOLEM, 5, 4, 9, "brightmossgolem", "Brightmoss Golem"));
 	minionList.push_back(Minion(CARD_CAPTAIN_HANK_HART, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 4, 2, 4, "captainhankhart", "Captain Hank Hart", FindEffect(SKILL_CAPTAIN_HANK_HART)));
 	minionList.push_back(Minion(CARD_CHAKKRAM, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 5, 5, 5, "chakkram", "Chakkram", FindEffect(SKILL_CHAKKRAM)));
+	minionList.push_back(Minion(CARD_CHAOS_ELEMENTAL, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 3, 4, 4, "chaoselemental", "Chaos Elemental", FindEffect(SKILL_CHAOS_ELEMENTAL)));
 	minionList.push_back(Minion(CARD_DAGGER_KIRI, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 8, "daggerkiri", "Dagger Kiri", FindEffect(SKILL_CELERITY)));
 	minionList.push_back(Minion(CARD_DANCING_BLADES, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 5, 4, 6, "dancingblades", "Dancing Blades", FindEffect(SKILL_DANCING_BLADES)));
 	minionList.push_back(Minion(CARD_DIAMOND_GOLEM, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_GOLEM, 6, 5, 11, "diamondgolem", "Diamond Golem"));

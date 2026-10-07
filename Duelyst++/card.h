@@ -42,6 +42,7 @@ enum eCard {
 	CARD_BRIGHTMOSS_GOLEM,
 	CARD_CAPTAIN_HANK_HART,
 	CARD_CHAKKRAM,
+	CARD_CHAOS_ELEMENTAL,
 	CARD_DAGGER_KIRI,
 	CARD_DANCING_BLADES,
 	CARD_DARK_SEED,
@@ -235,6 +236,7 @@ public:
 
 	//Actions
 	void SetPosition(int x, int y);
+	void MoveToPosition(int x, int y, bool byEffect);
 	void Attack(Minion* target, bool counter);
 	int DealDamage(Card* source, int damage);
 	void Dispel();

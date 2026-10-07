@@ -26,7 +26,7 @@ void Player::Preset(Collections* collections, Game* game) {
 	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(collections->FindCard(CARD_EPHEMERAL_SHROUD)->GetMinion()))); }
 	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(collections->FindCard(CARD_BLISTERING_SKORN)->GetMinion()))); }
 	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(collections->FindCard(CARD_CAPTAIN_HANK_HART)->GetMinion()))); }
-	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(collections->FindCard(CARD_DANCING_BLADES)->GetMinion()))); }
+	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(collections->FindCard(CARD_CHAOS_ELEMENTAL)->GetMinion()))); }
 	//for (int i = 0; i < 7; ++i) { deck.push_back(new Spell(*(collections->FindCard(CARD_DARK_SEED)->GetSpell()))); }
 	for (int i = 0; i < deck.size(); ++i)
 		this->game->SetContext(deck[i], this);

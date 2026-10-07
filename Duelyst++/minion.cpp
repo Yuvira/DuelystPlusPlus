@@ -219,9 +219,22 @@ void Minion::SetPosition(int x, int y) {
 	}
 }
 
+//Move on board
+void Minion::MoveToPosition(int x, int y, bool byEffect) {
+	SetPosition(x, y);
+	if (!byEffect) {
+		if (!hasCelerityMoved)
+			hasCelerityMoved = true;
+		else
+			hasMoved = true;
+	}
+	game->eventManager.SendOnMove(this, byEffect);
+}
+
 //Attack enemy
 void Minion::Attack(Minion* target, bool counter) {
 	int damage = atk;
+	bool canCounter = target->CanAttack(this);
 	game->eventManager.SendOnAttack(this, target, damage, counter);
 	target->DealDamage(this, damage);
 	if (!counter) {
@@ -235,7 +248,7 @@ void Minion::Attack(Minion* target, bool counter) {
 			hasCelerityMoved = true;
 			hasCelerityAttacked = true;
 		}
-		if (target->CanAttack(this))
+		if (canCounter)
 			target->Attack(this, true);
 	}
 }

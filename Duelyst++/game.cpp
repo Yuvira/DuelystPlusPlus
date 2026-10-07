@@ -405,11 +405,8 @@ void Game::Summon(Card* card, int x, int y, bool actionBar) {
 void Game::MoveUnit() {
 	if (selectable[selectionIdx]->minion == nullptr || selectable[selectionIdx] == &map.tiles[pos.x][pos.y]) {
 		if (selectable[selectionIdx] != &map.tiles[pos.x][pos.y]) {
-			activeUnit->SetPosition(selectable[selectionIdx]->pos.x, selectable[selectionIdx]->pos.y);
-			if (!activeUnit->hasCelerityMoved) { activeUnit->hasCelerityMoved = true; }
-			else { activeUnit->hasMoved = true; }
+			activeUnit->MoveToPosition(selectable[selectionIdx]->pos.x, selectable[selectionIdx]->pos.y, false);
 			pos = selectable[selectionIdx]->pos;
-			eventManager.SendOnMove(activeUnit, false);
 		}
 		moveable.clear();
 		attackable.clear();
