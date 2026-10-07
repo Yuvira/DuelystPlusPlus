@@ -470,7 +470,7 @@ Collections::Collections() {
 	minionList.push_back(Minion(CARD_BLUETIP_SCORPION, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 2, 3, 1, "bluetipscorpion", "Bluetip Scorpion", FindEffect(SKILL_BLUETIP_SCORPION)));
 	minionList.push_back(Minion(CARD_BONEREAPER, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 6, 2, 9, "bonereaper", "Bonereaper", FindEffect(SKILL_BONEREAPER)));
 	minionList.push_back(Minion(CARD_BRIGHTMOSS_GOLEM, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_GOLEM, 5, 4, 9, "brightmossgolem", "Brightmoss Golem"));
-	minionList.push_back(Minion(CARD_CAPTAIN_HANK_HART, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_GOLEM, 4, 2, 4, "captainhankhart", "Captain Hank Hart", FindEffect(SKILL_CAPTAIN_HANK_HART)));
+	minionList.push_back(Minion(CARD_CAPTAIN_HANK_HART, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 4, 2, 4, "captainhankhart", "Captain Hank Hart", FindEffect(SKILL_CAPTAIN_HANK_HART)));
 	minionList.push_back(Minion(CARD_DAGGER_KIRI, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 8, "daggerkiri", "Dagger Kiri", FindEffect(SKILL_CELERITY)));
 	minionList.push_back(Minion(CARD_DANCING_BLADES, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 5, 4, 6, "dancingblades", "Dancing Blades", FindEffect(SKILL_DANCING_BLADES)));
 	minionList.push_back(Minion(CARD_DIAMOND_GOLEM, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_GOLEM, 6, 5, 11, "diamondgolem", "Diamond Golem"));
