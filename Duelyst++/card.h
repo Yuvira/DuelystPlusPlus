@@ -43,6 +43,7 @@ enum eCard {
 	CARD_CAPTAIN_HANK_HART,
 	CARD_CHAKKRAM,
 	CARD_CHAOS_ELEMENTAL,
+	CARD_CROSSBONES,
 	CARD_DAGGER_KIRI,
 	CARD_DANCING_BLADES,
 	CARD_DARK_SEED,
@@ -102,7 +103,8 @@ enum eTargetFilters {
 	TARGET_FILTER_MINION  = 1 << 2,
 	TARGET_FILTER_GENERAL = 1 << 3,
 	TARGET_FILTER_ALLY    = 1 << 4,
-	TARGET_FILTER_ENEMY   = 1 << 5
+	TARGET_FILTER_ENEMY   = 1 << 5,
+	TARGET_FILTER_RANGED  = 1 << 6
 };
 
 //Factions
@@ -239,6 +241,7 @@ public:
 	void MoveToPosition(int x, int y, bool byEffect);
 	void Attack(Minion* target, bool counter);
 	int DealDamage(Card* source, int damage);
+	void Destroy(Card* source);
 	void Dispel();
 	void AddEffects();
 

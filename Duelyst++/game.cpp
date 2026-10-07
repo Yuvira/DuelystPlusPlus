@@ -665,7 +665,8 @@ void Game::HighlightSelectable(TargetMode targetMode, BoardTile* tile) {
 			|| (targetMode.HasFilters(TARGET_FILTER_MINION) && selectable[i]->minion->tribe == TRIBE_GENERAL)
 			|| (targetMode.HasFilters(TARGET_FILTER_GENERAL) && selectable[i]->minion->tribe != TRIBE_GENERAL)
 			|| (targetMode.HasFilters(TARGET_FILTER_ALLY) && selectable[i]->minion->owner != &players[turn])
-			|| (targetMode.HasFilters(TARGET_FILTER_ENEMY) && selectable[i]->minion->owner == &players[turn])) {
+			|| (targetMode.HasFilters(TARGET_FILTER_ENEMY) && selectable[i]->minion->owner == &players[turn])
+			|| (targetMode.HasFilters(TARGET_FILTER_RANGED) && !selectable[i]->minion->HasKeywords(KEYWORD_RANGED))) {
 			selectable.erase(selectable.begin() + i);
 			--i;
 		}

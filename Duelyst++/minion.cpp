@@ -277,6 +277,11 @@ int Minion::DealDamage(Card* source, int damage) {
 	return damage;
 }
 
+//Destroy this
+void Minion::Destroy(Card* source) {
+	isDead = true;
+}
+
 //Dispel minion
 void Minion::Dispel() {
 
