@@ -245,6 +245,23 @@ Collections::Collections() {
 			context.card->GetMinion()->DealDamage(context.card, -damage);
 	};
 
+	//Chakkram
+	effects[SKILL_CHAKKRAM] = Effect(SKILL_CHAKKRAM, KEYWORD_NONE, "Costs 2 less if your General took damage on your opponent's last turn");
+	effects[SKILL_CHAKKRAM].OnDamage = [](EffectContext context, Card* source, Minion* target, int damage) {
+		if (!context.card->IsOnBoard() && target == context.card->owner->general && &context.game->players[context.game->turn] != context.card->owner)
+			context.card->AddEffect(context.game->collections->FindEffect(EFFECT_CHAKKRAM), context.effect);
+	};
+	effects[SKILL_CHAKKRAM].OnTurnEnd = [](EffectContext context, Player* player) {
+		if (player == context.card->owner)
+			context.card->RemoveEffectsFromSource(context.effect);
+	};
+	effects[SKILL_CHAKKRAM].OnSummon = [](EffectContext context, Minion* minion, bool actionBar) {
+		if (context.card == minion)
+			context.card->RemoveEffectsFromSource(context.effect);
+	};
+	effects[EFFECT_CHAKKRAM] = Effect(EFFECT_CHAKKRAM, KEYWORD_NONE, "{Chakkram}");
+	effects[EFFECT_CHAKKRAM].costBuff = -2;
+
 	//Dancing Blades
 	effects[SKILL_DANCING_BLADES] = Effect(SKILL_DANCING_BLADES, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Deal 3 damage to ANY minion in front of this");
 	effects[SKILL_DANCING_BLADES].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
@@ -471,6 +488,7 @@ Collections::Collections() {
 	minionList.push_back(Minion(CARD_BONEREAPER, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 6, 2, 9, "bonereaper", "Bonereaper", FindEffect(SKILL_BONEREAPER)));
 	minionList.push_back(Minion(CARD_BRIGHTMOSS_GOLEM, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_GOLEM, 5, 4, 9, "brightmossgolem", "Brightmoss Golem"));
 	minionList.push_back(Minion(CARD_CAPTAIN_HANK_HART, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 4, 2, 4, "captainhankhart", "Captain Hank Hart", FindEffect(SKILL_CAPTAIN_HANK_HART)));
+	minionList.push_back(Minion(CARD_CHAKKRAM, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 5, 5, 5, "chakkram", "Chakkram", FindEffect(SKILL_CHAKKRAM)));
 	minionList.push_back(Minion(CARD_DAGGER_KIRI, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 8, "daggerkiri", "Dagger Kiri", FindEffect(SKILL_CELERITY)));
 	minionList.push_back(Minion(CARD_DANCING_BLADES, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 5, 4, 6, "dancingblades", "Dancing Blades", FindEffect(SKILL_DANCING_BLADES)));
 	minionList.push_back(Minion(CARD_DIAMOND_GOLEM, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_GOLEM, 6, 5, 11, "diamondgolem", "Diamond Golem"));
