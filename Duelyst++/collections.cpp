@@ -156,6 +156,19 @@ Collections::Collections() {
 	};
 	effects[EFFECT_BASTION] = Effect(EFFECT_BASTION, KEYWORD_NONE, 0, 0, 1, "{Bastion}");
 
+	//Black Locust
+	effects[SKILL_BLACK_LOCUST] = Effect(SKILL_BLACK_LOCUST, KEYWORD_FLYING, 0, 0, 0, "{Flying}|After this minion moves, summon a Black Locust nearby");
+	effects[SKILL_BLACK_LOCUST].OnMove = [](EffectContext context, Minion* minion, bool byEffect) {
+		if (context.card->IsMinion() && context.card == minion && !byEffect) {
+			BoardTile* tile = context.game->map.GetRandomNear(minion->curTile, true);
+			if (tile != nullptr) {
+				Minion* copy = new Minion(*(context.card->original->GetMinion()));
+				context.game->SetContext(copy, context.card->owner);
+				context.game->Summon(copy, tile, false);
+			}
+		}
+	};
+
 	//Blaze Hound
 	effects[SKILL_BLAZE_HOUND] = Effect(SKILL_BLAZE_HOUND, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Both players draw a card");
 	effects[SKILL_BLAZE_HOUND].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
@@ -384,6 +397,7 @@ Collections::Collections() {
 	minionList.push_back(Minion(CARD_AZURE_HERALD, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 4, "azureherald", "Azure Herald", FindEffect(SKILL_AZURE_HERALD)));
 	minionList.push_back(Minion(CARD_AZURE_HORN_SHAMAN, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 4, "azurehornshaman", "Azure Horn Shaman", FindEffect(SKILL_AZURE_HORN_SHAMAN)));
 	minionList.push_back(Minion(CARD_BASTION, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_STRUCTURE, 3, 0, 5, "bastion", "Bastion", FindEffect(SKILL_BASTION)));
+	minionList.push_back(Minion(CARD_BLACK_LOCUST, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 4, 2, 2, "blacklocust", "Black Locust", FindEffect(SKILL_BLACK_LOCUST)));
 	minionList.push_back(Minion(CARD_BLAZE_HOUND, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 3, 4, 3, "blazehound", "Blaze Hound", FindEffect(SKILL_BLAZE_HOUND)));
 	minionList.push_back(Minion(CARD_BLISTERING_SKORN, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 4, 4, 5, "blisteringskorn", "Blistering Skorn", FindEffect(SKILL_BLISTERING_SKORN)));
 	minionList.push_back(Minion(CARD_BLOODTEAR_ALCHEMIST, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "bloodtearalchemist", "Bloodtear Alchemist", FindEffect(SKILL_BLOODTEAR_ALCHEMIST)));

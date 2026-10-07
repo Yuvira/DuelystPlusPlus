@@ -30,6 +30,7 @@ enum eCard {
 	CARD_AZURE_HERALD,
 	CARD_AZURE_HORN_SHAMAN,
 	CARD_BASTION,
+	CARD_BLACK_LOCUST,
 	CARD_BLAZE_HOUND,
 	CARD_BLISTERING_SKORN,
 	CARD_BLOODTEAR_ALCHEMIST,
@@ -236,6 +237,7 @@ public:
 
 	//Action & Event Overrides
 	void Resolve(BoardTile* tile);
+	void InitState();
 	void OnTurnEnd(Player* player);
 
 	//Getter

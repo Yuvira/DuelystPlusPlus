@@ -111,11 +111,11 @@ BoardTile* Map::GetRandomCorner() {
 }
 
 //Get random empty tiles
-BoardTile* Map::GetRandomNear(BoardTile* tile) {
+BoardTile* Map::GetRandomNear(BoardTile* tile, bool empty) {
 	std::vector<BoardTile*> valid;
 	for (int i = max(tile->pos.x - 1, 0); i < min(tile->pos.x + 2, 9); ++i)
 		for (int j = max(tile->pos.y - 1, 0); j < min(tile->pos.y + 2, 5); ++j)
-			if (tiles[i][j].minion == nullptr)
+			if (!empty || tiles[i][j].minion == nullptr)
 				valid.push_back(&tiles[i][j]);
 	if (valid.size() > 0) {
 		int i = rand() % valid.size();

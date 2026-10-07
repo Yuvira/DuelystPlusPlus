@@ -57,7 +57,7 @@ public:
 	BoardTile* GetRandom();
 	BoardTile* GetRandom(BoardTile* ignore);
 	BoardTile* GetRandomCorner();
-	BoardTile* GetRandomNear(BoardTile* tile);
+	BoardTile* GetRandomNear(BoardTile* tile, bool empty);
 	std::vector<BoardTile*> GetNear(BoardTile* tile);
 	BoardTile tiles[9][5];
 };

@@ -397,6 +397,7 @@ void Game::Summon(Card* card, int x, int y, bool actionBar) {
 	minions.push_back(card->GetMinion());
 	minions.back()->SetPosition(x, y);
 	minions.back()->AddEffects();
+	minions.back()->InitState();
 	eventManager.SendOnSummon(minions.back(), actionBar);
 }
 

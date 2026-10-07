@@ -360,13 +360,15 @@ void Minion::Resolve(BoardTile* tile) {
 	//Summon this
 	game->Summon(this, tile, true);
 
-	//Exhaust
+}
+
+//Initialize states
+void Minion::InitState() {
 	hasMoved = !HasKeywords(KEYWORD_RUSH);
 	hasAttacked = !HasKeywords(KEYWORD_RUSH);
 	hasCelerityMoved = !HasKeywords(KEYWORD_RUSH) || !HasKeywords(KEYWORD_CELERITY);
 	hasCelerityAttacked = !HasKeywords(KEYWORD_RUSH) || !HasKeywords(KEYWORD_CELERITY);
 	hasForcefield = HasKeywords(KEYWORD_FORCEFIELD);
-
 }
 
 //When a player's turn ends
