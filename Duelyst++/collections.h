@@ -12,14 +12,16 @@ public:
 	Collections();
 	~Collections();
 	Effect FindEffect(eEffect effect);
-	Card* FindCard(std::string name);
-	std::vector<Effect> effectList;
+	Card* FindCard(eCard card);
+	std::unordered_map<eEffect, Effect> effects;
+	std::unordered_map<eCard, Card*> cards;
 	std::vector<Card*> cardList;
-	std::vector<Minion> generalList;
 	std::vector<Minion> minionList;
-	std::vector<Minion> minionTokenList;
 	std::vector<Spell> spellList;
-	std::vector<Spell> spellTokenList;
+	int cardCount;
+	int generalCount;
+	int minionCount;
+	int spellCount;
 };
 
 #endif

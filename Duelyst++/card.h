@@ -13,12 +13,52 @@ class Spell;
 
 #pragma region Enums / Helpers
 
-//Card types
+#pragma region Card List
+
+//Card identifiers
 enum eCard {
 	CARD_NONE,
-	CARD_MINION,
-	CARD_SPELL,
-	CARD_ARTIFACT
+	CARD_ABJUDICATOR,
+	CARD_AETHERMASTER,
+	CARD_ALCUIN_LOREMASTER,
+	CARD_ARAKI_HEADHUNTER,
+	CARD_ARCHON_SPELLBINDER,
+	CARD_ARGEON_HIGHMAYNE,
+	CARD_ARROW_WHISTLER,
+	CARD_ASH_MEPHYT,
+	CARD_ASTRAL_CRUSADER,
+	CARD_AZURE_HERALD,
+	CARD_AZURE_HORN_SHAMAN,
+	CARD_BASTION,
+	CARD_BLAZE_HOUND,
+	CARD_BLISTERING_SKORN,
+	CARD_BLOODTEAR_ALCHEMIST,
+	CARD_BREATH_OF_THE_UNBORN,
+	CARD_DARK_SEED,
+	CARD_DRAGONLARK,
+	CARD_FIREBLAZER,
+	CARD_FIRE_SPITTER,
+	CARD_KOMODO_CHARGER,
+	CARD_SABERSPINE_TIGER,
+	CARD_SAPPHIRE_SEER,
+	CARD_EPHEMERAL_SHROUD
+};
+
+#pragma endregion
+
+//Card types
+enum eCardType {
+	CARDTYPE_NONE,
+	CARDTYPE_MINION,
+	CARDTYPE_SPELL,
+	CARDTYPE_ARTIFACT
+};
+
+//Card tags
+enum eCardTag {
+	CARDTAG_NONE,
+	CARDTAG_GENERAL,
+	CARDTAG_TOKEN
 };
 
 //Rarities
@@ -138,8 +178,10 @@ public:
 	bool IsSpell() { return GetSpell() != nullptr; }
 
 	//Properties
+	eCard cardId;
+	eCardTag cardTag;
+	eCardType cardType;
 	eFaction faction;
-	eCard cardType;
 	TargetMode targetMode;
 	bool isToken;
 	int cost;
@@ -162,8 +204,8 @@ public:
 
 	//Constructors / Initialization
 	Minion();
-	Minion(eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name);
-	Minion(eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name, Effect effect);
+	Minion(eCard cardId, eCardTag cardTag, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name);
+	Minion(eCard cardId, eCardTag cardTag, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name, Effect effect);
 	~Minion();
 	void GenerateDetails();
 
@@ -222,8 +264,8 @@ public:
 
 	//Constructors / Initialization
 	Spell();
-	Spell(eFaction faction, TargetMode targetMode, int cost, std::string path, std::string name);
-	Spell(eFaction faction, TargetMode targetMode, int cost, std::string path, std::string name, Effect effect);
+	Spell(eCard cardId, eCardTag cardTag, eFaction faction, TargetMode targetMode, int cost, std::string path, std::string name);
+	Spell(eCard cardId, eCardTag cardTag, eFaction faction, TargetMode targetMode, int cost, std::string path, std::string name, Effect effect);
 	~Spell();
 	void GenerateDetails();
 

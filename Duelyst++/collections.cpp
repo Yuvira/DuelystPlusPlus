@@ -9,43 +9,43 @@ Collections::Collections() {
 #pragma region Effects
 
 	//Keyword skills
-	effectList.push_back(Effect(SKILL_CELERITY, KEYWORD_CELERITY, 0, 0, 0, "{Celerity}"));
-	effectList.push_back(Effect(SKILL_FLYING, KEYWORD_FLYING, 0, 0, 0, "{Flying}"));
-	effectList.push_back(Effect(SKILL_FORCEFIELD, KEYWORD_FORCEFIELD, 0, 0, 0, "{Forcefield}"));
-	effectList.push_back(Effect(SKILL_PROVOKE, KEYWORD_PROVOKE, 0, 0, 0, "{Provoke}"));
-	effectList.push_back(Effect(SKILL_RANGED, KEYWORD_RANGED, 0, 0, 0, "{Ranged}"));
-	effectList.push_back(Effect(SKILL_RUSH, KEYWORD_RUSH, 0, 0, 0, "{Rush}"));
+	effects[SKILL_CELERITY] = Effect(SKILL_CELERITY, KEYWORD_CELERITY, 0, 0, 0, "{Celerity}");
+	effects[SKILL_FLYING] = Effect(SKILL_FLYING, KEYWORD_FLYING, 0, 0, 0, "{Flying}");
+	effects[SKILL_FORCEFIELD] = Effect(SKILL_FORCEFIELD, KEYWORD_FORCEFIELD, 0, 0, 0, "{Forcefield}");
+	effects[SKILL_PROVOKE] = Effect(SKILL_PROVOKE, KEYWORD_PROVOKE, 0, 0, 0, "{Provoke}");
+	effects[SKILL_RANGED] = Effect(SKILL_RANGED, KEYWORD_RANGED, 0, 0, 0, "{Ranged}");
+	effects[SKILL_RUSH] = Effect(SKILL_RUSH, KEYWORD_RUSH, 0, 0, 0, "{Rush}");
 
 	//Dispelled
-	effectList.push_back(Effect(EFFECT_DISPELLED, KEYWORD_NONE, 0, 0, 0, "{Dispelled}"));
+	effects[EFFECT_DISPELLED] = Effect(EFFECT_DISPELLED, KEYWORD_NONE, 0, 0, 0, "{Dispelled}");
 
 #pragma region Minions
 
 	//Abjudicator
-	effectList.push_back(Effect(SKILL_ABJUDICATOR, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Lower the cost of all spells in your action bar by 1"));
-	effectList.back().OnPreCastThis = [](EffectContext context, BoardTile* tile) {
+	effects[SKILL_ABJUDICATOR] = Effect(SKILL_ABJUDICATOR, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Lower the cost of all spells in your action bar by 1");
+	effects[SKILL_ABJUDICATOR].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
 		for (Card* card : context.card->owner->hand)
-			if (card->cardType == CARD_SPELL)
+			if (card->cardType == CARDTYPE_SPELL)
 				card->AddEffect(context.game->collections->FindEffect(EFFECT_ABJUDICATOR), context.effect);
 	};
-	effectList.push_back(Effect(EFFECT_ABJUDICATOR, KEYWORD_NONE, -1, 0, 0, "Abjudicator"));
+	effects[EFFECT_ABJUDICATOR] = Effect(EFFECT_ABJUDICATOR, KEYWORD_NONE, -1, 0, 0, "Abjudicator");
 
 	//Aethermaster
-	effectList.push_back(Effect(SKILL_AETHERMASTER, KEYWORD_NONE, 0, 0, 0, "You may replace an additional card each turn"));
-	effectList.back().OnAddThis = [](EffectContext context) {
+	effects[SKILL_AETHERMASTER] = Effect(SKILL_AETHERMASTER, KEYWORD_NONE, 0, 0, 0, "You may replace an additional card each turn");
+	effects[SKILL_AETHERMASTER].OnAddThis = [](EffectContext context) {
 		++context.card->owner->maxReplaces;
 		++context.card->owner->replaces;
 	};
-	effectList.back().OnRemoveThis = [](EffectContext context) {
+	effects[SKILL_AETHERMASTER].OnRemoveThis = [](EffectContext context) {
 		--context.card->owner->maxReplaces;
 		context.card->owner->replaces = min(context.card->owner->replaces, context.card->owner->maxReplaces);
 	};
 
 	//Alcuin Loremaster
-	effectList.push_back(Effect(SKILL_ALCUIN_LOREMASTER, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Put a copy of the most recently cast spell into your action bar"));
-	effectList.back().OnPreCastThis = [](EffectContext context, BoardTile* tile) {
+	effects[SKILL_ALCUIN_LOREMASTER] = Effect(SKILL_ALCUIN_LOREMASTER, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Put a copy of the most recently cast spell into your action bar");
+	effects[SKILL_ALCUIN_LOREMASTER].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
 		for (Spell* spell : context.game->spellHistory | std::views::reverse) {
-			if (spell->cardType == CARD_SPELL) {
+			if (spell->cardType == CARDTYPE_SPELL) {
 				context.card->owner->AddToHand(spell->original, true);
 				break;
 			}
@@ -53,51 +53,51 @@ Collections::Collections() {
 	};
 
 	//Araki Headhunter
-	effectList.push_back(Effect(SKILL_ARAKI_HEADHUNTER, KEYWORD_NONE, 0, 0, 0, "Whenever you summon a minion with {Opening Gambit} from your action bar, gain +2 Attack"));
-	effectList.back().OnSummon = [](EffectContext context, Minion* source, bool fromActionBar) {
+	effects[SKILL_ARAKI_HEADHUNTER] = Effect(SKILL_ARAKI_HEADHUNTER, KEYWORD_NONE, 0, 0, 0, "Whenever you summon a minion with {Opening Gambit} from your action bar, gain +2 Attack");
+	effects[SKILL_ARAKI_HEADHUNTER].OnSummon = [](EffectContext context, Minion* source, bool fromActionBar) {
 		if (context.card->IsOnBoard() && context.card != source && context.card->owner == source->owner && source->HasKeywords(KEYWORD_OPENING_GAMBIT) && fromActionBar)
 			context.card->AddEffect(context.game->collections->FindEffect(EFFECT_ARAKI_HEADHUNTER), nullptr);
 	};
-	effectList.push_back(Effect(EFFECT_ARAKI_HEADHUNTER, KEYWORD_NONE, 0, 2, 0, "Headhunter"));
+	effects[EFFECT_ARAKI_HEADHUNTER] = Effect(EFFECT_ARAKI_HEADHUNTER, KEYWORD_NONE, 0, 2, 0, "Headhunter");
 
 	//Archon Spellbinder
-	effectList.push_back(Effect(SKILL_ARCHON_SPELLBINDER, KEYWORD_NONE, 0, 0, 0, "Your opponent's non-Bloodborn spells cost 1 more to cast"));
-	effectList.back().OnAddThis = [](EffectContext context) {
+	effects[SKILL_ARCHON_SPELLBINDER] = Effect(SKILL_ARCHON_SPELLBINDER, KEYWORD_NONE, 0, 0, 0, "Your opponent's non-Bloodborn spells cost 1 more to cast");
+	effects[SKILL_ARCHON_SPELLBINDER].OnAddThis = [](EffectContext context) {
 		for (Card* card : context.card->owner->opponent->hand)
-			if (card->cardType == CARD_SPELL)
+			if (card->cardType == CARDTYPE_SPELL)
 				card->AddEffect(context.game->collections->FindEffect(EFFECT_ARCHON_SPELLBINDER), context.effect);
 		for (Card* card : context.card->owner->opponent->deck)
-			if (card->cardType == CARD_SPELL)
+			if (card->cardType == CARDTYPE_SPELL)
 				card->AddEffect(context.game->collections->FindEffect(EFFECT_ARCHON_SPELLBINDER), context.effect);
 	};
-	effectList.back().OnRemoveThis = [](EffectContext context) {
+	effects[SKILL_ARCHON_SPELLBINDER].OnRemoveThis = [](EffectContext context) {
 		for (Card* card : context.card->owner->opponent->hand)
 			card->RemoveEffectsFromSource(context.effect);
 		for (Card* card : context.card->owner->opponent->deck)
 			card->RemoveEffectsFromSource(context.effect);
 	};
-	effectList.back().OnDraw = [](EffectContext context, Card* card, bool fromDeck) {
-		if (context.card->IsOnBoard() && !fromDeck && card->owner != context.card->owner && card->cardType == CARD_SPELL)
+	effects[SKILL_ARCHON_SPELLBINDER].OnDraw = [](EffectContext context, Card* card, bool fromDeck) {
+		if (context.card->IsOnBoard() && !fromDeck && card->owner != context.card->owner && card->cardType == CARDTYPE_SPELL)
 			card->AddEffect(context.game->collections->FindEffect(EFFECT_ARCHON_SPELLBINDER), context.effect);
 	};
-	effectList.push_back(Effect(EFFECT_ARCHON_SPELLBINDER, KEYWORD_NONE, 1, 0, 0, "{Spellbound}"));
+	effects[EFFECT_ARCHON_SPELLBINDER] = Effect(EFFECT_ARCHON_SPELLBINDER, KEYWORD_NONE, 1, 0, 0, "{Spellbound}");
 
 	//Arrow Whistler
-	effectList.push_back(Effect(SKILL_ARROW_WHISTLER, KEYWORD_RANGED, 0, 0, 0, "{Ranged}|Your other minions with {Ranged} have +1 Attack"));
-	effectList.back().OnAddThis = [](EffectContext context) {
+	effects[SKILL_ARROW_WHISTLER] = Effect(SKILL_ARROW_WHISTLER, KEYWORD_RANGED, 0, 0, 0, "{Ranged}|Your other minions with {Ranged} have +1 Attack");
+	effects[SKILL_ARROW_WHISTLER].OnAddThis = [](EffectContext context) {
 		for (Minion* minion : context.game->minions)
 			if (context.card->owner == minion->owner && minion != context.card && minion->tribe != TRIBE_GENERAL && minion->HasKeywords(KEYWORD_RANGED))
 				minion->AddEffect(context.game->collections->FindEffect(EFFECT_ARROW_WHISTLER), context.effect);
 	};
-	effectList.back().OnRemoveThis = [](EffectContext context) {
+	effects[SKILL_ARROW_WHISTLER].OnRemoveThis = [](EffectContext context) {
 		for (Minion* minion : context.game->minions)
 			minion->RemoveEffectsFromSource(context.effect);
 	};
-	effectList.back().OnSummon = [](EffectContext context, Minion* source, bool fromActionBar) {
+	effects[SKILL_ARROW_WHISTLER].OnSummon = [](EffectContext context, Minion* source, bool fromActionBar) {
 		if (context.card->IsOnBoard() && context.card != source && context.card->owner == source->owner && source->HasKeywords(KEYWORD_RANGED))
 			source->AddEffect(context.game->collections->FindEffect(EFFECT_ARROW_WHISTLER), context.effect);
 	};
-	effectList.back().OnEffectsChanged = [](EffectContext context, Card* card) {
+	effects[SKILL_ARROW_WHISTLER].OnEffectsChanged = [](EffectContext context, Card* card) {
 		if (context.card->IsOnBoard() && card->IsOnBoard() && context.card->owner == card->owner && context.card != card) {
 			if (card->GetMinion()->HasKeywords(KEYWORD_RANGED))
 				card->AddEffect(context.game->collections->FindEffect(EFFECT_ARROW_WHISTLER), context.effect);
@@ -105,11 +105,11 @@ Collections::Collections() {
 				card->RemoveEffectsFromSource(context.effect);
 		}
 	};
-	effectList.push_back(Effect(EFFECT_ARROW_WHISTLER, KEYWORD_NONE, 0, 1, 0, "{Whistling Arrows}"));
+	effects[EFFECT_ARROW_WHISTLER] = Effect(EFFECT_ARROW_WHISTLER, KEYWORD_NONE, 0, 1, 0, "{Whistling Arrows}");
 
 	//Ash Mephyt
-	effectList.push_back(Effect(SKILL_ASH_MEPHYT, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Summon two copies of this minion on random spaces"));
-	effectList.back().OnPreCastThis = [](EffectContext context, BoardTile* tile) {
+	effects[SKILL_ASH_MEPHYT] = Effect(SKILL_ASH_MEPHYT, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Summon two copies of this minion on random spaces");
+	effects[SKILL_ASH_MEPHYT].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
 		if (context.card->IsMinion()) {
 			for (int i = 0; i < 2; ++i) {
 				BoardTile* newTile = context.game->map.GetRandom(tile);
@@ -123,49 +123,49 @@ Collections::Collections() {
 	};
 
 	//Astral Crusader
-	effectList.push_back(Effect(SKILL_ASTRAL_CRUSADER, KEYWORD_NONE, 0, 0, 0, "Whenever you replace this card, it costs 3 less and gains +3/+3"));
-	effectList.back().OnReplace = [](EffectContext context, Card* card) {
+	effects[SKILL_ASTRAL_CRUSADER] = Effect(SKILL_ASTRAL_CRUSADER, KEYWORD_NONE, 0, 0, 0, "Whenever you replace this card, it costs 3 less and gains +3/+3");
+	effects[SKILL_ASTRAL_CRUSADER].OnReplace = [](EffectContext context, Card* card) {
 		if (context.card == card)
 			card->AddEffect(context.game->collections->FindEffect(EFFECT_ASTRAL_CRUSADER), nullptr);
 	};
-	effectList.push_back(Effect(EFFECT_ASTRAL_CRUSADER, KEYWORD_NONE, -3, 3, 3, "{Astral Crusader}"));
+	effects[EFFECT_ASTRAL_CRUSADER] = Effect(EFFECT_ASTRAL_CRUSADER, KEYWORD_NONE, -3, 3, 3, "{Astral Crusader}");
 
 	//Azure Herald
-	effectList.push_back(Effect(SKILL_AZURE_HERALD, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Restore 3 Health to your General"));
-	effectList.back().OnPreCastThis = [](EffectContext context, BoardTile* tile) {
+	effects[SKILL_AZURE_HERALD] = Effect(SKILL_AZURE_HERALD, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Restore 3 Health to your General");
+	effects[SKILL_AZURE_HERALD].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
 		context.card->owner->general->DealDamage(context.card, -3);
 	};
 
 	//Azure Horn Shaman
-	effectList.push_back(Effect(SKILL_AZURE_HORN_SHAMAN, KEYWORD_NONE, 0, 0, 0, "{Dying Wish}: Give +4 Health to friendly minions around it"));
-	effectList.back().OnDeath = [](EffectContext context, Minion* source) {
+	effects[SKILL_AZURE_HORN_SHAMAN] = Effect(SKILL_AZURE_HORN_SHAMAN, KEYWORD_NONE, 0, 0, 0, "{Dying Wish}: Give +4 Health to friendly minions around it");
+	effects[SKILL_AZURE_HORN_SHAMAN].OnDeath = [](EffectContext context, Minion* source) {
 		if (context.card == source)
 			for (BoardTile* tile : context.game->map.GetNear(source->curTile))
 				if (tile->minion != nullptr && tile->minion->owner == context.card->owner && tile->minion->tribe != TRIBE_GENERAL)
 					tile->minion->AddEffect(context.game->collections->FindEffect(EFFECT_AZURE_HORN_SHAMAN), nullptr);
 	};
-	effectList.push_back(Effect(EFFECT_AZURE_HORN_SHAMAN, KEYWORD_NONE, 0, 0, 4, "{Azure Horn Shaman}"));
+	effects[EFFECT_AZURE_HORN_SHAMAN] = Effect(EFFECT_AZURE_HORN_SHAMAN, KEYWORD_NONE, 0, 0, 4, "{Azure Horn Shaman}");
 
 	//Bastion
-	effectList.push_back(Effect(SKILL_BASTION, KEYWORD_NONE, 0, 0, 0, "At the end of your turn, give other friendly minions +1 Health"));
-	effectList.back().OnTurnEnd = [](EffectContext context, Player* player) {
+	effects[SKILL_BASTION] = Effect(SKILL_BASTION, KEYWORD_NONE, 0, 0, 0, "At the end of your turn, give other friendly minions +1 Health");
+	effects[SKILL_BASTION].OnTurnEnd = [](EffectContext context, Player* player) {
 		if (context.card->IsOnBoard() && context.card->owner == player)
 			for (Minion* minion : context.game->minions)
 				if (minion->owner == context.card->owner && minion != context.card && minion->tribe != TRIBE_GENERAL)
 					minion->AddEffect(context.game->collections->FindEffect(EFFECT_BASTION), nullptr);
 	};
-	effectList.push_back(Effect(EFFECT_BASTION, KEYWORD_NONE, 0, 0, 1, "{Bastion}"));
+	effects[EFFECT_BASTION] = Effect(EFFECT_BASTION, KEYWORD_NONE, 0, 0, 1, "{Bastion}");
 
 	//Blaze Hound
-	effectList.push_back(Effect(SKILL_BLAZE_HOUND, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Both players draw a card"));
-	effectList.back().OnPreCastThis = [](EffectContext context, BoardTile* tile) {
+	effects[SKILL_BLAZE_HOUND] = Effect(SKILL_BLAZE_HOUND, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Both players draw a card");
+	effects[SKILL_BLAZE_HOUND].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
 		context.game->players[0].Draw();
 		context.game->players[1].Draw();
 	};
 
 	//Blistering Skorn
-	effectList.push_back(Effect(SKILL_BLISTERING_SKORN, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Deal 1 damage to everything (including itself)"));
-	effectList.back().OnPreCastThis = [](EffectContext context, BoardTile* tile) {
+	effects[SKILL_BLISTERING_SKORN] = Effect(SKILL_BLISTERING_SKORN, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Deal 1 damage to everything (including itself)");
+	effects[SKILL_BLISTERING_SKORN].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
 		for (Minion* minion : context.game->minions)
 			minion->DealDamage(context.card, 1);
 		if (context.card->IsMinion())
@@ -173,8 +173,8 @@ Collections::Collections() {
 	};
 
 	//Bloodtear Alchemist
-	effectList.push_back(Effect(SKILL_BLOODTEAR_ALCHEMIST, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Deal 1 damage to an enemy"));
-	effectList.back().OnPreCastThis = [](EffectContext context, BoardTile* tile) {
+	effects[SKILL_BLOODTEAR_ALCHEMIST] = Effect(SKILL_BLOODTEAR_ALCHEMIST, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Deal 1 damage to an enemy");
+	effects[SKILL_BLOODTEAR_ALCHEMIST].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
 		context.game->HighlightSelectable(TargetMode(TARGET_MODE_ALL, TARGET_FILTER_ENEMY));
 		if (context.game->selectable.size() > 0) {
 			context.game->callback = EffectCallback(context, nullptr);
@@ -186,8 +186,8 @@ Collections::Collections() {
 	};
 
 	//Ephemeral Shroud
-	effectList.push_back(Effect(SKILL_EPHEMERAL_SHROUD, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Dispel 1 nearby space"));
-	effectList.back().OnPreCastThis = [](EffectContext context, BoardTile* tile) {
+	effects[SKILL_EPHEMERAL_SHROUD] = Effect(SKILL_EPHEMERAL_SHROUD, KEYWORD_OPENING_GAMBIT, 0, 0, 0, "{Opening Gambit}: Dispel 1 nearby space");
+	effects[SKILL_EPHEMERAL_SHROUD].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
 		context.game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, TARGET_FILTER_NONE), tile);
 		if (context.game->selectable.size() > 0) {
 			context.game->callback = EffectCallback(context, nullptr);
@@ -204,8 +204,8 @@ Collections::Collections() {
 #pragma region Spells
 
 	//Breath of The Unborn
-	effectList.push_back(Effect(SPELL_BREATH_OF_THE_UNBORN, KEYWORD_NONE, 0, 0, 0, "Deal 2 damage to all enemy minions. Fully heal all friendly minions"));
-	effectList.back().OnResolveThis = [](EffectContext context, BoardTile* tile) {
+	effects[SPELL_BREATH_OF_THE_UNBORN] = Effect(SPELL_BREATH_OF_THE_UNBORN, KEYWORD_NONE, 0, 0, 0, "Deal 2 damage to all enemy minions. Fully heal all friendly minions");
+	effects[SPELL_BREATH_OF_THE_UNBORN].OnResolveThis = [](EffectContext context, BoardTile* tile) {
 		for (int i = 0; i < context.game->minions.size(); ++i) {
 			if (context.game->minions[i]->tribe != TRIBE_GENERAL) {
 				if (context.game->minions[i]->owner == context.card->owner) { context.game->minions[i]->DealDamage(context.card, -999); }
@@ -215,8 +215,8 @@ Collections::Collections() {
 	};
 
 	//Dark Seed
-	effectList.push_back(Effect(SPELL_DARK_SEED, KEYWORD_NONE, 0, 0, 0, "Deal 1 damage to the enemy general for each card in the opponent's action bar"));
-	effectList.back().OnResolveThis = [](EffectContext context, BoardTile* tile) {
+	effects[SPELL_DARK_SEED] = Effect(SPELL_DARK_SEED, KEYWORD_NONE, 0, 0, 0, "Deal 1 damage to the enemy general for each card in the opponent's action bar");
+	effects[SPELL_DARK_SEED].OnResolveThis = [](EffectContext context, BoardTile* tile) {
 		if (tile->minion != nullptr) {
 			int damage = context.card->owner == &context.game->players[0] ? context.game->players[1].hand.size() : context.game->players[0].hand.size();
 			tile->minion->DealDamage(context.card, damage);
@@ -370,34 +370,34 @@ Collections::Collections() {
 #pragma region Cards
 
 	//Generals
-	generalList.push_back(Minion(FACTION_LYONAR, TRIBE_GENERAL, 0, 2, 25, "argeonhighmayne", "Argeon Highmayne"));
+	minionList.push_back(Minion(CARD_ARGEON_HIGHMAYNE, CARDTAG_GENERAL, FACTION_LYONAR, TRIBE_GENERAL, 0, 2, 25, "argeonhighmayne", "Argeon Highmayne"));
 
 	//Minions
-	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_ARCANYST, 3, 3, 1, "abjudicator", "Abjudicator", FindEffect(SKILL_ABJUDICATOR)));
-	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_ARCANYST, 2, 1, 3, "aethermaster", "Aethermaster", FindEffect(SKILL_AETHERMASTER)));
-	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_ARCANYST, 3, 3, 1, "alcuinloremaster", "Alcuin Loremaster", FindEffect(SKILL_ALCUIN_LOREMASTER)));
-	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 3, "arakiheadhunter", "Araki Headhunter", FindEffect(SKILL_ARAKI_HEADHUNTER)));
-	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_ARCANYST, 6, 7, 7, "archonspellbinder", "Archon Spellbinder", FindEffect(SKILL_ARCHON_SPELLBINDER)));
-	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_WARMASTER, 4, 2, 4, "arrowwhistler", "Arrow Whistler", FindEffect(SKILL_ARROW_WHISTLER)));
-	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 3, "ashmephyt", "Ash Mephyt", FindEffect(SKILL_ASH_MEPHYT)));
-	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 7, 7, 6, "astralcrusader", "Astral Crusader", FindEffect(SKILL_ASTRAL_CRUSADER)));
-	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 4, "azureherald", "Azure Herald", FindEffect(SKILL_AZURE_HERALD)));
-	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 4, "azurehornshaman", "Azure Horn Shaman", FindEffect(SKILL_AZURE_HORN_SHAMAN)));
-	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_STRUCTURE, 3, 0, 5, "bastion", "Bastion", FindEffect(SKILL_BASTION)));
-	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 3, 4, 3, "blazehound", "Blaze Hound", FindEffect(SKILL_BLAZE_HOUND)));
-	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 4, 4, 5, "blisteringskorn", "Blistering Skorn", FindEffect(SKILL_BLISTERING_SKORN)));
-	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "bloodtearalchemist", "Bloodtear Alchemist", FindEffect(SKILL_BLOODTEAR_ALCHEMIST)));
-	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "dragonlark", "Dragonlark", FindEffect(SKILL_FLYING)));
-	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 5, 5, 5, "fireblazer", "Fireblazer", FindEffect(SKILL_PROVOKE)));
-	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "firespitter", "Fire Spitter", FindEffect(SKILL_RANGED)));
-	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 3, "komodocharger", "Komodo Charger"));
-	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "saberspinetiger", "Saberspine Tiger", FindEffect(SKILL_RUSH)));
-	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 2, "sapphireseer", "Sapphire Seer", FindEffect(SKILL_FORCEFIELD)));
-	minionList.push_back(Minion(FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 1, "ephemeralshroud", "Ephemeral Shroud", FindEffect(SKILL_EPHEMERAL_SHROUD)));
+	minionList.push_back(Minion(CARD_ABJUDICATOR, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_ARCANYST, 3, 3, 1, "abjudicator", "Abjudicator", FindEffect(SKILL_ABJUDICATOR)));
+	minionList.push_back(Minion(CARD_AETHERMASTER, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_ARCANYST, 2, 1, 3, "aethermaster", "Aethermaster", FindEffect(SKILL_AETHERMASTER)));
+	minionList.push_back(Minion(CARD_ALCUIN_LOREMASTER, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_ARCANYST, 3, 3, 1, "alcuinloremaster", "Alcuin Loremaster", FindEffect(SKILL_ALCUIN_LOREMASTER)));
+	minionList.push_back(Minion(CARD_ARAKI_HEADHUNTER, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 3, "arakiheadhunter", "Araki Headhunter", FindEffect(SKILL_ARAKI_HEADHUNTER)));
+	minionList.push_back(Minion(CARD_ARCHON_SPELLBINDER, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_ARCANYST, 6, 7, 7, "archonspellbinder", "Archon Spellbinder", FindEffect(SKILL_ARCHON_SPELLBINDER)));
+	minionList.push_back(Minion(CARD_ARROW_WHISTLER, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_WARMASTER, 4, 2, 4, "arrowwhistler", "Arrow Whistler", FindEffect(SKILL_ARROW_WHISTLER)));
+	minionList.push_back(Minion(CARD_ASH_MEPHYT, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 3, "ashmephyt", "Ash Mephyt", FindEffect(SKILL_ASH_MEPHYT)));
+	minionList.push_back(Minion(CARD_ASTRAL_CRUSADER, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 7, 7, 6, "astralcrusader", "Astral Crusader", FindEffect(SKILL_ASTRAL_CRUSADER)));
+	minionList.push_back(Minion(CARD_AZURE_HERALD, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 4, "azureherald", "Azure Herald", FindEffect(SKILL_AZURE_HERALD)));
+	minionList.push_back(Minion(CARD_AZURE_HORN_SHAMAN, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 4, "azurehornshaman", "Azure Horn Shaman", FindEffect(SKILL_AZURE_HORN_SHAMAN)));
+	minionList.push_back(Minion(CARD_BASTION, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_STRUCTURE, 3, 0, 5, "bastion", "Bastion", FindEffect(SKILL_BASTION)));
+	minionList.push_back(Minion(CARD_BLAZE_HOUND, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 3, 4, 3, "blazehound", "Blaze Hound", FindEffect(SKILL_BLAZE_HOUND)));
+	minionList.push_back(Minion(CARD_BLISTERING_SKORN, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 4, 4, 5, "blisteringskorn", "Blistering Skorn", FindEffect(SKILL_BLISTERING_SKORN)));
+	minionList.push_back(Minion(CARD_BLOODTEAR_ALCHEMIST, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "bloodtearalchemist", "Bloodtear Alchemist", FindEffect(SKILL_BLOODTEAR_ALCHEMIST)));
+	minionList.push_back(Minion(CARD_DRAGONLARK, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "dragonlark", "Dragonlark", FindEffect(SKILL_FLYING)));
+	minionList.push_back(Minion(CARD_EPHEMERAL_SHROUD, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 1, "ephemeralshroud", "Ephemeral Shroud", FindEffect(SKILL_EPHEMERAL_SHROUD)));
+	minionList.push_back(Minion(CARD_FIREBLAZER, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 5, 5, 5, "fireblazer", "Fireblazer", FindEffect(SKILL_PROVOKE)));
+	minionList.push_back(Minion(CARD_FIRE_SPITTER, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "firespitter", "Fire Spitter", FindEffect(SKILL_RANGED)));
+	minionList.push_back(Minion(CARD_KOMODO_CHARGER, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 3, "komodocharger", "Komodo Charger"));
+	minionList.push_back(Minion(CARD_SABERSPINE_TIGER, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "saberspinetiger", "Saberspine Tiger", FindEffect(SKILL_RUSH)));
+	minionList.push_back(Minion(CARD_SAPPHIRE_SEER, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 2, "sapphireseer", "Sapphire Seer", FindEffect(SKILL_FORCEFIELD)));
 
 	//Spells
-	spellList.push_back(Spell(FACTION_ABYSSIAN, TargetMode(TARGET_MODE_ALL, TARGET_FILTER_UNIT), 4, "breathoftheunborn", "Breath of The Unborn", FindEffect(SPELL_BREATH_OF_THE_UNBORN)));
-	spellList.push_back(Spell(FACTION_ABYSSIAN, TargetMode(TARGET_MODE_ALL, TARGET_FILTER_ENEMY | TARGET_FILTER_GENERAL), 4, "darkseed", "Dark Seed", FindEffect(SPELL_DARK_SEED)));
+	spellList.push_back(Spell(CARD_BREATH_OF_THE_UNBORN, CARDTAG_NONE, FACTION_ABYSSIAN, TargetMode(TARGET_MODE_ALL, TARGET_FILTER_UNIT), 4, "breathoftheunborn", "Breath of The Unborn", FindEffect(SPELL_BREATH_OF_THE_UNBORN)));
+	spellList.push_back(Spell(CARD_DARK_SEED, CARDTAG_NONE, FACTION_ABYSSIAN, TargetMode(TARGET_MODE_ALL, TARGET_FILTER_ENEMY | TARGET_FILTER_GENERAL), 4, "darkseed", "Dark Seed", FindEffect(SPELL_DARK_SEED)));
 
 	/*
 
@@ -536,17 +536,34 @@ Collections::Collections() {
 
 	*/
 
-	//Generate card list
-	for (int i = 0; i < generalList.size(); ++i) { cardList.push_back(&generalList[i]); }
-	for (int i = 0; i < minionList.size(); ++i) { cardList.push_back(&minionList[i]); }
-	for (int i = 0; i < minionTokenList.size(); ++i) { cardList.push_back(&minionTokenList[i]); }
-	for (int i = 0; i < spellList.size(); ++i) { cardList.push_back(&spellList[i]); }
-	for (int i = 0; i < spellTokenList.size(); ++i) { cardList.push_back(&spellTokenList[i]); }
+	//Generate card map
+	for (int i = 0; i < minionList.size(); ++i) {
+		cards[minionList[i].cardId] = &minionList[i];
+		cards[minionList[i].cardId]->original = cards[minionList[i].cardId];
+		cardList.push_back(cards[minionList[i].cardId]);
+	}
+	for (int i = 0; i < spellList.size(); ++i) {
+		cards[spellList[i].cardId] = &spellList[i];
+		cards[spellList[i].cardId]->original = cards[spellList[i].cardId];
+		cardList.push_back(cards[spellList[i].cardId]);
+	}
 
 	//Set original references
 	for (int i = 0; i < cardList.size(); ++i) { cardList[i]->original = cardList[i]; }
 
 #pragma endregion
+
+	//Counts
+	generalCount = 0;
+	minionCount = 0;
+	for (int i = 0; i < minionList.size(); ++i) {
+		if (minionList[i].cardTag == CARDTAG_GENERAL)
+			++generalCount;
+		else if (minionList[i].cardTag == CARDTAG_NONE)
+			++minionCount;
+	}
+	spellCount = spellList.size();
+	cardCount = generalCount + minionCount + spellCount;
 
 }
 Collections::~Collections() {}
@@ -557,17 +574,16 @@ Collections::~Collections() {}
 
 //Find effect by enum
 Effect Collections::FindEffect(eEffect effect) {
-	for (int i = 0; i < effectList.size(); ++i)
-		if (effectList[i].effect == effect)
-			return effectList[i];
+	if (effects.contains(effect))
+		return effects[effect];
+	return Effect();
 }
 
 //Find card by name
-Card* Collections::FindCard(std::string name) {
-	for (int i = 0; i < cardList.size(); ++i)
-		if (cardList[i]->name == name)
-			return cardList[i];
-	return cardList[0];
+Card* Collections::FindCard(eCard card) {
+	if (cards.contains(card))
+		return cards[card];
+	return nullptr;
 }
 
 #pragma endregion

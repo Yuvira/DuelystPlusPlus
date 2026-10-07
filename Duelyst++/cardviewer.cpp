@@ -23,7 +23,7 @@ CardViewer::CardViewer(Collections* collections) {
 	//Variables
 	pos = Coord(0, 0);
 	page = 0;
-	pageCount = (this->collections->cardList.size() + 53) / 54;
+	pageCount = (this->collections->cardCount + 53) / 54;
 	pageNumber.CreateFromString(std::to_string(page + 1) + " / " + std::to_string(pageCount));
 	modeSwitch = nullptr;
 
@@ -50,11 +50,11 @@ void CardViewer::RenderCollection(Renderer& renderer) {
 		renderer.Render(collections->cardList[a]->sprite, (((a - (page * 54)) % 9) * 7) + 2, (((a - (page * 54)) / 9) * 7) + 7);
 
 	//Card counts
-	count[0].CreateFromString("Generals  : " + std::to_string(collections->generalList.size()));
-	count[1].CreateFromString("Units     : " + std::to_string(collections->minionList.size()));
-	count[2].CreateFromString("Spells    : " + std::to_string(collections->spellList.size()));
+	count[0].CreateFromString("Generals  : " + std::to_string(collections->generalCount));
+	count[1].CreateFromString("Minions   : " + std::to_string(collections->minionCount));
+	count[2].CreateFromString("Spells    : " + std::to_string(collections->spellCount));
 	count[3].CreateFromString("Artifacts : 0");
-	count[4].CreateFromString("TOTAL : " + std::to_string(collections->cardList.size()));
+	count[4].CreateFromString("TOTAL : " + std::to_string(collections->cardCount));
 	for (int i = 0; i < 4; ++i)
 		renderer.Render(count[i], 1, i + 1);
 	renderer.Render(count[4], 18, 1);

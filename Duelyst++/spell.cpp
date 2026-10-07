@@ -4,9 +4,11 @@
 #pragma region Constructors / Initialization
 
 //Game constructors
-Spell::Spell() : Spell(FACTION_NEUTRAL, TargetMode(TARGET_MODE_ALL, TARGET_FILTER_NONE), 0, "", "???") {}
-Spell::Spell(eFaction faction, TargetMode targetMode, int cost, std::string path, std::string name) {
-	cardType = CARD_SPELL;
+Spell::Spell() : Spell(CARD_NONE, CARDTAG_NONE, FACTION_NEUTRAL, TargetMode(TARGET_MODE_ALL, TARGET_FILTER_NONE), 0, "", "???") {}
+Spell::Spell(eCard cardId, eCardTag cardTag, eFaction faction, TargetMode targetMode, int cost, std::string path, std::string name) {
+	this->cardId = cardId;
+	this->cardTag = cardTag;
+	cardType = CARDTYPE_SPELL;
 	this->faction = faction;
 	this->targetMode = targetMode;
 	this->cost = cost;
@@ -19,7 +21,7 @@ Spell::Spell(eFaction faction, TargetMode targetMode, int cost, std::string path
 	game = nullptr;
 	owner = nullptr;
 }
-Spell::Spell(eFaction faction, TargetMode targetMode, int cost, std::string path, std::string name, Effect effect) : Spell(faction, targetMode, cost, path, name) {
+Spell::Spell(eCard cardId, eCardTag cardTag, eFaction faction, TargetMode targetMode, int cost, std::string path, std::string name, Effect effect) : Spell(cardId, cardTag, faction, targetMode, cost, path, name) {
 	if (effect.effect != EFFECT_NONE)
 		AddEffect(effect, nullptr);
 }

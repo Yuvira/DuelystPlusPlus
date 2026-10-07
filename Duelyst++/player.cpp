@@ -22,12 +22,11 @@ Player::~Player() {}
 //Preset deck
 void Player::Preset(Collections* collections, Game* game) {
 	this->game = game;
-	deck.push_back(new Minion(*(collections->FindCard("Argeon Highmayne")->GetMinion())));
-	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(collections->FindCard("Ephemeral Shroud")->GetMinion()))); }
-	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(collections->FindCard("Blistering Skorn")->GetMinion()))); }
-	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(collections->FindCard("Bastion")->GetMinion()))); }
-	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(collections->FindCard("Blaze Hound")->GetMinion()))); }
-	//for (int i = 0; i < 7; ++i) { deck.push_back(new Spell(*(collections->FindCard("Dark Seed")->GetSpell()))); }
+	deck.push_back(new Minion(*(collections->FindCard(CARD_ARGEON_HIGHMAYNE)->GetMinion())));
+	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(collections->FindCard(CARD_EPHEMERAL_SHROUD)->GetMinion()))); }
+	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(collections->FindCard(CARD_BLISTERING_SKORN)->GetMinion()))); }
+	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(collections->FindCard(CARD_ASH_MEPHYT)->GetMinion()))); }
+	//for (int i = 0; i < 7; ++i) { deck.push_back(new Spell(*(collections->FindCard(CARD_DARK_SEED)->GetSpell()))); }
 	for (int i = 0; i < deck.size(); ++i)
 		this->game->SetContext(deck[i], this);
 }
@@ -123,9 +122,9 @@ void Player::Draw() {
 //Add card to hand
 void Player::AddToHand(Card* card, bool cast) {
 	if (cast) {
-		if (card->cardType == CARD_MINION)
+		if (card->cardType == CARDTYPE_MINION)
 			card = new Minion(*(card->GetMinion()));
-		else if (card->cardType == CARD_SPELL)
+		else if (card->cardType == CARDTYPE_SPELL)
 			card = new Spell(*(card->GetSpell()));
 	}
 	game->SetContext(card, this);
