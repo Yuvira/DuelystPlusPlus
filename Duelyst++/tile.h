@@ -54,6 +54,7 @@ class Map {
 public:
 	Map();
 	~Map();
+	BoardTile* GetTile(int x, int y);
 	BoardTile* GetRandom();
 	BoardTile* GetRandom(BoardTile* ignore);
 	BoardTile* GetRandomCorner();

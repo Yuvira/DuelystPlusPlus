@@ -81,6 +81,13 @@ Map::Map() {
 }
 Map::~Map() {}
 
+//Get tile at co-ordinates
+BoardTile* Map::GetTile(int x, int y) {
+	if (x < 0 || x > 8 || y < 0 || y > 4)
+		return nullptr;
+	return &tiles[x][y];
+}
+
 //Get random empty tile
 BoardTile* Map::GetRandom() { return GetRandom(nullptr); }
 BoardTile* Map::GetRandom(BoardTile* ignore) {

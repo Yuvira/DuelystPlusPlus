@@ -228,6 +228,33 @@ Collections::Collections() {
 			damage *= 2;
 	};
 
+	//Bonereaper
+	effects[SKILL_BONEREAPER] = Effect(SKILL_BONEREAPER, KEYWORD_PROVOKE, "{Provoke}|At the end of your turn, deal 2 damage to all nearby enemy minions");
+	effects[SKILL_BONEREAPER].OnTurnEnd = [](EffectContext context, Player* player) {
+		if (context.card->IsMinion() && context.card->IsOnBoard() && context.card->owner == player) {
+			for (BoardTile* tile : context.game->map.GetNear(context.card->GetMinion()->curTile))
+				if (tile->minion != nullptr && tile->minion->owner != context.card->owner && tile->minion->tribe != TRIBE_GENERAL)
+					tile->minion->DealDamage(context.card, 2);
+		}
+	};
+
+	//Captain Hank Hart
+	effects[SKILL_CAPTAIN_HANK_HART] = Effect(SKILL_CAPTAIN_HANK_HART, KEYWORD_RANGED, "{Ranged}|Whenever this deals damage, restore that much Health to it");
+	effects[SKILL_CAPTAIN_HANK_HART].OnDamage = [](EffectContext context, Card* source, Minion* target, int damage) {
+		if (context.card == source && context.card->IsOnBoard() && context.card->IsMinion() && context.card->GetMinion()->hp > 0)
+			context.card->GetMinion()->DealDamage(context.card, -damage);
+	};
+
+	//Dancing Blades
+	effects[SKILL_DANCING_BLADES] = Effect(SKILL_DANCING_BLADES, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Deal 3 damage to ANY minion in front of this");
+	effects[SKILL_DANCING_BLADES].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
+		int x = tile->pos.x;
+		&context.game->players[0] == context.card->owner ? ++x : --x;
+		BoardTile* target = context.game->map.GetTile(x, tile->pos.y);
+		if (target != nullptr && target->minion != nullptr && target->minion->tribe != TRIBE_GENERAL)
+			target->minion->DealDamage(context.card, 3);
+	};
+
 	//Ephemeral Shroud
 	effects[SKILL_EPHEMERAL_SHROUD] = Effect(SKILL_EPHEMERAL_SHROUD, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Dispel 1 nearby space");
 	effects[SKILL_EPHEMERAL_SHROUD].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
@@ -441,8 +468,11 @@ Collections::Collections() {
 	minionList.push_back(Minion(CARD_BLOODSHARD_GOLEM, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_GOLEM, 3, 4, 3, "bloodshardgolem", "Bloodshard Golem"));
 	minionList.push_back(Minion(CARD_BLOODTEAR_ALCHEMIST, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "bloodtearalchemist", "Bloodtear Alchemist", FindEffect(SKILL_BLOODTEAR_ALCHEMIST)));
 	minionList.push_back(Minion(CARD_BLUETIP_SCORPION, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 2, 3, 1, "bluetipscorpion", "Bluetip Scorpion", FindEffect(SKILL_BLUETIP_SCORPION)));
+	minionList.push_back(Minion(CARD_BONEREAPER, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 6, 2, 9, "bonereaper", "Bonereaper", FindEffect(SKILL_BONEREAPER)));
 	minionList.push_back(Minion(CARD_BRIGHTMOSS_GOLEM, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_GOLEM, 5, 4, 9, "brightmossgolem", "Brightmoss Golem"));
+	minionList.push_back(Minion(CARD_CAPTAIN_HANK_HART, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_GOLEM, 4, 2, 4, "captainhankhart", "Captain Hank Hart", FindEffect(SKILL_CAPTAIN_HANK_HART)));
 	minionList.push_back(Minion(CARD_DAGGER_KIRI, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 8, "daggerkiri", "Dagger Kiri", FindEffect(SKILL_CELERITY)));
+	minionList.push_back(Minion(CARD_DANCING_BLADES, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 5, 4, 6, "dancingblades", "Dancing Blades", FindEffect(SKILL_DANCING_BLADES)));
 	minionList.push_back(Minion(CARD_DIAMOND_GOLEM, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_GOLEM, 6, 5, 11, "diamondgolem", "Diamond Golem"));
 	minionList.push_back(Minion(CARD_DRAGONLARK, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "dragonlark", "Dragonlark", FindEffect(SKILL_FLYING)));
 	minionList.push_back(Minion(CARD_DRYBONE_GOLEM, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_GOLEM, 7, 10, 10, "drybonegolem", "Drybone Golem"));
