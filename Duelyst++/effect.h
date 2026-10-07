@@ -157,20 +157,20 @@ public:
 	Effect* source;
 	std::function<void(EffectContext)> OnAddThis;
 	std::function<void(EffectContext)> OnRemoveThis;
-	std::function<void(EffectContext, BoardTile*)> OnPreCastThis;
-	std::function<void(EffectContext, BoardTile*)> OnResolveThis;
-	std::function<void(EffectContext, Card*, BoardTile*)> OnCast;
-	std::function<void(EffectContext, Minion*, bool)> OnSummon;
-	std::function<void(EffectContext, Minion*)> OnDeath;
-	std::function<void(EffectContext, Minion*, Minion*, bool)> OnAttack;
-	std::function<void(EffectContext, Card*, Minion*, int)> OnDamage;
-	std::function<void(EffectContext, Card*, Minion*, int)> OnHeal;
-	std::function<void(EffectContext, Minion*, bool)> OnMove;
-	std::function<void(EffectContext, Card*, bool)> OnDraw;
-	std::function<void(EffectContext, Card*)> OnReplace;
-	std::function<void(EffectContext, Card*)> OnEffectsChanged;
-	std::function<void(EffectContext, Player*)> OnTurnStart;
-	std::function<void(EffectContext, Player*)> OnTurnEnd;
+	std::function<void(EffectContext, BoardTile* tile)> OnPreCastThis;
+	std::function<void(EffectContext, BoardTile* tile)> OnResolveThis;
+	std::function<void(EffectContext, Card* card, BoardTile* tile)> OnCast;
+	std::function<void(EffectContext, Minion* minion, bool actionBar)> OnSummon;
+	std::function<void(EffectContext, Minion* minion)> OnDeath;
+	std::function<void(EffectContext, Minion* source, Minion* target, bool counter)> OnAttack;
+	std::function<void(EffectContext, Card* source, Minion* target, int damage)> OnDamage;
+	std::function<void(EffectContext, Card* source, Minion* target, int damage)> OnHeal;
+	std::function<void(EffectContext, Minion* minion, bool byEffect)> OnMove;
+	std::function<void(EffectContext, Card* card, bool fromDeck)> OnDraw;
+	std::function<void(EffectContext, Card* card)> OnReplace;
+	std::function<void(EffectContext, Card* card)> OnEffectsChanged;
+	std::function<void(EffectContext, Player* player)> OnTurnStart;
+	std::function<void(EffectContext, Player* player)> OnTurnEnd;
 	bool IsContinuous() { return source != nullptr; }
 };
 
