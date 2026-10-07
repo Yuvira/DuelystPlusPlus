@@ -263,10 +263,10 @@ void Card::OnDeath(Minion* minion) {
 }
 
 //Whenever a minion attacks another minion
-void Card::OnAttack(Minion* source, Minion* target, bool counter) {
+void Card::OnAttack(Minion* source, Minion* target, int& damage, bool counter) {
 	for (int i = 0; i < effects.size(); ++i)
 		if (effects[i]->OnAttack)
-			effects[i]->OnAttack(EffectContext(effects[i], this, game), source, target, counter);
+			effects[i]->OnAttack(EffectContext(effects[i], this, game), source, target, damage, counter);
 }
 
 //Whenever a minion is damaged

@@ -162,7 +162,7 @@ public:
 	std::function<void(EffectContext, Card* card, BoardTile* tile)> OnCast;
 	std::function<void(EffectContext, Minion* minion, bool actionBar)> OnSummon;
 	std::function<void(EffectContext, Minion* minion)> OnDeath;
-	std::function<void(EffectContext, Minion* source, Minion* target, bool counter)> OnAttack;
+	std::function<void(EffectContext, Minion* source, Minion* target, int& damage, bool counter)> OnAttack;
 	std::function<void(EffectContext, Card* source, Minion* target, int damage)> OnDamage;
 	std::function<void(EffectContext, Card* source, Minion* target, int damage)> OnHeal;
 	std::function<void(EffectContext, Minion* minion, bool byEffect)> OnMove;

@@ -41,12 +41,12 @@ void EventManager::SendOnDeath(Minion* minion) {
 }
 
 //Send onAttack events
-void EventManager::SendOnAttack(Minion* source, Minion* target, bool counter) {
-	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnAttack(source, target, counter); }
-	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnAttack(source, target, counter); }
-	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnAttack(source, target, counter); }
-	for (int i = 0; i < game->players[1].hand.size(); ++i) { game->players[1].hand[i]->OnAttack(source, target, counter); }
-	for (int i = 0; i < game->players[1].deck.size(); ++i) { game->players[1].deck[i]->OnAttack(source, target, counter); }
+void EventManager::SendOnAttack(Minion* source, Minion* target, int& damage, bool counter) {
+	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnAttack(source, target, damage, counter); }
+	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnAttack(source, target, damage, counter); }
+	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnAttack(source, target, damage, counter); }
+	for (int i = 0; i < game->players[1].hand.size(); ++i) { game->players[1].hand[i]->OnAttack(source, target, damage, counter); }
+	for (int i = 0; i < game->players[1].deck.size(); ++i) { game->players[1].deck[i]->OnAttack(source, target, damage, counter); }
 }
 
 //Send onDamage events

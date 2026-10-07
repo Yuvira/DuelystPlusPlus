@@ -35,9 +35,11 @@ enum eCard {
 	CARD_BLISTERING_SKORN,
 	CARD_BLOOD_TAURA,
 	CARD_BLOODTEAR_ALCHEMIST,
+	CARD_BLUETIP_SCORPION,
 	CARD_BREATH_OF_THE_UNBORN,
 	CARD_DARK_SEED,
 	CARD_DRAGONLARK,
+	CARD_FACESTRIKER,
 	CARD_FIREBLAZER,
 	CARD_FIRE_SPITTER,
 	CARD_KOMODO_CHARGER,
@@ -158,7 +160,7 @@ public:
 	void OnCast(Card* card, BoardTile* tile);
 	void OnSummon(Minion* minion, bool fromActionBar);
 	void OnDeath(Minion* minion);
-	void OnAttack(Minion* source, Minion* target, bool counter);
+	void OnAttack(Minion* source, Minion* target, int& damage, bool counter);
 	void OnDamage(Card* source, Minion* target, int damage);
 	void OnHeal(Card* source, Minion* target, int heal);
 	void OnMove(Minion* minion, bool byEffect);

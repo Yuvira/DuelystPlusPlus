@@ -222,8 +222,8 @@ void Minion::SetPosition(int x, int y) {
 //Attack enemy
 void Minion::Attack(Minion* target, bool counter) {
 	int damage = atk;
+	game->eventManager.SendOnAttack(this, target, damage, counter);
 	target->DealDamage(this, damage);
-	game->eventManager.SendOnAttack(this, target, counter);
 	if (!counter) {
 		if (!hasCelerityAttacked && !hasMoved) {
 			hasCelerityMoved = true;

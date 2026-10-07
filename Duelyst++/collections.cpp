@@ -221,6 +221,13 @@ Collections::Collections() {
 		}
 	};
 
+	//Bluetip Scorpion
+	effects[SKILL_BLUETIP_SCORPION] = Effect(SKILL_BLUETIP_SCORPION, KEYWORD_NONE, "Deals double damage to minions");
+	effects[SKILL_BLUETIP_SCORPION].OnAttack = [](EffectContext context, Minion* source, Minion* target, int& damage, bool counter) {
+		if (context.card == source && target->tribe != TRIBE_GENERAL)
+			damage *= 2;
+	};
+
 	//Ephemeral Shroud
 	effects[SKILL_EPHEMERAL_SHROUD] = Effect(SKILL_EPHEMERAL_SHROUD, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Dispel 1 nearby space");
 	effects[SKILL_EPHEMERAL_SHROUD].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
@@ -233,6 +240,13 @@ Collections::Collections() {
 					tile->minion->Dispel();
 			};
 		}
+	};
+
+	//Facestriker
+	effects[SKILL_FACESTRIKER] = Effect(SKILL_FACESTRIKER, KEYWORD_NONE, "Deals double damage to Generals");
+	effects[SKILL_FACESTRIKER].OnAttack = [](EffectContext context, Minion* source, Minion* target, int& damage, bool counter) {
+		if (context.card == source && target->tribe == TRIBE_GENERAL)
+			damage *= 2;
 	};
 
 #pragma endregion
@@ -425,8 +439,10 @@ Collections::Collections() {
 	minionList.push_back(Minion(CARD_BLISTERING_SKORN, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 4, 4, 5, "blisteringskorn", "Blistering Skorn", FindEffect(SKILL_BLISTERING_SKORN)));
 	minionList.push_back(Minion(CARD_BLOOD_TAURA, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 25, 12, 12, "bloodtaura", "Blood Taura", FindEffect(SKILL_BLOOD_TAURA)));
 	minionList.push_back(Minion(CARD_BLOODTEAR_ALCHEMIST, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "bloodtearalchemist", "Bloodtear Alchemist", FindEffect(SKILL_BLOODTEAR_ALCHEMIST)));
+	minionList.push_back(Minion(CARD_BLUETIP_SCORPION, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 2, 3, 1, "bluetipscorpion", "Bluetip Scorpion", FindEffect(SKILL_BLUETIP_SCORPION)));
 	minionList.push_back(Minion(CARD_DRAGONLARK, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "dragonlark", "Dragonlark", FindEffect(SKILL_FLYING)));
 	minionList.push_back(Minion(CARD_EPHEMERAL_SHROUD, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 1, "ephemeralshroud", "Ephemeral Shroud", FindEffect(SKILL_EPHEMERAL_SHROUD)));
+	minionList.push_back(Minion(CARD_FACESTRIKER, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 6, 4, 6, "facestriker", "Facestriker", FindEffect(SKILL_FACESTRIKER)));
 	minionList.push_back(Minion(CARD_FIREBLAZER, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 5, 5, 5, "fireblazer", "Fireblazer", FindEffect(SKILL_PROVOKE)));
 	minionList.push_back(Minion(CARD_FIRE_SPITTER, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "firespitter", "Fire Spitter", FindEffect(SKILL_RANGED)));
 	minionList.push_back(Minion(CARD_KOMODO_CHARGER, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 3, "komodocharger", "Komodo Charger"));

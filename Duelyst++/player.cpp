@@ -25,8 +25,9 @@ void Player::Preset(Collections* collections, Game* game) {
 	deck.push_back(new Minion(*(collections->FindCard(CARD_ARGEON_HIGHMAYNE)->GetMinion())));
 	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(collections->FindCard(CARD_EPHEMERAL_SHROUD)->GetMinion()))); }
 	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(collections->FindCard(CARD_BLISTERING_SKORN)->GetMinion()))); }
-	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(collections->FindCard(CARD_BLACK_LOCUST)->GetMinion()))); }
-	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(collections->FindCard(CARD_BLOOD_TAURA)->GetMinion()))); }
+	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(collections->FindCard(CARD_FACESTRIKER)->GetMinion()))); }
+	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(collections->FindCard(CARD_BLUETIP_SCORPION)->GetMinion()))); }
+	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(collections->FindCard(CARD_BASTION)->GetMinion()))); }
 	//for (int i = 0; i < 7; ++i) { deck.push_back(new Spell(*(collections->FindCard(CARD_DARK_SEED)->GetSpell()))); }
 	for (int i = 0; i < deck.size(); ++i)
 		this->game->SetContext(deck[i], this);

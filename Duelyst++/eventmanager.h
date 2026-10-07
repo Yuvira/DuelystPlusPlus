@@ -16,7 +16,7 @@ public:
 	void SendOnCast(Card* card, BoardTile* tile);
 	void SendOnSummon(Minion* minion, bool actionBar);
 	void SendOnDeath(Minion* minion);
-	void SendOnAttack(Minion* source, Minion* target, bool counter);
+	void SendOnAttack(Minion* source, Minion* target, int& damage, bool counter);
 	void SendOnDamage(Card* source, Minion* target, int damage);
 	void SendOnHeal(Card* source, Minion* target, int heal);
 	void SendOnMove(Minion* minion, bool byEffect);
