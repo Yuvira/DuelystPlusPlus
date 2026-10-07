@@ -39,7 +39,6 @@ enum eEffect {
 	EFFECT_ASTRAL_CRUSADER,
 	EFFECT_AZURE_HORN_SHAMAN,
 	EFFECT_BASTION,
-	EFFECT_BLOOD_TAURA,
 	EFFECT_CHAKKRAM,
 	EFFECT_CONSUMING_REBIRTH,
 	EFFECT_CRIMSON_OCULUS,
@@ -145,12 +144,13 @@ public:
 class Effect {
 public:
 	Effect();
-	Effect(eEffect effect, eKeywordFlags keywords, int costBuff, int atkBuff, int hpBuff);
-	Effect(eEffect effect, eKeywordFlags keywords, int costBuff, int atkBuff, int hpBuff, std::string description);
+	Effect(eEffect effect, eKeywordFlags keywords);
+	Effect(eEffect effect, eKeywordFlags keywords, std::string description);
 	~Effect();
 	eEffect effect;
 	eKeywordFlags keywords;
 	std::string description;
+	int fixedCost;
 	int costBuff;
 	int atkBuff;
 	int hpBuff;

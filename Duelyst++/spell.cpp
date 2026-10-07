@@ -69,6 +69,9 @@ void Spell::UpdateStatBuffs() {
 	for (int i = 0; i < effects.size(); ++i)
 		costBuff += effects[i]->costBuff;
 	cost = max(original->cost + costBuff, 0);
+	for (int i = 0; i < effects.size(); ++i)
+		if (effects[i]->fixedCost > -1)
+			cost = effects[i]->fixedCost;
 }
 
 //Update card stats

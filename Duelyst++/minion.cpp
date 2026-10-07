@@ -152,6 +152,9 @@ void Minion::UpdateStatBuffs() {
 	atk = max(original->GetMinion()->atk + atkBuff, 0);
 	hpMax = original->GetMinion()->hpMax + hpBuff;
 	hp = hpMax + hpDelta;
+	for (int i = 0; i < effects.size(); ++i)
+		if (effects[i]->fixedCost > -1)
+			cost = effects[i]->fixedCost;
 }
 
 //Update HP & ATK sprites

@@ -17,15 +17,16 @@ EffectContext::~EffectContext() {}
 #pragma region Constructors
 
 //Effect constructors
-Effect::Effect() : Effect(EFFECT_NONE, KEYWORD_NONE, 0, 0, 0, "") {}
-Effect::Effect(eEffect effect, eKeywordFlags keywords, int costBuff, int atkBuff, int hpBuff) : Effect(effect, keywords, costBuff, atkBuff, hpBuff, "") {}
-Effect::Effect(eEffect effect, eKeywordFlags keywords, int costBuff, int atkBuff, int hpBuff, std::string description) {
+Effect::Effect() : Effect(EFFECT_NONE, KEYWORD_NONE, "") {}
+Effect::Effect(eEffect effect, eKeywordFlags keywords) : Effect(effect, keywords, "") {}
+Effect::Effect(eEffect effect, eKeywordFlags keywords, std::string description) {
 	this->effect = effect;
 	this->keywords = keywords;
 	this->description = description;
-	this->costBuff = costBuff;
-	this->atkBuff = atkBuff;
-	this->hpBuff = hpBuff;
+	fixedCost = -1;
+	costBuff = 0;
+	atkBuff = 0;
+	hpBuff = 0;
 	source = nullptr;
 }
 Effect::~Effect() {}
