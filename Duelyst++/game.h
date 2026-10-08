@@ -7,7 +7,7 @@
 #include "eventmanager.h"
 
 //Debug mode
-inline constexpr bool IS_DEBUG = true;
+inline constexpr bool IS_DEBUG = false;
 
 #pragma region Enums / Helpers
 
