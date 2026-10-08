@@ -56,7 +56,7 @@ Game::Game(Collections* collections) {
 		Summon(players[i].deck[0], i * 8, 2, false);
 		players[i].deck.erase(players[i].deck.begin());
 		players[i].general = minions.back();
-		players[i].Init(i + 2);
+		players[i].Init(IS_DEBUG ? 9 : i + 2);
 	}
 
 	//Hand
