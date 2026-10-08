@@ -4,10 +4,16 @@
 #pragma region Constructors / Initialization
 
 //Minion constructors
-Minion::Minion() : Minion(CARD_NONE, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 0, 0, 0, "", "???") {}
-Minion::Minion(eCard cardId, eCardTag cardTag, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name) {
+Minion::Minion()
+	: Minion(CARD_NONE, FACTION_NEUTRAL, TRIBE_NONE, 0, 0, 0, "", "???", false, nullptr) {}
+Minion::Minion(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name)
+	: Minion(cardId, faction, tribe, cost, atk, hp, path, name, false, nullptr) {}
+Minion::Minion(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name, bool isToken)
+	: Minion(cardId, faction, tribe, cost, atk, hp, path, name, isToken, nullptr) {}
+Minion::Minion(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name, Effect* effect)
+	: Minion(cardId, faction, tribe, cost, atk, hp, path, name, false, effect) {}
+Minion::Minion(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name, bool isToken, Effect* effect) {
 	this->cardId = cardId;
-	this->cardTag = cardTag;
 	cardType = CARDTYPE_MINION;
 	this->faction = faction;
 	this->tribe = tribe;
@@ -16,6 +22,7 @@ Minion::Minion(eCard cardId, eCardTag cardTag, eFaction faction, eTribe tribe, i
 	this->atk = atk;
 	this->hp = hp;
 	hpMax = hp;
+	this->isToken = isToken;
 	this->name = name;
 	isDead = false;
 	hasMoved = false;
@@ -32,10 +39,8 @@ Minion::Minion(eCard cardId, eCardTag cardTag, eFaction faction, eTribe tribe, i
 	curTile = nullptr;
 	game = nullptr;
 	owner = nullptr;
-}
-Minion::Minion(eCard cardId, eCardTag cardTag, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name, Effect effect) : Minion(cardId, cardTag, faction, tribe, cost, atk, hp, path, name) {
-	if (effect.effect != EFFECT_NONE)
-		AddEffect(effect, nullptr);
+	if (effect != nullptr && effect->effect != EFFECT_NONE)
+		AddEffect(*effect, nullptr);
 }
 Minion::~Minion() {}
 
@@ -294,7 +299,7 @@ void Minion::Dispel() {
 	}
 
 	//Add dispelled effect
-	AddEffect(game->collections->FindEffect(EFFECT_DISPELLED), nullptr);
+	AddEffect(*game->collections->FindEffect(EFFECT_DISPELLED), nullptr);
 
 	//Remove misc
 	hasCelerityMoved = true;

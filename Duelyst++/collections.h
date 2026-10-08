@@ -11,7 +11,7 @@ class Collections {
 public:
 	Collections();
 	~Collections();
-	Effect FindEffect(eEffect effect);
+	Effect* FindEffect(eEffect effect);
 	Card* FindCard(eCard card);
 	std::unordered_map<eEffect, Effect> effects;
 	std::unordered_map<eCard, Card*> cards;

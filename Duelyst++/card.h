@@ -75,13 +75,6 @@ enum eCardType {
 	CARDTYPE_ARTIFACT
 };
 
-//Card tags
-enum eCardTag {
-	CARDTAG_NONE,
-	CARDTAG_GENERAL,
-	CARDTAG_TOKEN
-};
-
 //Rarities
 enum eRarity {
 	RARITY_NONE,
@@ -201,7 +194,6 @@ public:
 
 	//Properties
 	eCard cardId;
-	eCardTag cardTag;
 	eCardType cardType;
 	eFaction faction;
 	TargetMode targetMode;
@@ -226,8 +218,10 @@ public:
 
 	//Constructors / Initialization
 	Minion();
-	Minion(eCard cardId, eCardTag cardTag, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name);
-	Minion(eCard cardId, eCardTag cardTag, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name, Effect effect);
+	Minion(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name);
+	Minion(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name, bool isToken);
+	Minion(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name, Effect* effect);
+	Minion(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name, bool isToken, Effect* effect);
 	~Minion();
 	void GenerateDetails();
 
@@ -289,8 +283,10 @@ public:
 
 	//Constructors / Initialization
 	Spell();
-	Spell(eCard cardId, eCardTag cardTag, eFaction faction, TargetMode targetMode, int cost, std::string path, std::string name);
-	Spell(eCard cardId, eCardTag cardTag, eFaction faction, TargetMode targetMode, int cost, std::string path, std::string name, Effect effect);
+	Spell(eCard cardId, eFaction faction, TargetMode targetMode, int cost, std::string path, std::string name);
+	Spell(eCard cardId, eFaction faction, TargetMode targetMode, int cost, std::string path, std::string name, bool isToken);
+	Spell(eCard cardId, eFaction faction, TargetMode targetMode, int cost, std::string path, std::string name, Effect* effect);
+	Spell(eCard cardId, eFaction faction, TargetMode targetMode, int cost, std::string path, std::string name, bool isToken, Effect* effect);
 	~Spell();
 	void GenerateDetails();
 

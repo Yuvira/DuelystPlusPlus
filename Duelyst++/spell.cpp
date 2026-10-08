@@ -4,14 +4,21 @@
 #pragma region Constructors / Initialization
 
 //Game constructors
-Spell::Spell() : Spell(CARD_NONE, CARDTAG_NONE, FACTION_NEUTRAL, TargetMode(TARGET_MODE_ALL, TARGET_FILTER_NONE), 0, "", "???") {}
-Spell::Spell(eCard cardId, eCardTag cardTag, eFaction faction, TargetMode targetMode, int cost, std::string path, std::string name) {
+Spell::Spell()
+	: Spell(CARD_NONE, FACTION_NEUTRAL, TargetMode(TARGET_MODE_ALL, TARGET_FILTER_NONE), 0, "", "???") {}
+Spell::Spell(eCard cardId, eFaction faction, TargetMode targetMode, int cost, std::string path, std::string name)
+	: Spell(cardId, faction, targetMode, cost, path, name, false, nullptr) {}
+Spell::Spell(eCard cardId, eFaction faction, TargetMode targetMode, int cost, std::string path, std::string name, bool isToken)
+	: Spell(cardId, faction, targetMode, cost, path, name, isToken, nullptr) {}
+Spell::Spell(eCard cardId, eFaction faction, TargetMode targetMode, int cost, std::string path, std::string name, Effect* effect)
+	: Spell(cardId, faction, targetMode, cost, path, name, false, effect) {}
+Spell::Spell(eCard cardId, eFaction faction, TargetMode targetMode, int cost, std::string path, std::string name, bool isToken, Effect* effect) {
 	this->cardId = cardId;
-	this->cardTag = cardTag;
 	cardType = CARDTYPE_SPELL;
 	this->faction = faction;
 	this->targetMode = targetMode;
 	this->cost = cost;
+	this->isToken = isToken;
 	this->name = name;
 	if (path == "")
 		sprite.Resize(5, 5);
@@ -20,10 +27,8 @@ Spell::Spell(eCard cardId, eCardTag cardTag, eFaction faction, TargetMode target
 	GenerateDetails();
 	game = nullptr;
 	owner = nullptr;
-}
-Spell::Spell(eCard cardId, eCardTag cardTag, eFaction faction, TargetMode targetMode, int cost, std::string path, std::string name, Effect effect) : Spell(cardId, cardTag, faction, targetMode, cost, path, name) {
-	if (effect.effect != EFFECT_NONE)
-		AddEffect(effect, nullptr);
+	if (effect != nullptr && effect->effect != EFFECT_NONE)
+		AddEffect(*effect, nullptr);
 }
 Spell::~Spell() {}
 
