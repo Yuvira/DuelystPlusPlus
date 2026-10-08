@@ -145,9 +145,9 @@ Collections::Collections() {
 
 	//Azure Horn Shaman
 	effects[SKILL_AZURE_HORN_SHAMAN] = Effect(SKILL_AZURE_HORN_SHAMAN, KEYWORD_NONE, "{Dying Wish}: Give +4 Health to friendly minions around it");
-	effects[SKILL_AZURE_HORN_SHAMAN].OnDeath = [](EffectContext context, Minion* source) {
-		if (context.card == source)
-			for (BoardTile* tile : context.game->map.GetNear(source->curTile))
+	effects[SKILL_AZURE_HORN_SHAMAN].OnDeath = [](EffectContext context, Minion* minion) {
+		if (context.card == minion)
+			for (BoardTile* tile : context.game->map.GetNear(minion->curTile))
 				if (tile->minion != nullptr && tile->minion->owner == context.card->owner && tile->minion->tribe != TRIBE_GENERAL)
 					tile->minion->AddEffect(*context.game->collections->FindEffect(EFFECT_AZURE_HORN_SHAMAN), nullptr);
 	};
@@ -338,6 +338,19 @@ Collections::Collections() {
 			context.card->owner->opponent->general->DealDamage(context.card, 2);
 	};
 
+	//Dioltas
+	effects[SKILL_DIOLTAS] = Effect(SKILL_DIOLTAS, KEYWORD_NONE, "{Dying Wish}: Summon a 0/8 Tombstone minion with Provoke near your General");
+	effects[SKILL_DIOLTAS].OnDeath = [](EffectContext context, Minion* minion) {
+		if (context.card == minion) {
+			BoardTile* tile = context.game->map.GetRandomNear(context.card->owner->general->curTile, true);
+			if (tile != nullptr) {
+				Minion* token = new Minion(*(context.game->collections->FindCard(CARD_TOMBSTONE)->GetMinion()));
+				context.game->SetContext(token, context.card->owner);
+				context.game->Summon(token, tile, false);
+			}
+		}
+	};
+
 	//Ephemeral Shroud
 	effects[SKILL_EPHEMERAL_SHROUD] = Effect(SKILL_EPHEMERAL_SHROUD, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Dispel 1 nearby space");
 	effects[SKILL_EPHEMERAL_SHROUD].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
@@ -425,6 +438,7 @@ Collections::Collections() {
 	minionList.push_back(Minion(CARD_DEATHBLIGHTER, FACTION_NEUTRAL, TRIBE_NONE, 6, 3, 4, "deathblighter", "Deathblighter", FindEffect(SKILL_DEATHBLIGHTER)));
 	minionList.push_back(Minion(CARD_DECIMUS, FACTION_NEUTRAL, TRIBE_NONE, 4, 4, 4, "decimus", "Decimus", FindEffect(SKILL_DECIMUS)));
 	minionList.push_back(Minion(CARD_DIAMOND_GOLEM, FACTION_NEUTRAL, TRIBE_GOLEM, 6, 5, 11, "diamondgolem", "Diamond Golem"));
+	minionList.push_back(Minion(CARD_DIOLTAS, FACTION_NEUTRAL, TRIBE_NONE, 4, 5, 3, "dioltas", "Dioltas", FindEffect(SKILL_DIOLTAS)));
 	minionList.push_back(Minion(CARD_DRAGONLARK, FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "dragonlark", "Dragonlark", FindEffect(SKILL_FLYING)));
 	minionList.push_back(Minion(CARD_DRYBONE_GOLEM, FACTION_NEUTRAL, TRIBE_GOLEM, 7, 10, 10, "drybonegolem", "Drybone Golem"));
 	minionList.push_back(Minion(CARD_EPHEMERAL_SHROUD, FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 1, "ephemeralshroud", "Ephemeral Shroud", FindEffect(SKILL_EPHEMERAL_SHROUD)));
@@ -435,6 +449,9 @@ Collections::Collections() {
 	minionList.push_back(Minion(CARD_KOMODO_CHARGER, FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 3, "komodocharger", "Komodo Charger"));
 	minionList.push_back(Minion(CARD_SABERSPINE_TIGER, FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "saberspinetiger", "Saberspine Tiger", FindEffect(SKILL_RUSH)));
 	minionList.push_back(Minion(CARD_SAPPHIRE_SEER, FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 2, "sapphireseer", "Sapphire Seer", FindEffect(SKILL_FORCEFIELD)));
+
+	//Token Minions
+	minionList.push_back(Minion(CARD_TOMBSTONE, FACTION_NEUTRAL, TRIBE_NONE, 3, 0, 10, "tombstone", "Tombstone", true, FindEffect(SKILL_PROVOKE)));
 
 	//Spells
 	spellList.push_back(Spell(CARD_BREATH_OF_THE_UNBORN, FACTION_ABYSSIAN, TargetMode(TARGET_MODE_ALL, TARGET_FILTER_UNIT), 4, "breathoftheunborn", "Breath of The Unborn", FindEffect(SPELL_BREATH_OF_THE_UNBORN)));
@@ -454,6 +471,9 @@ Collections::Collections() {
 
 	//Set original references
 	for (int i = 0; i < cardList.size(); ++i) { cardList[i]->original = cardList[i]; }
+
+	//Assign tokens
+	cards[CARD_DIOLTAS]->token = cards[CARD_TOMBSTONE];
 
 #pragma endregion
 
