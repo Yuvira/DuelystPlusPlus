@@ -43,6 +43,8 @@ void Renderer::SwapBuffer() {
 //Render sprite
 void Renderer::Render(Sprite sprite) { Render(sprite, sprite.pos.X, sprite.pos.Y); }
 void Renderer::Render(Sprite sprite, int x, int y) {
+	if (sprite.buffer.size() == 0)
+		return;
 	SMALL_RECT box;
 	box.Top = y;
 	box.Left = x;
