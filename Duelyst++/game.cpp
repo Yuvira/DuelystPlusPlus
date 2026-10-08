@@ -5,9 +5,9 @@
 
 //Callback constructor
 EffectCallback::EffectCallback() : EffectCallback(EffectContext(), nullptr) {}
-EffectCallback::EffectCallback(EffectContext context, BoardTile* tile) {
+EffectCallback::EffectCallback(EffectContext context, BoardTile* source) {
 	this->context = context;
-	this->tile = tile;
+	this->source = source;
 	Callback = nullptr;
 }
 EffectCallback::~EffectCallback() {}
@@ -484,15 +484,6 @@ void Game::ChangeTurn(bool newTurn) {
 
 	//Indicate turn is ending
 	endTurn = true;
-
-	//Process end of turn events
-	while (lateCallbacks.size() > 0) {
-		if (lateCallbacks[0].Callback)
-			lateCallbacks[0].Execute();
-		lateCallbacks.erase(lateCallbacks.begin());
-		if (selectable.size() > 0)
-			return;
-	}
 
 	//Draw and reset replaces
 	if (turnCount > 0)

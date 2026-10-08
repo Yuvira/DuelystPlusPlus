@@ -23,13 +23,13 @@ enum eMode {
 class EffectCallback {
 public:
 	EffectCallback();
-	EffectCallback(EffectContext context, BoardTile* tile);
+	EffectCallback(EffectContext context, BoardTile* source);
 	~EffectCallback();
-	void Execute() { if (Callback) Callback(context, tile); }
-	void Execute(BoardTile* target) { if (Callback) Callback(context, target); }
+	void Execute() { if (Callback) Callback(context, source, nullptr); }
+	void Execute(BoardTile* target) { if (Callback) Callback(context, source, target); }
 	EffectContext context;
-	BoardTile* tile;
-	void (*Callback)(EffectContext, BoardTile* tile);
+	BoardTile* source;
+	void (*Callback)(EffectContext, BoardTile* source, BoardTile* target);
 };
 
 //Pathing coords
@@ -97,7 +97,6 @@ public:
 	Map map;
 	Tile hand[7];
 	EffectCallback callback;
-	std::vector<EffectCallback> lateCallbacks;
 	std::vector<BoardTile*> highlighted;
 	std::vector<BoardTile*> moveable;
 	std::vector<BoardTile*> hostile;

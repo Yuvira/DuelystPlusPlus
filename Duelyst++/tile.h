@@ -55,6 +55,7 @@ public:
 	BoardTile* GetTile(int x, int y);
 	BoardTile* GetRandomEmpty();
 	BoardTile* GetRandomEmpty(BoardTile* ignore);
+	BoardTile* GetRandomEmpty(BoardTile* ignore1, BoardTile* ignore2);
 	BoardTile* GetRandomEmptyCorner();
 	BoardTile* GetRandomEmptyNear(BoardTile* tile);
 	std::vector<BoardTile*> GetAllNear(BoardTile* tile);

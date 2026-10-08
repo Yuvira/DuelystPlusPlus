@@ -213,10 +213,10 @@ Collections::Collections() {
 	effects[SKILL_BLOODTEAR_ALCHEMIST].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
 		context.game->HighlightSelectable(TargetMode(TARGET_MODE_ALL, TARGET_FILTER_ENEMY));
 		if (context.game->selectable.size() > 0) {
-			context.game->callback = EffectCallback(context, nullptr);
-			context.game->callback.Callback = [](EffectContext context, BoardTile* tile) {
-				if (tile->minion != nullptr)
-					tile->minion->DealDamage(context.card, 1);
+			context.game->callback = EffectCallback(context, tile);
+			context.game->callback.Callback = [](EffectContext context, BoardTile* source, BoardTile* target) {
+				if (target->minion != nullptr)
+					target->minion->DealDamage(context.card, 1);
 			};
 		}
 	};
@@ -287,10 +287,10 @@ Collections::Collections() {
 	effects[SKILL_CROSSBONES].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
 		context.game->HighlightSelectable(TargetMode(TARGET_MODE_ALL, TARGET_FILTER_ENEMY | TARGET_FILTER_RANGED));
 		if (context.game->selectable.size() > 0) {
-			context.game->callback = EffectCallback(context, nullptr);
-			context.game->callback.Callback = [](EffectContext context, BoardTile* tile) {
-				if (tile->minion != nullptr)
-					tile->minion->Destroy(context.card);
+			context.game->callback = EffectCallback(context, tile);
+			context.game->callback.Callback = [](EffectContext context, BoardTile* source, BoardTile* target) {
+				if (target->minion != nullptr)
+					target->minion->Destroy(context.card);
 			};
 		}
 	};
@@ -407,11 +407,11 @@ Collections::Collections() {
 	effects[SKILL_EPHEMERAL_SHROUD].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
 		context.game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, TARGET_FILTER_NONE), tile);
 		if (context.game->selectable.size() > 0) {
-			context.game->callback = EffectCallback(context, nullptr);
-			context.game->callback.Callback = [](EffectContext context, BoardTile* tile) {
-				tile->SetFeature(TILE_NONE);
-				if (tile->minion != nullptr)
-					tile->minion->Dispel();
+			context.game->callback = EffectCallback(context, tile);
+			context.game->callback.Callback = [](EffectContext context, BoardTile* source, BoardTile* target) {
+				target->SetFeature(TILE_NONE);
+				if (target->minion != nullptr)
+					target->minion->Dispel();
 			};
 		}
 	};
@@ -460,6 +460,22 @@ Collections::Collections() {
 	};
 	effects[EFFECT_FIRST_SWORD_OF_AKRANE] = Effect(EFFECT_FIRST_SWORD_OF_AKRANE, KEYWORD_NONE, "{Akrane's First Sword}");
 	effects[EFFECT_FIRST_SWORD_OF_AKRANE].atkBuff = 1;
+
+	//Ghost Lynx
+	effects[SKILL_GHOST_LYNX] = Effect(SKILL_GHOST_LYNX, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Teleport a nearby minion to a random space");
+	effects[SKILL_GHOST_LYNX].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
+		context.game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, TARGET_FILTER_MINION), tile);
+		if (context.game->selectable.size() > 0) {
+			context.game->callback = EffectCallback(context, tile);
+			context.game->callback.Callback = [](EffectContext context, BoardTile* source, BoardTile* target) {
+				if (target->minion != nullptr) {
+					BoardTile* tile = context.game->map.GetRandomEmpty(source, target);
+					if (tile != nullptr)
+						target->minion->MoveToPosition(tile->pos.x, tile->pos.y, true);
+				}
+			};
+		}
+	};
 
 #pragma endregion
 
@@ -542,6 +558,7 @@ Collections::Collections() {
 	minionList.push_back(Minion(CARD_FIRESTARTER, FACTION_NEUTRAL, TRIBE_ARCANYST, 5, 3, 5, "firestarter", "Firestarter", FindEffect(SKILL_FIRESTARTER)));
 	minionList.push_back(Minion(CARD_FIRE_SPITTER, FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "firespitter", "Fire Spitter", FindEffect(SKILL_RANGED)));
 	minionList.push_back(Minion(CARD_FIRST_SWORD_OF_AKRANE, FACTION_NEUTRAL, TRIBE_NONE, 6, 7, 7, "firstswordofakrane", "First Sword of Akrane", FindEffect(SKILL_FIRST_SWORD_OF_AKRANE)));
+	minionList.push_back(Minion(CARD_GHOST_LYNX, FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 1, "ghostlynx", "Ghost Lynx", FindEffect(SKILL_GHOST_LYNX)));
 	minionList.push_back(Minion(CARD_HAILSTONE_GOLEM, FACTION_NEUTRAL, TRIBE_GOLEM, 4, 4, 6, "hailstonegolem", "Hailstone Golem"));
 	minionList.push_back(Minion(CARD_KOMODO_CHARGER, FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 3, "komodocharger", "Komodo Charger"));
 	minionList.push_back(Minion(CARD_SABERSPINE_TIGER, FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "saberspinetiger", "Saberspine Tiger", FindEffect(SKILL_RUSH)));
