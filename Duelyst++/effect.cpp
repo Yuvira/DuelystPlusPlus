@@ -18,7 +18,7 @@ EffectContext::~EffectContext() {}
 
 //Effect constructors
 Effect::Effect() : Effect(EFFECT_NONE, KEYWORD_NONE, "") {}
-Effect::Effect(eEffect effect, eKeywordFlags keywords, std::string description) {
+Effect::Effect(eEffect effect, int keywords, std::string description) {
 	this->effect = effect;
 	this->keywords = keywords;
 	this->description = description;

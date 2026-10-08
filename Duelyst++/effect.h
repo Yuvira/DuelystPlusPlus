@@ -142,10 +142,10 @@ public:
 class Effect {
 public:
 	Effect();
-	Effect(eEffect effect, eKeywordFlags keywords, std::string description);
+	Effect(eEffect effect, int keywords, std::string description);
 	~Effect();
 	eEffect effect;
-	eKeywordFlags keywords;
+	int keywords;
 	std::string description;
 	int fixedCost;
 	int costBuff;
