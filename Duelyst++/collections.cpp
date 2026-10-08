@@ -323,6 +323,21 @@ Collections::Collections() {
 			context.card->owner->general->DealDamage(context.card, -1);
 	};
 
+	//Deathblighter
+	effects[SKILL_DEATHBLIGHTER] = Effect(SKILL_DEATHBLIGHTER, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Deal 3 damage to all enemy minions around it");
+	effects[SKILL_DEATHBLIGHTER].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
+		for (BoardTile* tile : context.game->map.GetNear(tile))
+			if (tile->minion != nullptr && tile->minion->owner != context.card->owner && tile->minion->tribe != TRIBE_GENERAL)
+				tile->minion->DealDamage(context.card, 3);
+	};
+
+	//Decimus
+	effects[SKILL_DECIMUS] = Effect(SKILL_DECIMUS, KEYWORD_NONE, "Whenever your opponent draws a card, deal 2 damage to the enemy General");
+	effects[SKILL_DECIMUS].OnDraw = [](EffectContext context, Card* card, bool fromDeck) {
+		if (context.card->IsOnBoard() && context.card->owner != card->owner && fromDeck)
+			context.card->owner->opponent->general->DealDamage(context.card, 2);
+	};
+
 	//Ephemeral Shroud
 	effects[SKILL_EPHEMERAL_SHROUD] = Effect(SKILL_EPHEMERAL_SHROUD, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Dispel 1 nearby space");
 	effects[SKILL_EPHEMERAL_SHROUD].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
@@ -407,6 +422,8 @@ Collections::Collections() {
 	minionList.push_back(Minion(CARD_DARK_NEMESIS, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 7, 4, 10, "darknemesis", "Dark Nemesis", FindEffect(SKILL_DARK_NEMESIS)));
 	minionList.push_back(Minion(CARD_DANCING_BLADES, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 5, 4, 6, "dancingblades", "Dancing Blades", FindEffect(SKILL_DANCING_BLADES)));
 	minionList.push_back(Minion(CARD_DAY_WATCHER, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 3, 3, 3, "daywatcher", "Day Watcher", FindEffect(SKILL_DAY_WATCHER)));
+	minionList.push_back(Minion(CARD_DEATHBLIGHTER, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 6, 3, 4, "deathblighter", "Deathblighter", FindEffect(SKILL_DEATHBLIGHTER)));
+	minionList.push_back(Minion(CARD_DECIMUS, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 4, 4, 4, "decimus", "Decimus", FindEffect(SKILL_DECIMUS)));
 	minionList.push_back(Minion(CARD_DIAMOND_GOLEM, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_GOLEM, 6, 5, 11, "diamondgolem", "Diamond Golem"));
 	minionList.push_back(Minion(CARD_DRAGONLARK, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "dragonlark", "Dragonlark", FindEffect(SKILL_FLYING)));
 	minionList.push_back(Minion(CARD_DRYBONE_GOLEM, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_GOLEM, 7, 10, 10, "drybonegolem", "Drybone Golem"));
