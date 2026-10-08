@@ -378,6 +378,30 @@ Collections::Collections() {
 		}
 	};
 
+	//Eclipse
+	effects[SKILL_ECLIPSE] = Effect(SKILL_ECLIPSE, KEYWORD_NONE, "Whenever this minion takes damage, it deals that much damage to the enemy General");
+	effects[SKILL_ECLIPSE].OnDamage = [](EffectContext context, Card* source, Minion* target, int damage) {
+		if (context.card->IsOnBoard() && context.card == target)
+			context.card->owner->opponent->general->DealDamage(context.card, damage);
+	};
+
+	//Emerald Rejuvenator
+	effects[SKILL_EMERALD_REJUVENATOR] = Effect(SKILL_EMERALD_REJUVENATOR, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Restore 4 Health to BOTH Generals");
+	effects[SKILL_EMERALD_REJUVENATOR].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
+		context.card->owner->general->DealDamage(context.card, -4);
+		context.card->owner->opponent->general->DealDamage(context.card, -4);
+	};
+
+	//Envybaer
+	effects[SKILL_ENVYBAER] = Effect(SKILL_ENVYBAER, KEYWORD_NONE, "Whenever this minion damages an enemy, teleport that enemy to a random corner");
+	effects[SKILL_ENVYBAER].OnDamage = [](EffectContext context, Card* source, Minion* target, int damage) {
+		if (context.card->IsOnBoard() && context.card == source && context.card->owner != target->owner) {
+			BoardTile* tile = context.game->map.GetRandomCorner();
+			if (tile != nullptr)
+				target->MoveToPosition(tile->pos.x, tile->pos.y, true);
+		}
+	};
+
 	//Ephemeral Shroud
 	effects[SKILL_EPHEMERAL_SHROUD] = Effect(SKILL_EPHEMERAL_SHROUD, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Dispel 1 nearby space");
 	effects[SKILL_EPHEMERAL_SHROUD].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
@@ -390,6 +414,13 @@ Collections::Collections() {
 					tile->minion->Dispel();
 			};
 		}
+	};
+
+	//E'Xun
+	effects[SKILL_EXUN] = Effect(SKILL_EXUN, KEYWORD_FORCEFIELD, "{Forcefield}|Whenever this minion attacks or is attacked, draw a card");
+	effects[SKILL_EXUN].OnAttack = [](EffectContext context, Minion* source, Minion* target, int& damage, bool counter) {
+		if (context.card->IsOnBoard() && (context.card == source || context.card == target) && !counter)
+			context.card->owner->Draw();
 	};
 
 	//Facestriker
@@ -470,7 +501,11 @@ Collections::Collections() {
 	minionList.push_back(Minion(CARD_DREAMGAZER, FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 1, "dreamgazer", "Dreangazer", FindEffect(SKILL_DREAMGAZER)));
 	minionList.push_back(Minion(CARD_DRYBONE_GOLEM, FACTION_NEUTRAL, TRIBE_GOLEM, 7, 10, 10, "drybonegolem", "Drybone Golem"));
 	minionList.push_back(Minion(CARD_DUST_WAILER, FACTION_NEUTRAL, TRIBE_NONE, 6, 3, 4, "dustwailer", "Dust Wailer", FindEffect(SKILL_DUST_WAILER)));
+	minionList.push_back(Minion(CARD_ECLIPSE, FACTION_NEUTRAL, TRIBE_ARCANYST, 6, 3, 7, "eclipse", "Eclipse", FindEffect(SKILL_ECLIPSE)));
+	minionList.push_back(Minion(CARD_EMERALD_REJUVENATOR, FACTION_NEUTRAL, TRIBE_NONE, 4, 4, 4, "emeraldrejuvenator", "Emerald Rejuvenator", FindEffect(SKILL_EMERALD_REJUVENATOR)));
+	minionList.push_back(Minion(CARD_ENVYBAER, FACTION_NEUTRAL, TRIBE_NONE, 5, 3, 10, "envybaer", "Envybaer", FindEffect(SKILL_ENVYBAER)));
 	minionList.push_back(Minion(CARD_EPHEMERAL_SHROUD, FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 1, "ephemeralshroud", "Ephemeral Shroud", FindEffect(SKILL_EPHEMERAL_SHROUD)));
+	minionList.push_back(Minion(CARD_EXUN, FACTION_NEUTRAL, TRIBE_NONE, 7, 5, 5, "exun", "E'Xun", FindEffect(SKILL_EXUN)));
 	minionList.push_back(Minion(CARD_FACESTRIKER, FACTION_NEUTRAL, TRIBE_NONE, 6, 4, 6, "facestriker", "Facestriker", FindEffect(SKILL_FACESTRIKER)));
 	minionList.push_back(Minion(CARD_FIREBLAZER, FACTION_NEUTRAL, TRIBE_NONE, 5, 5, 5, "fireblazer", "Fireblazer", FindEffect(SKILL_PROVOKE)));
 	minionList.push_back(Minion(CARD_FIRE_SPITTER, FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "firespitter", "Fire Spitter", FindEffect(SKILL_RANGED)));
