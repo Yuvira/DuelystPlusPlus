@@ -337,6 +337,7 @@ void Game::Update() {
 				minions[i]->curTile->minion = nullptr;
 			minions[i]->curTile = nullptr;
 			grave.push_back(minions[i]);
+			destroyedMinions.push_back(minions[i]);
 			minions.erase(minions.begin() + i);
 			--i;
 		}

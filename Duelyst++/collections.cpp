@@ -646,6 +646,24 @@ Collections::Collections() {
 		}
 	};
 
+	//Keeper of the Vale
+	effects[SKILL_KEEPER_OF_THE_VALE] = Effect(SKILL_KEEPER_OF_THE_VALE, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Summon a random non-token friendly minion destroyed this game nearby");
+	effects[SKILL_KEEPER_OF_THE_VALE].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
+		BoardTile* target = context.game->map.GetRandomEmptyNear(tile);
+		if (target != nullptr) {
+			std::vector<Card*> minions;
+			for (Card* graveCard : context.game->destroyedMinions)
+				if (!graveCard->isToken && graveCard->IsMinion() && graveCard->owner == context.card->owner)
+					minions.push_back(graveCard);
+			if (minions.size() > 0) {
+				int i = rand() % minions.size();
+				Minion* copy = new Minion(*(minions[i]->original->GetMinion()));
+				context.game->SetContext(copy, context.card->owner);
+				context.game->Summon(copy, target, false);
+			}
+		}
+	};
+
 #pragma endregion
 
 #pragma region Spells
@@ -739,6 +757,7 @@ Collections::Collections() {
 	minionList.push_back(Minion(CARD_IRONCLAD, FACTION_NEUTRAL, TRIBE_NONE, 5, 4, 3, "ironclad", "Ironclad", FindEffect(SKILL_IRONCLAD)));
 	minionList.push_back(Minion(CARD_JAX_TRUESIGHT, FACTION_NEUTRAL, TRIBE_NONE, 6, 1, 1, "jaxtruesight", "Jax Truesight", FindEffect(SKILL_JAX_TRUESIGHT)));
 	minionList.push_back(Minion(CARD_JAXI, FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 1, "jaxi", "Jaxi", FindEffect(SKILL_JAXI)));
+	minionList.push_back(Minion(CARD_KEEPER_OF_THE_VALE, FACTION_NEUTRAL, TRIBE_NONE, 5, 3, 4, "keeperofthevale", "Keeper of the Vale", FindEffect(SKILL_KEEPER_OF_THE_VALE)));
 	minionList.push_back(Minion(CARD_KOMODO_CHARGER, FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 3, "komodocharger", "Komodo Charger"));
 	minionList.push_back(Minion(CARD_SABERSPINE_TIGER, FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "saberspinetiger", "Saberspine Tiger", FindEffect(SKILL_RUSH)));
 	minionList.push_back(Minion(CARD_SAPPHIRE_SEER, FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 2, "sapphireseer", "Sapphire Seer", FindEffect(SKILL_FORCEFIELD)));

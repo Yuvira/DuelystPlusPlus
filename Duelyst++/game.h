@@ -81,9 +81,10 @@ public:
 	void DrawArrow(int type, int x, int y, Renderer& renderer);
 	void SetContext(Card* card, Player* player);
 	bool CanMove(int x, int y);
-	std::vector<Card*> grave;
-	std::vector<Spell*> spellHistory;
 	std::vector<Minion*> minions;
+	std::vector<Card*> grave;
+	std::vector<Minion*> destroyedMinions;
+	std::vector<Spell*> spellHistory;
 	Sprite light;
 	Sprite board;
 	Sprite chars[10];
