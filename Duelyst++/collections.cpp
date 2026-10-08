@@ -564,6 +564,31 @@ Collections::Collections() {
 	effects[EFFECT_GOLEM_METALLURGIST] = Effect(EFFECT_GOLEM_METALLURGIST, KEYWORD_NONE, "{Metallurgy}");
 	effects[EFFECT_GOLEM_METALLURGIST].costBuff = -1;
 
+	//Golem Vanquisher
+	effects[SKILL_GOLEM_VANQUISHER] = Effect(SKILL_GOLEM_VANQUISHER, KEYWORD_PROVOKE, "{Provoke}|Your other Golem minions have {Provoke}");
+	effects[SKILL_GOLEM_VANQUISHER].OnAddThis = [](EffectContext context) {
+		for (Minion* minion : context.game->minions)
+			if (context.card->owner == minion->owner && minion != context.card && minion->tribe == TRIBE_GOLEM)
+				minion->AddEffect(*context.game->collections->FindEffect(EFFECT_GOLEM_VANQUISHER), context.effect);
+	};
+	effects[SKILL_GOLEM_VANQUISHER].OnRemoveThis = [](EffectContext context) {
+		for (Minion* minion : context.game->minions)
+			minion->RemoveEffectsFromSource(context.effect);
+	};
+	effects[SKILL_GOLEM_VANQUISHER].OnSummon = [](EffectContext context, Minion* source, bool fromActionBar) {
+		if (context.card->IsOnBoard() && context.card != source && context.card->owner == source->owner && source->tribe == TRIBE_GOLEM)
+			source->AddEffect(*context.game->collections->FindEffect(EFFECT_GOLEM_VANQUISHER), context.effect);
+	};
+	effects[SKILL_GOLEM_VANQUISHER].OnEffectsChanged = [](EffectContext context, Card* card) {
+		if (context.card->IsOnBoard() && card->IsOnBoard() && context.card->owner == card->owner && context.card != card) {
+			if (card->GetMinion()->tribe == TRIBE_GOLEM)
+				card->AddEffect(*context.game->collections->FindEffect(EFFECT_GOLEM_VANQUISHER), context.effect);
+			else
+				card->RemoveEffectsFromSource(context.effect);
+		}
+	};
+	effects[EFFECT_GOLEM_VANQUISHER] = Effect(EFFECT_GOLEM_VANQUISHER, KEYWORD_PROVOKE, "{Golem Vanquisher}|{Provoke}");
+
 	//Grove Lion
 	effects[SKILL_GROVE_LION] = Effect(SKILL_GROVE_LION, KEYWORD_NONE, "While this minion is on the battlefield, your General has {Forcefield}");
 	effects[SKILL_GROVE_LION].OnAddThis = [](EffectContext context) {
@@ -573,6 +598,28 @@ Collections::Collections() {
 		context.card->owner->general->RemoveEffectsFromSource(context.effect);
 	};
 	effects[EFFECT_GROVE_LION] = Effect(EFFECT_GROVE_LION, KEYWORD_FORCEFIELD, "{Grove Lion}|{Forcefield}");
+
+	//Healing Mystic
+	effects[SKILL_HEALING_MYSTIC] = Effect(SKILL_HEALING_MYSTIC, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Restore 2 Health to anything");
+	effects[SKILL_HEALING_MYSTIC].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
+		context.game->HighlightSelectable(TargetMode(TARGET_MODE_ALL, TARGET_FILTER_UNIT));
+		if (context.game->selectable.size() > 0) {
+			context.game->callback = EffectCallback(context, tile);
+			context.game->callback.Callback = [](EffectContext context, BoardTile* source, BoardTile* target) {
+				if (target->minion != nullptr)
+					target->minion->DealDamage(context.card, -2);
+			};
+		}
+	};
+
+	//Ironclad
+	effects[SKILL_IRONCLAD] = Effect(SKILL_IRONCLAD, KEYWORD_NONE, "{Dying Wish}: Dispel all enemy minions");
+	effects[SKILL_IRONCLAD].OnDeath = [](EffectContext context, Minion* minion) {
+		if (context.card == minion)
+			for (Minion* target : context.game->minions)
+				if (target->owner != minion->owner && target->tribe != TRIBE_GENERAL)
+					target->Dispel();
+	};
 
 #pragma endregion
 
@@ -660,8 +707,11 @@ Collections::Collections() {
 	minionList.push_back(Minion(CARD_GHOST_LYNX, FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 1, "ghostlynx", "Ghost Lynx", FindEffect(SKILL_GHOST_LYNX)));
 	minionList.push_back(Minion(CARD_GOLDEN_JUSTICAR, FACTION_NEUTRAL, TRIBE_WARMASTER, 5, 4, 6, "goldenjusticar", "Golden Justicar", FindEffect(SKILL_GOLDEN_JUSTICAR)));
 	minionList.push_back(Minion(CARD_GOLEM_METALLURGIST, FACTION_NEUTRAL, TRIBE_GOLEM, 2, 2, 3, "golemmetallurgist", "Golem Metallurgist", FindEffect(SKILL_GOLEM_METALLURGIST)));
+	minionList.push_back(Minion(CARD_GOLEM_VANQUISHER, FACTION_NEUTRAL, TRIBE_GOLEM, 3, 2, 4, "golemvanquisher", "Golem Vanquisher", FindEffect(SKILL_GOLEM_VANQUISHER)));
 	minionList.push_back(Minion(CARD_GROVE_LION, FACTION_NEUTRAL, TRIBE_NONE, 6, 5, 5, "grovelion", "Grove Lion", FindEffect(SKILL_GROVE_LION)));
 	minionList.push_back(Minion(CARD_HAILSTONE_GOLEM, FACTION_NEUTRAL, TRIBE_GOLEM, 4, 4, 6, "hailstonegolem", "Hailstone Golem"));
+	minionList.push_back(Minion(CARD_HEALING_MYSTIC, FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 3, "healingmystic", "Healing Mystic", FindEffect(SKILL_HEALING_MYSTIC)));
+	minionList.push_back(Minion(CARD_IRONCLAD, FACTION_NEUTRAL, TRIBE_NONE, 5, 4, 3, "ironclad", "Ironclad", FindEffect(SKILL_IRONCLAD)));
 	minionList.push_back(Minion(CARD_KOMODO_CHARGER, FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 3, "komodocharger", "Komodo Charger"));
 	minionList.push_back(Minion(CARD_SABERSPINE_TIGER, FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "saberspinetiger", "Saberspine Tiger", FindEffect(SKILL_RUSH)));
 	minionList.push_back(Minion(CARD_SAPPHIRE_SEER, FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 2, "sapphireseer", "Sapphire Seer", FindEffect(SKILL_FORCEFIELD)));
