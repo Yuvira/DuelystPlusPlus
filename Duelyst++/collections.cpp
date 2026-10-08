@@ -461,6 +461,21 @@ Collections::Collections() {
 	effects[EFFECT_FIRST_SWORD_OF_AKRANE] = Effect(EFFECT_FIRST_SWORD_OF_AKRANE, KEYWORD_NONE, "{Akrane's First Sword}");
 	effects[EFFECT_FIRST_SWORD_OF_AKRANE].atkBuff = 1;
 
+	//Flameblood Warlock
+	effects[SKILL_FLAMEBLOOD_WARLOCK] = Effect(SKILL_FLAMEBLOOD_WARLOCK, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Deal 3 damage to BOTH Generals");
+	effects[SKILL_FLAMEBLOOD_WARLOCK].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
+		context.card->owner->general->DealDamage(context.card, 3);
+		context.card->owner->opponent->general->DealDamage(context.card, 3);
+	};
+
+	//Deathblighter
+	effects[SKILL_FROSTBONE_NAGA] = Effect(SKILL_FROSTBONE_NAGA, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Deal 2 damage to everything around it");
+	effects[SKILL_FROSTBONE_NAGA].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
+		for (BoardTile* tile : context.game->map.GetAllNear(tile))
+			if (tile->minion != nullptr)
+				tile->minion->DealDamage(context.card, 2);
+	};
+
 	//Ghost Lynx
 	effects[SKILL_GHOST_LYNX] = Effect(SKILL_GHOST_LYNX, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Teleport a nearby minion to a random space");
 	effects[SKILL_GHOST_LYNX].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
@@ -558,6 +573,8 @@ Collections::Collections() {
 	minionList.push_back(Minion(CARD_FIRESTARTER, FACTION_NEUTRAL, TRIBE_ARCANYST, 5, 3, 5, "firestarter", "Firestarter", FindEffect(SKILL_FIRESTARTER)));
 	minionList.push_back(Minion(CARD_FIRE_SPITTER, FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "firespitter", "Fire Spitter", FindEffect(SKILL_RANGED)));
 	minionList.push_back(Minion(CARD_FIRST_SWORD_OF_AKRANE, FACTION_NEUTRAL, TRIBE_NONE, 6, 7, 7, "firstswordofakrane", "First Sword of Akrane", FindEffect(SKILL_FIRST_SWORD_OF_AKRANE)));
+	minionList.push_back(Minion(CARD_FLAMEBLOOD_WARLOCK, FACTION_NEUTRAL, TRIBE_NONE, 2, 3, 1, "flamebloodwarlock", "Flameblood Warlock", FindEffect(SKILL_FLAMEBLOOD_WARLOCK)));
+	minionList.push_back(Minion(CARD_FROSTBONE_NAGA, FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 3, "frostbonenaga", "Frostbone Naga", FindEffect(SKILL_FROSTBONE_NAGA)));
 	minionList.push_back(Minion(CARD_GHOST_LYNX, FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 1, "ghostlynx", "Ghost Lynx", FindEffect(SKILL_GHOST_LYNX)));
 	minionList.push_back(Minion(CARD_HAILSTONE_GOLEM, FACTION_NEUTRAL, TRIBE_GOLEM, 4, 4, 6, "hailstonegolem", "Hailstone Golem"));
 	minionList.push_back(Minion(CARD_KOMODO_CHARGER, FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 3, "komodocharger", "Komodo Charger"));
