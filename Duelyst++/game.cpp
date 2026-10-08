@@ -8,7 +8,7 @@ EffectCallback::EffectCallback() : EffectCallback(EffectContext(), nullptr) {}
 EffectCallback::EffectCallback(EffectContext context, BoardTile* tile) {
 	this->context = context;
 	this->tile = tile;
-	callback = nullptr;
+	Callback = nullptr;
 }
 EffectCallback::~EffectCallback() {}
 
@@ -105,7 +105,7 @@ void Game::RenderGame(Renderer& renderer) {
 		minions[i]->Render(renderer);
 
 	//Render active minion card while selecting opening gambit targets
-	if (activeCard != nullptr && activeCard->GetMinion() != nullptr && mode == MODE_SELECT && callback.callback)
+	if (activeCard != nullptr && activeCard->GetMinion() != nullptr && mode == MODE_SELECT && callback.Callback)
 		activeCard->GetMinion()->Render(renderer);
 
 	//Move mode indicators
@@ -247,7 +247,7 @@ void Game::Input() {
 
 		//Use card at selection
 		else if (asciiVal == 32) {
-			if (callback.callback)
+			if (callback.Callback)
 				UseEffect();
 			else
 				UseCard();
@@ -374,7 +374,7 @@ void Game::UseEffect() {
 	selectable.clear();
 	selectionIdx = -1;
 	mode = MODE_NONE;
-	if (callback.callback) {
+	if (callback.Callback) {
 		callback.Execute(tile);
 		callback = EffectCallback();
 	}
@@ -435,7 +435,7 @@ void Game::ChangeTurn(bool newTurn) {
 
 	//Process end of turn events
 	while (lateCallbacks.size() > 0) {
-		if (lateCallbacks[0].callback)
+		if (lateCallbacks[0].Callback)
 			lateCallbacks[0].Execute();
 		lateCallbacks.erase(lateCallbacks.begin());
 		if (selectable.size() > 0)

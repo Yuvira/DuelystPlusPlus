@@ -155,22 +155,22 @@ public:
 	int atkBuff;
 	int hpBuff;
 	Effect* source;
-	std::function<void(EffectContext)> OnAddThis;
-	std::function<void(EffectContext)> OnRemoveThis;
-	std::function<void(EffectContext, BoardTile* tile)> OnPreCastThis;
-	std::function<void(EffectContext, BoardTile* tile)> OnResolveThis;
-	std::function<void(EffectContext, Card* card, BoardTile* tile)> OnCast;
-	std::function<void(EffectContext, Minion* minion, bool actionBar)> OnSummon;
-	std::function<void(EffectContext, Minion* minion)> OnDeath;
-	std::function<void(EffectContext, Minion* source, Minion* target, int& damage, bool counter)> OnAttack;
-	std::function<void(EffectContext, Card* source, Minion* target, int damage)> OnDamage;
-	std::function<void(EffectContext, Card* source, Minion* target, int damage)> OnHeal;
-	std::function<void(EffectContext, Minion* minion, bool byEffect)> OnMove;
-	std::function<void(EffectContext, Card* card, bool fromDeck)> OnDraw;
-	std::function<void(EffectContext, Card* card)> OnReplace;
-	std::function<void(EffectContext, Card* card)> OnEffectsChanged;
-	std::function<void(EffectContext, Player* player)> OnTurnStart;
-	std::function<void(EffectContext, Player* player)> OnTurnEnd;
+	void (*OnAddThis)(EffectContext) = nullptr;
+	void (*OnRemoveThis)(EffectContext) = nullptr;
+	void (*OnPreCastThis)(EffectContext, BoardTile* tile) = nullptr;
+	void (*OnResolveThis)(EffectContext, BoardTile* tile) = nullptr;
+	void (*OnCast)(EffectContext, Card* card, BoardTile* tile) = nullptr;
+	void (*OnSummon)(EffectContext, Minion* minion, bool actionBar) = nullptr;
+	void (*OnDeath)(EffectContext, Minion* minion) = nullptr;
+	void (*OnAttack)(EffectContext, Minion* source, Minion* target, int& damage, bool counter) = nullptr;
+	void (*OnDamage)(EffectContext, Card* source, Minion* target, int damage) = nullptr;
+	void (*OnHeal)(EffectContext, Card* source, Minion* target, int damage) = nullptr;
+	void (*OnMove)(EffectContext, Minion* minion, bool byEffect) = nullptr;
+	void (*OnDraw)(EffectContext, Card* card, bool fromDeck) = nullptr;
+	void (*OnReplace)(EffectContext, Card* card) = nullptr;
+	void (*OnEffectsChanged)(EffectContext, Card* card) = nullptr;
+	void (*OnTurnStart)(EffectContext, Player* player) = nullptr;
+	void (*OnTurnEnd)(EffectContext, Player* player) = nullptr;
 	bool IsContinuous() { return source != nullptr; }
 };
 

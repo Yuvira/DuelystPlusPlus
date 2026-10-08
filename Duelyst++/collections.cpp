@@ -214,7 +214,7 @@ Collections::Collections() {
 		context.game->HighlightSelectable(TargetMode(TARGET_MODE_ALL, TARGET_FILTER_ENEMY));
 		if (context.game->selectable.size() > 0) {
 			context.game->callback = EffectCallback(context, nullptr);
-			context.game->callback.callback = [](EffectContext context, BoardTile* tile) {
+			context.game->callback.Callback = [](EffectContext context, BoardTile* tile) {
 				if (tile->minion != nullptr)
 					tile->minion->DealDamage(context.card, 1);
 			};
@@ -288,7 +288,7 @@ Collections::Collections() {
 		context.game->HighlightSelectable(TargetMode(TARGET_MODE_ALL, TARGET_FILTER_ENEMY | TARGET_FILTER_RANGED));
 		if (context.game->selectable.size() > 0) {
 			context.game->callback = EffectCallback(context, nullptr);
-			context.game->callback.callback = [](EffectContext context, BoardTile* tile) {
+			context.game->callback.Callback = [](EffectContext context, BoardTile* tile) {
 				if (tile->minion != nullptr)
 					tile->minion->Destroy(context.card);
 			};
@@ -329,7 +329,7 @@ Collections::Collections() {
 		context.game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, TARGET_FILTER_NONE), tile);
 		if (context.game->selectable.size() > 0) {
 			context.game->callback = EffectCallback(context, nullptr);
-			context.game->callback.callback = [](EffectContext context, BoardTile* tile) {
+			context.game->callback.Callback = [](EffectContext context, BoardTile* tile) {
 				tile->SetFeature(TILE_NONE);
 				if (tile->minion != nullptr)
 					tile->minion->Dispel();

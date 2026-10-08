@@ -24,11 +24,11 @@ public:
 	EffectCallback();
 	EffectCallback(EffectContext context, BoardTile* tile);
 	~EffectCallback();
-	void Execute() { callback(context, tile); }
-	void Execute(BoardTile* target) { callback(context, target); }
+	void Execute() { if (Callback) Callback(context, tile); }
+	void Execute(BoardTile* target) { if (Callback) Callback(context, target); }
 	EffectContext context;
 	BoardTile* tile;
-	std::function<void(EffectContext, BoardTile*)> callback;
+	void (*Callback)(EffectContext, BoardTile* tile);
 };
 
 //Pathing coords
