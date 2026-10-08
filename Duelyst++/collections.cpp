@@ -272,6 +272,16 @@ Collections::Collections() {
 		}
 	};
 
+	//Crimson Oculus
+	effects[SKILL_CRIMSON_OCULUS] = Effect(SKILL_CRIMSON_OCULUS, KEYWORD_NONE, "Whenever opponent summons a minion, this minion gets +1/+1");
+	effects[SKILL_CRIMSON_OCULUS].OnSummon = [](EffectContext context, Minion* minion, bool actionBar) {
+		if (context.card->IsOnBoard() && context.card->owner != minion->owner)
+			context.card->AddEffect(context.game->collections->FindEffect(EFFECT_CRIMSON_OCULUS), nullptr);
+	};
+	effects[EFFECT_CRIMSON_OCULUS] = Effect(EFFECT_CRIMSON_OCULUS, KEYWORD_NONE, "{Crimson Oculus}");
+	effects[EFFECT_CRIMSON_OCULUS].atkBuff = 1;
+	effects[EFFECT_CRIMSON_OCULUS].hpBuff = 1;
+
 	//Crossbones
 	effects[SKILL_CROSSBONES] = Effect(SKILL_CROSSBONES, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Destroy an enemy minion with Ranged");
 	effects[SKILL_CROSSBONES].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
@@ -293,6 +303,24 @@ Collections::Collections() {
 		BoardTile* target = context.game->map.GetTile(x, tile->pos.y);
 		if (target != nullptr && target->minion != nullptr && target->minion->tribe != TRIBE_GENERAL)
 			target->minion->DealDamage(context.card, 3);
+	};
+
+	//Dark Nemesis
+	effects[SKILL_DARK_NEMESIS] = Effect(SKILL_DARK_NEMESIS, KEYWORD_NONE, "At the start of your turn, deal 4 damage to the enemy General and this minion gains +4 Attack");
+	effects[SKILL_DARK_NEMESIS].OnTurnStart = [](EffectContext context, Player* player) {
+		if (context.card->IsOnBoard() && context.card->owner == player) {
+			context.card->owner->opponent->general->DealDamage(context.card, 4);
+			context.card->AddEffect(context.game->collections->FindEffect(EFFECT_DARK_NEMESIS), nullptr);
+		}
+	};
+	effects[EFFECT_DARK_NEMESIS] = Effect(EFFECT_DARK_NEMESIS, KEYWORD_NONE, "{Dark Nemesis}");
+	effects[EFFECT_DARK_NEMESIS].atkBuff = 4;
+
+	//Day Watcher
+	effects[SKILL_DAY_WATCHER] = Effect(SKILL_DAY_WATCHER, KEYWORD_NONE, "Whenever a friendly minion attacks, restore 1 Health to your General");
+	effects[SKILL_DAY_WATCHER].OnAttack = [](EffectContext context, Minion* source, Minion* target, int& damage, bool counter) {
+		if (context.card->IsOnBoard() && context.card->owner == source->owner && source->tribe != TRIBE_GENERAL && !counter)
+			context.card->owner->general->DealDamage(context.card, -1);
 	};
 
 	//Ephemeral Shroud
@@ -373,9 +401,12 @@ Collections::Collections() {
 	minionList.push_back(Minion(CARD_CAPTAIN_HANK_HART, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 4, 2, 4, "captainhankhart", "Captain Hank Hart", FindEffect(SKILL_CAPTAIN_HANK_HART)));
 	minionList.push_back(Minion(CARD_CHAKKRAM, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 5, 5, 5, "chakkram", "Chakkram", FindEffect(SKILL_CHAKKRAM)));
 	minionList.push_back(Minion(CARD_CHAOS_ELEMENTAL, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 3, 4, 4, "chaoselemental", "Chaos Elemental", FindEffect(SKILL_CHAOS_ELEMENTAL)));
+	minionList.push_back(Minion(CARD_CRIMSON_OCULUS, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 3, "crimsonoculus", "Crimson Oculus", FindEffect(SKILL_CRIMSON_OCULUS)));
 	minionList.push_back(Minion(CARD_CROSSBONES, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 3, 3, 3, "crossbones", "Crossbones", FindEffect(SKILL_CROSSBONES)));
 	minionList.push_back(Minion(CARD_DAGGER_KIRI, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 8, "daggerkiri", "Dagger Kiri", FindEffect(SKILL_CELERITY)));
+	minionList.push_back(Minion(CARD_DARK_NEMESIS, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 7, 4, 10, "darknemesis", "Dark Nemesis", FindEffect(SKILL_DARK_NEMESIS)));
 	minionList.push_back(Minion(CARD_DANCING_BLADES, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 5, 4, 6, "dancingblades", "Dancing Blades", FindEffect(SKILL_DANCING_BLADES)));
+	minionList.push_back(Minion(CARD_DAY_WATCHER, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 3, 3, 3, "daywatcher", "Day Watcher", FindEffect(SKILL_DAY_WATCHER)));
 	minionList.push_back(Minion(CARD_DIAMOND_GOLEM, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_GOLEM, 6, 5, 11, "diamondgolem", "Diamond Golem"));
 	minionList.push_back(Minion(CARD_DRAGONLARK, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "dragonlark", "Dragonlark", FindEffect(SKILL_FLYING)));
 	minionList.push_back(Minion(CARD_DRYBONE_GOLEM, CARDTAG_NONE, FACTION_NEUTRAL, TRIBE_GOLEM, 7, 10, 10, "drybonegolem", "Drybone Golem"));
