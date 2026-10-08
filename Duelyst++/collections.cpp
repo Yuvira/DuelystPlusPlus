@@ -116,7 +116,7 @@ Collections::Collections() {
 	effects[SKILL_ASH_MEPHYT].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
 		if (context.card->IsMinion()) {
 			for (int i = 0; i < 2; ++i) {
-				BoardTile* newTile = context.game->map.GetRandom(tile);
+				BoardTile* newTile = context.game->map.GetRandomEmpty(tile);
 				if (newTile != nullptr) {
 					Minion* copy = new Minion(*(context.card->original->GetMinion()));
 					context.game->SetContext(copy, context.card->owner);
@@ -147,7 +147,7 @@ Collections::Collections() {
 	effects[SKILL_AZURE_HORN_SHAMAN] = Effect(SKILL_AZURE_HORN_SHAMAN, KEYWORD_NONE, "{Dying Wish}: Give +4 Health to friendly minions around it");
 	effects[SKILL_AZURE_HORN_SHAMAN].OnDeath = [](EffectContext context, Minion* minion) {
 		if (context.card == minion)
-			for (BoardTile* tile : context.game->map.GetNear(minion->curTile))
+			for (BoardTile* tile : context.game->map.GetAllNear(minion->curTile))
 				if (tile->minion != nullptr && tile->minion->owner == context.card->owner && tile->minion->tribe != TRIBE_GENERAL)
 					tile->minion->AddEffect(*context.game->collections->FindEffect(EFFECT_AZURE_HORN_SHAMAN), nullptr);
 	};
@@ -169,7 +169,7 @@ Collections::Collections() {
 	effects[SKILL_BLACK_LOCUST] = Effect(SKILL_BLACK_LOCUST, KEYWORD_FLYING, "{Flying}|After this minion moves, summon a Black Locust nearby");
 	effects[SKILL_BLACK_LOCUST].OnMove = [](EffectContext context, Minion* minion, bool byEffect) {
 		if (context.card->IsMinion() && context.card == minion && !byEffect) {
-			BoardTile* tile = context.game->map.GetRandomNear(minion->curTile, true);
+			BoardTile* tile = context.game->map.GetRandomEmptyNear(minion->curTile);
 			if (tile != nullptr) {
 				Minion* copy = new Minion(*(context.card->original->GetMinion()));
 				context.game->SetContext(copy, context.card->owner);
@@ -232,7 +232,7 @@ Collections::Collections() {
 	effects[SKILL_BONEREAPER] = Effect(SKILL_BONEREAPER, KEYWORD_PROVOKE, "{Provoke}|At the end of your turn, deal 2 damage to all nearby enemy minions");
 	effects[SKILL_BONEREAPER].OnTurnEnd = [](EffectContext context, Player* player) {
 		if (context.card->IsMinion() && context.card->IsOnBoard() && context.card->owner == player) {
-			for (BoardTile* tile : context.game->map.GetNear(context.card->GetMinion()->curTile))
+			for (BoardTile* tile : context.game->map.GetAllNear(context.card->GetMinion()->curTile))
 				if (tile->minion != nullptr && tile->minion->owner != context.card->owner && tile->minion->tribe != TRIBE_GENERAL)
 					tile->minion->DealDamage(context.card, 2);
 		}
@@ -266,7 +266,7 @@ Collections::Collections() {
 	effects[SKILL_CHAOS_ELEMENTAL] = Effect(SKILL_CHAOS_ELEMENTAL, KEYWORD_NONE, "Whenever this minion takes damage, it randomly teleports");
 	effects[SKILL_CHAOS_ELEMENTAL].OnDamage = [](EffectContext context, Card* source, Minion* target, int damage) {
 		if (context.card == target) {
-			BoardTile* tile = context.game->map.GetRandom(context.card->GetMinion()->curTile);
+			BoardTile* tile = context.game->map.GetRandomEmpty(context.card->GetMinion()->curTile);
 			if (tile != nullptr)
 				context.card->GetMinion()->MoveToPosition(tile->pos.x, tile->pos.y, true);
 		}
@@ -326,7 +326,7 @@ Collections::Collections() {
 	//Deathblighter
 	effects[SKILL_DEATHBLIGHTER] = Effect(SKILL_DEATHBLIGHTER, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Deal 3 damage to all enemy minions around it");
 	effects[SKILL_DEATHBLIGHTER].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
-		for (BoardTile* tile : context.game->map.GetNear(tile))
+		for (BoardTile* tile : context.game->map.GetAllNear(tile))
 			if (tile->minion != nullptr && tile->minion->owner != context.card->owner && tile->minion->tribe != TRIBE_GENERAL)
 				tile->minion->DealDamage(context.card, 3);
 	};
@@ -342,7 +342,7 @@ Collections::Collections() {
 	effects[SKILL_DIOLTAS] = Effect(SKILL_DIOLTAS, KEYWORD_NONE, "{Dying Wish}: Summon a 0/8 Tombstone minion with Provoke near your General");
 	effects[SKILL_DIOLTAS].OnDeath = [](EffectContext context, Minion* minion) {
 		if (context.card == minion) {
-			BoardTile* tile = context.game->map.GetRandomNear(context.card->owner->general->curTile, true);
+			BoardTile* tile = context.game->map.GetRandomEmptyNear(context.card->owner->general->curTile);
 			if (tile != nullptr) {
 				Minion* token = new Minion(*(context.game->collections->FindCard(CARD_TOMBSTONE)->GetMinion()));
 				context.game->SetContext(token, context.card->owner);
@@ -355,7 +355,7 @@ Collections::Collections() {
 	effects[SKILL_DREAMGAZER] = Effect(SKILL_DREAMGAZER, KEYWORD_NONE, "When you replace this card, summon it nearby. Your General takes 2 damage");
 	effects[SKILL_DREAMGAZER].OnReplace = [](EffectContext context, Card* card, bool& sendToDeck) {
 		if (context.card == card && context.card->IsMinion()) {
-			BoardTile* tile = context.game->map.GetRandomNear(context.card->owner->general->curTile, true);
+			BoardTile* tile = context.game->map.GetRandomEmptyNear(context.card->owner->general->curTile);
 			if (tile != nullptr) {
 				context.game->Summon(context.card, tile, false);
 				context.card->owner->general->DealDamage(context.card, 2);
@@ -396,7 +396,7 @@ Collections::Collections() {
 	effects[SKILL_ENVYBAER] = Effect(SKILL_ENVYBAER, KEYWORD_NONE, "Whenever this minion damages an enemy, teleport that enemy to a random corner");
 	effects[SKILL_ENVYBAER].OnDamage = [](EffectContext context, Card* source, Minion* target, int damage) {
 		if (context.card->IsOnBoard() && context.card == source && context.card->owner != target->owner) {
-			BoardTile* tile = context.game->map.GetRandomCorner();
+			BoardTile* tile = context.game->map.GetRandomEmptyCorner();
 			if (tile != nullptr)
 				target->MoveToPosition(tile->pos.x, tile->pos.y, true);
 		}

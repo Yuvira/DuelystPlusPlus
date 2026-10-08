@@ -53,10 +53,10 @@ public:
 	Map();
 	~Map();
 	BoardTile* GetTile(int x, int y);
-	BoardTile* GetRandom();
-	BoardTile* GetRandom(BoardTile* ignore);
-	BoardTile* GetRandomCorner();
-	BoardTile* GetRandomNear(BoardTile* tile, bool empty);
-	std::vector<BoardTile*> GetNear(BoardTile* tile);
+	BoardTile* GetRandomEmpty();
+	BoardTile* GetRandomEmpty(BoardTile* ignore);
+	BoardTile* GetRandomEmptyCorner();
+	BoardTile* GetRandomEmptyNear(BoardTile* tile);
+	std::vector<BoardTile*> GetAllNear(BoardTile* tile);
 	BoardTile tiles[9][5];
 };
