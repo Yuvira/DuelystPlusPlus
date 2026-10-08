@@ -518,6 +518,52 @@ Collections::Collections() {
 	effects[EFFECT_GOLDEN_JUSTICAR] = Effect(EFFECT_GOLDEN_JUSTICAR, KEYWORD_NONE, "{Golden Justicar}");
 	effects[EFFECT_GOLDEN_JUSTICAR].moveBuff = 2;
 
+	//Golem Metallurgist
+	effects[SKILL_GOLEM_METALLURGIST] = Effect(SKILL_GOLEM_METALLURGIST, KEYWORD_NONE, "The first Golem you summon each turn costs 1 less");
+	effects[SKILL_GOLEM_METALLURGIST].OnAddThis = [](EffectContext context) {
+		if (context.effect->ApplyEffect)
+			context.effect->ApplyEffect(context);
+	};
+	effects[SKILL_GOLEM_METALLURGIST].OnRemoveThis = [](EffectContext context) {
+		if (context.effect->RemoveEffect)
+			context.effect->RemoveEffect(context);
+	};
+	effects[SKILL_GOLEM_METALLURGIST].OnSummon = [](EffectContext context, Minion* minion, bool actionBar) {
+		if (actionBar && context.card->owner == minion->owner && minion->tribe == TRIBE_GOLEM && !context.effect->triggered) {
+			minion->RemoveEffectsFromSource(context.effect);
+			if (context.effect->RemoveEffect)
+				context.effect->RemoveEffect(context);
+			context.effect->triggered = true;
+		}
+	};
+	effects[SKILL_GOLEM_METALLURGIST].OnDraw = [](EffectContext context, Card* card, bool fromDeck) {
+		if (context.card->IsOnBoard() && !fromDeck && card->owner == context.card->owner && card->IsMinion() && card->GetMinion()->tribe == TRIBE_GOLEM)
+			card->AddEffect(*context.game->collections->FindEffect(EFFECT_GOLEM_METALLURGIST), context.effect);
+	};
+	effects[SKILL_GOLEM_METALLURGIST].OnTurnEnd = [](EffectContext context, Player* player) {
+		if (context.card->IsOnBoard() && context.card->owner == player) {
+			if (context.effect->ApplyEffect)
+				context.effect->ApplyEffect(context);
+		}
+		context.effect->triggered = false;
+	};
+	effects[SKILL_GOLEM_METALLURGIST].ApplyEffect = [](EffectContext context) {
+		for (Card* card : context.card->owner->hand)
+			if (card->IsMinion() && card->GetMinion()->tribe == TRIBE_GOLEM)
+				card->AddEffect(*context.game->collections->FindEffect(EFFECT_GOLEM_METALLURGIST), context.effect);
+		for (Card* card : context.card->owner->deck)
+			if (card->IsMinion() && card->GetMinion()->tribe == TRIBE_GOLEM)
+				card->AddEffect(*context.game->collections->FindEffect(EFFECT_GOLEM_METALLURGIST), context.effect);
+	};
+	effects[SKILL_GOLEM_METALLURGIST].RemoveEffect = [](EffectContext context) {
+		for (Card* card : context.card->owner->hand)
+			card->RemoveEffectsFromSource(context.effect);
+		for (Card* card : context.card->owner->deck)
+			card->RemoveEffectsFromSource(context.effect);
+	};
+	effects[EFFECT_GOLEM_METALLURGIST] = Effect(EFFECT_GOLEM_METALLURGIST, KEYWORD_NONE, "{Metallurgy}");
+	effects[EFFECT_GOLEM_METALLURGIST].costBuff = -1;
+
 #pragma endregion
 
 #pragma region Spells
@@ -603,6 +649,7 @@ Collections::Collections() {
 	minionList.push_back(Minion(CARD_FROSTBONE_NAGA, FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 3, "frostbonenaga", "Frostbone Naga", FindEffect(SKILL_FROSTBONE_NAGA)));
 	minionList.push_back(Minion(CARD_GHOST_LYNX, FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 1, "ghostlynx", "Ghost Lynx", FindEffect(SKILL_GHOST_LYNX)));
 	minionList.push_back(Minion(CARD_GOLDEN_JUSTICAR, FACTION_NEUTRAL, TRIBE_WARMASTER, 5, 4, 6, "goldenjusticar", "Golden Justicar", FindEffect(SKILL_GOLDEN_JUSTICAR)));
+	minionList.push_back(Minion(CARD_GOLEM_METALLURGIST, FACTION_NEUTRAL, TRIBE_GOLEM, 2, 2, 3, "golemmetallurgist", "Golem Metallurgist", FindEffect(SKILL_GOLEM_METALLURGIST)));
 	minionList.push_back(Minion(CARD_HAILSTONE_GOLEM, FACTION_NEUTRAL, TRIBE_GOLEM, 4, 4, 6, "hailstonegolem", "Hailstone Golem"));
 	minionList.push_back(Minion(CARD_KOMODO_CHARGER, FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 3, "komodocharger", "Komodo Charger"));
 	minionList.push_back(Minion(CARD_SABERSPINE_TIGER, FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "saberspinetiger", "Saberspine Tiger", FindEffect(SKILL_RUSH)));

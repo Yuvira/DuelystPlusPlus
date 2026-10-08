@@ -22,6 +22,7 @@ Effect::Effect(eEffect effect, int keywords, std::string description) {
 	this->effect = effect;
 	this->keywords = keywords;
 	this->description = description;
+	triggered = false;
 	fixedCost = -1;
 	costBuff = 0;
 	atkBuff = 0;

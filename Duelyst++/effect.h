@@ -147,6 +147,7 @@ public:
 	eEffect effect;
 	int keywords;
 	std::string description;
+	bool triggered;
 	int fixedCost;
 	int costBuff;
 	int atkBuff;
@@ -170,5 +171,7 @@ public:
 	void (*OnEffectsChanged)(EffectContext, Card* card) = nullptr;
 	void (*OnTurnStart)(EffectContext, Player* player) = nullptr;
 	void (*OnTurnEnd)(EffectContext, Player* player) = nullptr;
+	void (*ApplyEffect)(EffectContext) = nullptr;
+	void (*RemoveEffect)(EffectContext) = nullptr;
 	bool IsContinuous() { return source != nullptr; }
 };
