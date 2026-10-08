@@ -69,6 +69,7 @@ enum eCard {
 	CARD_FLAMEBLOOD_WARLOCK,
 	CARD_FROSTBONE_NAGA,
 	CARD_GHOST_LYNX,
+	CARD_GOLDEN_JUSTICAR,
 	CARD_HAILSTONE_GOLEM,
 	CARD_KOMODO_CHARGER,
 	CARD_SABERSPINE_TIGER,
@@ -249,7 +250,6 @@ public:
 	//Utils
 	bool CanAttack(Minion* target);
 	bool IsMoveable();
-	int MoveRange();
 	bool HasKeywords(int keywords);
 	bool IsProvoked();
 	bool IsOnBoard() { return curTile != nullptr; }
@@ -267,6 +267,7 @@ public:
 	int atk;
 	int hp;
 	int hpMax;
+	int moveRange;
 	bool isDead;
 	bool hasMoved;
 	bool hasAttacked;

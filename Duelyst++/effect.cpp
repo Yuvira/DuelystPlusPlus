@@ -26,6 +26,7 @@ Effect::Effect(eEffect effect, int keywords, std::string description) {
 	costBuff = 0;
 	atkBuff = 0;
 	hpBuff = 0;
+	moveBuff = 0;
 	token = nullptr;
 	source = nullptr;
 }

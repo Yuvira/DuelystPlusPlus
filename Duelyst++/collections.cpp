@@ -492,6 +492,32 @@ Collections::Collections() {
 		}
 	};
 
+	//Golden Justicar
+	effects[SKILL_GOLDEN_JUSTICAR] = Effect(SKILL_GOLDEN_JUSTICAR, KEYWORD_PROVOKE, "{Provoke}|Your other minions with {Provoke} can move two additional spaces");
+	effects[SKILL_GOLDEN_JUSTICAR].OnAddThis = [](EffectContext context) {
+		for (Minion* minion : context.game->minions)
+			if (context.card->owner == minion->owner && minion != context.card && minion->tribe != TRIBE_GENERAL && minion->HasKeywords(KEYWORD_PROVOKE))
+				minion->AddEffect(*context.game->collections->FindEffect(EFFECT_GOLDEN_JUSTICAR), context.effect);
+	};
+	effects[SKILL_GOLDEN_JUSTICAR].OnRemoveThis = [](EffectContext context) {
+		for (Minion* minion : context.game->minions)
+			minion->RemoveEffectsFromSource(context.effect);
+	};
+	effects[SKILL_GOLDEN_JUSTICAR].OnSummon = [](EffectContext context, Minion* source, bool fromActionBar) {
+		if (context.card->IsOnBoard() && context.card != source && context.card->owner == source->owner && source->HasKeywords(KEYWORD_PROVOKE))
+			source->AddEffect(*context.game->collections->FindEffect(EFFECT_GOLDEN_JUSTICAR), context.effect);
+	};
+	effects[SKILL_GOLDEN_JUSTICAR].OnEffectsChanged = [](EffectContext context, Card* card) {
+		if (context.card->IsOnBoard() && card->IsOnBoard() && context.card->owner == card->owner && context.card != card && card->GetMinion()->tribe != TRIBE_GENERAL) {
+			if (card->GetMinion()->HasKeywords(KEYWORD_PROVOKE))
+				card->AddEffect(*context.game->collections->FindEffect(EFFECT_GOLDEN_JUSTICAR), context.effect);
+			else
+				card->RemoveEffectsFromSource(context.effect);
+		}
+	};
+	effects[EFFECT_GOLDEN_JUSTICAR] = Effect(EFFECT_GOLDEN_JUSTICAR, KEYWORD_NONE, "{Golden Justicar}");
+	effects[EFFECT_GOLDEN_JUSTICAR].moveBuff = 2;
+
 #pragma endregion
 
 #pragma region Spells
@@ -576,6 +602,7 @@ Collections::Collections() {
 	minionList.push_back(Minion(CARD_FLAMEBLOOD_WARLOCK, FACTION_NEUTRAL, TRIBE_NONE, 2, 3, 1, "flamebloodwarlock", "Flameblood Warlock", FindEffect(SKILL_FLAMEBLOOD_WARLOCK)));
 	minionList.push_back(Minion(CARD_FROSTBONE_NAGA, FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 3, "frostbonenaga", "Frostbone Naga", FindEffect(SKILL_FROSTBONE_NAGA)));
 	minionList.push_back(Minion(CARD_GHOST_LYNX, FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 1, "ghostlynx", "Ghost Lynx", FindEffect(SKILL_GHOST_LYNX)));
+	minionList.push_back(Minion(CARD_GOLDEN_JUSTICAR, FACTION_NEUTRAL, TRIBE_WARMASTER, 5, 4, 6, "goldenjusticar", "Golden Justicar", FindEffect(SKILL_GOLDEN_JUSTICAR)));
 	minionList.push_back(Minion(CARD_HAILSTONE_GOLEM, FACTION_NEUTRAL, TRIBE_GOLEM, 4, 4, 6, "hailstonegolem", "Hailstone Golem"));
 	minionList.push_back(Minion(CARD_KOMODO_CHARGER, FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 3, "komodocharger", "Komodo Charger"));
 	minionList.push_back(Minion(CARD_SABERSPINE_TIGER, FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "saberspinetiger", "Saberspine Tiger", FindEffect(SKILL_RUSH)));

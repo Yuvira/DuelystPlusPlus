@@ -21,6 +21,7 @@ Minion::Minion(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, 
 	this->atk = atk;
 	this->hp = hp;
 	hpMax = hp;
+	moveRange = 2;
 	this->isToken = isToken;
 	this->name = name;
 	isDead = false;
@@ -153,15 +154,18 @@ void Minion::UpdateStatBuffs() {
 	int atkBuff = 0;
 	int hpBuff = 0;
 	int hpDelta = hp - hpMax;
+	int moveBuff = 0;
 	for (int i = 0; i < effects.size(); ++i) {
 		costBuff += effects[i]->costBuff;
 		atkBuff += effects[i]->atkBuff;
 		hpBuff += effects[i]->hpBuff;
+		moveBuff += effects[i]->moveBuff;
 	}
 	cost = max(original->GetMinion()->cost + costBuff, 0);
 	atk = max(original->GetMinion()->atk + atkBuff, 0);
 	hpMax = original->GetMinion()->hpMax + hpBuff;
 	hp = hpMax + hpDelta;
+	moveRange = max(original->GetMinion()->moveRange + moveBuff, 0);
 	for (int i = 0; i < effects.size(); ++i)
 		if (effects[i]->fixedCost > -1)
 			cost = effects[i]->fixedCost;
@@ -345,18 +349,6 @@ bool Minion::IsMoveable() {
 	if (tribe == TRIBE_STRUCTURE)
 		return false;
 	return true;
-}
-
-//Minion range
-int Minion::MoveRange() {
-	int range = 2;
-	for (int i = 0; i < effects.size(); ++i) {
-		switch (effects[i]->effect) {
-		case EFFECT_GOLDEN_JUSTICAR:
-			range += 2;
-		}
-	}
-	return range;
 }
 
 //Check if minion has given keywords

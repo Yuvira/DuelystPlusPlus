@@ -655,7 +655,7 @@ void Game::HighlightMoveable(int x, int y) {
 						HighlightTile(i, j, COLOR_GRAY);
 	}
 	else
-		SearchMoveable(pos.x, pos.y, map.tiles[pos.x][pos.y].minion->MoveRange());
+		SearchMoveable(pos.x, pos.y, map.tiles[pos.x][pos.y].minion->moveRange);
 	map.tiles[x][y].SetColor(COLOR_AQUA);
 }
 

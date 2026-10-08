@@ -117,7 +117,7 @@ void Card::UpdateDetails() {
 		}
 
 		//Add buffs line if applicable
-		if (effect->costBuff != 0 || effect->atkBuff != 0 || effect->hpBuff != 0) {
+		if (effect->costBuff != 0 || effect->atkBuff != 0 || effect->hpBuff != 0 || effect->moveBuff != 0) {
 			std::string str = "";
 			if (effect->atkBuff != 0 && effect->hpBuff != 0)
 				str += ValueString(effect->atkBuff * stacks) + "/" + ValueString(effect->hpBuff * stacks);
@@ -129,6 +129,11 @@ void Card::UpdateDetails() {
 				if (str != "")
 					str += ", ";
 				str += ValueString(effect->costBuff * stacks) + " Cost";
+			}
+			if (effect->moveBuff != 0) {
+				if (str != "")
+					str += ", ";
+				str += ValueString(effect->moveBuff * stacks) + " Movement";
 			}
 			str = "{" + str + "}";
 			lines.push_back(str);
