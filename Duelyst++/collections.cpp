@@ -621,6 +621,31 @@ Collections::Collections() {
 					target->Dispel();
 	};
 
+	//Jax Truesight
+	effects[SKILL_JAX_TRUESIGHT] = Effect(SKILL_JAX_TRUESIGHT, KEYWORD_OPENING_GAMBIT | KEYWORD_RANGED, "{Ranged}|{Opening Gambit}: Summon a 1/1 {Ranged} Mini-Jax in each corner");
+	effects[SKILL_JAX_TRUESIGHT].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
+		for (BoardTile* target : context.game->map.GetEmptyCorners()) {
+			if (target != tile) {
+				Minion* token = new Minion(*(context.game->collections->FindCard(CARD_MINI_JAX)->GetMinion()));
+				context.game->SetContext(token, context.card->owner);
+				context.game->Summon(token, target, false);
+			}
+		}
+	};
+
+	//Jaxi
+	effects[SKILL_JAXI] = Effect(SKILL_JAXI, KEYWORD_NONE, "{Dying Wish}: Summon a 1/1 {Ranged} Mini-Jax in a random corner");
+	effects[SKILL_JAXI].OnDeath = [](EffectContext context, Minion* minion) {
+		if (context.card == minion) {
+			BoardTile* tile = context.game->map.GetRandomEmptyCorner();
+			if (tile != nullptr) {
+				Minion* token = new Minion(*(context.game->collections->FindCard(CARD_MINI_JAX)->GetMinion()));
+				context.game->SetContext(token, context.card->owner);
+				context.game->Summon(token, tile, false);
+			}
+		}
+	};
+
 #pragma endregion
 
 #pragma region Spells
@@ -712,11 +737,14 @@ Collections::Collections() {
 	minionList.push_back(Minion(CARD_HAILSTONE_GOLEM, FACTION_NEUTRAL, TRIBE_GOLEM, 4, 4, 6, "hailstonegolem", "Hailstone Golem"));
 	minionList.push_back(Minion(CARD_HEALING_MYSTIC, FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 3, "healingmystic", "Healing Mystic", FindEffect(SKILL_HEALING_MYSTIC)));
 	minionList.push_back(Minion(CARD_IRONCLAD, FACTION_NEUTRAL, TRIBE_NONE, 5, 4, 3, "ironclad", "Ironclad", FindEffect(SKILL_IRONCLAD)));
+	minionList.push_back(Minion(CARD_JAX_TRUESIGHT, FACTION_NEUTRAL, TRIBE_NONE, 6, 1, 1, "jaxtruesight", "Jax Truesight", FindEffect(SKILL_JAX_TRUESIGHT)));
+	minionList.push_back(Minion(CARD_JAXI, FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 1, "jaxi", "Jaxi", FindEffect(SKILL_JAXI)));
 	minionList.push_back(Minion(CARD_KOMODO_CHARGER, FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 3, "komodocharger", "Komodo Charger"));
 	minionList.push_back(Minion(CARD_SABERSPINE_TIGER, FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "saberspinetiger", "Saberspine Tiger", FindEffect(SKILL_RUSH)));
 	minionList.push_back(Minion(CARD_SAPPHIRE_SEER, FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 2, "sapphireseer", "Sapphire Seer", FindEffect(SKILL_FORCEFIELD)));
 
 	//Token Minions
+	minionList.push_back(Minion(CARD_MINI_JAX, FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 1, "minijax", "Mini-Jax", true, FindEffect(SKILL_RANGED)));
 	minionList.push_back(Minion(CARD_SPELLSPARK, FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 1, "spellspark", "Spellspark", true, FindEffect(SKILL_RUSH)));
 	minionList.push_back(Minion(CARD_TOMBSTONE, FACTION_NEUTRAL, TRIBE_NONE, 3, 0, 10, "tombstone", "Tombstone", true, FindEffect(SKILL_PROVOKE)));
 
@@ -742,6 +770,8 @@ Collections::Collections() {
 	//Assign tokens
 	cards[CARD_DIOLTAS]->effects[0]->token = cards[CARD_TOMBSTONE];
 	cards[CARD_FIRESTARTER]->effects[0]->token = cards[CARD_SPELLSPARK];
+	cards[CARD_JAX_TRUESIGHT]->effects[0]->token = cards[CARD_MINI_JAX];
+	cards[CARD_JAXI]->effects[0]->token = cards[CARD_MINI_JAX];
 
 #pragma endregion
 

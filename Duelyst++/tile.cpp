@@ -108,9 +108,9 @@ BoardTile* Map::GetRandomEmpty(BoardTile* ignore1, BoardTile* ignore2) {
 BoardTile* Map::GetRandomEmptyCorner() {
 	std::vector<BoardTile*> valid;
 	if (tiles[0][0].minion == nullptr) { valid.push_back(&tiles[0][0]); }
-	else if (tiles[8][0].minion == nullptr) { valid.push_back(&tiles[8][0]); }
-	else if (tiles[0][4].minion == nullptr) { valid.push_back(&tiles[0][4]); }
-	else if (tiles[8][4].minion == nullptr) { valid.push_back(&tiles[8][4]); }
+	if (tiles[8][0].minion == nullptr) { valid.push_back(&tiles[8][0]); }
+	if (tiles[0][4].minion == nullptr) { valid.push_back(&tiles[0][4]); }
+	if (tiles[8][4].minion == nullptr) { valid.push_back(&tiles[8][4]); }
 	if (valid.size() > 0) {
 		int i = rand() % valid.size();
 		return valid[i];
@@ -132,6 +132,16 @@ BoardTile* Map::GetRandomEmptyNear(BoardTile* tile) {
 		return valid[i];
 	}
 	return nullptr;
+}
+
+//Get all empty corners
+std::vector<BoardTile*> Map::GetEmptyCorners() {
+	std::vector<BoardTile*> valid;
+	if (tiles[0][0].minion == nullptr) { valid.push_back(&tiles[0][0]); }
+	if (tiles[8][0].minion == nullptr) { valid.push_back(&tiles[8][0]); }
+	if (tiles[0][4].minion == nullptr) { valid.push_back(&tiles[0][4]); }
+	if (tiles[8][4].minion == nullptr) { valid.push_back(&tiles[8][4]); }
+	return valid;
 }
 
 //Get all tiles near a given tile
