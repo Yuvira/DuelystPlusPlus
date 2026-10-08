@@ -473,7 +473,7 @@ Collections::Collections() {
 	for (int i = 0; i < cardList.size(); ++i) { cardList[i]->original = cardList[i]; }
 
 	//Assign tokens
-	cards[CARD_DIOLTAS]->token = cards[CARD_TOMBSTONE];
+	cards[CARD_DIOLTAS]->effects[0]->token = cards[CARD_TOMBSTONE];
 
 #pragma endregion
 

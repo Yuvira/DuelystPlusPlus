@@ -154,6 +154,7 @@ public:
 	int costBuff;
 	int atkBuff;
 	int hpBuff;
+	Card* token;
 	Effect* source;
 	void (*OnAddThis)(EffectContext) = nullptr;
 	void (*OnRemoveThis)(EffectContext) = nullptr;

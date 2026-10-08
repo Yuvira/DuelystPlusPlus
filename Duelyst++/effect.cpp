@@ -27,6 +27,7 @@ Effect::Effect(eEffect effect, eKeywordFlags keywords, std::string description) 
 	costBuff = 0;
 	atkBuff = 0;
 	hpBuff = 0;
+	token = nullptr;
 	source = nullptr;
 }
 Effect::~Effect() {}

@@ -27,7 +27,6 @@ Card::Card() {
 	game = nullptr;
 	owner = nullptr;
 	original = this;
-	token = nullptr;
 	name = "???";
 	divider.CreateFromString("컴TOKEN컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴");
 }

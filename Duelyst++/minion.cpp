@@ -119,12 +119,18 @@ void Minion::DrawDetails(Renderer& renderer, int& y) {
 	UpdateDetailStats();
 	renderer.Render(header[1], 72, y); y += 2;
 	renderer.Render(details, 72, y); y += details.height + 1;
-	if (token != nullptr) {
-		if (y < 7)
-			y = 7;
-		renderer.Render(divider, 66, y);
-		y += 2;
-		token->DrawDetails(renderer, y);
+	bool tokens = false;
+	for (int i = 0; i < effects.size(); ++i) {
+		if (effects[i]->token != nullptr) {
+			if (!tokens) {
+				if (y < 7)
+					y = 7;
+				renderer.Render(divider, 66, y);
+				tokens = true;
+			}
+			y += 2;
+			effects[i]->token->DrawDetails(renderer, y);
+		}
 	}
 }
 

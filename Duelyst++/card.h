@@ -204,7 +204,6 @@ public:
 	Game* game;
 	Player* owner;
 	Card* original;
-	Card* token;
 	std::string name;
 	std::vector<Effect*> effects;
 	Sprite sprite;
