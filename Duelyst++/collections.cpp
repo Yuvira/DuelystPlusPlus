@@ -468,7 +468,7 @@ Collections::Collections() {
 		context.card->owner->opponent->general->DealDamage(context.card, 3);
 	};
 
-	//Deathblighter
+	//Frostbone Naga
 	effects[SKILL_FROSTBONE_NAGA] = Effect(SKILL_FROSTBONE_NAGA, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Deal 2 damage to everything around it");
 	effects[SKILL_FROSTBONE_NAGA].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
 		for (BoardTile* tile : context.game->map.GetAllNear(tile))
