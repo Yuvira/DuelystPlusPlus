@@ -11,6 +11,7 @@ public:
 	~Collections();
 	Effect* FindEffect(eEffect effect);
 	Card* FindCard(eCard card);
+	Minion* GetRandomTokenMinion();
 	std::unordered_map<eEffect, Effect> effects;
 	std::unordered_map<eCard, Card*> cards;
 	std::vector<Card*> cardList;

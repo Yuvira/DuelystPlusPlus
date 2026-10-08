@@ -664,6 +664,19 @@ Collections::Collections() {
 		}
 	};
 
+	//Khymera
+	effects[SKILL_KHYMERA] = Effect(SKILL_KHYMERA, KEYWORD_NONE, "Whenever this minion takes damage, summon a random token minion nearby");
+	effects[SKILL_KHYMERA].OnDamage = [](EffectContext context, Card* source, Minion* target, int damage) {
+		if (context.card->IsOnBoard() && context.card == target) {
+			BoardTile* tile = context.game->map.GetRandomEmptyNear(target->curTile);
+			if (tile != nullptr) {
+				Minion* token = new Minion(*(context.game->collections->GetRandomTokenMinion()));
+				context.game->SetContext(token, context.card->owner);
+				context.game->Summon(token, tile, false);
+			}
+		}
+	};
+
 #pragma endregion
 
 #pragma region Spells
@@ -758,6 +771,7 @@ Collections::Collections() {
 	minionList.push_back(Minion(CARD_JAX_TRUESIGHT, FACTION_NEUTRAL, TRIBE_NONE, 6, 1, 1, "jaxtruesight", "Jax Truesight", FindEffect(SKILL_JAX_TRUESIGHT)));
 	minionList.push_back(Minion(CARD_JAXI, FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 1, "jaxi", "Jaxi", FindEffect(SKILL_JAXI)));
 	minionList.push_back(Minion(CARD_KEEPER_OF_THE_VALE, FACTION_NEUTRAL, TRIBE_NONE, 5, 3, 4, "keeperofthevale", "Keeper of the Vale", FindEffect(SKILL_KEEPER_OF_THE_VALE)));
+	minionList.push_back(Minion(CARD_KHYMERA, FACTION_NEUTRAL, TRIBE_NONE, 8, 5, 12, "khymera", "Khymera", FindEffect(SKILL_KHYMERA)));
 	minionList.push_back(Minion(CARD_KOMODO_CHARGER, FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 3, "komodocharger", "Komodo Charger"));
 	minionList.push_back(Minion(CARD_SABERSPINE_TIGER, FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "saberspinetiger", "Saberspine Tiger", FindEffect(SKILL_RUSH)));
 	minionList.push_back(Minion(CARD_SAPPHIRE_SEER, FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 2, "sapphireseer", "Sapphire Seer", FindEffect(SKILL_FORCEFIELD)));
@@ -824,6 +838,19 @@ Effect* Collections::FindEffect(eEffect effect) {
 Card* Collections::FindCard(eCard card) {
 	if (cards.contains(card))
 		return cards[card];
+	return nullptr;
+}
+
+//Get random token minion
+Minion* Collections::GetRandomTokenMinion() {
+	std::vector<Minion*> valid;
+	for (int i = 0; i < minionList.size(); ++i)
+		if (minionList[i].isToken)
+			valid.push_back(&minionList[i]);
+	if (valid.size() > 0) {
+		int i = rand() % valid.size();
+		return valid[i];
+	}
 	return nullptr;
 }
 
