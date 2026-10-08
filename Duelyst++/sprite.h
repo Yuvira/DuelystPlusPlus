@@ -1,6 +1,4 @@
-//Defines
-#ifndef __SPRITE_H__
-#define __SPRITE_H__
+#pragma once
 
 //Include
 #include <string>
@@ -44,5 +42,3 @@ public:
 	COORD pos;
 	std::vector<CHAR_INFO> buffer;
 };
-
-#endif

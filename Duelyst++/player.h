@@ -1,6 +1,4 @@
-//Defines
-#ifndef __PLAYER_H__
-#define __PLAYER_H__
+#pragma once
 
 //Include
 #include <cstdlib>
@@ -31,5 +29,3 @@ public:
 	std::vector<Card*> deck;
 	std::vector<Card*> hand;
 };
-
-#endif

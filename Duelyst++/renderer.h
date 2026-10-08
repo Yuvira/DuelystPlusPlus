@@ -1,6 +1,4 @@
-//Defines
-#ifndef __RENDERER_H__
-#define __RENDERER_H__
+#pragma once
 
 //Include
 #include "sprite.h"
@@ -20,5 +18,3 @@ private:
 	bool currentBuffer;
 	COORD startPos;
 };
-
-#endif

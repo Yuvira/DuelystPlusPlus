@@ -1,6 +1,4 @@
-//Defines
-#ifndef __EVENTMANAGER_H__
-#define __EVENTMANAGER_H__
+#pragma once
 
 //Include
 #include "player.h"
@@ -27,5 +25,3 @@ public:
 	void SendOnTurnStart(Player* player);
 	Game* game;
 };
-
-#endif

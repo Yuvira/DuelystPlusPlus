@@ -1,6 +1,4 @@
-//Defines
-#ifndef __EFFECT_H__
-#define __EFFECT_H__
+#pragma once
 
 //Include
 #include <functional>
@@ -173,5 +171,3 @@ public:
 	void (*OnTurnEnd)(EffectContext, Player* player) = nullptr;
 	bool IsContinuous() { return source != nullptr; }
 };
-
-#endif

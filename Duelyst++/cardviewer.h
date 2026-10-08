@@ -1,6 +1,4 @@
-//Defines
-#ifndef __CARD_VIEWER_H__
-#define __CARD_VIEWER_H__
+#pragma once
 
 //Include
 #include "game.h"
@@ -25,5 +23,3 @@ public:
 	int pageCount;
 	bool* modeSwitch;
 };
-
-#endif

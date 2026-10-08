@@ -1,6 +1,4 @@
-//Defines
-#ifndef __CARD_H__
-#define __CARD_H__
+#pragma once
 
 //Include
 #include <algorithm>
@@ -305,5 +303,3 @@ public:
 	Spell* GetSpell() { return this; }
 
 };
-
-#endif

@@ -1,6 +1,4 @@
-//Defines
-#ifndef __GAME_H__
-#define __GAME_H__
+#pragma once
 
 //Include
 #include <iostream>
@@ -111,5 +109,3 @@ public:
 	int turnCount;
 	bool* modeSwitch;
 };
-
-#endif

@@ -1,6 +1,4 @@
-//Defines
-#ifndef __TILE_H__
-#define __TILE_H__
+#pragma once
 
 //Include
 #include <vector>
@@ -62,5 +60,3 @@ public:
 	std::vector<BoardTile*> GetNear(BoardTile* tile);
 	BoardTile tiles[9][5];
 };
-
-#endif

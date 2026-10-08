@@ -1,6 +1,4 @@
-//Defines
-#ifndef __COLLECTIONS_H__
-#define __COLLECTIONS_H__
+#pragma once
 
 //Include
 #include <ranges>
@@ -23,5 +21,3 @@ public:
 	int minionCount;
 	int spellCount;
 };
-
-#endif
