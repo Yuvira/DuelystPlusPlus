@@ -71,6 +71,7 @@ enum eCard {
 	CARD_GHOST_LYNX,
 	CARD_GOLDEN_JUSTICAR,
 	CARD_GOLEM_METALLURGIST,
+	CARD_GROVE_LION,
 	CARD_HAILSTONE_GOLEM,
 	CARD_KOMODO_CHARGER,
 	CARD_SABERSPINE_TIGER,
@@ -274,7 +275,7 @@ public:
 	bool hasAttacked;
 	bool hasCelerityMoved;
 	bool hasCelerityAttacked;
-	bool hasForcefield;
+	bool forcefieldBroken;
 	BoardTile* curTile;
 	Sprite hpSprite;
 	Sprite atkSprite;

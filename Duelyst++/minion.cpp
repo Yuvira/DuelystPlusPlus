@@ -29,7 +29,7 @@ Minion::Minion(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, 
 	hasAttacked = false;
 	hasCelerityMoved = true;
 	hasCelerityAttacked = true;
-	hasForcefield = false;
+	forcefieldBroken = false;
 	if (path == "")
 		sprite.Resize(5, 5);
 	else
@@ -97,7 +97,7 @@ void Minion::Render(Renderer& renderer) {
 	renderer.Render(sprite);
 	renderer.Render(atkSprite);
 	renderer.Render(hpSprite);
-	if (hasForcefield) {
+	if (HasKeywords(KEYWORD_FORCEFIELD) && !forcefieldBroken) {
 		int x = sprite.pos.X;
 		int y = sprite.pos.Y;
 		renderer.Render(game->chars[7], x + 1, y + 1);
@@ -279,8 +279,8 @@ int Minion::DealDamage(Card* source, int damage) {
 		game->eventManager.SendOnHeal(source, this, -damage);
 	}
 	else {
-		if (hasForcefield) {
-			hasForcefield = false;
+		if (HasKeywords(KEYWORD_FORCEFIELD) && !forcefieldBroken) {
+			forcefieldBroken = true;
 			damage = 0;
 		}
 		else {
@@ -313,7 +313,7 @@ void Minion::Dispel() {
 	//Remove misc
 	hasCelerityMoved = true;
 	hasCelerityAttacked = true;
-	hasForcefield = false;
+	forcefieldBroken = true;
 
 	//Update
 	UpdateStatBuffs();
@@ -391,7 +391,7 @@ void Minion::InitState() {
 	hasAttacked = !HasKeywords(KEYWORD_RUSH);
 	hasCelerityMoved = !HasKeywords(KEYWORD_RUSH) || !HasKeywords(KEYWORD_CELERITY);
 	hasCelerityAttacked = !HasKeywords(KEYWORD_RUSH) || !HasKeywords(KEYWORD_CELERITY);
-	hasForcefield = HasKeywords(KEYWORD_FORCEFIELD);
+	forcefieldBroken = false;
 }
 
 //When a player's turn ends
@@ -405,7 +405,7 @@ void Minion::OnTurnEnd(Player* player) {
 	hasAttacked = false;
 	hasCelerityMoved = !HasKeywords(KEYWORD_CELERITY);
 	hasCelerityAttacked = !HasKeywords(KEYWORD_CELERITY);
-	hasForcefield = HasKeywords(KEYWORD_FORCEFIELD);
+	forcefieldBroken = false;
 
 }
 
