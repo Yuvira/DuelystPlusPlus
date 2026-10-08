@@ -430,6 +430,37 @@ Collections::Collections() {
 			damage *= 2;
 	};
 
+	//Firestarter
+	effects[SKILL_FIRESTARTER] = Effect(SKILL_FIRESTARTER, KEYWORD_NONE, "Whenever you cast a spell, summon a 1/1 Spellspark with Rush on a random nearby space");
+	effects[SKILL_FIRESTARTER].OnCast = [](EffectContext context, Card* card, BoardTile* tile) {
+		if (context.card->IsOnBoard() && context.card->IsMinion() && card->IsSpell() && context.card->owner == card->owner) {
+			BoardTile* tile = context.game->map.GetRandomEmptyNear(context.card->GetMinion()->curTile);
+			if (tile != nullptr) {
+				Minion* token = new Minion(*(context.game->collections->FindCard(CARD_SPELLSPARK)->GetMinion()));
+				context.game->SetContext(token, context.card->owner);
+				context.game->Summon(token, tile, false);
+			}
+		}
+	};
+
+	//First Sword of Akrane
+	effects[SKILL_FIRST_SWORD_OF_AKRANE] = Effect(SKILL_FIRST_SWORD_OF_AKRANE, KEYWORD_NONE, "Your other minions have +1 Attack");
+	effects[SKILL_FIRST_SWORD_OF_AKRANE].OnAddThis = [](EffectContext context) {
+		for (Minion* minion : context.game->minions)
+			if (context.card->owner == minion->owner && minion != context.card && minion->tribe != TRIBE_GENERAL)
+				minion->AddEffect(*context.game->collections->FindEffect(EFFECT_FIRST_SWORD_OF_AKRANE), context.effect);
+	};
+	effects[SKILL_FIRST_SWORD_OF_AKRANE].OnRemoveThis = [](EffectContext context) {
+		for (Minion* minion : context.game->minions)
+			minion->RemoveEffectsFromSource(context.effect);
+	};
+	effects[SKILL_FIRST_SWORD_OF_AKRANE].OnSummon = [](EffectContext context, Minion* source, bool fromActionBar) {
+		if (context.card->IsOnBoard() && context.card != source && context.card->owner == source->owner)
+			source->AddEffect(*context.game->collections->FindEffect(EFFECT_FIRST_SWORD_OF_AKRANE), context.effect);
+	};
+	effects[EFFECT_FIRST_SWORD_OF_AKRANE] = Effect(EFFECT_FIRST_SWORD_OF_AKRANE, KEYWORD_NONE, "{Akrane's First Sword}");
+	effects[EFFECT_FIRST_SWORD_OF_AKRANE].atkBuff = 1;
+
 #pragma endregion
 
 #pragma region Spells
@@ -508,13 +539,16 @@ Collections::Collections() {
 	minionList.push_back(Minion(CARD_EXUN, FACTION_NEUTRAL, TRIBE_NONE, 7, 5, 5, "exun", "E'Xun", FindEffect(SKILL_EXUN)));
 	minionList.push_back(Minion(CARD_FACESTRIKER, FACTION_NEUTRAL, TRIBE_NONE, 6, 4, 6, "facestriker", "Facestriker", FindEffect(SKILL_FACESTRIKER)));
 	minionList.push_back(Minion(CARD_FIREBLAZER, FACTION_NEUTRAL, TRIBE_NONE, 5, 5, 5, "fireblazer", "Fireblazer", FindEffect(SKILL_PROVOKE)));
+	minionList.push_back(Minion(CARD_FIRESTARTER, FACTION_NEUTRAL, TRIBE_ARCANYST, 5, 3, 5, "firestarter", "Firestarter", FindEffect(SKILL_FIRESTARTER)));
 	minionList.push_back(Minion(CARD_FIRE_SPITTER, FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "firespitter", "Fire Spitter", FindEffect(SKILL_RANGED)));
+	minionList.push_back(Minion(CARD_FIRST_SWORD_OF_AKRANE, FACTION_NEUTRAL, TRIBE_NONE, 6, 7, 7, "firstswordofakrane", "First Sword of Akrane", FindEffect(SKILL_FIRST_SWORD_OF_AKRANE)));
 	minionList.push_back(Minion(CARD_HAILSTONE_GOLEM, FACTION_NEUTRAL, TRIBE_GOLEM, 4, 4, 6, "hailstonegolem", "Hailstone Golem"));
 	minionList.push_back(Minion(CARD_KOMODO_CHARGER, FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 3, "komodocharger", "Komodo Charger"));
 	minionList.push_back(Minion(CARD_SABERSPINE_TIGER, FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "saberspinetiger", "Saberspine Tiger", FindEffect(SKILL_RUSH)));
 	minionList.push_back(Minion(CARD_SAPPHIRE_SEER, FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 2, "sapphireseer", "Sapphire Seer", FindEffect(SKILL_FORCEFIELD)));
 
 	//Token Minions
+	minionList.push_back(Minion(CARD_SPELLSPARK, FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 1, "spellspark", "Spellspark", true, FindEffect(SKILL_RUSH)));
 	minionList.push_back(Minion(CARD_TOMBSTONE, FACTION_NEUTRAL, TRIBE_NONE, 3, 0, 10, "tombstone", "Tombstone", true, FindEffect(SKILL_PROVOKE)));
 
 	//Spells
@@ -538,6 +572,7 @@ Collections::Collections() {
 
 	//Assign tokens
 	cards[CARD_DIOLTAS]->effects[0]->token = cards[CARD_TOMBSTONE];
+	cards[CARD_FIRESTARTER]->effects[0]->token = cards[CARD_SPELLSPARK];
 
 #pragma endregion
 
