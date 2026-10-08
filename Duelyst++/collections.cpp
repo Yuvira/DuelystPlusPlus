@@ -677,6 +677,25 @@ Collections::Collections() {
 		}
 	};
 
+	//Lightbender
+	effects[SKILL_LIGHTBENDER] = Effect(SKILL_LIGHTBENDER, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Dispel ALL spaces around it");
+	effects[SKILL_LIGHTBENDER].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
+		for (BoardTile* tile : context.game->map.GetAllNear(tile)) {
+			tile->SetFeature(TILE_NONE);
+			if (tile->minion != nullptr)
+				tile->minion->Dispel();
+		}
+	};
+
+	//Lux Ignis
+	effects[SKILL_LUX_IGNIS] = Effect(SKILL_LUX_IGNIS, KEYWORD_RANGED, "{Ranged}|At the end of your turn, restore 2 Health to all nearby friendly minions");
+	effects[SKILL_LUX_IGNIS].OnTurnEnd = [](EffectContext context, Player* player) {
+		if (context.card->IsOnBoard() && context.card->owner == player)
+			for (BoardTile* tile : context.game->map.GetAllNear(context.card->GetMinion()->curTile))
+				if (tile->minion != nullptr && tile->minion->owner == context.card->owner && tile->minion != context.card && tile->minion->tribe != TRIBE_GENERAL)
+					tile->minion->DealDamage(context.card, -2);
+	};
+
 #pragma endregion
 
 #pragma region Spells
@@ -773,6 +792,8 @@ Collections::Collections() {
 	minionList.push_back(Minion(CARD_KEEPER_OF_THE_VALE, FACTION_NEUTRAL, TRIBE_NONE, 5, 3, 4, "keeperofthevale", "Keeper of the Vale", FindEffect(SKILL_KEEPER_OF_THE_VALE)));
 	minionList.push_back(Minion(CARD_KHYMERA, FACTION_NEUTRAL, TRIBE_NONE, 8, 5, 12, "khymera", "Khymera", FindEffect(SKILL_KHYMERA)));
 	minionList.push_back(Minion(CARD_KOMODO_CHARGER, FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 3, "komodocharger", "Komodo Charger"));
+	minionList.push_back(Minion(CARD_LIGHTBENDER, FACTION_NEUTRAL, TRIBE_ARCANYST, 4, 3, 3, "lightbender", "Lightbender", FindEffect(SKILL_LIGHTBENDER)));
+	minionList.push_back(Minion(CARD_LUX_IGNIS, FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 5, "luxignis", "Lux Ignis", FindEffect(SKILL_LUX_IGNIS)));
 	minionList.push_back(Minion(CARD_SABERSPINE_TIGER, FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "saberspinetiger", "Saberspine Tiger", FindEffect(SKILL_RUSH)));
 	minionList.push_back(Minion(CARD_SAPPHIRE_SEER, FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 2, "sapphireseer", "Sapphire Seer", FindEffect(SKILL_FORCEFIELD)));
 
