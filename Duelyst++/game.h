@@ -6,6 +6,9 @@
 #include <conio.h>
 #include "eventmanager.h"
 
+//Debug mode
+inline constexpr bool IS_DEBUG = true;
+
 #pragma region Enums / Helpers
 
 //Input mode
@@ -49,6 +52,7 @@ public:
 	~Game();
 	void RenderGame(Renderer& renderer);
 	void RenderSidebar(Renderer& renderer);
+	void RenderDebug(Renderer& renderer);
 	void Input();
 	void Update();
 	void UseCard();
@@ -83,6 +87,10 @@ public:
 	Sprite light;
 	Sprite board;
 	Sprite chars[10];
+	Sprite debugP1Deck;
+	Sprite debugP2Deck;
+	Sprite debugMinions;
+	Sprite debugGrave;
 	Collections* collections;
 	EventManager eventManager;
 	Player players[2];

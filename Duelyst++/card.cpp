@@ -136,32 +136,8 @@ void Card::UpdateDetails() {
 
 	}
 
-	//Resize and clear
-	int maxWidth = 0;
-	for (int i = 0; i < lines.size(); ++i)
-		maxWidth = max(maxWidth, TextWidth(lines[i]));
-	details.Resize(maxWidth, lines.size());
-
-	//Generate sprite
-	int idxDelta = 0;
-	WORD color = COLOR_GRAY;
-	for (int i = 0; i < lines.size(); ++i) {
-		for (int j = 0; j < lines[i].length(); ++j) {
-			if (lines[i][j] == '{') {
-				color = COLOR_LTWHITE;
-				++idxDelta;
-			}
-			else if (lines[i][j] == '}') {
-				color = COLOR_GRAY;
-				++idxDelta;
-			}
-			else {
-				details.buffer[(j + (i * details.width)) - idxDelta].Char.AsciiChar = lines[i][j];
-				details.buffer[(j + (i * details.width)) - idxDelta].Attributes = color;
-			}
-		}
-		idxDelta = 0;
-	}
+	//Generate
+	details.CreateFromTextBlock(lines);
 
 }
 

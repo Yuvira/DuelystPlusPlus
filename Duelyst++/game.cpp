@@ -65,6 +65,12 @@ Game::Game(Collections* collections) {
 		hand[i].border.pos.Y = 41;
 	}
 
+	//Debug info
+	debugP1Deck.CreateFromString("P1 Deck");
+	debugP2Deck.CreateFromString("P2 Deck");
+	debugMinions.CreateFromString("Minions");
+	debugGrave.CreateFromString("Graveyard");
+
 	//Variables
 	pos = Coord(0, 0);
 	handIdx = -1;
@@ -139,6 +145,9 @@ void Game::RenderGame(Renderer& renderer) {
 	//Sidebar
 	RenderSidebar(renderer);
 
+	//Debug
+	RenderDebug(renderer);
+
 }
 
 //Render sidebar
@@ -158,6 +167,49 @@ void Game::RenderSidebar(Renderer& renderer) {
 		if (handIdx < players[turn].hand.size())
 			players[turn].hand[handIdx]->DrawDetails(renderer, y);
 	}
+
+}
+
+//Render debug info
+void Game::RenderDebug(Renderer& renderer) {
+
+	//Skip if not debug mode
+	if (!IS_DEBUG)
+		return;
+
+	//Lines object
+	std::vector<std::string> lines;
+
+	//Player 1 deck data
+	lines.push_back("{P1 Deck}");
+	for (Card* card : players[0].deck)
+		lines.push_back(card->name);
+	debugP1Deck.CreateFromTextBlock(lines);
+	renderer.Render(debugP1Deck, 115, 1);
+	lines.clear();
+
+	//Player 2 deck data
+	lines.push_back("{P2 Deck}");
+	for (Card* card : players[1].deck)
+		lines.push_back(card->name);
+	debugP2Deck.CreateFromTextBlock(lines);
+	renderer.Render(debugP2Deck, 140, 1);
+	lines.clear();
+
+	//Minion data
+	lines.push_back("{Minions}");
+	for (Card* card : minions)
+		lines.push_back(card->name);
+	debugMinions.CreateFromTextBlock(lines);
+	renderer.Render(debugMinions, 165, 1);
+	lines.clear();
+
+	//Graveyard data
+	lines.push_back("{Graveyard}");
+	for (Card* card : grave)
+		lines.push_back(card->name);
+	debugGrave.CreateFromTextBlock(lines);
+	renderer.Render(debugGrave, 190, 1);
 
 }
 

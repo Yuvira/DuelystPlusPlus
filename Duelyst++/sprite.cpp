@@ -69,23 +69,56 @@ void Sprite::CreateFromFile(std::string filename) {
 	}
 }
 
-//Generate text sprites from string
-void Sprite::CreateFromString(std::string str) { CreateFromString(str, false); }
-void Sprite::CreateFromString(std::string str, bool vertical) {
-	if (vertical) {
-		width = 1;
-		height = str.length();
-	}
-	else {
-		width = str.length();
-		height = 1;
-	}
+//Generate text sprite from string
+void Sprite::CreateFromString(const std::string& str) {
+	width = str.length();
+	height = 1;
 	buffer.clear();
 	for (int i = 0; i < str.length(); ++i) {
 		buffer.push_back(CHAR_INFO());
 		buffer[i].Char.AsciiChar = str[i];
 		buffer[i].Attributes = COLOR_LTWHITE;
 	}
+}
+
+//Generate text sprite from list of strings with color formatting
+void Sprite::CreateFromTextBlock(const std::vector<std::string>& lines) {
+	int maxWidth = 0;
+	for (int i = 0; i < lines.size(); ++i)
+		maxWidth = max(maxWidth, TextWidth(lines[i]));
+	Resize(maxWidth, lines.size());
+	int idxDelta = 0;
+	WORD color = COLOR_GRAY;
+	for (int i = 0; i < lines.size(); ++i) {
+		for (int j = 0; j < lines[i].length(); ++j) {
+			if (lines[i][j] == '{') {
+				color = COLOR_LTWHITE;
+				++idxDelta;
+			}
+			else if (lines[i][j] == '}') {
+				color = COLOR_GRAY;
+				++idxDelta;
+			}
+			else {
+				buffer[(j + (i * width)) - idxDelta].Char.AsciiChar = lines[i][j];
+				buffer[(j + (i * width)) - idxDelta].Attributes = color;
+			}
+		}
+		idxDelta = 0;
+	}
+}
+
+#pragma endregion
+
+#pragma region Utils
+
+//Get width of text ignoring style tags
+int Sprite::TextWidth(std::string str) {
+	int width = 0;
+	for (int i = 0; i < str.length(); ++i)
+		if (str[i] != '{' && str[i] != '}')
+			++width;
+	return width;
 }
 
 #pragma endregion

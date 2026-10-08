@@ -36,8 +36,9 @@ public:
 	void Resize(int newWidth, int newHeight);
 	void SetColor(eColor color);
 	void CreateFromFile(std::string filename);
-	void CreateFromString(std::string str);
-	void CreateFromString(std::string str, bool vertical);
+	void CreateFromString(const std::string& str);
+	void CreateFromTextBlock(const std::vector<std::string>& lines);
+	int TextWidth(std::string str);
 	int width, height;
 	COORD pos;
 	std::vector<CHAR_INFO> buffer;
