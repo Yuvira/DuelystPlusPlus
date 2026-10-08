@@ -128,7 +128,7 @@ Collections::Collections() {
 
 	//Astral Crusader
 	effects[SKILL_ASTRAL_CRUSADER] = Effect(SKILL_ASTRAL_CRUSADER, KEYWORD_NONE, "Whenever you replace this card, it costs 3 less and gains +3/+3");
-	effects[SKILL_ASTRAL_CRUSADER].OnReplace = [](EffectContext context, Card* card) {
+	effects[SKILL_ASTRAL_CRUSADER].OnReplace = [](EffectContext context, Card* card, bool& sendToDeck) {
 		if (context.card == card)
 			card->AddEffect(*context.game->collections->FindEffect(EFFECT_ASTRAL_CRUSADER), nullptr);
 	};
@@ -351,6 +351,19 @@ Collections::Collections() {
 		}
 	};
 
+	//Dreamgazer
+	effects[SKILL_DREAMGAZER] = Effect(SKILL_DREAMGAZER, KEYWORD_NONE, "When you replace this card, summon it nearby. Your General takes 2 damage");
+	effects[SKILL_DREAMGAZER].OnReplace = [](EffectContext context, Card* card, bool& sendToDeck) {
+		if (context.card == card && context.card->IsMinion()) {
+			BoardTile* tile = context.game->map.GetRandomNear(context.card->owner->general->curTile, true);
+			if (tile != nullptr) {
+				context.game->Summon(context.card, tile, false);
+				context.card->owner->general->DealDamage(context.card, 2);
+				sendToDeck = false;
+			}
+		}
+	};
+
 	//Ephemeral Shroud
 	effects[SKILL_EPHEMERAL_SHROUD] = Effect(SKILL_EPHEMERAL_SHROUD, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Dispel 1 nearby space");
 	effects[SKILL_EPHEMERAL_SHROUD].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
@@ -440,6 +453,7 @@ Collections::Collections() {
 	minionList.push_back(Minion(CARD_DIAMOND_GOLEM, FACTION_NEUTRAL, TRIBE_GOLEM, 6, 5, 11, "diamondgolem", "Diamond Golem"));
 	minionList.push_back(Minion(CARD_DIOLTAS, FACTION_NEUTRAL, TRIBE_NONE, 4, 5, 3, "dioltas", "Dioltas", FindEffect(SKILL_DIOLTAS)));
 	minionList.push_back(Minion(CARD_DRAGONLARK, FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "dragonlark", "Dragonlark", FindEffect(SKILL_FLYING)));
+	minionList.push_back(Minion(CARD_DREAMGAZER, FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 1, "dreamgazer", "Dreangazer", FindEffect(SKILL_DREAMGAZER)));
 	minionList.push_back(Minion(CARD_DRYBONE_GOLEM, FACTION_NEUTRAL, TRIBE_GOLEM, 7, 10, 10, "drybonegolem", "Drybone Golem"));
 	minionList.push_back(Minion(CARD_EPHEMERAL_SHROUD, FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 1, "ephemeralshroud", "Ephemeral Shroud", FindEffect(SKILL_EPHEMERAL_SHROUD)));
 	minionList.push_back(Minion(CARD_FACESTRIKER, FACTION_NEUTRAL, TRIBE_NONE, 6, 4, 6, "facestriker", "Facestriker", FindEffect(SKILL_FACESTRIKER)));

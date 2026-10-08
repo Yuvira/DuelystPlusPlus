@@ -296,10 +296,10 @@ void Card::OnDraw(Card* card, bool fromDeck) {
 }
 
 //Whenever a card is replaced
-void Card::OnReplace(Card* replaced) {
+void Card::OnReplace(Card* replaced, bool& sendToDeck) {
 	for (int i = 0; i < effects.size(); ++i)
 		if (effects[i]->OnReplace)
-			effects[i]->OnReplace(EffectContext(effects[i], this, game), replaced);
+			effects[i]->OnReplace(EffectContext(effects[i], this, game), replaced, sendToDeck);
 }
 
 //Whenever the effects on a card change

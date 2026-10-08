@@ -86,12 +86,12 @@ void EventManager::SendOnDraw(Card* card, bool fromDeck) {
 }
 
 //Send onReplace events
-void EventManager::SendOnReplace(Card* card) {
-	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnReplace(card); }
-	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnReplace(card); }
-	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnReplace(card); }
-	for (int i = 0; i < game->players[1].hand.size(); ++i) { game->players[1].hand[i]->OnReplace(card); }
-	for (int i = 0; i < game->players[1].deck.size(); ++i) { game->players[1].deck[i]->OnReplace(card); }
+void EventManager::SendOnReplace(Card* card, bool& sendToDeck) {
+	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnReplace(card, sendToDeck); }
+	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnReplace(card, sendToDeck); }
+	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnReplace(card, sendToDeck); }
+	for (int i = 0; i < game->players[1].hand.size(); ++i) { game->players[1].hand[i]->OnReplace(card, sendToDeck); }
+	for (int i = 0; i < game->players[1].deck.size(); ++i) { game->players[1].deck[i]->OnReplace(card, sendToDeck); }
 }
 
 //Send onEffectsChanged events

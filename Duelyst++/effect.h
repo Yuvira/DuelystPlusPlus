@@ -165,7 +165,7 @@ public:
 	void (*OnHeal)(EffectContext, Card* source, Minion* target, int damage) = nullptr;
 	void (*OnMove)(EffectContext, Minion* minion, bool byEffect) = nullptr;
 	void (*OnDraw)(EffectContext, Card* card, bool fromDeck) = nullptr;
-	void (*OnReplace)(EffectContext, Card* card) = nullptr;
+	void (*OnReplace)(EffectContext, Card* card, bool& sendToDeck) = nullptr;
 	void (*OnEffectsChanged)(EffectContext, Card* card) = nullptr;
 	void (*OnTurnStart)(EffectContext, Player* player) = nullptr;
 	void (*OnTurnEnd)(EffectContext, Player* player) = nullptr;

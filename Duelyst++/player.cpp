@@ -142,13 +142,33 @@ void Player::AddToHand(Card* card, bool cast) {
 //Replace card
 void Player::Replace(int idx) {
 	if (replaces > 0 && hand.size() > idx) {
-		game->eventManager.SendOnReplace(hand[idx]);
-		deck.push_back(hand[idx]);
+
+		//Remove card from hand
+		Card* replaced = hand[idx];
 		hand.erase(hand.begin() + idx);
-		Shuffle();
-		hand.insert(hand.begin() + idx, deck[0]);
-		deck.erase(deck.begin());
+
+		//Send replace event
+		bool sendToDeck = true;
+		game->eventManager.SendOnReplace(replaced, sendToDeck);
+		replaced->OnReplace(replaced, sendToDeck);
+
+		//Draw new card and put replaced card back in the deck if able
+		if (deck.size() > 0) {
+			hand.insert(hand.begin() + idx, deck[0]);
+			deck.erase(deck.begin());
+			if (sendToDeck) {
+				deck.push_back(replaced);
+				Shuffle();
+			}
+		}
+
+		//If no cards in deck, put replaced card back in hand
+		else if (sendToDeck)
+			hand.insert(hand.begin() + idx, replaced);
+
+		//Decrement replace count
 		--replaces;
+
 	}
 }
 

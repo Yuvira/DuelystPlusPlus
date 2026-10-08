@@ -19,7 +19,7 @@ public:
 	void SendOnHeal(Card* source, Minion* target, int heal);
 	void SendOnMove(Minion* minion, bool byEffect);
 	void SendOnDraw(Card* card, bool fromDeck);
-	void SendOnReplace(Card* card);
+	void SendOnReplace(Card* card, bool& sendToDeck);
 	void SendOnEffectsChanged(Card*);
 	void SendOnTurnEnd(Player* player);
 	void SendOnTurnStart(Player* player);

@@ -53,6 +53,7 @@ enum eCard {
 	CARD_DIAMOND_GOLEM,
 	CARD_DIOLTAS,
 	CARD_DRAGONLARK,
+	CARD_DREAMGAZER,
 	CARD_DRYBONE_GOLEM,
 	CARD_EPHEMERAL_SHROUD,
 	CARD_FACESTRIKER,
@@ -176,7 +177,7 @@ public:
 	void OnHeal(Card* source, Minion* target, int heal);
 	void OnMove(Minion* minion, bool byEffect);
 	void OnDraw(Card* card, bool fromDeck);
-	void OnReplace(Card* replaced);
+	void OnReplace(Card* replaced, bool& sendToDeck);
 	void OnEffectsChanged(Card* card);
 	void OnTurnStart(Player* player);
 	virtual void OnTurnEnd(Player* player);
