@@ -101,7 +101,7 @@ Collections::Collections() {
 			source->AddEffect(*context.game->collections->FindEffect(EFFECT_ARROW_WHISTLER), context.effect);
 	};
 	effects[SKILL_ARROW_WHISTLER].OnEffectsChanged = [](EffectContext context, Card* card) {
-		if (context.card->IsOnBoard() && card->IsOnBoard() && context.card->owner == card->owner && context.card != card) {
+		if (context.card->IsOnBoard() && card->IsOnBoard() && context.card->owner == card->owner && context.card != card && card->GetMinion()->tribe != TRIBE_GENERAL) {
 			if (card->GetMinion()->HasKeywords(KEYWORD_RANGED))
 				card->AddEffect(*context.game->collections->FindEffect(EFFECT_ARROW_WHISTLER), context.effect);
 			else
