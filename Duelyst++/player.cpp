@@ -121,21 +121,20 @@ void Player::Draw() {
 }
 
 //Add card to hand
-void Player::AddToHand(Card* card, bool cast) {
-	if (cast) {
-		if (card->cardType == CARDTYPE_MINION)
-			card = new Minion(*(card->GetMinion()));
-		else if (card->cardType == CARDTYPE_SPELL)
-			card = new Spell(*(card->GetSpell()));
-	}
-	game->SetContext(card, this);
+void Player::AddNewToHand(Card* original) {
+	Card* newCard = nullptr;
+	if (original->IsMinion())
+		newCard = new Minion(*(original->GetMinion()));
+	else if (original->IsSpell())
+		newCard = new Spell(*(original->GetSpell()));
+	game->SetContext(newCard, this);
 	if (hand.size() < 6) {
-		hand.push_back(card);
-		game->eventManager.SendOnDraw(hand.back(), false);
+		hand.push_back(newCard);
+		game->eventManager.SendOnDraw(newCard, false);
 	}
 	else {
-		game->grave.push_back(card);
-		game->eventManager.SendOnDraw(game->grave.back(), false);
+		game->grave.push_back(newCard);
+		game->eventManager.SendOnDraw(newCard, false);
 	}
 }
 

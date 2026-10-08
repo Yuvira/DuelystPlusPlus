@@ -73,14 +73,6 @@ enum eCard {
 
 #pragma endregion
 
-//Card types
-enum eCardType {
-	CARDTYPE_NONE,
-	CARDTYPE_MINION,
-	CARDTYPE_SPELL,
-	CARDTYPE_ARTIFACT
-};
-
 //Rarities
 enum eRarity {
 	RARITY_NONE,
@@ -200,7 +192,6 @@ public:
 
 	//Properties
 	eCard cardId;
-	eCardType cardType;
 	eFaction faction;
 	TargetMode targetMode;
 	bool isToken;

@@ -15,7 +15,7 @@ public:
 	void Render(Renderer& renderer, bool left);
 	void Shuffle();
 	void Draw();
-	void AddToHand(Card* card, bool cast);
+	void AddNewToHand(Card* original);
 	void Replace(int idx);
 	int mana;
 	int manaMax;

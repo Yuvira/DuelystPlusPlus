@@ -14,7 +14,6 @@ Minion::Minion(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, 
 	: Minion(cardId, faction, tribe, cost, atk, hp, path, name, false, effect) {}
 Minion::Minion(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name, bool isToken, Effect* effect) {
 	this->cardId = cardId;
-	cardType = CARDTYPE_MINION;
 	this->faction = faction;
 	this->tribe = tribe;
 	targetMode = TargetMode(TARGET_MODE_NEAR_ALLIES, TARGET_FILTER_EMPTY);

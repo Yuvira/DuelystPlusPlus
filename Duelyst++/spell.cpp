@@ -14,7 +14,6 @@ Spell::Spell(eCard cardId, eFaction faction, TargetMode targetMode, int cost, st
 	: Spell(cardId, faction, targetMode, cost, path, name, false, effect) {}
 Spell::Spell(eCard cardId, eFaction faction, TargetMode targetMode, int cost, std::string path, std::string name, bool isToken, Effect* effect) {
 	this->cardId = cardId;
-	cardType = CARDTYPE_SPELL;
 	this->faction = faction;
 	this->targetMode = targetMode;
 	this->cost = cost;

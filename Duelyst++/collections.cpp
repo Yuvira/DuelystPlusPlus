@@ -25,7 +25,7 @@ Collections::Collections() {
 	effects[SKILL_ABJUDICATOR] = Effect(SKILL_ABJUDICATOR, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Lower the cost of all spells in your action bar by 1");
 	effects[SKILL_ABJUDICATOR].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
 		for (Card* card : context.card->owner->hand)
-			if (card->cardType == CARDTYPE_SPELL)
+			if (card->IsSpell())
 				card->AddEffect(*context.game->collections->FindEffect(EFFECT_ABJUDICATOR), context.effect);
 	};
 	effects[EFFECT_ABJUDICATOR] = Effect(EFFECT_ABJUDICATOR, KEYWORD_NONE, "Abjudicator");
@@ -46,8 +46,8 @@ Collections::Collections() {
 	effects[SKILL_ALCUIN_LOREMASTER] = Effect(SKILL_ALCUIN_LOREMASTER, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Put a copy of the most recently cast spell into your action bar");
 	effects[SKILL_ALCUIN_LOREMASTER].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
 		for (Spell* spell : context.game->spellHistory | std::views::reverse) {
-			if (spell->cardType == CARDTYPE_SPELL) {
-				context.card->owner->AddToHand(spell->original, true);
+			if (spell->IsSpell()) {
+				context.card->owner->AddNewToHand(spell->original);
 				break;
 			}
 		}
@@ -66,10 +66,10 @@ Collections::Collections() {
 	effects[SKILL_ARCHON_SPELLBINDER] = Effect(SKILL_ARCHON_SPELLBINDER, KEYWORD_NONE, "Your opponent's non-Bloodborn spells cost 1 more to cast");
 	effects[SKILL_ARCHON_SPELLBINDER].OnAddThis = [](EffectContext context) {
 		for (Card* card : context.card->owner->opponent->hand)
-			if (card->cardType == CARDTYPE_SPELL)
+			if (card->IsSpell())
 				card->AddEffect(*context.game->collections->FindEffect(EFFECT_ARCHON_SPELLBINDER), context.effect);
 		for (Card* card : context.card->owner->opponent->deck)
-			if (card->cardType == CARDTYPE_SPELL)
+			if (card->IsSpell())
 				card->AddEffect(*context.game->collections->FindEffect(EFFECT_ARCHON_SPELLBINDER), context.effect);
 	};
 	effects[SKILL_ARCHON_SPELLBINDER].OnRemoveThis = [](EffectContext context) {
@@ -79,7 +79,7 @@ Collections::Collections() {
 			card->RemoveEffectsFromSource(context.effect);
 	};
 	effects[SKILL_ARCHON_SPELLBINDER].OnDraw = [](EffectContext context, Card* card, bool fromDeck) {
-		if (context.card->IsOnBoard() && !fromDeck && card->owner != context.card->owner && card->cardType == CARDTYPE_SPELL)
+		if (context.card->IsOnBoard() && !fromDeck && card->owner != context.card->owner && card->IsSpell())
 			card->AddEffect(*context.game->collections->FindEffect(EFFECT_ARCHON_SPELLBINDER), context.effect);
 	};
 	effects[EFFECT_ARCHON_SPELLBINDER] = Effect(EFFECT_ARCHON_SPELLBINDER, KEYWORD_NONE, "{Spellbound}");

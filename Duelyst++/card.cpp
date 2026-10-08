@@ -20,7 +20,6 @@ TargetMode::~TargetMode() {}
 
 //Card constructor
 Card::Card() {
-	cardType = CARDTYPE_NONE;
 	faction = FACTION_NEUTRAL;
 	isToken = false;
 	cost = 0;
