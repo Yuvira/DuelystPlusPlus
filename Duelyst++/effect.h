@@ -144,7 +144,6 @@ public:
 class Effect {
 public:
 	Effect();
-	Effect(eEffect effect, eKeywordFlags keywords);
 	Effect(eEffect effect, eKeywordFlags keywords, std::string description);
 	~Effect();
 	eEffect effect;
