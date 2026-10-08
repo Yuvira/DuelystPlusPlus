@@ -119,10 +119,12 @@ BoardTile* Map::GetRandomCorner() {
 
 //Get random empty tiles
 BoardTile* Map::GetRandomNear(BoardTile* tile, bool empty) {
+	if (tile == nullptr)
+		return nullptr;
 	std::vector<BoardTile*> valid;
 	for (int i = max(tile->pos.x - 1, 0); i < min(tile->pos.x + 2, 9); ++i)
 		for (int j = max(tile->pos.y - 1, 0); j < min(tile->pos.y + 2, 5); ++j)
-			if (!empty || tiles[i][j].minion == nullptr)
+			if (&tiles[i][j] != tile && (!empty || tiles[i][j].minion == nullptr))
 				valid.push_back(&tiles[i][j]);
 	if (valid.size() > 0) {
 		int i = rand() % valid.size();
@@ -134,9 +136,11 @@ BoardTile* Map::GetRandomNear(BoardTile* tile, bool empty) {
 //Get tiles near a given tile
 std::vector<BoardTile*> Map::GetNear(BoardTile* tile) {
 	std::vector<BoardTile*> valid;
-	for (int i = max(tile->pos.x - 1, 0); i < min(tile->pos.x + 2, 9); ++i)
-		for (int j = max(tile->pos.y - 1, 0); j < min(tile->pos.y + 2, 5); ++j)
-			valid.push_back(&tiles[i][j]);
+	if (tile != nullptr)
+		for (int i = max(tile->pos.x - 1, 0); i < min(tile->pos.x + 2, 9); ++i)
+			for (int j = max(tile->pos.y - 1, 0); j < min(tile->pos.y + 2, 5); ++j)
+				if (&tiles[i][j] != tile)
+					valid.push_back(&tiles[i][j]);
 	return valid;
 }
 
