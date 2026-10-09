@@ -7,10 +7,10 @@ const int MAX_DESCRIPTION_WIDTH = 42;
 #pragma region Helper Constructors
 
 //Targeting mode constructor
-TargetMode::TargetMode() : TargetMode(TARGET_MODE_ALL, TARGET_FILTER_NONE) {}
-TargetMode::TargetMode(eTargetMode mode, int filters) {
+TargetMode::TargetMode() : TargetMode(TARGET_MODE_ALL, nullptr) {}
+TargetMode::TargetMode(eTargetMode mode, bool (*Predicate)(BoardTile*)) {
 	this->mode = mode;
-	this->filters = filters;
+	this->Predicate = Predicate;
 }
 TargetMode::~TargetMode() {}
 
@@ -330,6 +330,18 @@ int Card::TextWidth(std::string str) {
 		if (str[i] != '{' && str[i] != '}')
 			++width;
 	return width;
+}
+
+//Get card ownership
+bool Card::IsAlly() {
+	if (game == nullptr)
+		return false;
+	return owner == &game->players[game->turn];
+}
+bool Card::IsEnemy() {
+	if (game == nullptr)
+		return false;
+	return owner != &game->players[game->turn];
 }
 
 #pragma endregion

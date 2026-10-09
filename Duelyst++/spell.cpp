@@ -5,17 +5,16 @@
 
 //Game constructors
 Spell::Spell()
-	: Spell(CARD_NONE, FACTION_NEUTRAL, TargetMode(TARGET_MODE_ALL, TARGET_FILTER_NONE), 0, "", "???") {}
-Spell::Spell(eCard cardId, eFaction faction, TargetMode targetMode, int cost, std::string path, std::string name)
-	: Spell(cardId, faction, targetMode, cost, path, name, false, nullptr) {}
-Spell::Spell(eCard cardId, eFaction faction, TargetMode targetMode, int cost, std::string path, std::string name, bool isToken)
-	: Spell(cardId, faction, targetMode, cost, path, name, isToken, nullptr) {}
-Spell::Spell(eCard cardId, eFaction faction, TargetMode targetMode, int cost, std::string path, std::string name, Effect* effect)
-	: Spell(cardId, faction, targetMode, cost, path, name, false, effect) {}
-Spell::Spell(eCard cardId, eFaction faction, TargetMode targetMode, int cost, std::string path, std::string name, bool isToken, Effect* effect) {
+	: Spell(CARD_NONE, FACTION_NEUTRAL, 0, "", "???") {}
+Spell::Spell(eCard cardId, eFaction faction, int cost, std::string path, std::string name)
+	: Spell(cardId, faction, cost, path, name, false, nullptr) {}
+Spell::Spell(eCard cardId, eFaction faction, int cost, std::string path, std::string name, bool isToken)
+	: Spell(cardId, faction, cost, path, name, isToken, nullptr) {}
+Spell::Spell(eCard cardId, eFaction faction, int cost, std::string path, std::string name, Effect* effect)
+	: Spell(cardId, faction, cost, path, name, false, effect) {}
+Spell::Spell(eCard cardId, eFaction faction, int cost, std::string path, std::string name, bool isToken, Effect* effect) {
 	this->cardId = cardId;
 	this->faction = faction;
-	this->targetMode = targetMode;
 	this->cost = cost;
 	this->isToken = isToken;
 	this->name = name;

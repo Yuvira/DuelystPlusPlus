@@ -16,7 +16,7 @@ Minion::Minion(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, 
 	this->cardId = cardId;
 	this->faction = faction;
 	this->tribe = tribe;
-	targetMode = TargetMode(TARGET_MODE_NEAR_ALLIES, TARGET_FILTER_EMPTY);
+	targetMode = TargetMode(TARGET_MODE_NEAR_ALLIES, [](BoardTile* tile) { return tile->minion == nullptr; });
 	this->cost = cost;
 	this->atk = atk;
 	this->hp = hp;

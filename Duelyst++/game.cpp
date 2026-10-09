@@ -703,16 +703,12 @@ void Game::HighlightSelectable(TargetMode targetMode, BoardTile* tile) {
 	}
 
 	//Apply filters
-	for (int i = 0; i < selectable.size(); ++i) {
-		if ((targetMode.HasFilters(TARGET_FILTER_EMPTY) && selectable[i]->minion != nullptr)
-			|| (targetMode.HasAny(TARGET_FILTER_UNIT | TARGET_FILTER_MINION | TARGET_FILTER_GENERAL | TARGET_FILTER_ALLY | TARGET_FILTER_ENEMY) && selectable[i]->minion == nullptr)
-			|| (targetMode.HasFilters(TARGET_FILTER_MINION) && selectable[i]->minion->tribe == TRIBE_GENERAL)
-			|| (targetMode.HasFilters(TARGET_FILTER_GENERAL) && selectable[i]->minion->tribe != TRIBE_GENERAL)
-			|| (targetMode.HasFilters(TARGET_FILTER_ALLY) && selectable[i]->minion->owner != &players[turn])
-			|| (targetMode.HasFilters(TARGET_FILTER_ENEMY) && selectable[i]->minion->owner == &players[turn])
-			|| (targetMode.HasFilters(TARGET_FILTER_RANGED) && !selectable[i]->minion->HasKeywords(KEYWORD_RANGED))) {
-			selectable.erase(selectable.begin() + i);
-			--i;
+	if (targetMode.Predicate) {
+		for (int i = 0; i < selectable.size(); ++i) {
+			if (!targetMode.Predicate(selectable[i])) {
+				selectable.erase(selectable.begin() + i);
+				--i;
+			}
 		}
 	}
 

@@ -111,18 +111,6 @@ enum eTargetMode {
 	TARGET_MODE_NEAR_ENEMIES
 };
 
-//Targeting filters
-enum eTargetFilters {
-	TARGET_FILTER_NONE    = 0,
-	TARGET_FILTER_EMPTY   = 1 << 0,
-	TARGET_FILTER_UNIT    = 1 << 1,
-	TARGET_FILTER_MINION  = 1 << 2,
-	TARGET_FILTER_GENERAL = 1 << 3,
-	TARGET_FILTER_ALLY    = 1 << 4,
-	TARGET_FILTER_ENEMY   = 1 << 5,
-	TARGET_FILTER_RANGED  = 1 << 6
-};
-
 //Factions
 enum eFaction {
 	FACTION_NEUTRAL,
@@ -152,12 +140,10 @@ enum eTribe {
 class TargetMode {
 public:
 	TargetMode();
-	TargetMode(eTargetMode mode, int filters);
+	TargetMode(eTargetMode mode, bool (*Predicate)(BoardTile*));
 	~TargetMode();
-	bool HasFilters(int flags) { return (filters & flags) == flags; }
-	bool HasAny(int flags) { return (filters & flags) != TARGET_FILTER_NONE; }
 	eTargetMode mode;
-	int filters;
+	bool (*Predicate)(BoardTile*);
 };
 
 #pragma endregion
@@ -204,6 +190,8 @@ public:
 	virtual bool IsOnBoard() { return false; }
 	std::string ValueString(int value);
 	int TextWidth(std::string str);
+	bool IsAlly();
+	bool IsEnemy();
 
 	//Subclass getters
 	virtual Minion* GetMinion() { return nullptr; }
@@ -300,10 +288,10 @@ public:
 
 	//Constructors / Initialization
 	Spell();
-	Spell(eCard cardId, eFaction faction, TargetMode targetMode, int cost, std::string path, std::string name);
-	Spell(eCard cardId, eFaction faction, TargetMode targetMode, int cost, std::string path, std::string name, bool isToken);
-	Spell(eCard cardId, eFaction faction, TargetMode targetMode, int cost, std::string path, std::string name, Effect* effect);
-	Spell(eCard cardId, eFaction faction, TargetMode targetMode, int cost, std::string path, std::string name, bool isToken, Effect* effect);
+	Spell(eCard cardId, eFaction faction, int cost, std::string path, std::string name);
+	Spell(eCard cardId, eFaction faction, int cost, std::string path, std::string name, bool isToken);
+	Spell(eCard cardId, eFaction faction, int cost, std::string path, std::string name, Effect* effect);
+	Spell(eCard cardId, eFaction faction, int cost, std::string path, std::string name, bool isToken, Effect* effect);
 	~Spell();
 	void GenerateDetails();
 

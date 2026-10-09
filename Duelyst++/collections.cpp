@@ -211,7 +211,9 @@ Collections::Collections() {
 	//Bloodtear Alchemist
 	effects[SKILL_BLOODTEAR_ALCHEMIST] = Effect(SKILL_BLOODTEAR_ALCHEMIST, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Deal 1 damage to an enemy");
 	effects[SKILL_BLOODTEAR_ALCHEMIST].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
-		context.game->HighlightSelectable(TargetMode(TARGET_MODE_ALL, TARGET_FILTER_ENEMY));
+		context.game->HighlightSelectable(TargetMode(TARGET_MODE_ALL, [](BoardTile* tile) {
+			return tile->minion != nullptr && tile->minion->IsEnemy();
+		}));
 		if (context.game->selectable.size() > 0) {
 			context.game->callback = EffectCallback(context, tile);
 			context.game->callback.Callback = [](EffectContext context, BoardTile* source, BoardTile* target) {
@@ -285,7 +287,9 @@ Collections::Collections() {
 	//Crossbones
 	effects[SKILL_CROSSBONES] = Effect(SKILL_CROSSBONES, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Destroy an enemy minion with Ranged");
 	effects[SKILL_CROSSBONES].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
-		context.game->HighlightSelectable(TargetMode(TARGET_MODE_ALL, TARGET_FILTER_ENEMY | TARGET_FILTER_RANGED));
+		context.game->HighlightSelectable(TargetMode(TARGET_MODE_ALL, [](BoardTile* tile) {
+			return tile->minion != nullptr && tile->minion->IsEnemy() && tile->minion->tribe != TRIBE_GENERAL && tile->minion->HasKeywords(KEYWORD_RANGED);
+		}));
 		if (context.game->selectable.size() > 0) {
 			context.game->callback = EffectCallback(context, tile);
 			context.game->callback.Callback = [](EffectContext context, BoardTile* source, BoardTile* target) {
@@ -405,7 +409,7 @@ Collections::Collections() {
 	//Ephemeral Shroud
 	effects[SKILL_EPHEMERAL_SHROUD] = Effect(SKILL_EPHEMERAL_SHROUD, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Dispel 1 nearby space");
 	effects[SKILL_EPHEMERAL_SHROUD].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
-		context.game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, TARGET_FILTER_NONE), tile);
+		context.game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, nullptr), tile);
 		if (context.game->selectable.size() > 0) {
 			context.game->callback = EffectCallback(context, tile);
 			context.game->callback.Callback = [](EffectContext context, BoardTile* source, BoardTile* target) {
@@ -479,7 +483,9 @@ Collections::Collections() {
 	//Ghost Lynx
 	effects[SKILL_GHOST_LYNX] = Effect(SKILL_GHOST_LYNX, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Teleport a nearby minion to a random space");
 	effects[SKILL_GHOST_LYNX].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
-		context.game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, TARGET_FILTER_MINION), tile);
+		context.game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, [](BoardTile* tile) {
+			return tile->minion != nullptr && tile->minion->tribe != TRIBE_GENERAL;
+		}), tile);
 		if (context.game->selectable.size() > 0) {
 			context.game->callback = EffectCallback(context, tile);
 			context.game->callback.Callback = [](EffectContext context, BoardTile* source, BoardTile* target) {
@@ -602,7 +608,9 @@ Collections::Collections() {
 	//Healing Mystic
 	effects[SKILL_HEALING_MYSTIC] = Effect(SKILL_HEALING_MYSTIC, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Restore 2 Health to anything");
 	effects[SKILL_HEALING_MYSTIC].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
-		context.game->HighlightSelectable(TargetMode(TARGET_MODE_ALL, TARGET_FILTER_UNIT));
+		context.game->HighlightSelectable(TargetMode(TARGET_MODE_ALL, [](BoardTile* tile) {
+			return tile->minion != nullptr;
+		}));
 		if (context.game->selectable.size() > 0) {
 			context.game->callback = EffectCallback(context, tile);
 			context.game->callback.Callback = [](EffectContext context, BoardTile* source, BoardTile* target) {
@@ -822,8 +830,14 @@ Collections::Collections() {
 	minionList.push_back(Minion(CARD_TOMBSTONE, FACTION_NEUTRAL, TRIBE_NONE, 3, 0, 10, "tombstone", "Tombstone", true, FindEffect(SKILL_PROVOKE)));
 
 	//Spells
-	spellList.push_back(Spell(CARD_BREATH_OF_THE_UNBORN, FACTION_ABYSSIAN, TargetMode(TARGET_MODE_ALL, TARGET_FILTER_UNIT), 4, "breathoftheunborn", "Breath of The Unborn", FindEffect(SPELL_BREATH_OF_THE_UNBORN)));
-	spellList.push_back(Spell(CARD_DARK_SEED, FACTION_ABYSSIAN, TargetMode(TARGET_MODE_ALL, TARGET_FILTER_ENEMY | TARGET_FILTER_GENERAL), 4, "darkseed", "Dark Seed", FindEffect(SPELL_DARK_SEED)));
+	spellList.push_back(Spell(CARD_BREATH_OF_THE_UNBORN, FACTION_ABYSSIAN, 4, "breathoftheunborn", "Breath of The Unborn", FindEffect(SPELL_BREATH_OF_THE_UNBORN)));
+	spellList.back().targetMode = TargetMode(TARGET_MODE_ALL, [](BoardTile* tile) {
+		return tile->minion != nullptr;
+	});
+	spellList.push_back(Spell(CARD_DARK_SEED, FACTION_ABYSSIAN, 4, "darkseed", "Dark Seed", FindEffect(SPELL_DARK_SEED)));
+	spellList.back().targetMode = TargetMode(TARGET_MODE_ALL, [](BoardTile* tile) {
+		return tile->minion != nullptr && tile->minion->IsEnemy() && tile->minion->tribe == TRIBE_GENERAL;
+	});
 
 	//Generate card map
 	for (int i = 0; i < minionList.size(); ++i) {
