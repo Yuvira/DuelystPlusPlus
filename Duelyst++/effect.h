@@ -18,10 +18,11 @@ enum eKeywordFlags {
 	KEYWORD_CELERITY       = 1 << 0,
 	KEYWORD_FLYING         = 1 << 1,
 	KEYWORD_FORCEFIELD     = 1 << 2,
-	KEYWORD_OPENING_GAMBIT = 1 << 3,
-	KEYWORD_PROVOKE        = 1 << 4,
-	KEYWORD_RANGED         = 1 << 5,
-	KEYWORD_RUSH           = 1 << 6
+	KEYWORD_FRENZY         = 1 << 3,
+	KEYWORD_OPENING_GAMBIT = 1 << 4,
+	KEYWORD_PROVOKE        = 1 << 5,
+	KEYWORD_RANGED         = 1 << 6,
+	KEYWORD_RUSH           = 1 << 7
 };
 
 //Skills and effects
@@ -54,6 +55,7 @@ enum eEffect {
 	SKILL_CELERITY,
 	SKILL_FLYING,
 	SKILL_FORCEFIELD,
+	SKILL_FRENZY,
 	SKILL_PROVOKE,
 	SKILL_RANGED,
 	SKILL_RUSH,
@@ -163,9 +165,11 @@ public:
 	void (*OnCast)(EffectContext, Card* card, BoardTile* tile) = nullptr;
 	void (*OnSummon)(EffectContext, Minion* minion, bool actionBar) = nullptr;
 	void (*OnDeath)(EffectContext, Minion* minion) = nullptr;
-	void (*OnAttack)(EffectContext, Minion* source, Minion* target, int& damage, bool counter) = nullptr;
-	void (*OnDamage)(EffectContext, Card* source, Minion* target, int damage) = nullptr;
-	void (*OnHeal)(EffectContext, Card* source, Minion* target, int damage) = nullptr;
+	void (*OnAttack)(EffectContext, Minion* source, Minion* target, bool counter) = nullptr;
+	void (*OnWouldDealDamage)(EffectContext, Card* source, Minion* target, int& damage) = nullptr;
+	void (*OnDamageDealt)(EffectContext, Card* source, Minion* target, int damage) = nullptr;
+	void (*OnWouldHeal)(EffectContext, Card* source, Minion* target, int& heal) = nullptr;
+	void (*OnHealed)(EffectContext, Card* source, Minion* target, int heal) = nullptr;
 	void (*OnMove)(EffectContext, Minion* minion, bool byEffect) = nullptr;
 	void (*OnDraw)(EffectContext, Card* card, bool fromDeck) = nullptr;
 	void (*OnReplace)(EffectContext, Card* card, bool& sendToDeck) = nullptr;

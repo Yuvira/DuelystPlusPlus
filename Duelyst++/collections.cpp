@@ -12,6 +12,7 @@ Collections::Collections() {
 	effects[SKILL_CELERITY] = Effect(SKILL_CELERITY, KEYWORD_CELERITY, "{Celerity}");
 	effects[SKILL_FLYING] = Effect(SKILL_FLYING, KEYWORD_FLYING, "{Flying}");
 	effects[SKILL_FORCEFIELD] = Effect(SKILL_FORCEFIELD, KEYWORD_FORCEFIELD, "{Forcefield}");
+	effects[SKILL_FRENZY] = Effect(SKILL_FRENZY, KEYWORD_FRENZY, "{Frenzy}");
 	effects[SKILL_PROVOKE] = Effect(SKILL_PROVOKE, KEYWORD_PROVOKE, "{Provoke}");
 	effects[SKILL_RANGED] = Effect(SKILL_RANGED, KEYWORD_RANGED, "{Ranged}");
 	effects[SKILL_RUSH] = Effect(SKILL_RUSH, KEYWORD_RUSH, "{Rush}");
@@ -140,7 +141,7 @@ Collections::Collections() {
 	//Azure Herald
 	effects[SKILL_AZURE_HERALD] = Effect(SKILL_AZURE_HERALD, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Restore 3 Health to your General");
 	effects[SKILL_AZURE_HERALD].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
-		context.card->owner->general->DealDamage(context.card, -3);
+		context.card->owner->general->Heal(context.card, 3);
 	};
 
 	//Azure Horn Shaman
@@ -197,12 +198,12 @@ Collections::Collections() {
 	//Blood Taura
 	effects[SKILL_BLOOD_TAURA] = Effect(SKILL_BLOOD_TAURA, KEYWORD_PROVOKE, "{Provoke}|This minion's cost is equal to your General's Health");
 	effects[SKILL_BLOOD_TAURA].fixedCost = 25;
-	effects[SKILL_BLOOD_TAURA].OnDamage = [](EffectContext context, Card* source, Minion* target, int damage) {
+	effects[SKILL_BLOOD_TAURA].OnDamageDealt = [](EffectContext context, Card* source, Minion* target, int damage) {
 		if (target == context.card->owner->general)
 			context.effect->fixedCost = max(target->hp, 0);
 		context.card->UpdateStatBuffs();
 	};
-	effects[SKILL_BLOOD_TAURA].OnHeal = [](EffectContext context, Card* source, Minion* target, int heal) {
+	effects[SKILL_BLOOD_TAURA].OnHealed = [](EffectContext context, Card* source, Minion* target, int heal) {
 		if (target == context.card->owner->general)
 			context.effect->fixedCost = max(target->hp, 0);
 		context.card->UpdateStatBuffs();
@@ -225,7 +226,7 @@ Collections::Collections() {
 
 	//Bluetip Scorpion
 	effects[SKILL_BLUETIP_SCORPION] = Effect(SKILL_BLUETIP_SCORPION, KEYWORD_NONE, "Deals double damage to minions");
-	effects[SKILL_BLUETIP_SCORPION].OnAttack = [](EffectContext context, Minion* source, Minion* target, int& damage, bool counter) {
+	effects[SKILL_BLUETIP_SCORPION].OnWouldDealDamage = [](EffectContext context, Card* source, Minion* target, int& damage) {
 		if (context.card == source && target->tribe != TRIBE_GENERAL)
 			damage *= 2;
 	};
@@ -242,14 +243,14 @@ Collections::Collections() {
 
 	//Captain Hank Hart
 	effects[SKILL_CAPTAIN_HANK_HART] = Effect(SKILL_CAPTAIN_HANK_HART, KEYWORD_RANGED, "{Ranged}|Whenever this deals damage, restore that much Health to it");
-	effects[SKILL_CAPTAIN_HANK_HART].OnDamage = [](EffectContext context, Card* source, Minion* target, int damage) {
+	effects[SKILL_CAPTAIN_HANK_HART].OnDamageDealt = [](EffectContext context, Card* source, Minion* target, int damage) {
 		if (context.card == source && context.card->IsOnBoard() && context.card->IsMinion() && context.card->GetMinion()->hp > 0)
-			context.card->GetMinion()->DealDamage(context.card, -damage);
+			context.card->GetMinion()->Heal(context.card, damage);
 	};
 
 	//Chakkram
 	effects[SKILL_CHAKKRAM] = Effect(SKILL_CHAKKRAM, KEYWORD_NONE, "Costs 2 less if your General took damage on your opponent's last turn");
-	effects[SKILL_CHAKKRAM].OnDamage = [](EffectContext context, Card* source, Minion* target, int damage) {
+	effects[SKILL_CHAKKRAM].OnDamageDealt = [](EffectContext context, Card* source, Minion* target, int damage) {
 		if (!context.card->IsOnBoard() && target == context.card->owner->general && &context.game->players[context.game->turn] != context.card->owner)
 			context.card->AddEffect(*context.game->collections->FindEffect(EFFECT_CHAKKRAM), context.effect);
 	};
@@ -266,7 +267,7 @@ Collections::Collections() {
 
 	//Chaos Elemental
 	effects[SKILL_CHAOS_ELEMENTAL] = Effect(SKILL_CHAOS_ELEMENTAL, KEYWORD_NONE, "Whenever this minion takes damage, it randomly teleports");
-	effects[SKILL_CHAOS_ELEMENTAL].OnDamage = [](EffectContext context, Card* source, Minion* target, int damage) {
+	effects[SKILL_CHAOS_ELEMENTAL].OnDamageDealt = [](EffectContext context, Card* source, Minion* target, int damage) {
 		if (context.card == target) {
 			BoardTile* tile = context.game->map.GetRandomEmpty(context.card->GetMinion()->curTile);
 			if (tile != nullptr)
@@ -322,9 +323,9 @@ Collections::Collections() {
 
 	//Day Watcher
 	effects[SKILL_DAY_WATCHER] = Effect(SKILL_DAY_WATCHER, KEYWORD_NONE, "Whenever a friendly minion attacks, restore 1 Health to your General");
-	effects[SKILL_DAY_WATCHER].OnAttack = [](EffectContext context, Minion* source, Minion* target, int& damage, bool counter) {
+	effects[SKILL_DAY_WATCHER].OnAttack = [](EffectContext context, Minion* source, Minion* target, bool counter) {
 		if (context.card->IsOnBoard() && context.card->owner == source->owner && source->tribe != TRIBE_GENERAL && !counter)
-			context.card->owner->general->DealDamage(context.card, -1);
+			context.card->owner->general->Heal(context.card, 1);
 	};
 
 	//Deathblighter
@@ -384,7 +385,7 @@ Collections::Collections() {
 
 	//Eclipse
 	effects[SKILL_ECLIPSE] = Effect(SKILL_ECLIPSE, KEYWORD_NONE, "Whenever this minion takes damage, it deals that much damage to the enemy General");
-	effects[SKILL_ECLIPSE].OnDamage = [](EffectContext context, Card* source, Minion* target, int damage) {
+	effects[SKILL_ECLIPSE].OnDamageDealt = [](EffectContext context, Card* source, Minion* target, int damage) {
 		if (context.card->IsOnBoard() && context.card == target)
 			context.card->owner->opponent->general->DealDamage(context.card, damage);
 	};
@@ -392,13 +393,13 @@ Collections::Collections() {
 	//Emerald Rejuvenator
 	effects[SKILL_EMERALD_REJUVENATOR] = Effect(SKILL_EMERALD_REJUVENATOR, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Restore 4 Health to BOTH Generals");
 	effects[SKILL_EMERALD_REJUVENATOR].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
-		context.card->owner->general->DealDamage(context.card, -4);
-		context.card->owner->opponent->general->DealDamage(context.card, -4);
+		context.card->owner->general->Heal(context.card, 4);
+		context.card->owner->opponent->general->Heal(context.card, 4);
 	};
 
 	//Envybaer
 	effects[SKILL_ENVYBAER] = Effect(SKILL_ENVYBAER, KEYWORD_NONE, "Whenever this minion damages an enemy, teleport that enemy to a random corner");
-	effects[SKILL_ENVYBAER].OnDamage = [](EffectContext context, Card* source, Minion* target, int damage) {
+	effects[SKILL_ENVYBAER].OnDamageDealt = [](EffectContext context, Card* source, Minion* target, int damage) {
 		if (context.card->IsOnBoard() && context.card == source && context.card->owner != target->owner) {
 			BoardTile* tile = context.game->map.GetRandomEmptyCorner();
 			if (tile != nullptr)
@@ -422,14 +423,14 @@ Collections::Collections() {
 
 	//E'Xun
 	effects[SKILL_EXUN] = Effect(SKILL_EXUN, KEYWORD_FORCEFIELD, "{Forcefield}|Whenever this minion attacks or is attacked, draw a card");
-	effects[SKILL_EXUN].OnAttack = [](EffectContext context, Minion* source, Minion* target, int& damage, bool counter) {
+	effects[SKILL_EXUN].OnAttack = [](EffectContext context, Minion* source, Minion* target, bool counter) {
 		if (context.card->IsOnBoard() && (context.card == source || context.card == target) && !counter)
 			context.card->owner->Draw();
 	};
 
 	//Facestriker
 	effects[SKILL_FACESTRIKER] = Effect(SKILL_FACESTRIKER, KEYWORD_NONE, "Deals double damage to Generals");
-	effects[SKILL_FACESTRIKER].OnAttack = [](EffectContext context, Minion* source, Minion* target, int& damage, bool counter) {
+	effects[SKILL_FACESTRIKER].OnWouldDealDamage = [](EffectContext context, Card* source, Minion* target, int& damage) {
 		if (context.card == source && target->tribe == TRIBE_GENERAL)
 			damage *= 2;
 	};
@@ -615,7 +616,7 @@ Collections::Collections() {
 			context.game->callback = EffectCallback(context, tile);
 			context.game->callback.Callback = [](EffectContext context, BoardTile* source, BoardTile* target) {
 				if (target->minion != nullptr)
-					target->minion->DealDamage(context.card, -2);
+					target->minion->Heal(context.card, 2);
 			};
 		}
 	};
@@ -674,7 +675,7 @@ Collections::Collections() {
 
 	//Khymera
 	effects[SKILL_KHYMERA] = Effect(SKILL_KHYMERA, KEYWORD_NONE, "Whenever this minion takes damage, summon a random token minion nearby");
-	effects[SKILL_KHYMERA].OnDamage = [](EffectContext context, Card* source, Minion* target, int damage) {
+	effects[SKILL_KHYMERA].OnDamageDealt = [](EffectContext context, Card* source, Minion* target, int damage) {
 		if (context.card->IsOnBoard() && context.card == target) {
 			BoardTile* tile = context.game->map.GetRandomEmptyNear(target->curTile);
 			if (tile != nullptr) {
@@ -701,7 +702,7 @@ Collections::Collections() {
 		if (context.card->IsOnBoard() && context.card->owner == player)
 			for (BoardTile* tile : context.game->map.GetAllNear(context.card->GetMinion()->curTile))
 				if (tile->minion != nullptr && tile->minion->owner == context.card->owner && tile->minion != context.card && tile->minion->tribe != TRIBE_GENERAL)
-					tile->minion->DealDamage(context.card, -2);
+					tile->minion->Heal(context.card, 2);
 	};
 
 	//Lady Locke
@@ -731,7 +732,7 @@ Collections::Collections() {
 	effects[SPELL_BREATH_OF_THE_UNBORN].OnResolveThis = [](EffectContext context, BoardTile* tile) {
 		for (int i = 0; i < context.game->minions.size(); ++i) {
 			if (context.game->minions[i]->tribe != TRIBE_GENERAL) {
-				if (context.game->minions[i]->owner == context.card->owner) { context.game->minions[i]->DealDamage(context.card, -999); }
+				if (context.game->minions[i]->owner == context.card->owner) { context.game->minions[i]->Heal(context.card, 999); }
 				else { context.game->minions[i]->DealDamage(context.card, 2); }
 			}
 		}
@@ -821,6 +822,7 @@ Collections::Collections() {
 	minionList.push_back(Minion(CARD_LADY_LOCKE, FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 3, "ladylocke", "Lady Locke", FindEffect(SKILL_LADY_LOCKE)));
 	minionList.push_back(Minion(CARD_LIGHTBENDER, FACTION_NEUTRAL, TRIBE_ARCANYST, 4, 3, 3, "lightbender", "Lightbender", FindEffect(SKILL_LIGHTBENDER)));
 	minionList.push_back(Minion(CARD_LUX_IGNIS, FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 5, "luxignis", "Lux Ignis", FindEffect(SKILL_LUX_IGNIS)));
+	minionList.push_back(Minion(CARD_PIERCING_MANTIS, FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 20, "piercingmantis", "Piercing Mantis", FindEffect(SKILL_FRENZY)));
 	minionList.push_back(Minion(CARD_SABERSPINE_TIGER, FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "saberspinetiger", "Saberspine Tiger", FindEffect(SKILL_RUSH)));
 	minionList.push_back(Minion(CARD_SAPPHIRE_SEER, FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 2, "sapphireseer", "Sapphire Seer", FindEffect(SKILL_FORCEFIELD)));
 

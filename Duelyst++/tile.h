@@ -41,6 +41,7 @@ public:
 	BoardTile();
 	~BoardTile();
 	void SetFeature(eFeature newFeature);
+	bool IsNear(BoardTile* tile);
 	eFeature feature;
 	Minion* minion;
 	Sprite sprite;

@@ -254,24 +254,38 @@ void Card::OnDeath(Minion* minion) {
 }
 
 //Whenever a minion attacks another minion
-void Card::OnAttack(Minion* source, Minion* target, int& damage, bool counter) {
+void Card::OnAttack(Minion* source, Minion* target, bool counter) {
 	for (int i = 0; i < effects.size(); ++i)
 		if (effects[i]->OnAttack)
-			effects[i]->OnAttack(EffectContext(effects[i], this, game), source, target, damage, counter);
+			effects[i]->OnAttack(EffectContext(effects[i], this, game), source, target, counter);
+}
+
+//Whenever a minion would be damaged
+void Card::OnWouldDealDamage(Card* source, Minion* target, int& damage) {
+	for (int i = 0; i < effects.size(); ++i)
+		if (effects[i]->OnWouldDealDamage)
+			effects[i]->OnWouldDealDamage(EffectContext(effects[i], this, game), source, target, damage);
 }
 
 //Whenever a minion is damaged
-void Card::OnDamage(Card* source, Minion* target, int damage) {
+void Card::OnDamageDealt(Card* source, Minion* target, int damage) {
 	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i]->OnDamage)
-			effects[i]->OnDamage(EffectContext(effects[i], this, game), source, target, damage);
+		if (effects[i]->OnDamageDealt)
+			effects[i]->OnDamageDealt(EffectContext(effects[i], this, game), source, target, damage);
+}
+
+//Whenever a minion would be healed
+void Card::OnWouldHeal(Card* source, Minion* target, int& heal) {
+	for (int i = 0; i < effects.size(); ++i)
+		if (effects[i]->OnWouldHeal)
+			effects[i]->OnWouldHeal(EffectContext(effects[i], this, game), source, target, heal);
 }
 
 //Whenever a minion is healed
-void Card::OnHeal(Card* source, Minion* target, int heal) {
+void Card::OnHealed(Card* source, Minion* target, int heal) {
 	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i]->OnHeal)
-			effects[i]->OnHeal(EffectContext(effects[i], this, game), source, target, heal);
+		if (effects[i]->OnHealed)
+			effects[i]->OnHealed(EffectContext(effects[i], this, game), source, target, heal);
 }
 
 //Whenever a minion is moved

@@ -85,6 +85,7 @@ enum eCard {
 	CARD_LIGHTBENDER,
 	CARD_LUX_IGNIS,
 	CARD_MINI_JAX,
+	CARD_PIERCING_MANTIS,
 	CARD_SABERSPINE_TIGER,
 	CARD_SAPPHIRE_SEER,
 	CARD_SPELLSPARK,
@@ -176,9 +177,11 @@ public:
 	void OnCast(Card* card, BoardTile* tile);
 	void OnSummon(Minion* minion, bool fromActionBar);
 	void OnDeath(Minion* minion);
-	void OnAttack(Minion* source, Minion* target, int& damage, bool counter);
-	void OnDamage(Card* source, Minion* target, int damage);
-	void OnHeal(Card* source, Minion* target, int heal);
+	void OnAttack(Minion* source, Minion* target, bool counter);
+	void OnWouldDealDamage(Card* source, Minion* target, int& damage);
+	void OnDamageDealt(Card* source, Minion* target, int damage);
+	void OnWouldHeal(Card* source, Minion* target, int& heal);
+	void OnHealed(Card* source, Minion* target, int heal);
 	void OnMove(Minion* minion, bool byEffect);
 	void OnDraw(Card* card, bool fromDeck);
 	void OnReplace(Card* replaced, bool& sendToDeck);
@@ -245,6 +248,7 @@ public:
 	void MoveToPosition(int x, int y, bool byEffect);
 	void Attack(Minion* target, bool counter);
 	int DealDamage(Card* source, int damage);
+	int Heal(Card* source, int heal);
 	void Destroy(Card* source);
 	void Dispel();
 	void AddEffects();

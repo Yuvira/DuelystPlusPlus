@@ -247,10 +247,26 @@ void Minion::MoveToPosition(int x, int y, bool byEffect) {
 
 //Attack enemy
 void Minion::Attack(Minion* target, bool counter) {
+
+	//Initialize damage value and whether the target can counterattack
 	int damage = atk;
 	bool canCounter = target->CanAttack(this);
-	game->eventManager.SendOnAttack(this, target, damage, counter);
-	target->DealDamage(this, damage);
+
+	//Sent OnAttack event
+	game->eventManager.SendOnAttack(this, target, counter);
+
+	//Damage all adjacent minions if this has Frenzy and is targeting an adjacent tile
+	if (!counter && HasKeywords(KEYWORD_FRENZY) && curTile->IsNear(target->curTile)) {
+		for (BoardTile* tile : game->map.GetAllNear(curTile))
+			if (tile->minion != nullptr && tile->minion->owner != owner)
+				tile->minion->DealDamage(this, damage);
+	}
+
+	//Otherwise just damage target
+	else
+		target->DealDamage(this, damage);
+
+	//If this is an attack, allow target to counterattack
 	if (!counter) {
 		if (!hasCelerityAttacked && !hasMoved) {
 			hasCelerityMoved = true;
@@ -265,30 +281,39 @@ void Minion::Attack(Minion* target, bool counter) {
 		if (canCounter)
 			target->Attack(this, true);
 	}
+
 }
 
 //Deal damage to this
 int Minion::DealDamage(Card* source, int damage) {
-	if (damage < 0) {
-		if (hp - damage > hpMax) {
-			damage = -(hpMax - hp);
-			hp = hpMax;
-		}
-		else
-			hp -= damage;
-		game->eventManager.SendOnHeal(source, this, -damage);
-	}
-	else {
+	game->eventManager.SendOnWouldDealDamage(source, this, damage);
+	if (damage > 0) {
 		if (HasKeywords(KEYWORD_FORCEFIELD) && !forcefieldBroken) {
 			forcefieldBroken = true;
 			damage = 0;
 		}
 		else {
 			hp -= damage;
-			game->eventManager.SendOnDamage(source, this, damage);
+			game->eventManager.SendOnDamageDealt(source, this, damage);
 		}
 	}
 	return damage;
+}
+
+//Heal this
+int Minion::Heal(Card* source, int heal) {
+	game->eventManager.SendOnWouldHeal(source, this, heal);
+	if (heal > 0) {
+		if (hp + heal > hpMax) {
+			heal = hpMax - hp;
+			hp = hpMax;
+		}
+		else
+			hp += heal;
+		if (heal > 0)
+			game->eventManager.SendOnHealed(source, this, heal);
+	}
+	return heal;
 }
 
 //Destroy this
