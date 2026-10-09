@@ -166,6 +166,18 @@ void Card::AddEffect(Effect effect, Effect* source) {
 	UpdateStatBuffs();
 }
 
+//Add continuous effect to list
+void Card::AddContinuousEffect(Effect effect) {
+	effects.push_back(new Effect(effect));
+	effects.back()->source = effects.back();
+	if (IsOnBoard() && effects.back()->OnAddThis)
+		effects.back()->OnAddThis(EffectContext(effects.back(), this, game));
+	if (game != nullptr)
+		game->eventManager.SendOnEffectsChanged(this);
+	UpdateDetails();
+	UpdateStatBuffs();
+}
+
 //Remove effect from list
 void Card::RemoveEffect(Effect* effect) {
 	for (int i = 0; i < effects.size(); ++i) {

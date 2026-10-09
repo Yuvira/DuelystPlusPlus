@@ -81,6 +81,7 @@ enum eCard {
 	CARD_KEEPER_OF_THE_VALE,
 	CARD_KHYMERA,
 	CARD_KOMODO_CHARGER,
+	CARD_LADY_LOCKE,
 	CARD_LIGHTBENDER,
 	CARD_LUX_IGNIS,
 	CARD_MINI_JAX,
@@ -176,6 +177,7 @@ public:
 
 	//Effects
 	void AddEffect(Effect effect, Effect* source);
+	void AddContinuousEffect(Effect effect);
 	void RemoveEffect(Effect* effect);
 	void RemoveEffectsFromSource(Effect* source);
 	void RemoveEffectAt(std::vector<int> indices);

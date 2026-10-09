@@ -696,6 +696,24 @@ Collections::Collections() {
 					tile->minion->DealDamage(context.card, -2);
 	};
 
+	//Lady Locke
+	effects[SKILL_LADY_LOCKE] = Effect(SKILL_LADY_LOCKE, KEYWORD_OPENING_GAMBIT | KEYWORD_PROVOKE, "{Provoke}|{Opening Gambit}: Other minions you summon this turn gain +1/+1 and gain {Provoke}");
+	effects[SKILL_LADY_LOCKE].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
+		context.card->AddContinuousEffect(*context.game->collections->FindEffect(EFFECT_LADY_LOCKE_CONTINUOUS));
+	};
+	effects[EFFECT_LADY_LOCKE_CONTINUOUS] = Effect(EFFECT_LADY_LOCKE_CONTINUOUS, KEYWORD_NONE, "{Lady Locke}|Minions you summon this turn gain +1/+1 and gain {Provoke}");
+	effects[EFFECT_LADY_LOCKE_CONTINUOUS].OnSummon = [](EffectContext context, Minion* minion, bool actionBar) {
+		if (context.card->IsOnBoard() && context.card != minion && context.card->owner == minion->owner)
+			minion->AddEffect(*context.game->collections->FindEffect(EFFECT_LADY_LOCKE_BUFF), nullptr);
+	};
+	effects[EFFECT_LADY_LOCKE_CONTINUOUS].OnTurnEnd = [](EffectContext context, Player* player) {
+		if (context.card->IsOnBoard() && context.card->owner == player)
+			context.card->RemoveEffectsFromSource(context.effect);
+	};
+	effects[EFFECT_LADY_LOCKE_BUFF] = Effect(EFFECT_LADY_LOCKE_BUFF, KEYWORD_PROVOKE, "{Lady Locke}|{Provoke}");
+	effects[EFFECT_LADY_LOCKE_BUFF].atkBuff = 1;
+	effects[EFFECT_LADY_LOCKE_BUFF].hpBuff = 1;
+
 #pragma endregion
 
 #pragma region Spells
@@ -792,6 +810,7 @@ Collections::Collections() {
 	minionList.push_back(Minion(CARD_KEEPER_OF_THE_VALE, FACTION_NEUTRAL, TRIBE_NONE, 5, 3, 4, "keeperofthevale", "Keeper of the Vale", FindEffect(SKILL_KEEPER_OF_THE_VALE)));
 	minionList.push_back(Minion(CARD_KHYMERA, FACTION_NEUTRAL, TRIBE_NONE, 8, 5, 12, "khymera", "Khymera", FindEffect(SKILL_KHYMERA)));
 	minionList.push_back(Minion(CARD_KOMODO_CHARGER, FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 3, "komodocharger", "Komodo Charger"));
+	minionList.push_back(Minion(CARD_LADY_LOCKE, FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 3, "ladylocke", "Lady Locke", FindEffect(SKILL_LADY_LOCKE)));
 	minionList.push_back(Minion(CARD_LIGHTBENDER, FACTION_NEUTRAL, TRIBE_ARCANYST, 4, 3, 3, "lightbender", "Lightbender", FindEffect(SKILL_LIGHTBENDER)));
 	minionList.push_back(Minion(CARD_LUX_IGNIS, FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 5, "luxignis", "Lux Ignis", FindEffect(SKILL_LUX_IGNIS)));
 	minionList.push_back(Minion(CARD_SABERSPINE_TIGER, FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "saberspinetiger", "Saberspine Tiger", FindEffect(SKILL_RUSH)));
