@@ -529,7 +529,7 @@ Collections::Collections() {
 	effects[SKILL_GOLEM_METALLURGIST] = Effect(SKILL_GOLEM_METALLURGIST, KEYWORD_NONE, "The first Golem you summon each turn costs 1 less");
 	effects[SKILL_GOLEM_METALLURGIST].OnAddThis = [](EffectContext context) {
 		for (Card* card : context.game->castThisTurn)
-			if (card->IsMinion() && card->GetMinion()->tribe == TRIBE_GOLEM)
+			if (card->owner == context.card->owner && card->IsMinion() && card->GetMinion()->tribe == TRIBE_GOLEM)
 				return;
 		if (context.effect->ApplyEffect)
 			context.effect->ApplyEffect(context);
@@ -548,7 +548,7 @@ Collections::Collections() {
 	effects[SKILL_GOLEM_METALLURGIST].OnDraw = [](EffectContext context, Card* card, bool fromDeck) {
 		if (context.card->IsOnBoard() && !fromDeck && card->owner == context.card->owner && card->IsMinion() && card->GetMinion()->tribe == TRIBE_GOLEM) {
 			for (Card* card : context.game->castThisTurn)
-				if (card->IsMinion() && card->GetMinion()->tribe == TRIBE_GOLEM)
+				if (card->owner == context.card->owner && card->IsMinion() && card->GetMinion()->tribe == TRIBE_GOLEM)
 					return;
 			card->AddEffect(*context.game->collections->FindEffect(EFFECT_GOLEM_METALLURGIST), context.effect);
 		}
