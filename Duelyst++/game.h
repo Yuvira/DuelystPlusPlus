@@ -85,6 +85,7 @@ public:
 	std::vector<Card*> grave;
 	std::vector<Minion*> destroyedMinions;
 	std::vector<Spell*> spellHistory;
+	std::vector<Card*> castThisTurn;
 	Sprite light;
 	Sprite board;
 	Sprite chars[10];

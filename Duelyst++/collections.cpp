@@ -528,6 +528,9 @@ Collections::Collections() {
 	//Golem Metallurgist
 	effects[SKILL_GOLEM_METALLURGIST] = Effect(SKILL_GOLEM_METALLURGIST, KEYWORD_NONE, "The first Golem you summon each turn costs 1 less");
 	effects[SKILL_GOLEM_METALLURGIST].OnAddThis = [](EffectContext context) {
+		for (Card* card : context.game->castThisTurn)
+			if (card->IsMinion() && card->GetMinion()->tribe == TRIBE_GOLEM)
+				return;
 		if (context.effect->ApplyEffect)
 			context.effect->ApplyEffect(context);
 	};
@@ -536,23 +539,24 @@ Collections::Collections() {
 			context.effect->RemoveEffect(context);
 	};
 	effects[SKILL_GOLEM_METALLURGIST].OnSummon = [](EffectContext context, Minion* minion, bool actionBar) {
-		if (actionBar && context.card->owner == minion->owner && minion->tribe == TRIBE_GOLEM && !context.effect->triggered) {
+		if (actionBar && context.card->owner == minion->owner && minion->tribe == TRIBE_GOLEM) {
 			minion->RemoveEffectsFromSource(context.effect);
 			if (context.effect->RemoveEffect)
 				context.effect->RemoveEffect(context);
-			context.effect->triggered = true;
 		}
 	};
 	effects[SKILL_GOLEM_METALLURGIST].OnDraw = [](EffectContext context, Card* card, bool fromDeck) {
-		if (context.card->IsOnBoard() && !fromDeck && card->owner == context.card->owner && card->IsMinion() && card->GetMinion()->tribe == TRIBE_GOLEM)
+		if (context.card->IsOnBoard() && !fromDeck && card->owner == context.card->owner && card->IsMinion() && card->GetMinion()->tribe == TRIBE_GOLEM) {
+			for (Card* card : context.game->castThisTurn)
+				if (card->IsMinion() && card->GetMinion()->tribe == TRIBE_GOLEM)
+					return;
 			card->AddEffect(*context.game->collections->FindEffect(EFFECT_GOLEM_METALLURGIST), context.effect);
+		}
 	};
 	effects[SKILL_GOLEM_METALLURGIST].OnTurnEnd = [](EffectContext context, Player* player) {
-		if (context.card->IsOnBoard() && context.card->owner == player) {
+		if (context.card->IsOnBoard() && context.card->owner == player)
 			if (context.effect->ApplyEffect)
 				context.effect->ApplyEffect(context);
-		}
-		context.effect->triggered = false;
 	};
 	effects[SKILL_GOLEM_METALLURGIST].ApplyEffect = [](EffectContext context) {
 		for (Card* card : context.card->owner->hand)

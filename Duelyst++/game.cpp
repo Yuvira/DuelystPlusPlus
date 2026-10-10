@@ -438,6 +438,7 @@ void Game::UseEffect() {
 //Send cast event after pre-cast effect targets have been set
 void Game::PostCast() {
 	eventManager.SendOnCast(activeCard, &map.tiles[castPos.x][castPos.y]);
+	castThisTurn.push_back(activeCard->original);
 	activeCard->Resolve(&map.tiles[castPos.x][castPos.y]);
 	activeCard = nullptr;
 }
@@ -486,10 +487,16 @@ void Game::ChangeTurn(bool newTurn) {
 	//Indicate turn is ending
 	endTurn = true;
 
+	//Trigger end of turn
+	eventManager.SendOnTurnEnd(&players[!turn]);
+
 	//Draw and reset replaces
 	if (turnCount > 0)
 		players[turn].Draw();
 	players[turn].replaces = players[turn].maxReplaces;
+
+	//Clear cast history
+	castThisTurn.clear();
 
 	//Change turn
 	turn = newTurn;
@@ -507,8 +514,7 @@ void Game::ChangeTurn(bool newTurn) {
 	else
 		light.SetColor(COLOR_LTBLUE);
 
-	//End old turn, start new turn
-	eventManager.SendOnTurnEnd(&players[!turn]);
+	//Trigger start of turn
 	eventManager.SendOnTurnStart(&players[turn]);
 
 	//Turn has ended
