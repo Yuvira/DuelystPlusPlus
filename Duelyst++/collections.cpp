@@ -936,7 +936,7 @@ Collections::Collections() {
 	minionList.push_back(Minion(CARD_MOGWAI, FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 3, "mogwai", "Mogwai", FindEffect(SKILL_MOGWAI)));
 	minionList.push_back(Minion(CARD_NECROSEER, FACTION_NEUTRAL, TRIBE_NONE, 5, 5, 4, "necroseer", "Necroseer", FindEffect(SKILL_NECROSEER)));
 	minionList.push_back(Minion(CARD_NIGHT_WATCHER, FACTION_NEUTRAL, TRIBE_NONE, 4, 2, 4, "nightwatcher", "Night Watcher", FindEffect(SKILL_NIGHT_WATCHER)));
-	minionList.push_back(Minion(CARD_PIERCING_MANTIS, FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 20, "piercingmantis", "Piercing Mantis", FindEffect(SKILL_FRENZY)));
+	minionList.push_back(Minion(CARD_PIERCING_MANTIS, FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 2, "piercingmantis", "Piercing Mantis", FindEffect(SKILL_FRENZY)));
 	minionList.push_back(Minion(CARD_SABERSPINE_TIGER, FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "saberspinetiger", "Saberspine Tiger", FindEffect(SKILL_RUSH)));
 	minionList.push_back(Minion(CARD_SAPPHIRE_SEER, FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 2, "sapphireseer", "Sapphire Seer", FindEffect(SKILL_FORCEFIELD)));
 
