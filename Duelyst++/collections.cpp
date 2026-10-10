@@ -726,6 +726,56 @@ Collections::Collections() {
 	effects[EFFECT_LADY_LOCKE_BUFF] = Effect(EFFECT_LADY_LOCKE_BUFF, KEYWORD_PROVOKE, "{Lady Locke}|{Provoke}");
 	effects[EFFECT_LADY_LOCKE_BUFF].atkBuff = 1;
 	effects[EFFECT_LADY_LOCKE_BUFF].hpBuff = 1;
+	
+	//Manaforger
+	effects[SKILL_MANAFORGER] = Effect(SKILL_MANAFORGER, KEYWORD_NONE, "The first non-Bloodborn spell you cast each turn costs 1 less");
+	effects[SKILL_MANAFORGER].OnAddThis = [](EffectContext context) {
+		for (Card* c : context.game->castThisTurn)
+			if (c->IsSpell())
+				return;
+		if (context.effect->ApplyEffect)
+			context.effect->ApplyEffect(context);
+	};
+	effects[SKILL_MANAFORGER].OnRemoveThis = [](EffectContext context) {
+		if (context.effect->RemoveEffect)
+			context.effect->RemoveEffect(context);
+	};
+	effects[SKILL_MANAFORGER].OnCast = [](EffectContext context, Card* card, BoardTile* tile) {
+		if (context.card->owner == card->owner && card->IsSpell()) {
+			card->RemoveEffectsFromSource(context.effect);
+			if (context.effect->RemoveEffect)
+				context.effect->RemoveEffect(context);
+		}
+	};
+	effects[SKILL_MANAFORGER].OnDraw = [](EffectContext context, Card* card, bool fromDeck) {
+		if (context.card->IsOnBoard() && !fromDeck && card->owner == context.card->owner && card->IsSpell()) {
+			for (Card* c : context.game->castThisTurn)
+				if (c->IsSpell())
+					return;
+			card->AddEffect(*context.game->collections->FindEffect(EFFECT_MANAFORGER), context.effect);
+		}
+	};
+	effects[SKILL_MANAFORGER].OnTurnEnd = [](EffectContext context, Player* player) {
+		if (context.card->IsOnBoard() && context.card->owner == player)
+			if (context.effect->ApplyEffect)
+				context.effect->ApplyEffect(context);
+	};
+	effects[SKILL_MANAFORGER].ApplyEffect = [](EffectContext context) {
+		for (Card* card : context.card->owner->hand)
+			if (card->IsSpell())
+				card->AddEffect(*context.game->collections->FindEffect(EFFECT_MANAFORGER), context.effect);
+		for (Card* card : context.card->owner->deck)
+			if (card->IsSpell())
+				card->AddEffect(*context.game->collections->FindEffect(EFFECT_MANAFORGER), context.effect);
+		};
+	effects[SKILL_MANAFORGER].RemoveEffect = [](EffectContext context) {
+		for (Card* card : context.card->owner->hand)
+			card->RemoveEffectsFromSource(context.effect);
+		for (Card* card : context.card->owner->deck)
+			card->RemoveEffectsFromSource(context.effect);
+		};
+	effects[EFFECT_MANAFORGER] = Effect(EFFECT_MANAFORGER, KEYWORD_NONE, "{Manaforger}");
+	effects[EFFECT_MANAFORGER].costBuff = -1;
 
 #pragma endregion
 
@@ -826,6 +876,7 @@ Collections::Collections() {
 	minionList.push_back(Minion(CARD_LADY_LOCKE, FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 3, "ladylocke", "Lady Locke", FindEffect(SKILL_LADY_LOCKE)));
 	minionList.push_back(Minion(CARD_LIGHTBENDER, FACTION_NEUTRAL, TRIBE_ARCANYST, 4, 3, 3, "lightbender", "Lightbender", FindEffect(SKILL_LIGHTBENDER)));
 	minionList.push_back(Minion(CARD_LUX_IGNIS, FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 5, "luxignis", "Lux Ignis", FindEffect(SKILL_LUX_IGNIS)));
+	minionList.push_back(Minion(CARD_MANAFORGER, FACTION_NEUTRAL, TRIBE_ARCANYST, 2, 1, 3, "manaforger", "Manaforger", FindEffect(SKILL_MANAFORGER)));
 	minionList.push_back(Minion(CARD_PIERCING_MANTIS, FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 20, "piercingmantis", "Piercing Mantis", FindEffect(SKILL_FRENZY)));
 	minionList.push_back(Minion(CARD_SABERSPINE_TIGER, FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "saberspinetiger", "Saberspine Tiger", FindEffect(SKILL_RUSH)));
 	minionList.push_back(Minion(CARD_SAPPHIRE_SEER, FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 2, "sapphireseer", "Sapphire Seer", FindEffect(SKILL_FORCEFIELD)));
