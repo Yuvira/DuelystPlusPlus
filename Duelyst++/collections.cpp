@@ -142,7 +142,7 @@ Collections::Collections() {
 	};
 
 	//Azure Horn Shaman
-	effects[SKILL_AZURE_HORN_SHAMAN] = Effect(SKILL_AZURE_HORN_SHAMAN, KEYWORD_NONE, "{Dying Wish}: Give +4 Health to friendly minions around it");
+	effects[SKILL_AZURE_HORN_SHAMAN] = Effect(SKILL_AZURE_HORN_SHAMAN, KEYWORD_DYING_WISH, "{Dying Wish}: Give +4 Health to friendly minions around it");
 	effects[SKILL_AZURE_HORN_SHAMAN].OnDeath = [](EffectContext context, Minion* minion) {
 		if (context.IsCard(minion))
 			for (BoardTile* tile : context.game->map.GetAllNear(minion->curTile))
@@ -354,7 +354,7 @@ Collections::Collections() {
 	};
 
 	//Dioltas
-	effects[SKILL_DIOLTAS] = Effect(SKILL_DIOLTAS, KEYWORD_NONE, "{Dying Wish}: Summon a 0/8 Tombstone minion with Provoke near your General");
+	effects[SKILL_DIOLTAS] = Effect(SKILL_DIOLTAS, KEYWORD_DYING_WISH, "{Dying Wish}: Summon a 0/8 Tombstone minion with Provoke near your General");
 	effects[SKILL_DIOLTAS].OnDeath = [](EffectContext context, Minion* minion) {
 		if (context.IsCard(minion)) {
 			BoardTile* tile = context.game->map.GetRandomEmptyNear(context.card->owner->general->curTile);
@@ -630,7 +630,7 @@ Collections::Collections() {
 	};
 
 	//Ironclad
-	effects[SKILL_IRONCLAD] = Effect(SKILL_IRONCLAD, KEYWORD_NONE, "{Dying Wish}: Dispel all enemy minions");
+	effects[SKILL_IRONCLAD] = Effect(SKILL_IRONCLAD, KEYWORD_DYING_WISH, "{Dying Wish}: Dispel all enemy minions");
 	effects[SKILL_IRONCLAD].OnDeath = [](EffectContext context, Minion* minion) {
 		if (context.IsCard(minion))
 			for (Minion* target : context.game->minions)
@@ -647,7 +647,7 @@ Collections::Collections() {
 	};
 
 	//Jaxi
-	effects[SKILL_JAXI] = Effect(SKILL_JAXI, KEYWORD_NONE, "{Dying Wish}: Summon a 1/1 {Ranged} Mini-Jax in a random corner");
+	effects[SKILL_JAXI] = Effect(SKILL_JAXI, KEYWORD_DYING_WISH, "{Dying Wish}: Summon a 1/1 {Ranged} Mini-Jax in a random corner");
 	effects[SKILL_JAXI].OnDeath = [](EffectContext context, Minion* minion) {
 		if (context.IsCard(minion)) {
 			BoardTile* tile = context.game->map.GetRandomEmptyCorner();
@@ -815,7 +815,7 @@ Collections::Collections() {
 	};
 
 	//Necroseer
-	effects[SKILL_NECROSEER] = Effect(SKILL_NECROSEER, KEYWORD_NONE, "{Dying Wish}: Draw a card");
+	effects[SKILL_NECROSEER] = Effect(SKILL_NECROSEER, KEYWORD_DYING_WISH, "{Dying Wish}: Draw a card");
 	effects[SKILL_NECROSEER].OnDeath = [](EffectContext context, Minion* minion) {
 		if (context.IsCard(minion))
 			context.card->owner->Draw();

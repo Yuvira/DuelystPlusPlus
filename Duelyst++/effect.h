@@ -16,13 +16,14 @@ class Player;
 enum eKeywordFlags {
 	KEYWORD_NONE           = 0,
 	KEYWORD_CELERITY       = 1 << 0,
-	KEYWORD_FLYING         = 1 << 1,
-	KEYWORD_FORCEFIELD     = 1 << 2,
-	KEYWORD_FRENZY         = 1 << 3,
-	KEYWORD_OPENING_GAMBIT = 1 << 4,
-	KEYWORD_PROVOKE        = 1 << 5,
-	KEYWORD_RANGED         = 1 << 6,
-	KEYWORD_RUSH           = 1 << 7
+	KEYWORD_DYING_WISH     = 1 << 1,
+	KEYWORD_FLYING         = 1 << 2,
+	KEYWORD_FORCEFIELD     = 1 << 3,
+	KEYWORD_FRENZY         = 1 << 4,
+	KEYWORD_OPENING_GAMBIT = 1 << 5,
+	KEYWORD_PROVOKE        = 1 << 6,
+	KEYWORD_RANGED         = 1 << 7,
+	KEYWORD_RUSH           = 1 << 8
 };
 
 //Skills and effects
