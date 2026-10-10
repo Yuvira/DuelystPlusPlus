@@ -233,14 +233,14 @@ void Game::Input() {
 		else if (asciiVal == 100 || asciiVal == 68) { MoveCursor(1, 0); } //D
 
 		//Select minion
-		else if (asciiVal == 32) {
+		else if (asciiVal == 32) {                                        //Space
 			if (map.tiles[pos.x][pos.y].minion != nullptr)
 				if (map.tiles[pos.x][pos.y].minion->owner == &players[turn])
 					SelectTile(map.tiles[pos.x][pos.y]);
 		}
 
 		//Change turn
-		else if (asciiVal == 10 || asciiVal == 13)
+		else if (asciiVal == 10 || asciiVal == 13)                        //Enter
 			ChangeTurn(!turn);
 
 	}
@@ -255,11 +255,11 @@ void Game::Input() {
 		else if (asciiVal == 100 || asciiVal == 68) { MoveCursorHand(1, -1); } //D
 
 		//Replace card
-		else if (asciiVal == 114 || asciiVal == 82)
+		else if (asciiVal == 114 || asciiVal == 82)                            //R
 			players[turn].Replace(handIdx);
 
 		//Select card
-		else if (asciiVal == 32)
+		else if (asciiVal == 32)                                               //Space
 			if (handIdx < players[turn].hand.size())
 				SelectCard();
 
@@ -275,7 +275,7 @@ void Game::Input() {
 		else if (asciiVal == 100 || asciiVal == 68) { MoveSelect(1, 0); } //D
 
 		//Move minion
-		else if (asciiVal == 32) {
+		else if (asciiVal == 32) {                                        //Space
 			for (int a = 0; a < attackable.size(); ++a) {
 				if (attackable[a] == selectable[selectionIdx]) {
 					AttackUnit();
@@ -298,7 +298,7 @@ void Game::Input() {
 		else if (asciiVal == 100 || asciiVal == 68) { MoveSelect(1, 0); } //D
 
 		//Use card at selection
-		else if (asciiVal == 32) {
+		else if (asciiVal == 32) {                                        //Space
 			if (callback.Callback)
 				UseEffect();
 			else
