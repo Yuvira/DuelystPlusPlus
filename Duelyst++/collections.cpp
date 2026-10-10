@@ -777,6 +777,21 @@ Collections::Collections() {
 	effects[EFFECT_MANAFORGER] = Effect(EFFECT_MANAFORGER, KEYWORD_NONE, "{Manaforger}");
 	effects[EFFECT_MANAFORGER].costBuff = -1;
 
+	//Maw
+	effects[SKILL_MAW] = Effect(SKILL_MAW, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Deal 2 damage to a nearby enemy minion");
+	effects[SKILL_MAW].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
+		context.game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, [](BoardTile* tile) {
+			return tile->minion != nullptr && tile->minion->IsEnemy() && tile->minion->tribe != TRIBE_GENERAL;
+		}), tile);
+		if (context.game->selectable.size() > 0) {
+			context.game->callback = EffectCallback(context, tile);
+			context.game->callback.Callback = [](EffectContext context, BoardTile* source, BoardTile* target) {
+				if (target->minion != nullptr)
+					target->minion->DealDamage(context.card, 2);
+			};
+		}
+	};
+
 #pragma endregion
 
 #pragma region Spells
@@ -877,6 +892,7 @@ Collections::Collections() {
 	minionList.push_back(Minion(CARD_LIGHTBENDER, FACTION_NEUTRAL, TRIBE_ARCANYST, 4, 3, 3, "lightbender", "Lightbender", FindEffect(SKILL_LIGHTBENDER)));
 	minionList.push_back(Minion(CARD_LUX_IGNIS, FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 5, "luxignis", "Lux Ignis", FindEffect(SKILL_LUX_IGNIS)));
 	minionList.push_back(Minion(CARD_MANAFORGER, FACTION_NEUTRAL, TRIBE_ARCANYST, 2, 1, 3, "manaforger", "Manaforger", FindEffect(SKILL_MANAFORGER)));
+	minionList.push_back(Minion(CARD_MAW, FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 2, "maw", "Maw", FindEffect(SKILL_MAW)));
 	minionList.push_back(Minion(CARD_PIERCING_MANTIS, FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 20, "piercingmantis", "Piercing Mantis", FindEffect(SKILL_FRENZY)));
 	minionList.push_back(Minion(CARD_SABERSPINE_TIGER, FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "saberspinetiger", "Saberspine Tiger", FindEffect(SKILL_RUSH)));
 	minionList.push_back(Minion(CARD_SAPPHIRE_SEER, FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 2, "sapphireseer", "Sapphire Seer", FindEffect(SKILL_FORCEFIELD)));
