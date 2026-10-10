@@ -743,13 +743,13 @@ Collections::Collections() {
 		for (Card* card : context.card->owner->deck)
 			if (card->IsSpell())
 				card->AddEffect(EFFECT_MANAFORGER, context.effect);
-		};
+	};
 	effects[SKILL_MANAFORGER].RemoveEffect = [](EffectContext context) {
 		for (Card* card : context.card->owner->hand)
 			card->RemoveEffectsFromSource(context.effect);
 		for (Card* card : context.card->owner->deck)
 			card->RemoveEffectsFromSource(context.effect);
-		};
+	};
 	effects[EFFECT_MANAFORGER] = Effect(EFFECT_MANAFORGER, KEYWORD_NONE, "{Manaforger}");
 	effects[EFFECT_MANAFORGER].costBuff = -1;
 
