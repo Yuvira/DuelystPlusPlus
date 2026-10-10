@@ -16,7 +16,6 @@ Minion::Minion(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, 
 	this->cardId = cardId;
 	this->faction = faction;
 	this->tribe = tribe;
-	targetMode = TargetMode(TARGET_MODE_NEAR_ALLIES, [](BoardTile* tile) { return tile->minion == nullptr; });
 	this->cost = cost;
 	this->atk = atk;
 	this->hp = hp;
@@ -374,6 +373,13 @@ void Minion::AddEffects() {
 #pragma endregion
 
 #pragma region Utils
+
+//Get targeting mode
+TargetMode Minion::GetTargetMode() {
+	if (HasKeywords(KEYWORD_AIRDROP))
+		return TargetMode(TARGET_MODE_ALL, [](BoardTile* tile) { return tile->minion == nullptr; });
+	return TargetMode(TARGET_MODE_NEAR_ALLIES, [](BoardTile* tile) { return tile->minion == nullptr; });
+}
 
 //Can minion attack target
 bool Minion::CanAttack(Minion* target) {

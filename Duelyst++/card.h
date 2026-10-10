@@ -93,6 +93,7 @@ enum eCard {
 	CARD_NECROSEER,
 	CARD_NIGHT_WATCHER,
 	CARD_PIERCING_MANTIS,
+	CARD_PLANAR_SCOUT,
 	CARD_SABERSPINE_TIGER,
 	CARD_SAPPHIRE_SEER,
 	CARD_SPELLSPARK,
@@ -199,6 +200,7 @@ public:
 	virtual void OnTurnEnd(Player* player);
 
 	//Utils
+	virtual TargetMode GetTargetMode() { return TargetMode(); }
 	virtual bool IsGeneral() { return false; }
 	virtual bool IsOnBoard() { return false; }
 	std::string ValueString(int value);
@@ -215,7 +217,6 @@ public:
 	//Properties
 	eCard cardId;
 	eFaction faction;
-	TargetMode targetMode;
 	bool isToken;
 	int cost;
 	Game* game;
@@ -267,6 +268,7 @@ public:
 	void AddEffects();
 
 	//Utils
+	TargetMode GetTargetMode();
 	bool IsGeneral() { return tribe == TRIBE_GENERAL; }
 	bool CanAttack(Minion* target);
 	bool IsMoveable();
@@ -320,10 +322,16 @@ public:
 	void UpdateStatBuffs();
 	void UpdateDetailStats();
 
+	//Utils
+	TargetMode GetTargetMode() { return targetMode; }
+
 	//Action & Event Overrides
 	void Resolve(BoardTile* tile);
 
 	//Getter
 	Spell* GetSpell() { return this; }
+
+	//Targeting mode
+	TargetMode targetMode;
 
 };
