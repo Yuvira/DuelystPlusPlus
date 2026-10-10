@@ -768,6 +768,43 @@ Collections::Collections() {
 		}
 	};
 
+	//Mindwarper
+	effects[SKILL_MINDWARPER] = Effect(SKILL_MINDWARPER, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Gain a copy of a random spell from your opponent's action bar");
+	effects[SKILL_MINDWARPER].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
+		std::vector<Card*> valid;
+		for (Card* card : context.card->owner->opponent->hand)
+			if (card->IsSpell())
+				valid.push_back(card);
+		if (valid.size() > 0) {
+			int i = rand() % valid.size();
+			context.card->owner->AddNewToHand(valid[i]->original);
+		}
+	};
+
+	//Mirkblood Devourer
+	effects[SKILL_MIRKBLOOD_DEVOURER] = Effect(SKILL_MIRKBLOOD_DEVOURER, KEYWORD_NONE, "Friendly minions summoned nearby this minion gain +1/+1");
+	effects[SKILL_MIRKBLOOD_DEVOURER].OnSummon = [](EffectContext context, Minion* minion, bool actionBar) {
+		if (context.IsOnBoard() && context.IsAllied(minion) && context.card->GetMinion()->curTile->IsNear(minion->curTile))
+			minion->AddEffect(EFFECT_MIRKBLOOD_DEVOURER, nullptr);
+	};
+	effects[EFFECT_MIRKBLOOD_DEVOURER] = Effect(EFFECT_MIRKBLOOD_DEVOURER, KEYWORD_NONE, "{Mirkblood Devourer}");
+	effects[EFFECT_MIRKBLOOD_DEVOURER].atkBuff = 1;
+	effects[EFFECT_MIRKBLOOD_DEVOURER].hpBuff = 1;
+
+	//Mogwai
+	effects[SKILL_MOGWAI] = Effect(SKILL_MOGWAI, KEYWORD_NONE, "After this moves, draw a card");
+	effects[SKILL_MOGWAI].OnMove = [](EffectContext context, Minion* minion, bool byEffect) {
+		if (context.IsCardOnBoard(minion) && !byEffect)
+			context.card->owner->Draw();
+	};
+
+	//Necroseer
+	effects[SKILL_NECROSEER] = Effect(SKILL_NECROSEER, KEYWORD_NONE, "{Dying Wish}: Draw a card");
+	effects[SKILL_NECROSEER].OnDeath = [](EffectContext context, Minion* minion) {
+		if (context.IsCard(minion))
+			context.card->owner->Draw();
+	};
+
 #pragma endregion
 
 #pragma region Spells
@@ -871,6 +908,10 @@ Collections::Collections() {
 	minionList.push_back(Minion(CARD_LUX_IGNIS, FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 5, "luxignis", "Lux Ignis", FindEffect(SKILL_LUX_IGNIS)));
 	minionList.push_back(Minion(CARD_MANAFORGER, FACTION_NEUTRAL, TRIBE_ARCANYST, 2, 1, 3, "manaforger", "Manaforger", FindEffect(SKILL_MANAFORGER)));
 	minionList.push_back(Minion(CARD_MAW, FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 2, "maw", "Maw", FindEffect(SKILL_MAW)));
+	minionList.push_back(Minion(CARD_MINDWARPER, FACTION_NEUTRAL, TRIBE_ARCANYST, 4, 4, 3, "mindwarper", "Mindwarper", FindEffect(SKILL_MINDWARPER)));
+	minionList.push_back(Minion(CARD_MIRKBLOOD_DEVOURER, FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 4, "mirkblooddevourer", "Mirkblood Devourer", FindEffect(SKILL_MIRKBLOOD_DEVOURER)));
+	minionList.push_back(Minion(CARD_MOGWAI, FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 3, "mogwai", "Mogwai", FindEffect(SKILL_MOGWAI)));
+	minionList.push_back(Minion(CARD_NECROSEER, FACTION_NEUTRAL, TRIBE_NONE, 5, 5, 4, "necroseer", "Necroseer", FindEffect(SKILL_NECROSEER)));
 	minionList.push_back(Minion(CARD_PIERCING_MANTIS, FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 20, "piercingmantis", "Piercing Mantis", FindEffect(SKILL_FRENZY)));
 	minionList.push_back(Minion(CARD_SABERSPINE_TIGER, FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "saberspinetiger", "Saberspine Tiger", FindEffect(SKILL_RUSH)));
 	minionList.push_back(Minion(CARD_SAPPHIRE_SEER, FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 2, "sapphireseer", "Sapphire Seer", FindEffect(SKILL_FORCEFIELD)));
