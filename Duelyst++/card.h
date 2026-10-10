@@ -281,6 +281,7 @@ public:
 	int hp;
 	int hpMax;
 	int moveRange;
+	bool destroyed;
 	bool isDead;
 	bool hasMoved;
 	bool hasAttacked;

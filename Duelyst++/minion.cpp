@@ -24,6 +24,7 @@ Minion::Minion(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, 
 	moveRange = 2;
 	this->isToken = isToken;
 	this->name = name;
+	destroyed = false;
 	isDead = false;
 	hasMoved = false;
 	hasAttacked = false;
@@ -140,7 +141,7 @@ void Minion::DrawDetails(Renderer& renderer, int& y) {
 
 //Check if minion has died
 void Minion::Update(bool& shouldLoop) {
-	if (hp < 1) {
+	if (hp < 1 || destroyed) {
 		game->eventManager.SendOnDeath(this);
 		for (; !effects.empty(); RemoveEffect(effects.front())) {}
 		isDead = true;
@@ -319,7 +320,7 @@ int Minion::Heal(Card* source, int heal) {
 
 //Destroy this
 void Minion::Destroy(Card* source) {
-	isDead = true;
+	destroyed = true;
 }
 
 //Dispel minion
