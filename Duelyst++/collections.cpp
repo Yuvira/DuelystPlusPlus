@@ -144,7 +144,7 @@ Collections::Collections() {
 	//Azure Horn Shaman
 	effects[SKILL_AZURE_HORN_SHAMAN] = Effect(SKILL_AZURE_HORN_SHAMAN, KEYWORD_NONE, "{Dying Wish}: Give +4 Health to friendly minions around it");
 	effects[SKILL_AZURE_HORN_SHAMAN].OnDeath = [](EffectContext context, Minion* minion) {
-		if (context.card == minion)
+		if (context.IsCard(minion))
 			for (BoardTile* tile : context.game->map.GetAllNear(minion->curTile))
 				if (tile->HasMinion() && context.SharesOwner(tile->minion) && !tile->minion->IsGeneral())
 					tile->minion->AddEffect(EFFECT_AZURE_HORN_SHAMAN, nullptr);
@@ -166,7 +166,7 @@ Collections::Collections() {
 	//Black Locust
 	effects[SKILL_BLACK_LOCUST] = Effect(SKILL_BLACK_LOCUST, KEYWORD_FLYING, "{Flying}|After this minion moves, summon a Black Locust nearby");
 	effects[SKILL_BLACK_LOCUST].OnMove = [](EffectContext context, Minion* minion, bool byEffect) {
-		if (context.card->IsMinion() && context.IsCard(minion) && !byEffect) {
+		if (context.IsCardOnBoard(minion) && !byEffect) {
 			BoardTile* tile = context.game->map.GetRandomEmptyNear(minion->curTile);
 			if (tile != nullptr)
 				context.game->SummonToken(CARD_BLACK_LOCUST, tile, context.card->owner);
