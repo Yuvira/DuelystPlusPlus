@@ -455,6 +455,16 @@ void Game::Summon(Card* card, int x, int y, bool actionBar) {
 	eventManager.SendOnSummon(minions.back(), actionBar);
 }
 
+//Summon token at tile
+void Game::SummonToken(eCard cardId, BoardTile* tile, Player* owner) {
+	Card* card = collections->FindCard(cardId);
+	if (card->IsMinion()) {
+		Minion* token = new Minion(*(card->GetMinion()));
+		SetContext(token, owner);
+		Summon(token, tile, false);
+	}
+}
+
 //Move selected minion
 void Game::MoveUnit() {
 	if (selectable[selectionIdx]->minion == nullptr || selectable[selectionIdx] == &map.tiles[pos.x][pos.y]) {

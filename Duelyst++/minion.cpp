@@ -234,6 +234,7 @@ void Minion::SetPosition(int x, int y) {
 }
 
 //Move on board
+void Minion::MoveToTile(BoardTile* tile, bool byEffect) { MoveToPosition(tile->pos.x, tile->pos.y, byEffect); }
 void Minion::MoveToPosition(int x, int y, bool byEffect) {
 	SetPosition(x, y);
 	if (!byEffect) {

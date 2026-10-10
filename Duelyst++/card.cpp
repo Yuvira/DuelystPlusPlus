@@ -151,6 +151,10 @@ void Card::UpdateDetails() {
 #pragma region Card Effects
 
 //Add effect to list
+void Card::AddEffect(eEffect effectId, Effect* source) {
+	if (game != nullptr)
+		AddEffect(*game->collections->FindEffect(effectId), source);
+}
 void Card::AddEffect(Effect effect, Effect* source) {
 	if (source != nullptr)
 		for (int i = 0; i < effects.size(); ++i)
@@ -167,6 +171,10 @@ void Card::AddEffect(Effect effect, Effect* source) {
 }
 
 //Add continuous effect to list
+void Card::AddContinuousEffect(eEffect effectId) {
+	if (game != nullptr)
+		AddContinuousEffect(*game->collections->FindEffect(effectId));
+}
 void Card::AddContinuousEffect(Effect effect) {
 	effects.push_back(new Effect(effect));
 	effects.back()->source = effects.back();

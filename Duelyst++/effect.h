@@ -137,6 +137,14 @@ public:
 	EffectContext();
 	EffectContext(Effect* effect, Card* card, Game* game);
 	~EffectContext();
+	bool IsOnBoard();
+	bool BothOnBoard(Card* compare);
+	bool IsCard(Card* compare);
+	bool IsCardOnBoard(Card* compare);
+	bool SharesOwner(Card* compare);
+	bool IsOwnedBy(Player* compare);
+	bool IsAllied(Card* compare);
+	bool IsOwnerTurn();
 	Effect* effect;
 	Card* card;
 	Game* game;

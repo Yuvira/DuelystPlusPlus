@@ -60,6 +60,7 @@ public:
 	void PostCast();
 	void Summon(Card* card, BoardTile* tile, bool actionBar);
 	void Summon(Card* card, int x, int y, bool actionBar);
+	void SummonToken(eCard cardId, BoardTile* tile, Player* owner);
 	void MoveUnit();
 	void AttackUnit();
 	void ChangeTurn(bool _turn);

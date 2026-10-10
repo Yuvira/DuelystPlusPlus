@@ -165,7 +165,9 @@ public:
 	virtual void DrawDetails(Renderer& renderer, int& y) {}
 
 	//Effects
+	void AddEffect(eEffect effectId, Effect* source);
 	void AddEffect(Effect effect, Effect* source);
+	void AddContinuousEffect(eEffect effectId);
 	void AddContinuousEffect(Effect effect);
 	void RemoveEffect(Effect* effect);
 	void RemoveEffectsFromSource(Effect* source);
@@ -192,6 +194,7 @@ public:
 	virtual void OnTurnEnd(Player* player);
 
 	//Utils
+	virtual bool IsGeneral() { return false; }
 	virtual bool IsOnBoard() { return false; }
 	std::string ValueString(int value);
 	int TextWidth(std::string str);
@@ -247,6 +250,7 @@ public:
 
 	//Actions
 	void SetPosition(int x, int y);
+	void MoveToTile(BoardTile* tile, bool byEffect);
 	void MoveToPosition(int x, int y, bool byEffect);
 	void Attack(Minion* target, bool counter);
 	int DealDamage(Card* source, int damage);
@@ -256,6 +260,7 @@ public:
 	void AddEffects();
 
 	//Utils
+	bool IsGeneral() { return tribe == TRIBE_GENERAL; }
 	bool CanAttack(Minion* target);
 	bool IsMoveable();
 	bool HasKeywords(int keywords);
