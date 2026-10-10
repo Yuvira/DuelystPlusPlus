@@ -1,8 +1,6 @@
 simultaneous events should add resulting triggers to a stack that is processed later
 (e.g. OnDamageDealt triggering during Frenzy attacks)
 
-cards like Chakkram rely on past events that a token created in hand can't know about
-
 cards like Moebius can change their base stats, which means applying buffs to the original card stats won't work
 
 fixed stat changes need to apply over generic stat buffs, but continuous effects still need to apply over them

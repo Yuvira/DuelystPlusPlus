@@ -202,6 +202,12 @@ Collections::Collections() {
 			context.effect->fixedCost = max(target->hp, 0);
 		context.card->UpdateStatBuffs();
 	};
+	effects[SKILL_BLOOD_TAURA].OnDraw = [](EffectContext context, Card* card, bool fromDeck) {
+		if (context.IsCard(card) && !fromDeck) {
+			context.effect->fixedCost = max(context.card->owner->general->hp, 0);
+			context.card->UpdateStatBuffs();
+		}
+	};
 
 	//Bloodtear Alchemist
 	effects[SKILL_BLOODTEAR_ALCHEMIST] = Effect(SKILL_BLOODTEAR_ALCHEMIST, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Deal 1 damage to an enemy");
@@ -255,6 +261,16 @@ Collections::Collections() {
 	effects[SKILL_CHAKKRAM].OnSummon = [](EffectContext context, Minion* minion, bool actionBar) {
 		if (context.IsCard(minion))
 			context.card->RemoveEffectsFromSource(context.effect);
+	};
+	effects[SKILL_CHAKKRAM].OnDraw = [](EffectContext context, Card* card, bool fromDeck) {
+		if (context.IsCard(card) && !fromDeck) {
+			for (Event* event : context.game->eventManager.GetMostRecentTurnEvents(context.card->owner->opponent)) {
+				if (event->type == EVENT_DAMAGE_DEALT && event->target == context.card->owner->general) {
+					context.card->AddEffect(EFFECT_CHAKKRAM, context.effect);
+					break;
+				}
+			}
+		}
 	};
 	effects[EFFECT_CHAKKRAM] = Effect(EFFECT_CHAKKRAM, KEYWORD_NONE, "{Chakkram}");
 	effects[EFFECT_CHAKKRAM].costBuff = -2;

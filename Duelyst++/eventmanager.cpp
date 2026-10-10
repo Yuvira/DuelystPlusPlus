@@ -3,6 +3,18 @@
 
 #pragma region Constructor
 
+//Event object constructor
+Event::Event(eEventType type, int turn, Player* player, Card* source, Card* target, BoardTile* tile, int value, bool flag) {
+	this->type = type;
+	this->turn = turn;
+	this->player = player;
+	this->source = source;
+	this->target = target;
+	this->tile = tile;
+	this->value = value;
+	this->flag = flag;
+}
+
 //Event manager constructor
 EventManager::EventManager() {
 	game = nullptr;
@@ -16,6 +28,7 @@ EventManager::~EventManager() {}
 //Send onSpellCast events
 void EventManager::SendOnCast(Card* card, BoardTile* tile) {
 	game->Log(game->GetCardString(card) + " was cast");
+	eventLog.push_back(Event(EVENT_CAST, game->turnCount, card->owner, card, nullptr, tile, 0, false));
 	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnCast(card, tile); }
 	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnCast(card, tile); }
 	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnCast(card, tile); }
@@ -29,6 +42,7 @@ void EventManager::SendOnSummon(Minion* minion, bool actionBar) {
 		game->Log(game->GetCardString(minion) + " was summoned");
 	else
 		game->Log(game->GetCardString(minion) + " was created");
+	eventLog.push_back(Event(EVENT_SUMMON, game->turnCount, minion->owner, minion, nullptr, minion->curTile, 0, actionBar));
 	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnSummon(minion, actionBar); }
 	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnSummon(minion, actionBar); }
 	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnSummon(minion, actionBar); }
@@ -39,6 +53,7 @@ void EventManager::SendOnSummon(Minion* minion, bool actionBar) {
 //Send onDeath events
 void EventManager::SendOnDeath(Minion* minion) {
 	game->Log(game->GetCardString(minion) + " died");
+	eventLog.push_back(Event(EVENT_DEATH, game->turnCount, minion->owner, minion, nullptr, minion->curTile, 0, false));
 	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnDeath(minion); }
 	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnDeath(minion); }
 	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnDeath(minion); }
@@ -52,6 +67,7 @@ void EventManager::SendOnAttack(Minion* source, Minion* target, bool counter) {
 		game->Log(game->GetCardString(source) + " counterattacked " + game->GetCardString(target));
 	else
 		game->Log(game->GetCardString(source) + " attacked " + game->GetCardString(target));
+	eventLog.push_back(Event(EVENT_ATTACK, game->turnCount, source->owner, source, target, source->curTile, 0, counter));
 	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnAttack(source, target, counter); }
 	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnAttack(source, target, counter); }
 	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnAttack(source, target, counter); }
@@ -72,6 +88,7 @@ void EventManager::SendOnWouldDealDamage(Card* source, Minion* target, int& dama
 //Send onDamageDealt events
 void EventManager::SendOnDamageDealt(Card* source, Minion* target, int damage) {
 	game->Log(game->GetCardString(target) + " was damaged for " + std::to_string(damage) + " points");
+	eventLog.push_back(Event(EVENT_DAMAGE_DEALT, game->turnCount, target->owner, source, target, target->curTile, damage, false));
 	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnDamageDealt(source, target, damage); }
 	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnDamageDealt(source, target, damage); }
 	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnDamageDealt(source, target, damage); }
@@ -92,6 +109,7 @@ void EventManager::SendOnWouldHeal(Card* source, Minion* target, int& heal) {
 //Send onHealed events
 void EventManager::SendOnHealed(Card* source, Minion* target, int heal) {
 	game->Log(game->GetCardString(target) + " was healed for " + std::to_string(heal) + " points");
+	eventLog.push_back(Event(EVENT_HEALED, game->turnCount, target->owner, source, target, target->curTile, heal, false));
 	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnHealed(source, target, heal); }
 	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnHealed(source, target, heal); }
 	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnHealed(source, target, heal); }
@@ -105,6 +123,7 @@ void EventManager::SendOnMove(Minion* minion, bool byEffect) {
 		game->Log(game->GetCardString(minion) + " was moved");
 	else
 		game->Log(game->GetCardString(minion) + " moved");
+	eventLog.push_back(Event(EVENT_MOVE, game->turnCount, minion->owner, minion, nullptr, minion->curTile, 0, byEffect));
 	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnMove(minion, byEffect); }
 	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnMove(minion, byEffect); }
 	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnMove(minion, byEffect); }
@@ -118,6 +137,7 @@ void EventManager::SendOnDraw(Card* card, bool fromDeck) {
 		game->Log("Drew " + game->GetCardString(card) + " from deck");
 	else
 		game->Log("Added " + game->GetCardString(card) + " to hand");
+	eventLog.push_back(Event(EVENT_DRAW, game->turnCount, card->owner, card, nullptr, nullptr, 0, fromDeck));
 	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnDraw(card, fromDeck); }
 	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnDraw(card, fromDeck); }
 	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnDraw(card, fromDeck); }
@@ -128,6 +148,7 @@ void EventManager::SendOnDraw(Card* card, bool fromDeck) {
 //Send onReplace events
 void EventManager::SendOnReplace(Card* card, bool& sendToDeck) {
 	game->Log("Replaced " + game->GetCardString(card));
+	eventLog.push_back(Event(EVENT_REPLACE, game->turnCount, card->owner, card, nullptr, nullptr, 0, false));
 	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnReplace(card, sendToDeck); }
 	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnReplace(card, sendToDeck); }
 	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnReplace(card, sendToDeck); }
@@ -148,6 +169,7 @@ void EventManager::SendOnEffectsChanged(Card* card) {
 //Send onTurnEnd events
 void EventManager::SendOnTurnEnd(Player* player) {
 	game->Log("Ending {Turn " + std::to_string(game->turnCount) + "} for " + game->GetPlayerString(player));
+	eventLog.push_back(Event(EVENT_TURN_END, game->turnCount, player, nullptr, nullptr, nullptr, 0, false));
 	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnTurnEnd(player); }
 	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnTurnEnd(player); }
 	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnTurnEnd(player); }
@@ -158,11 +180,29 @@ void EventManager::SendOnTurnEnd(Player* player) {
 //Send onTurnStart events
 void EventManager::SendOnTurnStart(Player* player) {
 	game->Log("Starting {Turn " + std::to_string(game->turnCount) + "} for " + game->GetPlayerString(player));
+	eventLog.push_back(Event(EVENT_TURN_START, game->turnCount, player, nullptr, nullptr, nullptr, 0, false));
 	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnTurnStart(player); }
 	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnTurnStart(player); }
 	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnTurnStart(player); }
 	for (int i = 0; i < game->players[1].hand.size(); ++i) { game->players[1].hand[i]->OnTurnStart(player); }
 	for (int i = 0; i < game->players[1].deck.size(); ++i) { game->players[1].deck[i]->OnTurnStart(player); }
+}
+
+#pragma endregion
+
+#pragma region Utils
+
+//Get all events from a player's most recent turn (including the current one)
+std::vector<Event*> EventManager::GetMostRecentTurnEvents(Player* player) {
+	int max = -1;
+	std::vector<Event*> valid;
+	for (Event& event : eventLog)
+		if (event.type == EVENT_TURN_START && event.player == player && event.turn > max)
+			max = event.turn;
+	for (Event& event : eventLog)
+		if (event.turn == max)
+			valid.push_back(&event);
+	return valid;
 }
 
 #pragma endregion
