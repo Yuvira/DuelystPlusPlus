@@ -243,6 +243,18 @@ void Game::Input() {
 		else if (asciiVal == 10 || asciiVal == 13)                        //Enter
 			ChangeTurn(!turn);
 
+		//Debug damage/destroy
+		else if (IS_DEBUG) {
+			if (asciiVal == 122 || asciiVal == 90) {                     //Z
+				if (map.tiles[pos.x][pos.y].minion != nullptr)
+					map.tiles[pos.x][pos.y].minion->DealDamage(players[turn].general, 1);
+			}
+			else if (asciiVal == 120 || asciiVal == 88) {                //X
+				if (map.tiles[pos.x][pos.y].minion != nullptr)
+					map.tiles[pos.x][pos.y].minion->Destroy(players[turn].general);
+			}
+		}
+
 	}
 
 	//Hand mode
