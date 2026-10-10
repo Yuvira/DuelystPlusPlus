@@ -286,6 +286,14 @@ void Minion::Attack(Minion* target, bool counter) {
 
 }
 
+//Exhaust this
+void Minion::Exhaust() {
+	hasMoved = true;
+	hasCelerityMoved = true;
+	hasAttacked = true;
+	hasCelerityAttacked = true;
+}
+
 //Deal damage to this
 int Minion::DealDamage(Card* source, int damage) {
 	game->eventManager.SendOnWouldDealDamage(source, this, damage);

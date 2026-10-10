@@ -91,6 +91,7 @@ enum eCard {
 	CARD_MIRKBLOOD_DEVOURER,
 	CARD_MOGWAI,
 	CARD_NECROSEER,
+	CARD_NIGHT_WATCHER,
 	CARD_PIERCING_MANTIS,
 	CARD_SABERSPINE_TIGER,
 	CARD_SAPPHIRE_SEER,
@@ -257,6 +258,7 @@ public:
 	void MoveToTile(BoardTile* tile, bool byEffect);
 	void MoveToPosition(int x, int y, bool byEffect);
 	void Attack(Minion* target, bool counter);
+	void Exhaust();
 	int DealDamage(Card* source, int damage);
 	int Heal(Card* source, int heal);
 	void Destroy(Card* source);
