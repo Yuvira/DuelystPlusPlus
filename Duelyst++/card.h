@@ -259,6 +259,7 @@ public:
 	void MoveToPosition(int x, int y, bool byEffect);
 	void Attack(Minion* target, bool counter);
 	void Exhaust();
+	void Refresh();
 	int DealDamage(Card* source, int damage);
 	int Heal(Card* source, int heal);
 	void Destroy(Card* source);
@@ -276,7 +277,6 @@ public:
 	//Action & Event Overrides
 	void Resolve(BoardTile* tile);
 	void InitState();
-	void OnTurnEnd(Player* player);
 
 	//Getter
 	Minion* GetMinion() { return this; }

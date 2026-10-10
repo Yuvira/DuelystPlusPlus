@@ -37,6 +37,10 @@ Game::Game(Collections* collections) {
 	//Event manager context
 	eventManager.game = this;
 
+	//Initialize log
+	debugLog.push_back("{Log Start}");
+	debugLogSprite.CreateFromString(debugLog.back());
+
 	//Character sprites
 	char c[] = { 'Û', 'Þ', 'Ý', 'Ü', 'ß', 'X', '\\', '/', '³', 'Ä', '®', 'é', '¯' };
 	for (int i = 0; i < 10; ++i) { chars[i].buffer[0].Char.AsciiChar = c[i]; }
@@ -65,12 +69,6 @@ Game::Game(Collections* collections) {
 		hand[i].border.pos.Y = 41;
 	}
 
-	//Debug info
-	debugP1Deck.CreateFromString("P1 Deck");
-	debugP2Deck.CreateFromString("P2 Deck");
-	debugMinions.CreateFromString("Minions");
-	debugGrave.CreateFromString("Graveyard");
-
 	//Variables
 	pos = Coord(0, 0);
 	handIdx = -1;
@@ -81,6 +79,13 @@ Game::Game(Collections* collections) {
 	MoveCursor(0, 0);
 	activeUnit = nullptr;
 	mode = MODE_NONE;
+
+	//Debug info
+	debugP1Deck.CreateFromString("P1 Deck");
+	debugP2Deck.CreateFromString("P2 Deck");
+	debugMinions.CreateFromString("Minions");
+	debugGrave.CreateFromString("Graveyard");
+	debugMode = false;
 
 }
 Game::~Game() {}
@@ -177,39 +182,50 @@ void Game::RenderDebug(Renderer& renderer) {
 	if (!IS_DEBUG)
 		return;
 
-	//Lines object
-	std::vector<std::string> lines;
+	//Draw deck / field / grave info
+	if (debugMode) {
 
-	//Player 1 deck data
-	lines.push_back("{P1 Deck}");
-	for (Card* card : players[0].deck)
-		lines.push_back(card->name);
-	debugP1Deck.CreateFromTextBlock(lines);
-	renderer.Render(debugP1Deck, 115, 1);
-	lines.clear();
+		//Lines object
+		std::vector<std::string> lines;
 
-	//Player 2 deck data
-	lines.push_back("{P2 Deck}");
-	for (Card* card : players[1].deck)
-		lines.push_back(card->name);
-	debugP2Deck.CreateFromTextBlock(lines);
-	renderer.Render(debugP2Deck, 140, 1);
-	lines.clear();
+		//Player 1 deck data
+		lines.push_back("{P1 Deck}");
+		for (Card* card : players[0].deck)
+			lines.push_back(card->name);
+		debugP1Deck.CreateFromTextBlock(lines);
+		renderer.Render(debugP1Deck, 115, 1);
+		lines.clear();
 
-	//Minion data
-	lines.push_back("{Minions}");
-	for (Card* card : minions)
-		lines.push_back(card->name);
-	debugMinions.CreateFromTextBlock(lines);
-	renderer.Render(debugMinions, 165, 1);
-	lines.clear();
+		//Player 2 deck data
+		lines.push_back("{P2 Deck}");
+		for (Card* card : players[1].deck)
+			lines.push_back(card->name);
+		debugP2Deck.CreateFromTextBlock(lines);
+		renderer.Render(debugP2Deck, 140, 1);
+		lines.clear();
 
-	//Graveyard data
-	lines.push_back("{Graveyard}");
-	for (Card* card : grave)
-		lines.push_back(card->name);
-	debugGrave.CreateFromTextBlock(lines);
-	renderer.Render(debugGrave, 190, 1);
+		//Minion data
+		lines.push_back("{Minions}");
+		for (Card* card : minions)
+			lines.push_back(card->name);
+		debugMinions.CreateFromTextBlock(lines);
+		renderer.Render(debugMinions, 165, 1);
+		lines.clear();
+
+		//Graveyard data
+		lines.push_back("{Graveyard}");
+		for (Card* card : grave)
+			lines.push_back(card->name);
+		debugGrave.CreateFromTextBlock(lines);
+		renderer.Render(debugGrave, 190, 1);
+
+	}
+
+	//Draw log info
+	else {
+		debugLogSprite.CreateFromTextBlock(debugLog);
+		renderer.Render(debugLogSprite, 115, 1);
+	}
 
 }
 
@@ -243,16 +259,24 @@ void Game::Input() {
 		else if (asciiVal == 10 || asciiVal == 13)                        //Enter
 			ChangeTurn(!turn);
 
-		//Debug damage/destroy
+		//Debug inputs
 		else if (IS_DEBUG) {
-			if (asciiVal == 122 || asciiVal == 90) {                     //Z
+
+			//Damage or destroy target
+			if (asciiVal == 122 || asciiVal == 90) {                      //Z
 				if (map.tiles[pos.x][pos.y].minion != nullptr)
 					map.tiles[pos.x][pos.y].minion->DealDamage(players[turn].general, 1);
 			}
-			else if (asciiVal == 120 || asciiVal == 88) {                //X
+			else if (asciiVal == 120 || asciiVal == 88) {                 //X
 				if (map.tiles[pos.x][pos.y].minion != nullptr)
 					map.tiles[pos.x][pos.y].minion->Destroy(players[turn].general);
 			}
+
+			//Swap debug info page
+			else if (asciiVal == 108 || asciiVal == 76) {                 //L
+				debugMode = !debugMode;
+			}
+
 		}
 
 	}
@@ -509,13 +533,12 @@ void Game::ChangeTurn(bool newTurn) {
 	//Indicate turn is ending
 	endTurn = true;
 
-	//Trigger end of turn
-	eventManager.SendOnTurnEnd(&players[!turn]);
-
-	//Draw and reset replaces
-	if (turnCount > 0)
+	//Trigger end of turn, draw and reset replaces
+	if (turnCount > 0) {
+		eventManager.SendOnTurnEnd(&players[turn]);
 		players[turn].Draw();
-	players[turn].replaces = players[turn].maxReplaces;
+		players[turn].replaces = players[turn].maxReplaces;
+	}
 
 	//Clear cast history
 	castThisTurn.clear();
@@ -526,9 +549,13 @@ void Game::ChangeTurn(bool newTurn) {
 		++turnCount;
 
 	//Refresh mana
-	if (turnCount > 1 && players[turn].manaMax < 9)
+	if (turnCount > 2 && players[turn].manaMax < 9)
 		++players[turn].manaMax;
 	players[turn].mana = players[turn].manaMax;
+
+	//Refresh minions
+	for (Minion* minion : minions)
+		minion->Refresh();
 
 	//Set turn indicator
 	if (turn)
@@ -987,6 +1014,32 @@ bool Game::CanMove(int x, int y) {
 			return true;
 	}
 	return false;
+}
+
+//Get string for player objects
+std::string Game::GetPlayerString(Player* player) {
+	if (player == &players[false])
+		return "`P1`";
+	if (player == &players[true])
+		return "~P2~";
+	return "P?";
+}
+
+//Add formatting markers to text owned by a player
+std::string Game::GetCardString(Card* card) {
+	if (card->owner == &players[false])
+		return '`' + card->name + '`';
+	if (card->owner == &players[true])
+		return '~' + card->name + '~';
+	return card->name;
+}
+
+//Log string
+void Game::Log(std::string log) {
+	for (int i = 0; i < log.length(); ++i)
+		if (log[i] == '|')
+			log[i] = ' ';
+	debugLog.push_back(log);
 }
 
 #pragma endregion

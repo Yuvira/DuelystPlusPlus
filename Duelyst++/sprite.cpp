@@ -99,6 +99,14 @@ void Sprite::CreateFromTextBlock(const std::vector<std::string>& lines) {
 				color = COLOR_GRAY;
 				++idxDelta;
 			}
+			else if (lines[i][j] == '`') {
+				color = color == COLOR_LTBLUE ? COLOR_GRAY : COLOR_LTBLUE;
+				++idxDelta;
+			}
+			else if (lines[i][j] == '~') {
+				color = color == COLOR_LTRED ? COLOR_GRAY : COLOR_LTRED;
+				++idxDelta;
+			}
 			else {
 				buffer[(j + (i * width)) - idxDelta].Char.AsciiChar = lines[i][j];
 				buffer[(j + (i * width)) - idxDelta].Attributes = color;
@@ -116,7 +124,7 @@ void Sprite::CreateFromTextBlock(const std::vector<std::string>& lines) {
 int Sprite::TextWidth(std::string str) {
 	int width = 0;
 	for (int i = 0; i < str.length(); ++i)
-		if (str[i] != '{' && str[i] != '}')
+		if (str[i] != '{' && str[i] != '}' && str[1] != '`' && str[i] != '~')
 			++width;
 	return width;
 }

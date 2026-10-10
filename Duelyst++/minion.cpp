@@ -294,6 +294,15 @@ void Minion::Exhaust() {
 	hasCelerityAttacked = true;
 }
 
+//Refresh state
+void Minion::Refresh() {
+	hasMoved = false;
+	hasAttacked = false;
+	hasCelerityMoved = !HasKeywords(KEYWORD_CELERITY);
+	hasCelerityAttacked = !HasKeywords(KEYWORD_CELERITY);
+	forcefieldBroken = false;
+}
+
 //Deal damage to this
 int Minion::DealDamage(Card* source, int damage) {
 	game->eventManager.SendOnWouldDealDamage(source, this, damage);
@@ -427,21 +436,6 @@ void Minion::InitState() {
 	hasCelerityMoved = !HasKeywords(KEYWORD_RUSH) || !HasKeywords(KEYWORD_CELERITY);
 	hasCelerityAttacked = !HasKeywords(KEYWORD_RUSH) || !HasKeywords(KEYWORD_CELERITY);
 	forcefieldBroken = false;
-}
-
-//When a player's turn ends
-void Minion::OnTurnEnd(Player* player) {
-
-	//Trigger any effects on this card
-	Card::OnTurnEnd(player);
-
-	//Refresh
-	hasMoved = false;
-	hasAttacked = false;
-	hasCelerityMoved = !HasKeywords(KEYWORD_CELERITY);
-	hasCelerityAttacked = !HasKeywords(KEYWORD_CELERITY);
-	forcefieldBroken = false;
-
 }
 
 #pragma endregion
