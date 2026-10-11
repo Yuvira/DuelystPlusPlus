@@ -177,6 +177,7 @@ public:
 	int hpBuff;
 	int moveBuff;
 	Card* token;
+	Card* refCard;
 	Effect* source;
 	void (*OnAddThis)(EffectContext) = nullptr;
 	void (*OnRemoveThis)(EffectContext) = nullptr;

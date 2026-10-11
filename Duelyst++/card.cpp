@@ -151,17 +151,18 @@ void Card::UpdateDetails() {
 #pragma region Card Effects
 
 //Add effect to list
-void Card::AddEffect(eEffect effectId, Effect* source) {
+void Card::AddEffect(eEffect effectId, Effect* source, Card* refCard) {
 	if (game != nullptr)
-		AddEffect(*game->collections->FindEffect(effectId), source);
+		AddEffect(*game->collections->FindEffect(effectId), source, refCard);
 }
-void Card::AddEffect(Effect effect, Effect* source) {
+void Card::AddEffect(Effect effect, Effect* source, Card* refCard) {
 	if (source != nullptr)
 		for (int i = 0; i < effects.size(); ++i)
 			if (effects[i]->effect == effect.effect && effects[i]->source == source)
 				return;
 	effects.push_back(new Effect(effect));
 	effects.back()->source = source;
+	effects.back()->refCard = refCard;
 	if (IsOnBoard() && effects.back()->OnAddThis)
 		effects.back()->OnAddThis(EffectContext(effects.back(), this, game));
 	if (game != nullptr)
@@ -171,13 +172,14 @@ void Card::AddEffect(Effect effect, Effect* source) {
 }
 
 //Add continuous effect to list
-void Card::AddContinuousEffect(eEffect effectId) {
+void Card::AddContinuousEffect(eEffect effectId, Card* refCard) {
 	if (game != nullptr)
-		AddContinuousEffect(*game->collections->FindEffect(effectId));
+		AddContinuousEffect(*game->collections->FindEffect(effectId), refCard);
 }
-void Card::AddContinuousEffect(Effect effect) {
+void Card::AddContinuousEffect(Effect effect, Card* refCard) {
 	effects.push_back(new Effect(effect));
 	effects.back()->source = effects.back();
+	effects.back()->refCard = refCard;
 	if (IsOnBoard() && effects.back()->OnAddThis)
 		effects.back()->OnAddThis(EffectContext(effects.back(), this, game));
 	if (game != nullptr)

@@ -26,7 +26,7 @@ Spell::Spell(eCard cardId, eFaction faction, int cost, std::string path, std::st
 	game = nullptr;
 	owner = nullptr;
 	if (effect != nullptr && effect->effect != EFFECT_NONE)
-		AddEffect(*effect, nullptr);
+		AddEffect(*effect, nullptr, this);
 }
 Spell::~Spell() {}
 

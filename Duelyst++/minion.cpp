@@ -40,7 +40,7 @@ Minion::Minion(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, 
 	game = nullptr;
 	owner = nullptr;
 	if (effect != nullptr && effect->effect != EFFECT_NONE)
-		AddEffect(*effect, nullptr);
+		AddEffect(*effect, nullptr, this);
 }
 Minion::~Minion() {}
 
@@ -350,7 +350,7 @@ void Minion::Dispel() {
 	}
 
 	//Add dispelled effect
-	AddEffect(*game->collections->FindEffect(EFFECT_DISPELLED), nullptr);
+	AddEffect(EFFECT_DISPELLED, nullptr, nullptr);
 
 	//Remove misc
 	hasCelerityMoved = true;

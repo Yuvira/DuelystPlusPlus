@@ -25,6 +25,7 @@ Effect::Effect(eEffect effect, int keywords, std::string description) {
 	hpBuff = 0;
 	moveBuff = 0;
 	token = nullptr;
+	refCard = nullptr;
 	source = nullptr;
 }
 Effect::~Effect() {}

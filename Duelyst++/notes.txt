@@ -4,5 +4,3 @@ simultaneous events should add resulting triggers to a stack that is processed l
 cards like Moebius can change their base stats, which means applying buffs to the original card stats won't work
 
 fixed stat changes need to apply over generic stat buffs, but continuous effects still need to apply over them
-
-Lady Locke's continuous effect is removed when she's destroyed

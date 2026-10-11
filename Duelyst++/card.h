@@ -171,10 +171,10 @@ public:
 	virtual void DrawDetails(Renderer& renderer, int& y) {}
 
 	//Effects
-	void AddEffect(eEffect effectId, Effect* source);
-	void AddEffect(Effect effect, Effect* source);
-	void AddContinuousEffect(eEffect effectId);
-	void AddContinuousEffect(Effect effect);
+	void AddEffect(eEffect effectId, Effect* source, Card* refCard);
+	void AddEffect(Effect effect, Effect* source, Card* refCard);
+	void AddContinuousEffect(eEffect effectId, Card* refCard);
+	void AddContinuousEffect(Effect effect, Card* refCard);
 	void RemoveEffect(Effect* effect);
 	void RemoveEffectsFromSource(Effect* source);
 	void RemoveEffectAt(std::vector<int> indices);
