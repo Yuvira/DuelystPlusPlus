@@ -228,114 +228,130 @@ void Card::RemoveEffectAt(std::vector<int> indices) {
 
 //When this is cast (before minion is summoned or spell effects occur)
 void Card::PreCast(BoardTile* tile) {
-	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i]->OnPreCastThis)
-			effects[i]->OnPreCastThis(EffectContext(effects[i], this, game), tile);
+	std::vector<Effect*> effectIterator = effects;
+	for (Effect* effect : effectIterator)
+		if (effect->OnPreCastThis)
+			effect->OnPreCastThis(EffectContext(effect, this, game), tile);
 }
 
 //When this resolves (after OnCast events have been sent)
 void Card::Resolve(BoardTile* tile) {
-	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i]->OnResolveThis)
-			effects[i]->OnResolveThis(EffectContext(effects[i], this, game), tile);
+	std::vector<Effect*> effectIterator = effects;
+	for (Effect* effect : effectIterator)
+		if (effect->OnResolveThis)
+			effect->OnResolveThis(EffectContext(effect, this, game), tile);
 }
 
 //Whenever any card is cast
 void Card::OnCast(Card* card, BoardTile* tile) {
-	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i]->OnCast)
-			effects[i]->OnCast(EffectContext(effects[i], this, game), card, tile);
+	std::vector<Effect*> effectIterator = effects;
+	for (Effect* effect : effectIterator)
+		if (effect->OnCast)
+			effect->OnCast(EffectContext(effect, this, game), card, tile);
 }
 
 //Whenever a minion is summoned
 void Card::OnSummon(Minion* minion, bool fromActionBar) {
-	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i]->OnSummon)
-			effects[i]->OnSummon(EffectContext(effects[i], this, game), minion, fromActionBar);
+	std::vector<Effect*> effectIterator = effects;
+	for (Effect* effect : effectIterator)
+		if (effect->OnSummon)
+			effect->OnSummon(EffectContext(effect, this, game), minion, fromActionBar);
 }
 
 //Whenever a minion dies
 void Card::OnDeath(Minion* minion) {
-	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i]->OnDeath)
-			effects[i]->OnDeath(EffectContext(effects[i], this, game), minion);
+	std::vector<Effect*> effectIterator = effects;
+	for (Effect* effect : effectIterator)
+		if (effect->OnDeath)
+			effect->OnDeath(EffectContext(effect, this, game), minion);
 }
 
 //Whenever a minion attacks another minion
 void Card::OnAttack(Minion* source, Minion* target, bool counter) {
-	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i]->OnAttack)
-			effects[i]->OnAttack(EffectContext(effects[i], this, game), source, target, counter);
+	std::vector<Effect*> effectIterator = effects;
+	for (Effect* effect : effectIterator)
+		if (effect->OnAttack)
+			effect->OnAttack(EffectContext(effect, this, game), source, target, counter);
 }
 
 //Whenever a minion would be damaged
 void Card::OnWouldDealDamage(Card* source, Minion* target, int& damage) {
-	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i]->OnWouldDealDamage)
-			effects[i]->OnWouldDealDamage(EffectContext(effects[i], this, game), source, target, damage);
+	std::vector<Effect*> effectIterator = effects;
+	for (Effect* effect : effectIterator)
+		if (effect->OnWouldDealDamage)
+			effect->OnWouldDealDamage(EffectContext(effect, this, game), source, target, damage);
 }
 
 //Whenever a minion is damaged
 void Card::OnDamageDealt(Card* source, Minion* target, int damage) {
-	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i]->OnDamageDealt)
-			effects[i]->OnDamageDealt(EffectContext(effects[i], this, game), source, target, damage);
+	std::vector<Effect*> effectIterator = effects;
+	for (Effect* effect : effectIterator)
+		if (effect->OnDamageDealt)
+			effect->OnDamageDealt(EffectContext(effect, this, game), source, target, damage);
 }
 
 //Whenever a minion would be healed
 void Card::OnWouldHeal(Card* source, Minion* target, int& heal) {
-	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i]->OnWouldHeal)
-			effects[i]->OnWouldHeal(EffectContext(effects[i], this, game), source, target, heal);
+	std::vector<Effect*> effectIterator = effects;
+	for (Effect* effect : effectIterator)
+		if (effect->OnWouldHeal)
+			effect->OnWouldHeal(EffectContext(effect, this, game), source, target, heal);
 }
 
 //Whenever a minion is healed
 void Card::OnHealed(Card* source, Minion* target, int heal) {
-	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i]->OnHealed)
-			effects[i]->OnHealed(EffectContext(effects[i], this, game), source, target, heal);
+	std::vector<Effect*> effectIterator = effects;
+	for (Effect* effect : effectIterator)
+		if (effect->OnHealed)
+			effect->OnHealed(EffectContext(effect, this, game), source, target, heal);
 }
 
 //Whenever a minion is moved
 void Card::OnMove(Minion* minion, bool byEffect) {
-	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i]->OnMove)
-			effects[i]->OnMove(EffectContext(effects[i], this, game), minion, byEffect);
+	std::vector<Effect*> effectIterator = effects;
+	for (Effect* effect : effectIterator)
+		if (effect->OnMove)
+			effect->OnMove(EffectContext(effect, this, game), minion, byEffect);
 }
 
 //Whenever a card is added to an action bar
 void Card::OnDraw(Card* card, bool fromDeck) {
-	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i]->OnDraw)
-			effects[i]->OnDraw(EffectContext(effects[i], this, game), card, fromDeck);
+	std::vector<Effect*> effectIterator = effects;
+	for (Effect* effect : effectIterator)
+		if (effect->OnDraw)
+			effect->OnDraw(EffectContext(effect, this, game), card, fromDeck);
 }
 
 //Whenever a card is replaced
 void Card::OnReplace(Card* replaced, bool& sendToDeck) {
-	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i]->OnReplace)
-			effects[i]->OnReplace(EffectContext(effects[i], this, game), replaced, sendToDeck);
+	std::vector<Effect*> effectIterator = effects;
+	for (Effect* effect : effectIterator)
+		if (effect->OnReplace)
+			effect->OnReplace(EffectContext(effect, this, game), replaced, sendToDeck);
 }
 
 //Whenever the effects on a card change
 void Card::OnEffectsChanged(Card* card) {
-	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i]->OnEffectsChanged)
-			effects[i]->OnEffectsChanged(EffectContext(effects[i], this, game), card);
+	std::vector<Effect*> effectIterator = effects;
+	for (Effect* effect : effectIterator)
+		if (effect->OnEffectsChanged)
+			effect->OnEffectsChanged(EffectContext(effect, this, game), card);
 }
 
 //Whenever a player's turn starts
 void Card::OnTurnStart(Player* player) {
-	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i]->OnTurnStart)
-			effects[i]->OnTurnStart(EffectContext(effects[i], this, game), player);
+	std::vector<Effect*> effectIterator = effects;
+	for (Effect* effect : effectIterator)
+		if (effect->OnTurnStart)
+			effect->OnTurnStart(EffectContext(effect, this, game), player);
 }
 
 //Whenever a player's turn ends
 void Card::OnTurnEnd(Player* player) {
-	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i]->OnTurnEnd)
-			effects[i]->OnTurnEnd(EffectContext(effects[i], this, game), player);
+	std::vector<Effect*> effectIterator = effects;
+	for (Effect* effect : effectIterator)
+		if (effect->OnTurnEnd)
+			effect->OnTurnEnd(EffectContext(effect, this, game), player);
 }
 
 #pragma endregion
