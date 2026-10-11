@@ -197,7 +197,7 @@ public:
 	void OnReplace(Card* replaced, bool& sendToDeck);
 	void OnEffectsChanged(Card* card);
 	void OnTurnStart(Player* player);
-	virtual void OnTurnEnd(Player* player);
+	void OnTurnEnd(Player* player);
 
 	//Utils
 	virtual TargetMode GetTargetMode() { return TargetMode(); }
