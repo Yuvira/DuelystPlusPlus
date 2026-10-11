@@ -6,7 +6,7 @@
 //Game class
 class CardViewer {
 public:
-	CardViewer(Collections* collections);
+	CardViewer(Collections* collections, bool* modeSwitch);
 	~CardViewer();
 	void Input();
 	void Update();

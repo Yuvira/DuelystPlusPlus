@@ -16,16 +16,9 @@ int main() {
 	//Variables
 	Renderer renderer;
 	Collections collections;
-	CardViewer cardViewer = CardViewer(&collections);
-	Game game = Game(&collections);
-
-	//Set collections reference
-	game.collections = &collections;
-
-	//Switch
 	bool doGame = false;
-	cardViewer.modeSwitch = &doGame;
-	game.modeSwitch = &doGame;
+	CardViewer cardViewer = CardViewer(&collections, &doGame);
+	Game game = Game(&collections, &doGame);
 
 	//Loop
 	while (true) {

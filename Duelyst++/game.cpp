@@ -26,10 +26,11 @@ PathCoord::~PathCoord() {}
 #pragma region Game Constructor
 
 //Game constructor
-Game::Game(Collections* collections) {
+Game::Game(Collections* collections, bool* modeSwitch) {
 
 	//Collections reference
 	this->collections = collections;
+	this->modeSwitch = modeSwitch;
 
 	//Board border
 	board.CreateFromFile("resources/board.txt");

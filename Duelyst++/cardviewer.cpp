@@ -4,10 +4,11 @@
 #pragma region Constructor
 
 //Game constructor
-CardViewer::CardViewer(Collections* collections) {
+CardViewer::CardViewer(Collections* collections, bool* modeSwitch) {
 
 	//Collections reference
 	this->collections = collections;
+	this->modeSwitch = modeSwitch;
 
 	//Border
 	board.CreateFromFile("resources/border.txt");

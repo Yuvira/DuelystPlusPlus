@@ -50,7 +50,7 @@ class Game {
 public:
 	
 	//Constructor
-	Game(Collections* collections);
+	Game(Collections* collections, bool* modeSwitch);
 	~Game();
 
 	//Rendering
