@@ -41,6 +41,6 @@ bool EffectContext::IsCardOnBoard(Card* compare) { return card->IsOnBoard() && c
 bool EffectContext::SharesOwner(Card* compare) { return card->owner == compare->owner; }
 bool EffectContext::IsOwnedBy(Player* compare) { return card->owner == compare; }
 bool EffectContext::IsAllied(Card* compare) { return card != compare && card->owner == compare->owner; }
-bool EffectContext::IsOwnerTurn() { return &game->players[game->turn] == card->owner; }
+bool EffectContext::IsOwnerTurn() { return game->GetTurnPlayer() == card->owner; }
 
 #pragma endregion

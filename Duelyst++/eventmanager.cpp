@@ -16,9 +16,7 @@ Event::Event(eEventType type, int turn, Player* player, Card* source, Card* targ
 }
 
 //Event manager constructor
-EventManager::EventManager() {
-	game = nullptr;
-}
+EventManager::EventManager() { game = nullptr; }
 EventManager::~EventManager() {}
 
 #pragma endregion
@@ -28,12 +26,12 @@ EventManager::~EventManager() {}
 //Send onSpellCast events
 void EventManager::SendOnCast(Card* card, BoardTile* tile) {
 	game->Log(game->GetCardString(card) + " was cast");
-	eventLog.push_back(Event(EVENT_CAST, game->turnCount, card->owner, card, nullptr, tile, 0, false));
-	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnCast(card, tile); }
-	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnCast(card, tile); }
-	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnCast(card, tile); }
-	for (int i = 0; i < game->players[1].hand.size(); ++i) { game->players[1].hand[i]->OnCast(card, tile); }
-	for (int i = 0; i < game->players[1].deck.size(); ++i) { game->players[1].deck[i]->OnCast(card, tile); }
+	eventLog.push_back(Event(EVENT_CAST, game->GetTurnCount(), card->owner, card, nullptr, tile, 0, false));
+	for (Minion* m : game->GetMinions()) { m->OnCast(card, tile); }
+	for (Card* c : game->players[0].hand) { c->OnCast(card, tile); }
+	for (Card* c : game->players[0].deck) { c->OnCast(card, tile); }
+	for (Card* c : game->players[1].hand) { c->OnCast(card, tile); }
+	for (Card* c : game->players[1].deck) { c->OnCast(card, tile); }
 }
 
 //Send onSummon events
@@ -42,23 +40,23 @@ void EventManager::SendOnSummon(Minion* minion, bool actionBar) {
 		game->Log(game->GetCardString(minion) + " was summoned");
 	else
 		game->Log(game->GetCardString(minion) + " was created");
-	eventLog.push_back(Event(EVENT_SUMMON, game->turnCount, minion->owner, minion, nullptr, minion->curTile, 0, actionBar));
-	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnSummon(minion, actionBar); }
-	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnSummon(minion, actionBar); }
-	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnSummon(minion, actionBar); }
-	for (int i = 0; i < game->players[1].hand.size(); ++i) { game->players[1].hand[i]->OnSummon(minion, actionBar); }
-	for (int i = 0; i < game->players[1].deck.size(); ++i) { game->players[1].deck[i]->OnSummon(minion, actionBar); }
+	eventLog.push_back(Event(EVENT_SUMMON, game->GetTurnCount(), minion->owner, minion, nullptr, minion->curTile, 0, actionBar));
+	for (Minion* m : game->GetMinions()) { m->OnSummon(minion, actionBar); }
+	for (Card* c : game->players[0].hand) { c->OnSummon(minion, actionBar); }
+	for (Card* c : game->players[0].deck) { c->OnSummon(minion, actionBar); }
+	for (Card* c : game->players[1].hand) { c->OnSummon(minion, actionBar); }
+	for (Card* c : game->players[1].deck) { c->OnSummon(minion, actionBar); }
 }
 
 //Send onDeath events
 void EventManager::SendOnDeath(Minion* minion) {
 	game->Log(game->GetCardString(minion) + " died");
-	eventLog.push_back(Event(EVENT_DEATH, game->turnCount, minion->owner, minion, nullptr, minion->curTile, 0, false));
-	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnDeath(minion); }
-	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnDeath(minion); }
-	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnDeath(minion); }
-	for (int i = 0; i < game->players[1].hand.size(); ++i) { game->players[1].hand[i]->OnDeath(minion); }
-	for (int i = 0; i < game->players[1].deck.size(); ++i) { game->players[1].deck[i]->OnDeath(minion); }
+	eventLog.push_back(Event(EVENT_DEATH, game->GetTurnCount(), minion->owner, minion, nullptr, minion->curTile, 0, false));
+	for (Minion* m : game->GetMinions()) { m->OnDeath(minion); }
+	for (Card* c : game->players[0].hand) { c->OnDeath(minion); }
+	for (Card* c : game->players[0].deck) { c->OnDeath(minion); }
+	for (Card* c : game->players[1].hand) { c->OnDeath(minion); }
+	for (Card* c : game->players[1].deck) { c->OnDeath(minion); }
 }
 
 //Send onAttack events
@@ -67,54 +65,54 @@ void EventManager::SendOnAttack(Minion* source, Minion* target, bool counter) {
 		game->Log(game->GetCardString(source) + " counterattacked " + game->GetCardString(target));
 	else
 		game->Log(game->GetCardString(source) + " attacked " + game->GetCardString(target));
-	eventLog.push_back(Event(EVENT_ATTACK, game->turnCount, source->owner, source, target, source->curTile, 0, counter));
-	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnAttack(source, target, counter); }
-	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnAttack(source, target, counter); }
-	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnAttack(source, target, counter); }
-	for (int i = 0; i < game->players[1].hand.size(); ++i) { game->players[1].hand[i]->OnAttack(source, target, counter); }
-	for (int i = 0; i < game->players[1].deck.size(); ++i) { game->players[1].deck[i]->OnAttack(source, target, counter); }
+	eventLog.push_back(Event(EVENT_ATTACK, game->GetTurnCount(), source->owner, source, target, source->curTile, 0, counter));
+	for (Minion* m : game->GetMinions()) { m->OnAttack(source, target, counter); }
+	for (Card* c : game->players[0].hand) { c->OnAttack(source, target, counter); }
+	for (Card* c : game->players[0].deck) { c->OnAttack(source, target, counter); }
+	for (Card* c : game->players[1].hand) { c->OnAttack(source, target, counter); }
+	for (Card* c : game->players[1].deck) { c->OnAttack(source, target, counter); }
 }
 
 //Send onWouldDealDamage events
 void EventManager::SendOnWouldDealDamage(Card* source, Minion* target, int& damage) {
 	game->Log(game->GetCardString(target) + " will be damaged for " + std::to_string(damage) + " points");
-	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnWouldDealDamage(source, target, damage); }
-	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnWouldDealDamage(source, target, damage); }
-	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnWouldDealDamage(source, target, damage); }
-	for (int i = 0; i < game->players[1].hand.size(); ++i) { game->players[1].hand[i]->OnWouldDealDamage(source, target, damage); }
-	for (int i = 0; i < game->players[1].deck.size(); ++i) { game->players[1].deck[i]->OnWouldDealDamage(source, target, damage); }
+	for (Minion* m : game->GetMinions()) { m->OnWouldDealDamage(source, target, damage); }
+	for (Card* c : game->players[0].hand) { c->OnWouldDealDamage(source, target, damage); }
+	for (Card* c : game->players[0].deck) { c->OnWouldDealDamage(source, target, damage); }
+	for (Card* c : game->players[1].hand) { c->OnWouldDealDamage(source, target, damage); }
+	for (Card* c : game->players[1].deck) { c->OnWouldDealDamage(source, target, damage); }
 }
 
 //Send onDamageDealt events
 void EventManager::SendOnDamageDealt(Card* source, Minion* target, int damage) {
 	game->Log(game->GetCardString(target) + " was damaged for " + std::to_string(damage) + " points");
-	eventLog.push_back(Event(EVENT_DAMAGE_DEALT, game->turnCount, target->owner, source, target, target->curTile, damage, false));
-	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnDamageDealt(source, target, damage); }
-	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnDamageDealt(source, target, damage); }
-	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnDamageDealt(source, target, damage); }
-	for (int i = 0; i < game->players[1].hand.size(); ++i) { game->players[1].hand[i]->OnDamageDealt(source, target, damage); }
-	for (int i = 0; i < game->players[1].deck.size(); ++i) { game->players[1].deck[i]->OnDamageDealt(source, target, damage); }
+	eventLog.push_back(Event(EVENT_DAMAGE_DEALT, game->GetTurnCount(), target->owner, source, target, target->curTile, damage, false));
+	for (Minion* m : game->GetMinions()) { m->OnDamageDealt(source, target, damage); }
+	for (Card* c : game->players[0].hand) { c->OnDamageDealt(source, target, damage); }
+	for (Card* c : game->players[0].deck) { c->OnDamageDealt(source, target, damage); }
+	for (Card* c : game->players[1].hand) { c->OnDamageDealt(source, target, damage); }
+	for (Card* c : game->players[1].deck) { c->OnDamageDealt(source, target, damage); }
 }
 
 //Send onHealed events
 void EventManager::SendOnWouldHeal(Card* source, Minion* target, int& heal) {
 	game->Log(game->GetCardString(target) + " will be healed for " + std::to_string(heal) + " points");
-	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnWouldHeal(source, target, heal); }
-	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnWouldHeal(source, target, heal); }
-	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnWouldHeal(source, target, heal); }
-	for (int i = 0; i < game->players[1].hand.size(); ++i) { game->players[1].hand[i]->OnWouldHeal(source, target, heal); }
-	for (int i = 0; i < game->players[1].deck.size(); ++i) { game->players[1].deck[i]->OnWouldHeal(source, target, heal); }
+	for (Minion* m : game->GetMinions()) { m->OnWouldHeal(source, target, heal); }
+	for (Card* c : game->players[0].hand) { c->OnWouldHeal(source, target, heal); }
+	for (Card* c : game->players[0].deck) { c->OnWouldHeal(source, target, heal); }
+	for (Card* c : game->players[1].hand) { c->OnWouldHeal(source, target, heal); }
+	for (Card* c : game->players[1].deck) { c->OnWouldHeal(source, target, heal); }
 }
 
 //Send onHealed events
 void EventManager::SendOnHealed(Card* source, Minion* target, int heal) {
 	game->Log(game->GetCardString(target) + " was healed for " + std::to_string(heal) + " points");
-	eventLog.push_back(Event(EVENT_HEALED, game->turnCount, target->owner, source, target, target->curTile, heal, false));
-	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnHealed(source, target, heal); }
-	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnHealed(source, target, heal); }
-	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnHealed(source, target, heal); }
-	for (int i = 0; i < game->players[1].hand.size(); ++i) { game->players[1].hand[i]->OnHealed(source, target, heal); }
-	for (int i = 0; i < game->players[1].deck.size(); ++i) { game->players[1].deck[i]->OnHealed(source, target, heal); }
+	eventLog.push_back(Event(EVENT_HEALED, game->GetTurnCount(), target->owner, source, target, target->curTile, heal, false));
+	for (Minion* m : game->GetMinions()) { m->OnHealed(source, target, heal); }
+	for (Card* c : game->players[0].hand) { c->OnHealed(source, target, heal); }
+	for (Card* c : game->players[0].deck) { c->OnHealed(source, target, heal); }
+	for (Card* c : game->players[1].hand) { c->OnHealed(source, target, heal); }
+	for (Card* c : game->players[1].deck) { c->OnHealed(source, target, heal); }
 }
 
 //Send onMoved events
@@ -123,12 +121,12 @@ void EventManager::SendOnMove(Minion* minion, bool byEffect) {
 		game->Log(game->GetCardString(minion) + " was moved");
 	else
 		game->Log(game->GetCardString(minion) + " moved");
-	eventLog.push_back(Event(EVENT_MOVE, game->turnCount, minion->owner, minion, nullptr, minion->curTile, 0, byEffect));
-	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnMove(minion, byEffect); }
-	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnMove(minion, byEffect); }
-	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnMove(minion, byEffect); }
-	for (int i = 0; i < game->players[1].hand.size(); ++i) { game->players[1].hand[i]->OnMove(minion, byEffect); }
-	for (int i = 0; i < game->players[1].deck.size(); ++i) { game->players[1].deck[i]->OnMove(minion, byEffect); }
+	eventLog.push_back(Event(EVENT_MOVE, game->GetTurnCount(), minion->owner, minion, nullptr, minion->curTile, 0, byEffect));
+	for (Minion* m : game->GetMinions()) { m->OnMove(minion, byEffect); }
+	for (Card* c : game->players[0].hand) { c->OnMove(minion, byEffect); }
+	for (Card* c : game->players[0].deck) { c->OnMove(minion, byEffect); }
+	for (Card* c : game->players[1].hand) { c->OnMove(minion, byEffect); }
+	for (Card* c : game->players[1].deck) { c->OnMove(minion, byEffect); }
 }
 
 //Send onDraw events
@@ -137,55 +135,55 @@ void EventManager::SendOnDraw(Card* card, bool fromDeck) {
 		game->Log("Drew " + game->GetCardString(card) + " from deck");
 	else
 		game->Log("Added " + game->GetCardString(card) + " to hand");
-	eventLog.push_back(Event(EVENT_DRAW, game->turnCount, card->owner, card, nullptr, nullptr, 0, fromDeck));
-	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnDraw(card, fromDeck); }
-	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnDraw(card, fromDeck); }
-	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnDraw(card, fromDeck); }
-	for (int i = 0; i < game->players[1].hand.size(); ++i) { game->players[1].hand[i]->OnDraw(card, fromDeck); }
-	for (int i = 0; i < game->players[1].deck.size(); ++i) { game->players[1].deck[i]->OnDraw(card, fromDeck); }
+	eventLog.push_back(Event(EVENT_DRAW, game->GetTurnCount(), card->owner, card, nullptr, nullptr, 0, fromDeck));
+	for (Minion* m : game->GetMinions()) { m->OnDraw(card, fromDeck); }
+	for (Card* c : game->players[0].hand) { c->OnDraw(card, fromDeck); }
+	for (Card* c : game->players[0].deck) { c->OnDraw(card, fromDeck); }
+	for (Card* c : game->players[1].hand) { c->OnDraw(card, fromDeck); }
+	for (Card* c : game->players[1].deck) { c->OnDraw(card, fromDeck); }
 }
 
 //Send onReplace events
 void EventManager::SendOnReplace(Card* card, bool& sendToDeck) {
 	game->Log("Replaced " + game->GetCardString(card));
-	eventLog.push_back(Event(EVENT_REPLACE, game->turnCount, card->owner, card, nullptr, nullptr, 0, false));
-	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnReplace(card, sendToDeck); }
-	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnReplace(card, sendToDeck); }
-	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnReplace(card, sendToDeck); }
-	for (int i = 0; i < game->players[1].hand.size(); ++i) { game->players[1].hand[i]->OnReplace(card, sendToDeck); }
-	for (int i = 0; i < game->players[1].deck.size(); ++i) { game->players[1].deck[i]->OnReplace(card, sendToDeck); }
+	eventLog.push_back(Event(EVENT_REPLACE, game->GetTurnCount(), card->owner, card, nullptr, nullptr, 0, false));
+	for (Minion* m : game->GetMinions()) { m->OnReplace(card, sendToDeck); }
+	for (Card* c : game->players[0].hand) { c->OnReplace(card, sendToDeck); }
+	for (Card* c : game->players[0].deck) { c->OnReplace(card, sendToDeck); }
+	for (Card* c : game->players[1].hand) { c->OnReplace(card, sendToDeck); }
+	for (Card* c : game->players[1].deck) { c->OnReplace(card, sendToDeck); }
 }
 
 //Send onEffectsChanged events
 void EventManager::SendOnEffectsChanged(Card* card) {
 	game->Log("Effects changed on " + game->GetCardString(card));
-	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnEffectsChanged(card); }
-	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnEffectsChanged(card); }
-	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnEffectsChanged(card); }
-	for (int i = 0; i < game->players[1].hand.size(); ++i) { game->players[1].hand[i]->OnEffectsChanged(card); }
-	for (int i = 0; i < game->players[1].deck.size(); ++i) { game->players[1].deck[i]->OnEffectsChanged(card); }
+	for (Minion* m : game->GetMinions()) { m->OnEffectsChanged(card); }
+	for (Card* c : game->players[0].hand) { c->OnEffectsChanged(card); }
+	for (Card* c : game->players[0].deck) { c->OnEffectsChanged(card); }
+	for (Card* c : game->players[1].hand) { c->OnEffectsChanged(card); }
+	for (Card* c : game->players[1].deck) { c->OnEffectsChanged(card); }
 }
 
 //Send onTurnEnd events
 void EventManager::SendOnTurnEnd(Player* player) {
-	game->Log("Ending {Turn " + std::to_string(game->turnCount) + "} for " + game->GetPlayerString(player));
-	eventLog.push_back(Event(EVENT_TURN_END, game->turnCount, player, nullptr, nullptr, nullptr, 0, false));
-	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnTurnEnd(player); }
-	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnTurnEnd(player); }
-	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnTurnEnd(player); }
-	for (int i = 0; i < game->players[1].hand.size(); ++i) { game->players[1].hand[i]->OnTurnEnd(player); }
-	for (int i = 0; i < game->players[1].deck.size(); ++i) { game->players[1].deck[i]->OnTurnEnd(player); }
+	game->Log("Ending {Turn " + std::to_string(game->GetTurnCount()) + "} for " + game->GetPlayerString(player));
+	eventLog.push_back(Event(EVENT_TURN_END, game->GetTurnCount(), player, nullptr, nullptr, nullptr, 0, false));
+	for (Minion* m : game->GetMinions()) { m->OnTurnEnd(player); }
+	for (Card* c : game->players[0].hand) { c->OnTurnEnd(player); }
+	for (Card* c : game->players[0].deck) { c->OnTurnEnd(player); }
+	for (Card* c : game->players[1].hand) { c->OnTurnEnd(player); }
+	for (Card* c : game->players[1].deck) { c->OnTurnEnd(player); }
 }
 
 //Send onTurnStart events
 void EventManager::SendOnTurnStart(Player* player) {
-	game->Log("Starting {Turn " + std::to_string(game->turnCount) + "} for " + game->GetPlayerString(player));
-	eventLog.push_back(Event(EVENT_TURN_START, game->turnCount, player, nullptr, nullptr, nullptr, 0, false));
-	for (int i = 0; i < game->minions.size(); ++i) { game->minions[i]->OnTurnStart(player); }
-	for (int i = 0; i < game->players[0].hand.size(); ++i) { game->players[0].hand[i]->OnTurnStart(player); }
-	for (int i = 0; i < game->players[0].deck.size(); ++i) { game->players[0].deck[i]->OnTurnStart(player); }
-	for (int i = 0; i < game->players[1].hand.size(); ++i) { game->players[1].hand[i]->OnTurnStart(player); }
-	for (int i = 0; i < game->players[1].deck.size(); ++i) { game->players[1].deck[i]->OnTurnStart(player); }
+	game->Log("Starting {Turn " + std::to_string(game->GetTurnCount()) + "} for " + game->GetPlayerString(player));
+	eventLog.push_back(Event(EVENT_TURN_START, game->GetTurnCount(), player, nullptr, nullptr, nullptr, 0, false));
+	for (Minion* m : game->GetMinions()) { m->OnTurnStart(player); }
+	for (Card* c : game->players[0].hand) { c->OnTurnStart(player); }
+	for (Card* c : game->players[0].deck) { c->OnTurnStart(player); }
+	for (Card* c : game->players[1].hand) { c->OnTurnStart(player); }
+	for (Card* c : game->players[1].deck) { c->OnTurnStart(player); }
 }
 
 #pragma endregion

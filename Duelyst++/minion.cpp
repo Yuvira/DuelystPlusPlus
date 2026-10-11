@@ -97,18 +97,8 @@ void Minion::Render(Renderer& renderer) {
 	renderer.Render(sprite);
 	renderer.Render(atkSprite);
 	renderer.Render(hpSprite);
-	if (HasKeywords(KEYWORD_FORCEFIELD) && !forcefieldBroken) {
-		int x = sprite.pos.X;
-		int y = sprite.pos.Y;
-		renderer.Render(game->chars[7], x + 1, y + 1);
-		renderer.Render(game->chars[9], x + 2, y + 1);
-		renderer.Render(game->chars[6], x + 3, y + 1);
-		renderer.Render(game->chars[8], x + 1, y + 2);
-		renderer.Render(game->chars[8], x + 3, y + 2);
-		renderer.Render(game->chars[6], x + 1, y + 3);
-		renderer.Render(game->chars[9], x + 2, y + 3);
-		renderer.Render(game->chars[7], x + 3, y + 3);
-	}
+	if (HasKeywords(KEYWORD_FORCEFIELD) && !forcefieldBroken && game != nullptr)
+		game->DrawForcefield(sprite.pos.X, sprite.pos.Y, renderer);
 }
 
 //Draw card data
@@ -213,6 +203,15 @@ void Minion::UpdateDetailStats() {
 #pragma endregion
 
 #pragma region Actions
+
+//Initialize states
+void Minion::InitState() {
+	hasMoved = !HasKeywords(KEYWORD_RUSH);
+	hasAttacked = !HasKeywords(KEYWORD_RUSH);
+	hasCelerityMoved = !HasKeywords(KEYWORD_RUSH) || !HasKeywords(KEYWORD_CELERITY);
+	hasCelerityAttacked = !HasKeywords(KEYWORD_RUSH) || !HasKeywords(KEYWORD_CELERITY);
+	forcefieldBroken = false;
+}
 
 //Set sprite position
 void Minion::SetPosition(int x, int y) {
@@ -418,30 +417,6 @@ bool Minion::IsProvoked() {
 					if (game->map.tiles[i][j].minion->HasKeywords(KEYWORD_PROVOKE))
 						return true;
 	return false;
-}
-
-#pragma endregion
-
-#pragma region Action & Event Overrides
-
-//Summon minion on cast resolution
-void Minion::Resolve(BoardTile* tile) {
-
-	//Trigger any effects on this card
-	Card::Resolve(tile);
-
-	//Summon this
-	game->Summon(this, tile, true);
-
-}
-
-//Initialize states
-void Minion::InitState() {
-	hasMoved = !HasKeywords(KEYWORD_RUSH);
-	hasAttacked = !HasKeywords(KEYWORD_RUSH);
-	hasCelerityMoved = !HasKeywords(KEYWORD_RUSH) || !HasKeywords(KEYWORD_CELERITY);
-	hasCelerityAttacked = !HasKeywords(KEYWORD_RUSH) || !HasKeywords(KEYWORD_CELERITY);
-	forcefieldBroken = false;
 }
 
 #pragma endregion

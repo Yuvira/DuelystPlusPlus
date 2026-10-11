@@ -95,18 +95,9 @@ void Spell::UpdateDetailStats() {
 
 #pragma endregion
 
-#pragma region Action & Event Overrides
+#pragma region Setters
 
-//When a card is cast
-void Spell::Resolve(BoardTile* tile) {
-
-	//Trigger any effects on this card
-	Card::Resolve(tile);
-
-	//Cast this
-	game->grave.push_back(this);
-	game->spellHistory.push_back(this);
-
-}
+//Target mode
+void Spell::SetTargetMode(TargetMode targetMode) { this->targetMode = targetMode; }
 
 #pragma endregion

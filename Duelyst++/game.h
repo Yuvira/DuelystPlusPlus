@@ -47,6 +47,8 @@ public:
 
 //Game class
 class Game {
+
+//Methods
 public:
 	
 	//Constructor
@@ -71,7 +73,8 @@ public:
 	void SummonToken(eCard cardId, BoardTile* tile, Player* owner);
 	void MoveUnit();
 	void AttackUnit();
-	void ChangeTurn(bool _turn);
+	void Overflow(Card* card);
+	void ChangeTurn(bool newTurn);
 
 	//Selection & Movement
 	void SelectTile(BoardTile& tile);
@@ -94,15 +97,37 @@ public:
 
 	//Draw
 	void DrawPath(Renderer& renderer);
-	void DrawSword(int x, int y, Renderer& renderer);
 	void DrawArrow(int type, int x, int y, Renderer& renderer);
+	void DrawSword(int x, int y, Renderer& renderer);
+	void DrawForcefield(int x, int y, Renderer& renderer);
+
+	//Getters
+	const std::vector<Minion*>& GetMinions() const;
+	const std::vector<Card*>& GetGrave() const;
+	const std::vector<Minion*>& GetDestroyedMinions() const;
+	const std::vector<Spell*>& GetSpellHistory() const;
+	const std::vector<Card*>& GetCardsCastThisTurn() const;
+	const int& GetTurnCount() const;
+	const Player* GetTurnPlayer() const;
 
 	//Utils
 	void SetContext(Card* card, Player* player);
 	bool CanMove(int x, int y);
+	bool HasSelectable();
 	std::string GetPlayerString(Player* player);
 	std::string GetCardString(Card* card);
 	void Log(std::string log);
+
+	//Gameplay objects
+	Collections* collections;
+	EventManager eventManager;
+	Player players[2];
+	Map map;
+	Tile hand[7];
+	EffectCallback callback;
+
+//Properties
+private:
 
 	//Card object references
 	std::vector<Minion*> minions;
@@ -117,12 +142,6 @@ public:
 	Sprite chars[10];
 
 	//Gameplay objects
-	Collections* collections;
-	EventManager eventManager;
-	Player players[2];
-	Map map;
-	Tile hand[7];
-	EffectCallback callback;
 
 	//Selection objects
 	std::vector<BoardTile*> highlighted;

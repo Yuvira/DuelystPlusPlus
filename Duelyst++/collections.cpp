@@ -47,7 +47,7 @@ Collections::Collections() {
 	//Alcuin Loremaster
 	effects[SKILL_ALCUIN_LOREMASTER] = Effect(SKILL_ALCUIN_LOREMASTER, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Put a copy of the most recently cast spell into your action bar");
 	effects[SKILL_ALCUIN_LOREMASTER].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
-		for (Spell* spell : context.game->spellHistory | std::views::reverse) {
+		for (Spell* spell : context.game->GetSpellHistory() | std::views::reverse) {
 			if (spell->IsSpell()) {
 				context.card->owner->AddNewToHand(spell->original);
 				break;
@@ -90,12 +90,12 @@ Collections::Collections() {
 	//Arrow Whistler
 	effects[SKILL_ARROW_WHISTLER] = Effect(SKILL_ARROW_WHISTLER, KEYWORD_RANGED, "{Ranged}|Your other minions with {Ranged} have +1 Attack");
 	effects[SKILL_ARROW_WHISTLER].OnAddThis = [](EffectContext context) {
-		for (Minion* minion : context.game->minions)
+		for (Minion* minion : context.game->GetMinions())
 			if (context.IsAllied(minion) && !minion->IsGeneral() && minion->HasKeywords(KEYWORD_RANGED))
 				minion->AddEffect(EFFECT_ARROW_WHISTLER, context.effect);
 	};
 	effects[SKILL_ARROW_WHISTLER].OnRemoveThis = [](EffectContext context) {
-		for (Minion* minion : context.game->minions)
+		for (Minion* minion : context.game->GetMinions())
 			minion->RemoveEffectsFromSource(context.effect);
 	};
 	effects[SKILL_ARROW_WHISTLER].OnSummon = [](EffectContext context, Minion* minion, bool fromActionBar) {
@@ -157,7 +157,7 @@ Collections::Collections() {
 	effects[SKILL_BASTION] = Effect(SKILL_BASTION, KEYWORD_NONE, "At the end of your turn, give other friendly minions +1 Health");
 	effects[SKILL_BASTION].OnTurnEnd = [](EffectContext context, Player* player) {
 		if (context.IsOnBoard() && context.IsOwnedBy(player))
-			for (Minion* minion : context.game->minions)
+			for (Minion* minion : context.game->GetMinions())
 				if (context.IsAllied(minion) && !minion->IsGeneral())
 					minion->AddEffect(EFFECT_BASTION, nullptr);
 	};
@@ -184,7 +184,7 @@ Collections::Collections() {
 	//Blistering Skorn
 	effects[SKILL_BLISTERING_SKORN] = Effect(SKILL_BLISTERING_SKORN, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Deal 1 damage to everything (including itself)");
 	effects[SKILL_BLISTERING_SKORN].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
-		for (Minion* minion : context.game->minions)
+		for (Minion* minion : context.game->GetMinions())
 			minion->DealDamage(context.card, 1);
 		if (context.card->IsMinion())
 			context.card->GetMinion()->DealDamage(context.card, 1);
@@ -216,7 +216,7 @@ Collections::Collections() {
 		context.game->HighlightSelectable(TargetMode(TARGET_MODE_ALL, [](BoardTile* tile) {
 			return tile->HasMinion() && tile->minion->IsEnemy();
 		}));
-		if (context.game->selectable.size() > 0) {
+		if (context.game->HasSelectable()) {
 			context.game->callback = EffectCallback(context, tile);
 			context.game->callback.Callback = [](EffectContext context, BoardTile* source, BoardTile* target) {
 				if (target->HasMinion())
@@ -302,7 +302,7 @@ Collections::Collections() {
 		context.game->HighlightSelectable(TargetMode(TARGET_MODE_ALL, [](BoardTile* tile) {
 			return tile->HasMinion() && tile->minion->IsEnemy() && !tile->minion->IsGeneral() && tile->minion->HasKeywords(KEYWORD_RANGED);
 		}));
-		if (context.game->selectable.size() > 0) {
+		if (context.game->HasSelectable()) {
 			context.game->callback = EffectCallback(context, tile);
 			context.game->callback.Callback = [](EffectContext context, BoardTile* source, BoardTile* target) {
 				if (target->HasMinion())
@@ -419,7 +419,7 @@ Collections::Collections() {
 	effects[SKILL_EPHEMERAL_SHROUD] = Effect(SKILL_EPHEMERAL_SHROUD, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Dispel 1 nearby space");
 	effects[SKILL_EPHEMERAL_SHROUD].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
 		context.game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, nullptr), tile);
-		if (context.game->selectable.size() > 0) {
+		if (context.game->HasSelectable()) {
 			context.game->callback = EffectCallback(context, tile);
 			context.game->callback.Callback = [](EffectContext context, BoardTile* source, BoardTile* target) {
 				target->SetFeature(TILE_NONE);
@@ -456,12 +456,12 @@ Collections::Collections() {
 	//First Sword of Akrane
 	effects[SKILL_FIRST_SWORD_OF_AKRANE] = Effect(SKILL_FIRST_SWORD_OF_AKRANE, KEYWORD_NONE, "Your other minions have +1 Attack");
 	effects[SKILL_FIRST_SWORD_OF_AKRANE].OnAddThis = [](EffectContext context) {
-		for (Minion* minion : context.game->minions)
+		for (Minion* minion : context.game->GetMinions())
 			if (context.IsAllied(minion) && !minion->IsGeneral())
 				minion->AddEffect(EFFECT_FIRST_SWORD_OF_AKRANE, context.effect);
 	};
 	effects[SKILL_FIRST_SWORD_OF_AKRANE].OnRemoveThis = [](EffectContext context) {
-		for (Minion* minion : context.game->minions)
+		for (Minion* minion : context.game->GetMinions())
 			minion->RemoveEffectsFromSource(context.effect);
 	};
 	effects[SKILL_FIRST_SWORD_OF_AKRANE].OnSummon = [](EffectContext context, Minion* minion, bool fromActionBar) {
@@ -492,7 +492,7 @@ Collections::Collections() {
 		context.game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, [](BoardTile* tile) {
 			return tile->HasMinion() && !tile->minion->IsGeneral();
 		}), tile);
-		if (context.game->selectable.size() > 0) {
+		if (context.game->HasSelectable()) {
 			context.game->callback = EffectCallback(context, tile);
 			context.game->callback.Callback = [](EffectContext context, BoardTile* source, BoardTile* target) {
 				if (target->HasMinion()) {
@@ -507,12 +507,12 @@ Collections::Collections() {
 	//Golden Justicar
 	effects[SKILL_GOLDEN_JUSTICAR] = Effect(SKILL_GOLDEN_JUSTICAR, KEYWORD_PROVOKE, "{Provoke}|Your other minions with {Provoke} can move two additional spaces");
 	effects[SKILL_GOLDEN_JUSTICAR].OnAddThis = [](EffectContext context) {
-		for (Minion* minion : context.game->minions)
+		for (Minion* minion : context.game->GetMinions())
 			if (context.IsAllied(minion) && !minion->IsGeneral() && minion->HasKeywords(KEYWORD_PROVOKE))
 				minion->AddEffect(EFFECT_GOLDEN_JUSTICAR, context.effect);
 	};
 	effects[SKILL_GOLDEN_JUSTICAR].OnRemoveThis = [](EffectContext context) {
-		for (Minion* minion : context.game->minions)
+		for (Minion* minion : context.game->GetMinions())
 			minion->RemoveEffectsFromSource(context.effect);
 	};
 	effects[SKILL_GOLDEN_JUSTICAR].OnSummon = [](EffectContext context, Minion* minion, bool fromActionBar) {
@@ -533,7 +533,7 @@ Collections::Collections() {
 	//Golem Metallurgist
 	effects[SKILL_GOLEM_METALLURGIST] = Effect(SKILL_GOLEM_METALLURGIST, KEYWORD_NONE, "The first Golem you summon each turn costs 1 less");
 	effects[SKILL_GOLEM_METALLURGIST].OnAddThis = [](EffectContext context) {
-		for (Card* c : context.game->castThisTurn)
+		for (Card* c : context.game->GetCardsCastThisTurn())
 			if (c->IsMinion() && c->GetMinion()->tribe == TRIBE_GOLEM)
 				return;
 		if (context.effect->ApplyEffect)
@@ -552,7 +552,7 @@ Collections::Collections() {
 	};
 	effects[SKILL_GOLEM_METALLURGIST].OnDraw = [](EffectContext context, Card* card, bool fromDeck) {
 		if (context.IsOnBoard() && !fromDeck && context.SharesOwner(card) && card->IsMinion() && card->GetMinion()->tribe == TRIBE_GOLEM) {
-			for (Card* c : context.game->castThisTurn)
+			for (Card* c : context.game->GetCardsCastThisTurn())
 				if (c->IsMinion() && c->GetMinion()->tribe == TRIBE_GOLEM)
 					return;
 			card->AddEffect(EFFECT_GOLEM_METALLURGIST, context.effect);
@@ -583,12 +583,12 @@ Collections::Collections() {
 	//Golem Vanquisher
 	effects[SKILL_GOLEM_VANQUISHER] = Effect(SKILL_GOLEM_VANQUISHER, KEYWORD_PROVOKE, "{Provoke}|Your other Golem minions have {Provoke}");
 	effects[SKILL_GOLEM_VANQUISHER].OnAddThis = [](EffectContext context) {
-		for (Minion* minion : context.game->minions)
+		for (Minion* minion : context.game->GetMinions())
 			if (context.IsAllied(minion) && minion->tribe == TRIBE_GOLEM)
 				minion->AddEffect(EFFECT_GOLEM_VANQUISHER, context.effect);
 	};
 	effects[SKILL_GOLEM_VANQUISHER].OnRemoveThis = [](EffectContext context) {
-		for (Minion* minion : context.game->minions)
+		for (Minion* minion : context.game->GetMinions())
 			minion->RemoveEffectsFromSource(context.effect);
 	};
 	effects[SKILL_GOLEM_VANQUISHER].OnSummon = [](EffectContext context, Minion* minion, bool fromActionBar) {
@@ -621,7 +621,7 @@ Collections::Collections() {
 		context.game->HighlightSelectable(TargetMode(TARGET_MODE_ALL, [](BoardTile* tile) {
 			return tile->HasMinion();
 		}));
-		if (context.game->selectable.size() > 0) {
+		if (context.game->HasSelectable()) {
 			context.game->callback = EffectCallback(context, tile);
 			context.game->callback.Callback = [](EffectContext context, BoardTile* source, BoardTile* target) {
 				if (target->HasMinion())
@@ -634,7 +634,7 @@ Collections::Collections() {
 	effects[SKILL_IRONCLAD] = Effect(SKILL_IRONCLAD, KEYWORD_DYING_WISH, "{Dying Wish}: Dispel all enemy minions");
 	effects[SKILL_IRONCLAD].OnDeath = [](EffectContext context, Minion* minion) {
 		if (context.IsCard(minion))
-			for (Minion* target : context.game->minions)
+			for (Minion* target : context.game->GetMinions())
 				if (!context.SharesOwner(target) && target->tribe != TRIBE_GENERAL)
 					target->Dispel();
 	};
@@ -663,7 +663,7 @@ Collections::Collections() {
 		BoardTile* target = context.game->map.GetRandomEmptyNear(tile);
 		if (target != nullptr) {
 			std::vector<Card*> minions;
-			for (Card* destroyed : context.game->destroyedMinions)
+			for (Card* destroyed : context.game->GetDestroyedMinions())
 				if (!destroyed->isToken && destroyed->IsMinion() && context.SharesOwner(destroyed))
 					minions.push_back(destroyed);
 			if (minions.size() > 0) {
@@ -723,7 +723,7 @@ Collections::Collections() {
 	//Manaforger
 	effects[SKILL_MANAFORGER] = Effect(SKILL_MANAFORGER, KEYWORD_NONE, "The first non-Bloodborn spell you cast each turn costs 1 less");
 	effects[SKILL_MANAFORGER].OnAddThis = [](EffectContext context) {
-		for (Card* c : context.game->castThisTurn)
+		for (Card* c : context.game->GetCardsCastThisTurn())
 			if (c->IsSpell())
 				return;
 		if (context.effect->ApplyEffect)
@@ -742,7 +742,7 @@ Collections::Collections() {
 	};
 	effects[SKILL_MANAFORGER].OnDraw = [](EffectContext context, Card* card, bool fromDeck) {
 		if (context.IsOnBoard() && !fromDeck && context.SharesOwner(card) && card->IsSpell()) {
-			for (Card* c : context.game->castThisTurn)
+			for (Card* c : context.game->GetCardsCastThisTurn())
 				if (c->IsSpell())
 					return;
 			card->AddEffect(EFFECT_MANAFORGER, context.effect);
@@ -776,7 +776,7 @@ Collections::Collections() {
 		context.game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, [](BoardTile* tile) {
 			return tile->HasMinion() && tile->minion->IsEnemy() && !tile->minion->IsGeneral();
 		}), tile);
-		if (context.game->selectable.size() > 0) {
+		if (context.game->HasSelectable()) {
 			context.game->callback = EffectCallback(context, tile);
 			context.game->callback.Callback = [](EffectContext context, BoardTile* source, BoardTile* target) {
 				if (target->HasMinion())
@@ -836,7 +836,7 @@ Collections::Collections() {
 	//Breath of The Unborn
 	effects[SPELL_BREATH_OF_THE_UNBORN] = Effect(SPELL_BREATH_OF_THE_UNBORN, KEYWORD_NONE, "Deal 2 damage to all enemy minions. Fully heal all friendly minions");
 	effects[SPELL_BREATH_OF_THE_UNBORN].OnResolveThis = [](EffectContext context, BoardTile* tile) {
-		for (Minion* minion : context.game->minions) {
+		for (Minion* minion : context.game->GetMinions()) {
 			if (!minion->IsGeneral()) {
 				if (context.SharesOwner(minion))
 					minion->Heal(context.card, 999);
@@ -949,13 +949,13 @@ Collections::Collections() {
 
 	//Spells
 	spellList.push_back(Spell(CARD_BREATH_OF_THE_UNBORN, FACTION_ABYSSIAN, 4, "breathoftheunborn", "Breath of The Unborn", FindEffect(SPELL_BREATH_OF_THE_UNBORN)));
-	spellList.back().targetMode = TargetMode(TARGET_MODE_ALL, [](BoardTile* tile) {
+	spellList.back().SetTargetMode(TargetMode(TARGET_MODE_ALL, [](BoardTile* tile) {
 		return tile->minion != nullptr;
-	});
+	}));
 	spellList.push_back(Spell(CARD_DARK_SEED, FACTION_ABYSSIAN, 4, "darkseed", "Dark Seed", FindEffect(SPELL_DARK_SEED)));
-	spellList.back().targetMode = TargetMode(TARGET_MODE_ALL, [](BoardTile* tile) {
+	spellList.back().SetTargetMode(TargetMode(TARGET_MODE_ALL, [](BoardTile* tile) {
 		return tile->minion != nullptr && tile->minion->IsEnemy() && tile->minion->tribe == TRIBE_GENERAL;
-	});
+	}));
 
 	//Generate card map
 	for (int i = 0; i < minionList.size(); ++i) {

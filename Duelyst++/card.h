@@ -181,7 +181,7 @@ public:
 
 	//Actions
 	void PreCast(BoardTile* tile);
-	virtual void Resolve(BoardTile* tile);
+	void Resolve(BoardTile* tile);
 
 	//Events
 	void OnCast(Card* card, BoardTile* tile);
@@ -255,6 +255,7 @@ public:
 	void UpdateDetailStats();
 
 	//Actions
+	void InitState();
 	void SetPosition(int x, int y);
 	void MoveToTile(BoardTile* tile, bool byEffect);
 	void MoveToPosition(int x, int y, bool byEffect);
@@ -275,10 +276,6 @@ public:
 	bool HasKeywords(int keywords);
 	bool IsProvoked();
 	bool IsOnBoard() { return curTile != nullptr; }
-
-	//Action & Event Overrides
-	void Resolve(BoardTile* tile);
-	void InitState();
 
 	//Getter
 	Minion* GetMinion() { return this; }
@@ -304,6 +301,8 @@ public:
 
 //Spell class
 class Spell : public Card {
+
+//Methods
 public:
 
 	//Constructors / Initialization
@@ -322,14 +321,15 @@ public:
 	void UpdateStatBuffs();
 	void UpdateDetailStats();
 
-	//Utils
+	//Getters
 	TargetMode GetTargetMode() { return targetMode; }
-
-	//Action & Event Overrides
-	void Resolve(BoardTile* tile);
-
-	//Getter
 	Spell* GetSpell() { return this; }
+
+	//Setters
+	void SetTargetMode(TargetMode targetMode);
+
+//Properties
+private:
 
 	//Targeting mode
 	TargetMode targetMode;

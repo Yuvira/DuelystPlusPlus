@@ -474,9 +474,16 @@ void Game::UseEffect() {
 
 //Send cast event after pre-cast effect targets have been set
 void Game::PostCast() {
-	eventManager.SendOnCast(activeCard, &map.tiles[castPos.x][castPos.y]);
+	BoardTile* tile = &map.tiles[castPos.x][castPos.y];
+	eventManager.SendOnCast(activeCard, tile);
 	castThisTurn.push_back(activeCard->original);
-	activeCard->Resolve(&map.tiles[castPos.x][castPos.y]);
+	activeCard->Resolve(tile);
+	if (activeCard->IsMinion())
+		Summon(activeCard->GetMinion(), tile, true);
+	else if (activeCard->IsSpell()) {
+		grave.push_back(activeCard);
+		spellHistory.push_back(activeCard->GetSpell());
+	}
 	activeCard = nullptr;
 }
 
@@ -527,6 +534,9 @@ void Game::AttackUnit() {
 	activeUnit = nullptr;
 	mode = MODE_NONE;
 }
+
+//Send card that can't be added to hand to graveyard instead
+void Game::Overflow(Card* card) { grave.push_back(card); }
 
 //Change turn
 void Game::ChangeTurn(bool newTurn) {
@@ -841,7 +851,7 @@ void Game::GeneratePaths() {
 
 #pragma endregion
 
-#pragma region Path Rendering
+#pragma region Drawing
 
 //Draw arrow path
 void Game::DrawPath(Renderer& renderer) {
@@ -869,15 +879,6 @@ void Game::DrawPath(Renderer& renderer) {
 			}
 		}
 	}
-}
-
-//Draw attack swords
-void Game::DrawSword(int x, int y, Renderer& renderer) {
-	renderer.Render(chars[6], x + 2, y + 2);
-	renderer.Render(chars[7], x + 4, y + 2);
-	renderer.Render(chars[5], x + 3, y + 3);
-	renderer.Render(chars[5], x + 2, y + 4);
-	renderer.Render(chars[5], x + 4, y + 4);
 }
 
 //Draw arrows
@@ -994,6 +995,40 @@ void Game::DrawArrow(int type, int x, int y, Renderer& renderer) {
 	}
 }
 
+//Draw attack swords
+void Game::DrawSword(int x, int y, Renderer& renderer) {
+	renderer.Render(chars[6], x + 2, y + 2);
+	renderer.Render(chars[7], x + 4, y + 2);
+	renderer.Render(chars[5], x + 3, y + 3);
+	renderer.Render(chars[5], x + 2, y + 4);
+	renderer.Render(chars[5], x + 4, y + 4);
+}
+
+//Draw forcefield
+void Game::DrawForcefield(int x, int y, Renderer& renderer) {
+	renderer.Render(chars[7], x + 1, y + 1);
+	renderer.Render(chars[9], x + 2, y + 1);
+	renderer.Render(chars[6], x + 3, y + 1);
+	renderer.Render(chars[8], x + 1, y + 2);
+	renderer.Render(chars[8], x + 3, y + 2);
+	renderer.Render(chars[6], x + 1, y + 3);
+	renderer.Render(chars[9], x + 2, y + 3);
+	renderer.Render(chars[7], x + 3, y + 3);
+}
+
+#pragma endregion
+
+#pragma region Getters
+
+//Minion list
+const std::vector<Minion*>& Game::GetMinions() const { return minions; }
+const std::vector<Card*>& Game::GetGrave() const { return grave; }
+const std::vector<Minion*>& Game::GetDestroyedMinions() const { return destroyedMinions; }
+const std::vector<Spell*>& Game::GetSpellHistory() const { return spellHistory; }
+const std::vector<Card*>& Game::GetCardsCastThisTurn() const { return castThisTurn; }
+const int& Game::GetTurnCount() const { return turnCount; }
+const Player* Game::GetTurnPlayer() const { return &players[turn]; }
+
 #pragma endregion
 
 #pragma region Utils
@@ -1016,6 +1051,9 @@ bool Game::CanMove(int x, int y) {
 	}
 	return false;
 }
+
+//Check if any tiles are selectable
+bool Game::HasSelectable() { return selectable.size() > 0; }
 
 //Get string for player objects
 std::string Game::GetPlayerString(Player* player) {

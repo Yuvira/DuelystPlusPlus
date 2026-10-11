@@ -358,12 +358,12 @@ int Card::TextWidth(std::string str) {
 bool Card::IsAlly() {
 	if (game == nullptr)
 		return false;
-	return owner == &game->players[game->turn];
+	return owner == game->GetTurnPlayer();
 }
 bool Card::IsEnemy() {
 	if (game == nullptr)
 		return false;
-	return owner != &game->players[game->turn];
+	return owner != game->GetTurnPlayer();
 }
 
 #pragma endregion

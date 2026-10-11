@@ -67,7 +67,7 @@ void Player::Render(Renderer& renderer, bool left) {
 	renderer.Render(spr, left ? 20 : 45 - str.length(), 2);
 
 	//Replace
-	if (&game->players[game->turn] == this) {
+	if (game->GetTurnPlayer() == this) {
 		uiReplace.buffer[0].Char.AsciiChar = std::to_string(replaces)[0];
 		renderer.Render(uiReplace, 4, 44);
 	}
@@ -108,15 +108,13 @@ void Player::Shuffle() {
 //Draw card
 void Player::Draw() {
 	if (deck.size() > 0) {
-		if (hand.size() < 6) {
-			hand.push_back(deck[0]);
-			game->eventManager.SendOnDraw(hand.back(), true);
-		}
-		else {
-			game->grave.push_back(deck[0]);
-			game->eventManager.SendOnDraw(game->grave.back(), true);
-		}
+		Card* card = deck[0];
 		deck.erase(deck.begin());
+		if (hand.size() < 6)
+			hand.push_back(card);
+		else
+			game->Overflow(card);
+		game->eventManager.SendOnDraw(card, true);
 	}
 }
 
@@ -128,14 +126,11 @@ void Player::AddNewToHand(Card* original) {
 	else if (original->IsSpell())
 		newCard = new Spell(*(original->GetSpell()));
 	game->SetContext(newCard, this);
-	if (hand.size() < 6) {
+	if (hand.size() < 6)
 		hand.push_back(newCard);
-		game->eventManager.SendOnDraw(newCard, false);
-	}
-	else {
-		game->grave.push_back(newCard);
-		game->eventManager.SendOnDraw(newCard, false);
-	}
+	else
+		game->Overflow(newCard);
+	game->eventManager.SendOnDraw(newCard, false);
 }
 
 //Replace card
