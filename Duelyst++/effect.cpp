@@ -1,21 +1,12 @@
 //Include
+#include "effect.h"
 #include "game.h"
-
-#pragma region Constructors
-
-//Self reference constructor
-EffectContext::EffectContext() : EffectContext(nullptr, nullptr, nullptr) {}
-EffectContext::EffectContext(Effect* effect, Card* card, Game* game) {
-	this->effect = effect;
-	this->card = card;
-	this->game = game;
-}
-EffectContext::~EffectContext() {}
+#include "card.h"
 
 //Effect constructors
 Effect::Effect() : Effect(EFFECT_NONE, KEYWORD_NONE, "") {}
-Effect::Effect(eEffect effect, int keywords, std::string description) {
-	this->effect = effect;
+Effect::Effect(eEffect effectId, int keywords, std::string description) {
+	this->effectId = effectId;
 	this->keywords = keywords;
 	this->description = description;
 	triggered = false;
@@ -30,9 +21,58 @@ Effect::Effect(eEffect effect, int keywords, std::string description) {
 }
 Effect::~Effect() {}
 
-#pragma endregion
+//Trigger events
+void Effect::TriggerPreEvent(EffectContext context, Event* event) {
+	if (OnPreEvent)
+		OnPreEvent(context, event);
+}
+void Effect::TriggerPostEvent(EffectContext context, Event* event) {
+	if (OnPostEvent)
+		OnPostEvent(context, event);
+}
 
-#pragma region Utils
+//Trigger legacy events
+void Effect::TriggerOnAddThis(EffectContext context) {
+	if (OnAddThis)
+		OnAddThis(context);
+}
+void Effect::TriggerOnRemoveThis(EffectContext context) {
+	if (OnRemoveThis)
+		OnRemoveThis(context);
+}
+void Effect::TriggerOnPreCastThis(EffectContext context, BoardTile* tile) {
+	if (OnPreCastThis)
+		OnPreCastThis(context, tile);
+}
+void Effect::TriggerOnResolveThis(EffectContext context, BoardTile* tile) {
+	if (OnResolveThis)
+		OnResolveThis(context, tile);
+}
+
+//Getters
+Card* Effect::GetToken() { return token; }
+const eEffect& Effect::GetID() const { return effectId; }
+const int& Effect::GetKeywords() const { return keywords; }
+const std::string& Effect::GetDescription() const { return description; }
+const int& Effect::GetCostBuff() const { return costBuff; }
+const int& Effect::GetFixedCost() const { return fixedCost; }
+const int& Effect::GetAtkBuff() const { return atkBuff; }
+const int& Effect::GetHPBuff() const { return hpBuff; }
+const int& Effect::GetMoveBuff() const { return moveBuff; }
+const Effect* const& Effect::GetSource() const { return source; };
+Card* Effect::GetRef() { return refCard; };
+
+//Setters
+void Effect::SetCostBuff(int costBuff) { this->costBuff = costBuff; }
+void Effect::SetFixedCost(int fixedCost) { this->fixedCost = fixedCost; }
+void Effect::SetAtkBuff(int atkBuff) { this->atkBuff = atkBuff; }
+void Effect::SetHPBuff(int hpBuff) { this->hpBuff = hpBuff; }
+void Effect::SetMoveBuff(int moveBuff) { this->moveBuff = moveBuff; }
+void Effect::SetToken(Card* token) { this->token = token; }
+void Effect::SetSources(Effect* source, Card* refCard) {
+	this->source = source;
+	this->refCard = refCard;
+}
 
 //Utilities
 bool EffectContext::IsOnBoard() { return card->IsOnBoard(); }
@@ -43,5 +83,3 @@ bool EffectContext::SharesOwner(Card* compare) { return card->owner == compare->
 bool EffectContext::IsOwnedBy(Player* compare) { return card->owner == compare; }
 bool EffectContext::IsAllied(Card* compare) { return card != compare && card->owner == compare->owner; }
 bool EffectContext::IsOwnerTurn() { return game->GetTurnPlayer() == card->owner; }
-
-#pragma endregion

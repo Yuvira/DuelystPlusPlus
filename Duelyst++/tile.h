@@ -2,7 +2,7 @@
 
 //Include
 #include <vector>
-#include "renderer.h"
+#include "sprite.h"
 
 //Definition
 class Minion;
@@ -21,7 +21,7 @@ enum eFeature {
 class Coord {
 public:
 	Coord();
-	Coord(int _x, int _y);
+	Coord(int x, int y);
 	~Coord();
 	int x;
 	int y;

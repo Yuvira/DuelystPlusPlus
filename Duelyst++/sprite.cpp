@@ -1,4 +1,5 @@
 //Include
+#include <fstream>
 #include "sprite.h"
 
 #pragma region Constructors

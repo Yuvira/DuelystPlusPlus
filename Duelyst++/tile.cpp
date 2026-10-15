@@ -5,9 +5,9 @@
 
 //Custom co-ord
 Coord::Coord() : Coord(0, 0) {}
-Coord::Coord(int _x, int _y) {
-	x = _x;
-	y = _y;
+Coord::Coord(int x, int y) {
+	this->x = x;
+	this->y = y;
 }
 Coord::~Coord() {}
 

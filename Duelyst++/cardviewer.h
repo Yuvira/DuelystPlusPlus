@@ -1,10 +1,16 @@
 #pragma once
 
 //Include
-#include "game.h"
+#include "tile.h"
 
-//Game class
+//Define
+class Collections;
+class Renderer;
+
+//Codex view
 class CardViewer {
+
+//Methods
 public:
 	CardViewer(Collections* collections, bool* modeSwitch);
 	~CardViewer();
@@ -13,6 +19,9 @@ public:
 	void RenderCollection(Renderer& renderer);
 	void RenderSidebar(Renderer& renderer);
 	void MoveCursor(int x, int y);
+
+//Properties
+private:
 	Sprite board;
 	Sprite count[5];
 	Sprite pageNumber;
@@ -22,4 +31,5 @@ public:
 	int page;
 	int pageCount;
 	bool* modeSwitch;
+
 };

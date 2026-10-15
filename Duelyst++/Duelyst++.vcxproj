@@ -135,9 +135,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="card.h" />
+    <ClInclude Include="cardids.h" />
     <ClInclude Include="cardviewer.h" />
     <ClInclude Include="collections.h" />
     <ClInclude Include="effect.h" />
+    <ClInclude Include="effectids.h" />
+    <ClInclude Include="event.h" />
     <ClInclude Include="eventmanager.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="renderer.h" />

@@ -1,5 +1,9 @@
 //Include
+#include "card.h"
 #include "game.h"
+#include "collections.h"
+#include "effect.h"
+#include "event.h"
 
 //Constants
 const int MAX_DESCRIPTION_WIDTH = 42;
@@ -61,15 +65,16 @@ void Card::UpdateDetails() {
 		int headerIdx = lines.size();
 		std::string line = "";
 		std::string word = "";
-		for (int i = 0; i < effect->description.length(); ++i) {
-			if (line.length() == 0 && (effect->description[i] == '|' || effect->description[i] == ' ')) {
-				if (effect->description[i] == '|')
+		std::string description = effect->GetDescription();
+		for (int i = 0; i < description.length(); ++i) {
+			if (line.length() == 0 && (description[i] == '|' || description[i] == ' ')) {
+				if (description[i] == '|')
 					lines.push_back(word);
-				else if (effect->description[i] == ' ')
+				else if (description[i] == ' ')
 					line += word;
 				word = "";
 			}
-			else if (effect->description[i] == '|') {
+			else if (description[i] == '|') {
 				if (TextWidth(line) + TextWidth(word) + 1 > MAX_DESCRIPTION_WIDTH) {
 					lines.push_back(line);
 					lines.push_back(word);
@@ -81,7 +86,7 @@ void Card::UpdateDetails() {
 				line = "";
 				word = "";
 			}
-			else if (effect->description[i] == ' ') {
+			else if (description[i] == ' ') {
 				if (TextWidth(line) + TextWidth(word) + 1 > MAX_DESCRIPTION_WIDTH) {
 					lines.push_back(line);
 					line = word;
@@ -91,7 +96,7 @@ void Card::UpdateDetails() {
 				word = "";
 			}
 			else
-				word += effect->description[i];
+				word += description[i];
 		}
 		if (line.length() == 0)
 			lines.push_back(word);
@@ -106,7 +111,7 @@ void Card::UpdateDetails() {
 		int stacks = 1;
 		if (effectRefs.size() > 1) {
 			for (int i = 1; i < effectRefs.size(); ++i) {
-				if (effectRefs[i]->effect == effect->effect) {
+				if (effectRefs[i]->GetID() == effect->GetID()) {
 					effectRefs.erase(effectRefs.begin() + i);
 					++stacks;
 					--i;
@@ -117,23 +122,23 @@ void Card::UpdateDetails() {
 		}
 
 		//Add buffs line if applicable
-		if (effect->costBuff != 0 || effect->atkBuff != 0 || effect->hpBuff != 0 || effect->moveBuff != 0) {
+		if (effect->GetCostBuff() != 0 || effect->GetAtkBuff() != 0 || effect->GetHPBuff() != 0 || effect->GetMoveBuff() != 0) {
 			std::string str = "";
-			if (effect->atkBuff != 0 && effect->hpBuff != 0)
-				str += ValueString(effect->atkBuff * stacks) + "/" + ValueString(effect->hpBuff * stacks);
-			else if (effect->atkBuff != 0)
-				str += ValueString(effect->atkBuff * stacks) + " Attack";
-			else if (effect->hpBuff != 0)
-				str += ValueString(effect->hpBuff * stacks) + " Health";
-			if (effect->costBuff != 0) {
+			if (effect->GetAtkBuff() != 0 && effect->GetHPBuff() != 0)
+				str += ValueString(effect->GetAtkBuff() * stacks) + "/" + ValueString(effect->GetHPBuff() * stacks);
+			else if (effect->GetAtkBuff() != 0)
+				str += ValueString(effect->GetAtkBuff() * stacks) + " Attack";
+			else if (effect->GetHPBuff() != 0)
+				str += ValueString(effect->GetHPBuff() * stacks) + " Health";
+			if (effect->GetCostBuff() != 0) {
 				if (str != "")
 					str += ", ";
-				str += ValueString(effect->costBuff * stacks) + " Cost";
+				str += ValueString(effect->GetCostBuff() * stacks) + " Cost";
 			}
-			if (effect->moveBuff != 0) {
+			if (effect->GetMoveBuff() != 0) {
 				if (str != "")
 					str += ", ";
-				str += ValueString(effect->moveBuff * stacks) + " Movement";
+				str += ValueString(effect->GetMoveBuff() * stacks) + " Movement";
 			}
 			str = "{" + str + "}";
 			lines.push_back(str);
@@ -158,15 +163,18 @@ void Card::AddEffect(eEffect effectId, Effect* source, Card* refCard) {
 void Card::AddEffect(Effect effect, Effect* source, Card* refCard) {
 	if (source != nullptr)
 		for (int i = 0; i < effects.size(); ++i)
-			if (effects[i]->effect == effect.effect && effects[i]->source == source)
+			if (effects[i]->GetID() == effect.GetID() && effects[i]->GetSource() == source)
 				return;
 	effects.push_back(new Effect(effect));
-	effects.back()->source = source;
-	effects.back()->refCard = refCard;
-	if (IsOnBoard() && effects.back()->OnAddThis)
-		effects.back()->OnAddThis(EffectContext(effects.back(), this, game));
-	if (game != nullptr)
-		game->eventManager.SendOnEffectsChanged(this);
+	effects.back()->SetSources(source, refCard);
+	if (IsOnBoard())
+		effects.back()->TriggerOnAddThis(EffectContext(effects.back(), this, game));
+	if (game != nullptr) {
+		OnEffectsChangedEvent* event = new OnEffectsChangedEvent(game->GetTurnCount(), this);
+		game->eventManager.SendOnPreEvent(game, event);
+		game->eventManager.SendOnPostEvent(game, event);
+		delete event;
+	}
 	UpdateDetails();
 	UpdateStatBuffs();
 }
@@ -178,12 +186,15 @@ void Card::AddContinuousEffect(eEffect effectId, Card* refCard) {
 }
 void Card::AddContinuousEffect(Effect effect, Card* refCard) {
 	effects.push_back(new Effect(effect));
-	effects.back()->source = effects.back();
-	effects.back()->refCard = refCard;
-	if (IsOnBoard() && effects.back()->OnAddThis)
-		effects.back()->OnAddThis(EffectContext(effects.back(), this, game));
-	if (game != nullptr)
-		game->eventManager.SendOnEffectsChanged(this);
+	effects.back()->SetSources(effects.back(), refCard);
+	if (IsOnBoard())
+		effects.back()->TriggerOnAddThis(EffectContext(effects.back(), this, game));
+	if (game != nullptr) {
+		OnEffectsChangedEvent* event = new OnEffectsChangedEvent(game->GetTurnCount(), this);
+		game->eventManager.SendOnPreEvent(game, event);
+		game->eventManager.SendOnPostEvent(game, event);
+		delete event;
+	}
 	UpdateDetails();
 	UpdateStatBuffs();
 }
@@ -202,7 +213,7 @@ void Card::RemoveEffect(Effect* effect) {
 void Card::RemoveEffectsFromSource(Effect* source) {
 	std::vector<int> indices;
 	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i]->source == source)
+		if (effects[i]->GetSource() == source)
 			indices.push_back(i);
 	RemoveEffectAt(indices);
 }
@@ -217,143 +228,23 @@ void Card::RemoveEffectAt(std::vector<int> indices) {
 		effects.erase(effects.begin() + indices[i]);
 	}
 	for (int i = 0; i < removed.size(); ++i)
-		if (removed[i]->OnRemoveThis)
-			removed[i]->OnRemoveThis(EffectContext(removed[i], this, game));
-	game->eventManager.SendOnEffectsChanged(this);
+		removed[i]->TriggerOnRemoveThis(EffectContext(removed[i], this, game));
+	OnEffectsChangedEvent* event = new OnEffectsChangedEvent(game->GetTurnCount(), this);
+	game->eventManager.SendOnPreEvent(game, event);
+	game->eventManager.SendOnPostEvent(game, event);
+	delete event;
 	UpdateDetails();
 	UpdateStatBuffs();
 }
 
 #pragma endregion
 
-#pragma region Events
+#pragma region Getters
 
-//When this is cast (before minion is summoned or spell effects occur)
-void Card::PreCast(BoardTile* tile) {
+//Getters
+std::vector<Effect*> Card::GetEffects() {
 	std::vector<Effect*> effectIterator = effects;
-	for (Effect* effect : effectIterator)
-		if (effect->OnPreCastThis)
-			effect->OnPreCastThis(EffectContext(effect, this, game), tile);
-}
-
-//When this resolves (after OnCast events have been sent)
-void Card::Resolve(BoardTile* tile) {
-	std::vector<Effect*> effectIterator = effects;
-	for (Effect* effect : effectIterator)
-		if (effect->OnResolveThis)
-			effect->OnResolveThis(EffectContext(effect, this, game), tile);
-}
-
-//Whenever any card is cast
-void Card::OnCast(Card* card, BoardTile* tile) {
-	std::vector<Effect*> effectIterator = effects;
-	for (Effect* effect : effectIterator)
-		if (effect->OnCast)
-			effect->OnCast(EffectContext(effect, this, game), card, tile);
-}
-
-//Whenever a minion is summoned
-void Card::OnSummon(Minion* minion, bool fromActionBar) {
-	std::vector<Effect*> effectIterator = effects;
-	for (Effect* effect : effectIterator)
-		if (effect->OnSummon)
-			effect->OnSummon(EffectContext(effect, this, game), minion, fromActionBar);
-}
-
-//Whenever a minion dies
-void Card::OnDeath(Minion* minion) {
-	std::vector<Effect*> effectIterator = effects;
-	for (Effect* effect : effectIterator)
-		if (effect->OnDeath)
-			effect->OnDeath(EffectContext(effect, this, game), minion);
-}
-
-//Whenever a minion attacks another minion
-void Card::OnAttack(Minion* source, Minion* target, bool counter) {
-	std::vector<Effect*> effectIterator = effects;
-	for (Effect* effect : effectIterator)
-		if (effect->OnAttack)
-			effect->OnAttack(EffectContext(effect, this, game), source, target, counter);
-}
-
-//Whenever a minion would be damaged
-void Card::OnWouldDealDamage(Card* source, Minion* target, int& damage) {
-	std::vector<Effect*> effectIterator = effects;
-	for (Effect* effect : effectIterator)
-		if (effect->OnWouldDealDamage)
-			effect->OnWouldDealDamage(EffectContext(effect, this, game), source, target, damage);
-}
-
-//Whenever a minion is damaged
-void Card::OnDamageDealt(Card* source, Minion* target, int damage) {
-	std::vector<Effect*> effectIterator = effects;
-	for (Effect* effect : effectIterator)
-		if (effect->OnDamageDealt)
-			effect->OnDamageDealt(EffectContext(effect, this, game), source, target, damage);
-}
-
-//Whenever a minion would be healed
-void Card::OnWouldHeal(Card* source, Minion* target, int& heal) {
-	std::vector<Effect*> effectIterator = effects;
-	for (Effect* effect : effectIterator)
-		if (effect->OnWouldHeal)
-			effect->OnWouldHeal(EffectContext(effect, this, game), source, target, heal);
-}
-
-//Whenever a minion is healed
-void Card::OnHealed(Card* source, Minion* target, int heal) {
-	std::vector<Effect*> effectIterator = effects;
-	for (Effect* effect : effectIterator)
-		if (effect->OnHealed)
-			effect->OnHealed(EffectContext(effect, this, game), source, target, heal);
-}
-
-//Whenever a minion is moved
-void Card::OnMove(Minion* minion, bool byEffect) {
-	std::vector<Effect*> effectIterator = effects;
-	for (Effect* effect : effectIterator)
-		if (effect->OnMove)
-			effect->OnMove(EffectContext(effect, this, game), minion, byEffect);
-}
-
-//Whenever a card is added to an action bar
-void Card::OnDraw(Card* card, bool fromDeck) {
-	std::vector<Effect*> effectIterator = effects;
-	for (Effect* effect : effectIterator)
-		if (effect->OnDraw)
-			effect->OnDraw(EffectContext(effect, this, game), card, fromDeck);
-}
-
-//Whenever a card is replaced
-void Card::OnReplace(Card* replaced, bool& sendToDeck) {
-	std::vector<Effect*> effectIterator = effects;
-	for (Effect* effect : effectIterator)
-		if (effect->OnReplace)
-			effect->OnReplace(EffectContext(effect, this, game), replaced, sendToDeck);
-}
-
-//Whenever the effects on a card change
-void Card::OnEffectsChanged(Card* card) {
-	std::vector<Effect*> effectIterator = effects;
-	for (Effect* effect : effectIterator)
-		if (effect->OnEffectsChanged)
-			effect->OnEffectsChanged(EffectContext(effect, this, game), card);
-}
-
-//Whenever a player's turn starts
-void Card::OnTurnStart(Player* player) {
-	std::vector<Effect*> effectIterator = effects;
-	for (Effect* effect : effectIterator)
-		if (effect->OnTurnStart)
-			effect->OnTurnStart(EffectContext(effect, this, game), player);
-}
-
-//Whenever a player's turn ends
-void Card::OnTurnEnd(Player* player) {
-	std::vector<Effect*> effectIterator = effects;
-	for (Effect* effect : effectIterator)
-		if (effect->OnTurnEnd)
-			effect->OnTurnEnd(EffectContext(effect, this, game), player);
+	return effectIterator;
 }
 
 #pragma endregion

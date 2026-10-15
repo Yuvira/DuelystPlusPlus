@@ -1,6 +1,9 @@
 //Include
 #include <ctime>
+#include "game.h"
 #include "cardviewer.h"
+#include "collections.h"
+#include "renderer.h"
 
 //Main
 int main() {

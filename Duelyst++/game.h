@@ -1,10 +1,20 @@
 #pragma once
 
 //Include
-#include <iostream>
-#include <stdlib.h>
-#include <conio.h>
+#include <vector>
+#include "cardids.h"
+#include "effect.h"
+#include "tile.h"
+#include "player.h"
 #include "eventmanager.h"
+#include "sprite.h"
+
+//Define
+class Collections;
+class Card;
+class Spell;
+class Minion;
+struct TargetMode;
 
 //Debug mode
 inline constexpr bool IS_DEBUG = false;
@@ -102,6 +112,7 @@ public:
 	void DrawForcefield(int x, int y, Renderer& renderer);
 
 	//Getters
+	std::vector<Player*> GetPlayers();
 	const std::vector<Minion*>& GetMinions() const;
 	const std::vector<Card*>& GetGrave() const;
 	const std::vector<Minion*>& GetDestroyedMinions() const;

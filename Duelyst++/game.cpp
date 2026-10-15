@@ -1,12 +1,16 @@
 //Include
+#include <conio.h>
 #include "game.h"
+#include "card.h"
+#include "collections.h"
+#include "event.h"
+#include "renderer.h"
 
 #pragma region Helper Constructors
 
 //Callback constructor
-EffectCallback::EffectCallback() : EffectCallback(EffectContext(), nullptr) {}
-EffectCallback::EffectCallback(EffectContext context, BoardTile* source) {
-	this->context = context;
+EffectCallback::EffectCallback() : EffectCallback(EffectContext(nullptr, nullptr, nullptr), nullptr) {}
+EffectCallback::EffectCallback(EffectContext context, BoardTile* source) : context(context) {
 	this->source = source;
 	Callback = nullptr;
 }
@@ -34,9 +38,6 @@ Game::Game(Collections* collections, bool* modeSwitch) {
 
 	//Board border
 	board.CreateFromFile("resources/board.txt");
-
-	//Event manager context
-	eventManager.game = this;
 
 	//Initialize log
 	debugLog.push_back("{Log Start}");
@@ -443,7 +444,9 @@ void Game::UseCard() {
 
 	//Remove from hand and do pre-cast effect targeting
 	players[turn].hand.erase(players[turn].hand.begin() + handIdx);
-	activeCard->PreCast(&map.tiles[pos.x][pos.y]);
+	for (Effect* effect : activeCard->GetEffects())
+		if (effect->OnPreCastThis)
+			effect->OnPreCastThis(EffectContext(effect, activeCard, this), &map.tiles[pos.x][pos.y]);
 	if (activeCard->GetMinion() != nullptr)
 		activeCard->GetMinion()->SetPosition(pos.x, pos.y);
 	castPos = pos;
@@ -475,9 +478,14 @@ void Game::UseEffect() {
 //Send cast event after pre-cast effect targets have been set
 void Game::PostCast() {
 	BoardTile* tile = &map.tiles[castPos.x][castPos.y];
-	eventManager.SendOnCast(activeCard, tile);
+	OnCastEvent* event = new OnCastEvent(GetTurnCount(), activeCard, tile);
+	eventManager.SendOnPreEvent(this, event);
+	eventManager.SendOnPostEvent(this, event);
+	delete event;
 	castThisTurn.push_back(activeCard->original);
-	activeCard->Resolve(tile);
+	for (Effect* effect : activeCard->GetEffects())
+		if (effect->OnResolveThis)
+			effect->OnResolveThis(EffectContext(effect, activeCard, this), tile);
 	if (activeCard->IsMinion())
 		Summon(activeCard->GetMinion(), tile, true);
 	else if (activeCard->IsSpell()) {
@@ -492,11 +500,14 @@ void Game::Summon(Card* card, BoardTile* tile, bool actionBar) { Summon(card, ti
 void Game::Summon(Card* card, int x, int y, bool actionBar) {
 	if (!card->IsMinion())
 		return;
+	OnSummonEvent* event = new OnSummonEvent(GetTurnCount(), card->GetMinion(), actionBar);
+	eventManager.SendOnPreEvent(this, event);
 	minions.push_back(card->GetMinion());
 	minions.back()->SetPosition(x, y);
 	minions.back()->AddEffects();
 	minions.back()->InitState();
-	eventManager.SendOnSummon(minions.back(), actionBar);
+	eventManager.SendOnPostEvent(this, event);
+	delete event;
 }
 
 //Summon token at tile
@@ -546,7 +557,10 @@ void Game::ChangeTurn(bool newTurn) {
 
 	//Trigger end of turn, draw and reset replaces
 	if (turnCount > 0) {
-		eventManager.SendOnTurnEnd(&players[turn]);
+		OnTurnEndEvent* event = new OnTurnEndEvent(GetTurnCount(), &players[turn]);
+		eventManager.SendOnPreEvent(this, event);
+		eventManager.SendOnPostEvent(this, event);
+		delete event;
 		players[turn].Draw();
 		players[turn].replaces = players[turn].maxReplaces;
 	}
@@ -575,7 +589,10 @@ void Game::ChangeTurn(bool newTurn) {
 		light.SetColor(COLOR_LTBLUE);
 
 	//Trigger start of turn
-	eventManager.SendOnTurnStart(&players[turn]);
+	OnTurnStartEvent* event = new OnTurnStartEvent(GetTurnCount(), &players[turn]);
+	eventManager.SendOnPreEvent(this, event);
+	eventManager.SendOnPostEvent(this, event);
+	delete event;
 
 	//Turn has ended
 	endTurn = false;
@@ -1020,12 +1037,21 @@ void Game::DrawForcefield(int x, int y, Renderer& renderer) {
 
 #pragma region Getters
 
+//Players
+std::vector<Player*> Game::GetPlayers() {
+	std::vector<Player*> p;
+	p.insert(p.end(), { &players[0], &players[1] });
+	return p;
+}
+
 //Minion list
 const std::vector<Minion*>& Game::GetMinions() const { return minions; }
 const std::vector<Card*>& Game::GetGrave() const { return grave; }
 const std::vector<Minion*>& Game::GetDestroyedMinions() const { return destroyedMinions; }
 const std::vector<Spell*>& Game::GetSpellHistory() const { return spellHistory; }
 const std::vector<Card*>& Game::GetCardsCastThisTurn() const { return castThisTurn; }
+
+//Util getters
 const int& Game::GetTurnCount() const { return turnCount; }
 const Player* Game::GetTurnPlayer() const { return &players[turn]; }
 

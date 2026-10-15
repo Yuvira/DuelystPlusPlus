@@ -1,5 +1,12 @@
 //Include
+#include <algorithm>
+#include "card.h"
 #include "game.h"
+#include "tile.h"
+#include "player.h"
+#include "effect.h"
+#include "event.h"
+#include "renderer.h"
 
 #pragma region Constructors / Initialization
 
@@ -39,7 +46,7 @@ Minion::Minion(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, 
 	curTile = nullptr;
 	game = nullptr;
 	owner = nullptr;
-	if (effect != nullptr && effect->effect != EFFECT_NONE)
+	if (effect != nullptr && effect->GetID() != EFFECT_NONE)
 		AddEffect(*effect, nullptr, this);
 }
 Minion::~Minion() {}
@@ -111,7 +118,7 @@ void Minion::DrawDetails(Renderer& renderer, int& y) {
 	renderer.Render(details, 72, y); y += details.height + 1;
 	bool tokens = false;
 	for (int i = 0; i < effects.size(); ++i) {
-		if (effects[i]->token != nullptr) {
+		if (effects[i]->GetToken() != nullptr) {
 			if (!tokens) {
 				if (y < 7)
 					y = 7;
@@ -119,7 +126,7 @@ void Minion::DrawDetails(Renderer& renderer, int& y) {
 				tokens = true;
 			}
 			y += 2;
-			effects[i]->token->DrawDetails(renderer, y);
+			effects[i]->GetToken()->DrawDetails(renderer, y);
 		}
 	}
 }
@@ -131,7 +138,10 @@ void Minion::DrawDetails(Renderer& renderer, int& y) {
 //Check if minion has died
 void Minion::Update(bool& shouldLoop) {
 	if (hp < 1 || destroyed) {
-		game->eventManager.SendOnDeath(this);
+		OnDeathEvent* event = new OnDeathEvent(game->GetTurnCount(), this);
+		game->eventManager.SendOnPreEvent(game, event);
+		game->eventManager.SendOnPostEvent(game, event);
+		delete event;
 		for (; !effects.empty(); RemoveEffect(effects.front())) {}
 		isDead = true;
 		shouldLoop = true;
@@ -146,10 +156,10 @@ void Minion::UpdateStatBuffs() {
 	int hpDelta = hp - hpMax;
 	int moveBuff = 0;
 	for (int i = 0; i < effects.size(); ++i) {
-		costBuff += effects[i]->costBuff;
-		atkBuff += effects[i]->atkBuff;
-		hpBuff += effects[i]->hpBuff;
-		moveBuff += effects[i]->moveBuff;
+		costBuff += effects[i]->GetCostBuff();
+		atkBuff += effects[i]->GetAtkBuff();
+		hpBuff += effects[i]->GetHPBuff();
+		moveBuff += effects[i]->GetMoveBuff();
 	}
 	cost = max(original->GetMinion()->cost + costBuff, 0);
 	atk = max(original->GetMinion()->atk + atkBuff, 0);
@@ -157,8 +167,8 @@ void Minion::UpdateStatBuffs() {
 	hp = hpMax + hpDelta;
 	moveRange = max(original->GetMinion()->moveRange + moveBuff, 0);
 	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i]->fixedCost > -1)
-			cost = effects[i]->fixedCost;
+		if (effects[i]->GetFixedCost() > -1)
+			cost = effects[i]->GetFixedCost();
 }
 
 //Update HP & ATK sprites
@@ -242,7 +252,10 @@ void Minion::MoveToPosition(int x, int y, bool byEffect) {
 		else
 			hasMoved = true;
 	}
-	game->eventManager.SendOnMove(this, byEffect);
+	OnMoveEvent* event = new OnMoveEvent(game->GetTurnCount(), this, byEffect);
+	game->eventManager.SendOnPreEvent(game, event);
+	game->eventManager.SendOnPostEvent(game, event);
+	delete event;
 }
 
 //Attack enemy
@@ -253,7 +266,10 @@ void Minion::Attack(Minion* target, bool counter) {
 	bool canCounter = target->CanAttack(this);
 
 	//Sent OnAttack event
-	game->eventManager.SendOnAttack(this, target, counter);
+	OnAttackEvent* event = new OnAttackEvent(game->GetTurnCount(), this, target, counter);
+	game->eventManager.SendOnPreEvent(game, event);
+	game->eventManager.SendOnPostEvent(game, event);
+	delete event;
 
 	//Damage all adjacent minions if this has Frenzy and is targeting an adjacent tile
 	if (!counter && HasKeywords(KEYWORD_FRENZY) && curTile->IsNear(target->curTile)) {
@@ -303,7 +319,8 @@ void Minion::Refresh() {
 
 //Deal damage to this
 int Minion::DealDamage(Card* source, int damage) {
-	game->eventManager.SendOnWouldDealDamage(source, this, damage);
+	OnDamageEvent* event = new OnDamageEvent(game->GetTurnCount(), source, this, damage);
+	game->eventManager.SendOnPreEvent(game, event);
 	if (damage > 0) {
 		if (HasKeywords(KEYWORD_FORCEFIELD) && !forcefieldBroken) {
 			forcefieldBroken = true;
@@ -311,15 +328,17 @@ int Minion::DealDamage(Card* source, int damage) {
 		}
 		else {
 			hp -= damage;
-			game->eventManager.SendOnDamageDealt(source, this, damage);
+			game->eventManager.SendOnPostEvent(game, event);
 		}
 	}
+	delete event;
 	return damage;
 }
 
 //Heal this
 int Minion::Heal(Card* source, int heal) {
-	game->eventManager.SendOnWouldHeal(source, this, heal);
+	OnHealEvent* event = new OnHealEvent(game->GetTurnCount(), source, this, heal);
+	game->eventManager.SendOnPreEvent(game, event);
 	if (heal > 0) {
 		if (hp + heal > hpMax) {
 			heal = hpMax - hp;
@@ -328,8 +347,9 @@ int Minion::Heal(Card* source, int heal) {
 		else
 			hp += heal;
 		if (heal > 0)
-			game->eventManager.SendOnHealed(source, this, heal);
+			game->eventManager.SendOnPostEvent(game, event);
 	}
+	delete event;
 	return heal;
 }
 
@@ -365,8 +385,7 @@ void Minion::Dispel() {
 //Trigger OnAddThis on effects when summoned
 void Minion::AddEffects() {
 	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i]->OnAddThis)
-			effects[i]->OnAddThis(EffectContext(effects[i], this, game));
+		effects[i]->TriggerOnAddThis(EffectContext(effects[i], this, game));
 }
 
 #pragma endregion
@@ -404,7 +423,7 @@ bool Minion::IsMoveable() {
 bool Minion::HasKeywords(int keywords) {
 	int flags = KEYWORD_NONE;
 	for (int i = 0; i < effects.size(); ++i)
-		flags |= effects[i]->keywords;
+		flags |= effects[i]->GetKeywords();
 	return (flags & keywords) == keywords;
 }
 

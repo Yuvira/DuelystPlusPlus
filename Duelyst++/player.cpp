@@ -1,5 +1,11 @@
 //Include
+#include "player.h"
 #include "game.h"
+#include "collections.h";
+#include "card.h"
+#include "effect.h"
+#include "event.h"
+#include "renderer.h"
 
 #pragma region Constructor
 
@@ -109,12 +115,15 @@ void Player::Shuffle() {
 void Player::Draw() {
 	if (deck.size() > 0) {
 		Card* card = deck[0];
+		OnDrawEvent* event = new OnDrawEvent(game->GetTurnCount(), card);
+		game->eventManager.SendOnPreEvent(game, event);
 		deck.erase(deck.begin());
 		if (hand.size() < 6)
 			hand.push_back(card);
 		else
 			game->Overflow(card);
-		game->eventManager.SendOnDraw(card, true);
+		game->eventManager.SendOnPostEvent(game, event);
+		delete event;
 	}
 }
 
@@ -126,11 +135,14 @@ void Player::AddNewToHand(Card* original) {
 	else if (original->IsSpell())
 		newCard = new Spell(*(original->GetSpell()));
 	game->SetContext(newCard, this);
+	OnAddToHandEvent* event = new OnAddToHandEvent(game->GetTurnCount(), newCard);
+	game->eventManager.SendOnPreEvent(game, event);
 	if (hand.size() < 6)
 		hand.push_back(newCard);
 	else
 		game->Overflow(newCard);
-	game->eventManager.SendOnDraw(newCard, false);
+	game->eventManager.SendOnPostEvent(game, event);
+	delete event;
 }
 
 //Replace card
@@ -142,26 +154,33 @@ void Player::Replace(int idx) {
 		hand.erase(hand.begin() + idx);
 
 		//Send replace event
-		bool sendToDeck = true;
-		game->eventManager.SendOnReplace(replaced, sendToDeck);
-		replaced->OnReplace(replaced, sendToDeck);
+		OnReplaceEvent* event = new OnReplaceEvent(game->GetTurnCount(), replaced, true);
+		game->eventManager.SendOnPreEvent(game, event);
+		for (Effect* e : replaced->GetEffects())
+			e->TriggerPreEvent(EffectContext(e, replaced, game), event);
+		game->eventManager.SendOnPostEvent(game, event);
+		for (Effect* e : replaced->GetEffects())
+			e->TriggerPostEvent(EffectContext(e, replaced, game), event);
 
 		//Draw new card and put replaced card back in the deck if able
 		if (deck.size() > 0) {
 			hand.insert(hand.begin() + idx, deck[0]);
 			deck.erase(deck.begin());
-			if (sendToDeck) {
+			if (event->sendToDeck) {
 				deck.push_back(replaced);
 				Shuffle();
 			}
 		}
 
 		//If no cards in deck, put replaced card back in hand
-		else if (sendToDeck)
+		else if (event->sendToDeck)
 			hand.insert(hand.begin() + idx, replaced);
 
 		//Decrement replace count
 		--replaces;
+
+		//Trigger replace and delet event
+		delete event;
 
 	}
 }

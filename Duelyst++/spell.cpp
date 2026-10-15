@@ -1,5 +1,8 @@
 //Include
-#include "game.h"
+#include <algorithm>
+#include "card.h"
+#include "effect.h"
+#include "renderer.h"
 
 #pragma region Constructors / Initialization
 
@@ -25,7 +28,7 @@ Spell::Spell(eCard cardId, eFaction faction, int cost, std::string path, std::st
 	GenerateDetails();
 	game = nullptr;
 	owner = nullptr;
-	if (effect != nullptr && effect->effect != EFFECT_NONE)
+	if (effect != nullptr && effect->GetID() != EFFECT_NONE)
 		AddEffect(*effect, nullptr, this);
 }
 Spell::~Spell() {}
@@ -56,7 +59,7 @@ void Spell::DrawDetails(Renderer& renderer, int& y) {
 	renderer.Render(details, 72, y); y += details.height + 1;
 	bool tokens = false;
 	for (int i = 0; i < effects.size(); ++i) {
-		if (effects[i]->token != nullptr) {
+		if (effects[i]->GetToken() != nullptr) {
 			if (!tokens) {
 				if (y < 7)
 					y = 7;
@@ -64,7 +67,7 @@ void Spell::DrawDetails(Renderer& renderer, int& y) {
 				tokens = true;
 			}
 			y += 2;
-			effects[i]->token->DrawDetails(renderer, y);
+			effects[i]->GetToken()->DrawDetails(renderer, y);
 		}
 	}
 }
@@ -77,11 +80,11 @@ void Spell::DrawDetails(Renderer& renderer, int& y) {
 void Spell::UpdateStatBuffs() {
 	int costBuff = 0;
 	for (int i = 0; i < effects.size(); ++i)
-		costBuff += effects[i]->costBuff;
+		costBuff += effects[i]->GetCostBuff();
 	cost = max(original->cost + costBuff, 0);
 	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i]->fixedCost > -1)
-			cost = effects[i]->fixedCost;
+		if (effects[i]->GetFixedCost() > -1)
+			cost = effects[i]->GetFixedCost();
 }
 
 //Update card stats

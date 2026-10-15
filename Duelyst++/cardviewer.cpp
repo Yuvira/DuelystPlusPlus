@@ -1,5 +1,9 @@
 //Include
+#include <conio.h>
 #include "cardviewer.h"
+#include "collections.h"
+#include "card.h"
+#include "renderer.h"
 
 #pragma region Constructor
 
@@ -24,7 +28,7 @@ CardViewer::CardViewer(Collections* collections, bool* modeSwitch) {
 	//Variables
 	pos = Coord(0, 0);
 	page = 0;
-	pageCount = (this->collections->cardCount + 53) / 54;
+	pageCount = (this->collections->GetCardCount() + 53) / 54;
 	pageNumber.CreateFromString(std::to_string(page + 1) + " / " + std::to_string(pageCount));
 	modeSwitch = nullptr;
 
@@ -47,15 +51,15 @@ void CardViewer::RenderCollection(Renderer& renderer) {
 			renderer.Render(tiles[i][j].border);
 
 	//Cards
-	for (int a = page * 54; a < min((page + 1) * 54, collections->cardList.size()); ++a)
-		renderer.Render(collections->cardList[a]->sprite, (((a - (page * 54)) % 9) * 7) + 2, (((a - (page * 54)) / 9) * 7) + 7);
+	for (int a = page * 54; a < min((page + 1) * 54, collections->GetCards().size()); ++a)
+		renderer.Render(collections->GetCards()[a]->sprite, (((a - (page * 54)) % 9) * 7) + 2, (((a - (page * 54)) / 9) * 7) + 7);
 
 	//Card counts
-	count[0].CreateFromString("Generals  : " + std::to_string(collections->generalCount));
-	count[1].CreateFromString("Minions   : " + std::to_string(collections->minionCount));
-	count[2].CreateFromString("Spells    : " + std::to_string(collections->spellCount));
+	count[0].CreateFromString("Generals  : " + std::to_string(collections->CountCardsWhere([](Card* card) { return card->IsGeneral(); })));
+	count[1].CreateFromString("Minions   : " + std::to_string(collections->CountCardsWhere([](Card* card) { return card->IsMinion(); })));
+	count[2].CreateFromString("Spells    : " + std::to_string(collections->CountCardsWhere([](Card* card) { return card->IsSpell(); })));
 	count[3].CreateFromString("Artifacts : 0");
-	count[4].CreateFromString("TOTAL : " + std::to_string(collections->cardCount));
+	count[4].CreateFromString("TOTAL : " + std::to_string(collections->GetCardCount()));
 	for (int i = 0; i < 4; ++i)
 		renderer.Render(count[i], 1, i + 1);
 	renderer.Render(count[4], 18, 1);
@@ -72,8 +76,8 @@ void CardViewer::RenderCollection(Renderer& renderer) {
 void CardViewer::RenderSidebar(Renderer& renderer) {
 	int y = 1;
 	int i = (pos.y * 9) + pos.x + (page * 54);
-	if (i < collections->cardList.size())
-		collections->cardList[i]->DrawDetails(renderer, y);
+	if (i < collections->GetCards().size())
+		collections->GetCards()[i]->DrawDetails(renderer, y);
 }
 
 #pragma endregion

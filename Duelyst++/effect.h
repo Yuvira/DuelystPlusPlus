@@ -1,151 +1,26 @@
 #pragma once
 
 //Include
-#include <functional>
-#include "tile.h"
+#include <string>
+#include "effectids.h"
 
 //Definitions
+class Game;
+class BoardTile;
+class Player;
 class Card;
 class Effect;
-class Game;
-class Player;
+struct Event;
 
-#pragma region Enums / Helpers
-
-//Keyword flags
-enum eKeywordFlags {
-	KEYWORD_NONE           = 0,
-	KEYWORD_AIRDROP        = 1 << 0,
-	KEYWORD_CELERITY       = 1 << 1,
-	KEYWORD_DYING_WISH     = 1 << 2,
-	KEYWORD_FLYING         = 1 << 3,
-	KEYWORD_FORCEFIELD     = 1 << 4,
-	KEYWORD_FRENZY         = 1 << 5,
-	KEYWORD_OPENING_GAMBIT = 1 << 6,
-	KEYWORD_PROVOKE        = 1 << 7,
-	KEYWORD_RANGED         = 1 << 8,
-	KEYWORD_RUSH           = 1 << 9
-};
-
-//Skills and effects
-enum eEffect {
-
-	//Keyword Skills
-	SKILL_AIRDROP,
-	SKILL_CELERITY,
-	SKILL_FLYING,
-	SKILL_FORCEFIELD,
-	SKILL_FRENZY,
-	SKILL_PROVOKE,
-	SKILL_RANGED,
-	SKILL_RUSH,
-
-	//Minion Skills
-	SKILL_ABJUDICATOR,
-	SKILL_AETHERMASTER,
-	SKILL_ALCUIN_LOREMASTER,
-	SKILL_ALTER_REXX,
-	SKILL_ARAKI_HEADHUNTER,
-	SKILL_ARCHON_SPELLBINDER,
-	SKILL_ARROW_WHISTLER,
-	SKILL_ASH_MEPHYT,
-	SKILL_ASTRAL_CRUSADER,
-	SKILL_AZURE_HERALD,
-	SKILL_AZURE_HORN_SHAMAN,
-	SKILL_BASTION,
-	SKILL_BLACK_LOCUST,
-	SKILL_BLAZE_HOUND,
-	SKILL_BLISTERING_SKORN,
-	SKILL_BLOOD_TAURA,
-	SKILL_BLOODTEAR_ALCHEMIST,
-	SKILL_BLUETIP_SCORPION,
-	SKILL_BONEREAPER,
-	SKILL_CAPTAIN_HANK_HART,
-	SKILL_CHAKKRAM,
-	SKILL_CHAOS_ELEMENTAL,
-	SKILL_CRIMSON_OCULUS,
-	SKILL_CROSSBONES,
-	SKILL_DANCING_BLADES,
-	SKILL_DARK_NEMESIS,
-	SKILL_DAY_WATCHER,
-	SKILL_DEATHBLIGHTER,
-	SKILL_DECIMUS,
-	SKILL_DIOLTAS,
-	SKILL_DREAMGAZER,
-	SKILL_DUST_WAILER,
-	SKILL_ECLIPSE,
-	SKILL_EMERALD_REJUVENATOR,
-	SKILL_ENVYBAER,
-	SKILL_EPHEMERAL_SHROUD,
-	SKILL_EXUN,
-	SKILL_FACESTRIKER,
-	SKILL_FIRESTARTER,
-	SKILL_FIRST_SWORD_OF_AKRANE,
-	SKILL_FLAMEBLOOD_WARLOCK,
-	SKILL_FROSTBONE_NAGA,
-	SKILL_GHOST_LYNX,
-	SKILL_GOLDEN_JUSTICAR,
-	SKILL_GOLEM_METALLURGIST,
-	SKILL_GOLEM_VANQUISHER,
-	SKILL_GROVE_LION,
-	SKILL_HEALING_MYSTIC,
-	SKILL_IRONCLAD,
-	SKILL_JAX_TRUESIGHT,
-	SKILL_JAXI,
-	SKILL_KEEPER_OF_THE_VALE,
-	SKILL_KHYMERA,
-	SKILL_LADY_LOCKE,
-	SKILL_LIGHTBENDER,
-	SKILL_LUX_IGNIS,
-	SKILL_MANAFORGER,
-	SKILL_MAW,
-	SKILL_MINDWARPER,
-	SKILL_MIRKBLOOD_DEVOURER,
-	SKILL_MOGWAI,
-	SKILL_NECROSEER,
-	SKILL_NIGHT_WATCHER,
-
-	//Effects
-	EFFECT_NONE,
-	EFFECT_DISPELLED,
-	EFFECT_ABJUDICATOR,
-	EFFECT_ARAKI_HEADHUNTER,
-	EFFECT_ARCHON_SPELLBINDER,
-	EFFECT_ARROW_WHISTLER,
-	EFFECT_ASTRAL_CRUSADER,
-	EFFECT_AZURE_HORN_SHAMAN,
-	EFFECT_BASTION,
-	EFFECT_CHAKKRAM,
-	EFFECT_CONSUMING_REBIRTH,
-	EFFECT_CRIMSON_OCULUS,
-	EFFECT_DARK_NEMESIS,
-	EFFECT_DARKFIRE_SACRIFICE,
-	EFFECT_FIRST_SWORD_OF_AKRANE,
-	EFFECT_GOLDEN_JUSTICAR,
-	EFFECT_GOLEM_METALLURGIST,
-	EFFECT_GOLEM_VANQUISHER,
-	EFFECT_GROVE_LION,
-	EFFECT_LADY_LOCKE_CONTINUOUS,
-	EFFECT_LADY_LOCKE_BUFF,
-	EFFECT_MANAFORGER,
-	EFFECT_MIRKBLOOD_DEVOURER,
-
-	//Spells
-	SPELL_BREATH_OF_THE_UNBORN,
-	SPELL_CONSUMING_REBIRTH,
-	SPELL_DAEMONIC_LURE,
-	SPELL_DARK_SEED,
-	SPELL_DARK_TRANSFORMATION,
-	SPELL_DARKFIRE_SACRIFICE
-
-};
+#pragma region Effect Context
 
 //Self reference container for passing to lambdas
-class EffectContext {
-public:
-	EffectContext();
-	EffectContext(Effect* effect, Card* card, Game* game);
-	~EffectContext();
+struct EffectContext {
+	EffectContext(Effect* effect, Card* card, Game* game) {
+		this->effect = effect;
+		this->card = card;
+		this->game = game;
+	}
 	bool IsOnBoard();
 	bool BothOnBoard(Card* compare);
 	bool IsCard(Card* compare);
@@ -163,11 +38,61 @@ public:
 
 //Effect class
 class Effect {
+
+//Methods
 public:
+
+	//Constructors
 	Effect();
-	Effect(eEffect effect, int keywords, std::string description);
+	Effect(eEffect effectId, int keywords, std::string description);
 	~Effect();
-	eEffect effect;
+
+	//Triggers
+	void TriggerPreEvent(EffectContext context, Event* event);
+	void TriggerPostEvent(EffectContext context, Event* event);
+
+	//Legacy triggers
+	void TriggerOnAddThis(EffectContext context);
+	void TriggerOnRemoveThis(EffectContext context);
+	void TriggerOnPreCastThis(EffectContext context, BoardTile* tile);
+	void TriggerOnResolveThis(EffectContext context, BoardTile* tile);
+
+	//Getters & Setters
+	Card* GetToken();
+	Card* GetRef();
+	const Effect* const& GetSource() const;
+	const eEffect& GetID() const;
+	const int& GetKeywords() const;
+	const std::string& GetDescription() const;
+	const int& GetCostBuff() const;
+	const int& GetFixedCost() const;
+	const int& GetAtkBuff() const;
+	const int& GetHPBuff() const;
+	const int& GetMoveBuff() const;
+	void SetCostBuff(int costBuff);
+	void SetFixedCost(int costBuff);
+	void SetAtkBuff(int costBuff);
+	void SetHPBuff(int costBuff);
+	void SetMoveBuff(int costBuff);
+	void SetToken(Card* token);
+	void SetSources(Effect* source, Card* refCard);
+
+	//Utils
+	bool IsContinuous() { return source != nullptr; }
+
+	//Function pointers
+	void (*OnPreEvent)(EffectContext context, Event* event) = nullptr;
+	void (*OnPostEvent)(EffectContext context, Event* event) = nullptr;
+	void (*OnAddThis)(EffectContext) = nullptr;
+	void (*OnRemoveThis)(EffectContext) = nullptr;
+	void (*OnPreCastThis)(EffectContext, BoardTile* tile) = nullptr;
+	void (*OnResolveThis)(EffectContext, BoardTile* tile) = nullptr;
+	void (*ApplyEffect)(EffectContext) = nullptr;
+	void (*RemoveEffect)(EffectContext) = nullptr;
+
+//Properties
+private:
+	eEffect effectId;
 	int keywords;
 	std::string description;
 	bool triggered;
@@ -179,25 +104,5 @@ public:
 	Card* token;
 	Card* refCard;
 	Effect* source;
-	void (*OnAddThis)(EffectContext) = nullptr;
-	void (*OnRemoveThis)(EffectContext) = nullptr;
-	void (*OnPreCastThis)(EffectContext, BoardTile* tile) = nullptr;
-	void (*OnResolveThis)(EffectContext, BoardTile* tile) = nullptr;
-	void (*OnCast)(EffectContext, Card* card, BoardTile* tile) = nullptr;
-	void (*OnSummon)(EffectContext, Minion* minion, bool actionBar) = nullptr;
-	void (*OnDeath)(EffectContext, Minion* minion) = nullptr;
-	void (*OnAttack)(EffectContext, Minion* source, Minion* target, bool counter) = nullptr;
-	void (*OnWouldDealDamage)(EffectContext, Card* source, Minion* target, int& damage) = nullptr;
-	void (*OnDamageDealt)(EffectContext, Card* source, Minion* target, int damage) = nullptr;
-	void (*OnWouldHeal)(EffectContext, Card* source, Minion* target, int& heal) = nullptr;
-	void (*OnHealed)(EffectContext, Card* source, Minion* target, int heal) = nullptr;
-	void (*OnMove)(EffectContext, Minion* minion, bool byEffect) = nullptr;
-	void (*OnDraw)(EffectContext, Card* card, bool fromDeck) = nullptr;
-	void (*OnReplace)(EffectContext, Card* card, bool& sendToDeck) = nullptr;
-	void (*OnEffectsChanged)(EffectContext, Card* card) = nullptr;
-	void (*OnTurnStart)(EffectContext, Player* player) = nullptr;
-	void (*OnTurnEnd)(EffectContext, Player* player) = nullptr;
-	void (*ApplyEffect)(EffectContext) = nullptr;
-	void (*RemoveEffect)(EffectContext) = nullptr;
-	bool IsContinuous() { return source != nullptr; }
+
 };

@@ -1,8 +1,15 @@
 #pragma once
 
 //Include
-#include <cstdlib>
-#include "collections.h"
+#include <vector>
+#include "sprite.h"
+
+//Define
+class Game;
+class Collections;
+class Renderer;
+class Card;
+class Minion;
 
 //Player class
 class Player {

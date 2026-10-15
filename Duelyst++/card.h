@@ -1,115 +1,21 @@
 #pragma once
 
 //Include
-#include <algorithm>
-#include "effect.h"
+#include "cardids.h"
+#include "effectids.h"
+#include "sprite.h"
 
 //Definitions
+class Renderer;
 class Game;
+class BoardTile;
+class Effect;
 class Player;
+class Minion;
 class Spell;
+struct Event;
 
-#pragma region Enums / Helpers
-
-#pragma region Card List
-
-//Card identifiers
-enum eCard {
-	CARD_NONE,
-	CARD_ABJUDICATOR,
-	CARD_AETHERMASTER,
-	CARD_ALCUIN_LOREMASTER,
-	CARD_ARAKI_HEADHUNTER,
-	CARD_ARCHON_SPELLBINDER,
-	CARD_ARGEON_HIGHMAYNE,
-	CARD_ARROW_WHISTLER,
-	CARD_ASH_MEPHYT,
-	CARD_ASTRAL_CRUSADER,
-	CARD_AZURE_HERALD,
-	CARD_AZURE_HORN_SHAMAN,
-	CARD_BASTION,
-	CARD_BLACK_LOCUST,
-	CARD_BLAZE_HOUND,
-	CARD_BLISTERING_SKORN,
-	CARD_BLOOD_TAURA,
-	CARD_BLOODSHARD_GOLEM,
-	CARD_BLOODTEAR_ALCHEMIST,
-	CARD_BLUETIP_SCORPION,
-	CARD_BONEREAPER,
-	CARD_BREATH_OF_THE_UNBORN,
-	CARD_BRIGHTMOSS_GOLEM,
-	CARD_CAPTAIN_HANK_HART,
-	CARD_CHAKKRAM,
-	CARD_CHAOS_ELEMENTAL,
-	CARD_CRIMSON_OCULUS,
-	CARD_CROSSBONES,
-	CARD_DAGGER_KIRI,
-	CARD_DANCING_BLADES,
-	CARD_DARK_NEMESIS,
-	CARD_DARK_SEED,
-	CARD_DAY_WATCHER,
-	CARD_DEATHBLIGHTER,
-	CARD_DECIMUS,
-	CARD_DIAMOND_GOLEM,
-	CARD_DIOLTAS,
-	CARD_DRAGONLARK,
-	CARD_DREAMGAZER,
-	CARD_DRYBONE_GOLEM,
-	CARD_DUST_WAILER,
-	CARD_ECLIPSE,
-	CARD_EMERALD_REJUVENATOR,
-	CARD_ENVYBAER,
-	CARD_EPHEMERAL_SHROUD,
-	CARD_EXUN,
-	CARD_FACESTRIKER,
-	CARD_FIREBLAZER,
-	CARD_FIRESTARTER,
-	CARD_FIRE_SPITTER,
-	CARD_FIRST_SWORD_OF_AKRANE,
-	CARD_FLAMEBLOOD_WARLOCK,
-	CARD_FROSTBONE_NAGA,
-	CARD_GHOST_LYNX,
-	CARD_GOLDEN_JUSTICAR,
-	CARD_GOLEM_METALLURGIST,
-	CARD_GOLEM_VANQUISHER,
-	CARD_GROVE_LION,
-	CARD_HAILSTONE_GOLEM,
-	CARD_HEALING_MYSTIC,
-	CARD_IRONCLAD,
-	CARD_JAX_TRUESIGHT,
-	CARD_JAXI,
-	CARD_KEEPER_OF_THE_VALE,
-	CARD_KHYMERA,
-	CARD_KOMODO_CHARGER,
-	CARD_LADY_LOCKE,
-	CARD_LIGHTBENDER,
-	CARD_LUX_IGNIS,
-	CARD_MANAFORGER,
-	CARD_MAW,
-	CARD_MINDWARPER,
-	CARD_MINI_JAX,
-	CARD_MIRKBLOOD_DEVOURER,
-	CARD_MOGWAI,
-	CARD_NECROSEER,
-	CARD_NIGHT_WATCHER,
-	CARD_PIERCING_MANTIS,
-	CARD_PLANAR_SCOUT,
-	CARD_SABERSPINE_TIGER,
-	CARD_SAPPHIRE_SEER,
-	CARD_SPELLSPARK,
-	CARD_TOMBSTONE
-};
-
-#pragma endregion
-
-//Rarities
-enum eRarity {
-	RARITY_NONE,
-	RARITY_COMMON,
-	RARITY_RARE,
-	RARITY_EPIC,
-	RARITY_LEGENDARY
-};
+#pragma region Targeting Helpers
 
 //Targeting modes
 enum eTargetMode {
@@ -120,34 +26,8 @@ enum eTargetMode {
 	TARGET_MODE_NEAR_ENEMIES
 };
 
-//Factions
-enum eFaction {
-	FACTION_NEUTRAL,
-	FACTION_LYONAR,
-	FACTION_SONGHAI,
-	FACTION_VETRUVIAN,
-	FACTION_ABYSSIAN,
-	FACTION_MAGMAR,
-	FACTION_VANAR
-};
-
-//Tribes
-enum eTribe {
-	TRIBE_NONE,
-	TRIBE_GENERAL,
-	TRIBE_ARCANYST,
-	TRIBE_PET,
-	TRIBE_GOLEM,
-	TRIBE_MECH,
-	TRIBE_DERVISH,
-	TRIBE_VESPYR,
-	TRIBE_STRUCTURE,
-	TRIBE_WARMASTER
-};
-
 //Targeting mode
-class TargetMode {
-public:
+struct TargetMode {
 	TargetMode();
 	TargetMode(eTargetMode mode, bool (*Predicate)(BoardTile*));
 	~TargetMode();
@@ -179,25 +59,8 @@ public:
 	void RemoveEffectsFromSource(Effect* source);
 	void RemoveEffectAt(std::vector<int> indices);
 
-	//Actions
-	void PreCast(BoardTile* tile);
-	void Resolve(BoardTile* tile);
-
-	//Events
-	void OnCast(Card* card, BoardTile* tile);
-	void OnSummon(Minion* minion, bool fromActionBar);
-	void OnDeath(Minion* minion);
-	void OnAttack(Minion* source, Minion* target, bool counter);
-	void OnWouldDealDamage(Card* source, Minion* target, int& damage);
-	void OnDamageDealt(Card* source, Minion* target, int damage);
-	void OnWouldHeal(Card* source, Minion* target, int& heal);
-	void OnHealed(Card* source, Minion* target, int heal);
-	void OnMove(Minion* minion, bool byEffect);
-	void OnDraw(Card* card, bool fromDeck);
-	void OnReplace(Card* replaced, bool& sendToDeck);
-	void OnEffectsChanged(Card* card);
-	void OnTurnStart(Player* player);
-	void OnTurnEnd(Player* player);
+	//Getters
+	std::vector<Effect*> GetEffects();
 
 	//Utils
 	virtual TargetMode GetTargetMode() { return TargetMode(); }
