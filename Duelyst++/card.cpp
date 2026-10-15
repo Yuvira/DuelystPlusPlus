@@ -172,10 +172,9 @@ void Card::AddEffect(Effect effect, Effect* source, Card* refCard) {
 		effects.back()->TriggerSelfEvent(EffectContext(effects.back(), this, game), &addEvent);
 	}
 	if (game != nullptr) {
-		OnEffectsChangedEvent* event = new OnEffectsChangedEvent(game->GetTurnCount(), this);
-		game->eventManager.SendOnPreEvent(game, event);
-		game->eventManager.SendOnPostEvent(game, event);
-		delete event;
+		OnEffectsChangedEvent event = OnEffectsChangedEvent(game->GetTurnCount(), this);
+		game->eventManager.SendOnPreEvent(game, &event);
+		game->eventManager.SendOnPostEvent(game, &event);
 	}
 	UpdateDetails();
 	UpdateStatBuffs();
@@ -194,10 +193,9 @@ void Card::AddContinuousEffect(Effect effect, Card* refCard) {
 		effects.back()->TriggerSelfEvent(EffectContext(effects.back(), this, game), &addEvent);
 	}
 	if (game != nullptr) {
-		OnEffectsChangedEvent* event = new OnEffectsChangedEvent(game->GetTurnCount(), this);
-		game->eventManager.SendOnPreEvent(game, event);
-		game->eventManager.SendOnPostEvent(game, event);
-		delete event;
+		OnEffectsChangedEvent event = OnEffectsChangedEvent(game->GetTurnCount(), this);
+		game->eventManager.SendOnPreEvent(game, &event);
+		game->eventManager.SendOnPostEvent(game, &event);
 	}
 	UpdateDetails();
 	UpdateStatBuffs();
@@ -235,10 +233,9 @@ void Card::RemoveEffectAt(std::vector<int> indices) {
 		OnRemoveThisEvent removeEvent = OnRemoveThisEvent();
 		removed[i]->TriggerSelfEvent(EffectContext(removed[i], this, game), &removeEvent);
 	}
-	OnEffectsChangedEvent* event = new OnEffectsChangedEvent(game->GetTurnCount(), this);
-	game->eventManager.SendOnPreEvent(game, event);
-	game->eventManager.SendOnPostEvent(game, event);
-	delete event;
+	OnEffectsChangedEvent event = OnEffectsChangedEvent(game->GetTurnCount(), this);
+	game->eventManager.SendOnPreEvent(game, &event);
+	game->eventManager.SendOnPostEvent(game, &event);
 	UpdateDetails();
 	UpdateStatBuffs();
 }

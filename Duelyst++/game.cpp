@@ -479,10 +479,9 @@ void Game::UseEffect() {
 //Send cast event after pre-cast effect targets have been set
 void Game::PostCast() {
 	BoardTile* tile = &map.tiles[castPos.x][castPos.y];
-	OnCastEvent* event = new OnCastEvent(GetTurnCount(), activeCard, tile);
-	eventManager.SendOnPreEvent(this, event);
-	eventManager.SendOnPostEvent(this, event);
-	delete event;
+	OnCastEvent event = OnCastEvent(GetTurnCount(), activeCard, tile);
+	eventManager.SendOnPreEvent(this, &event);
+	eventManager.SendOnPostEvent(this, &event);
 	castThisTurn.push_back(activeCard->original);
 	for (Effect* effect : activeCard->GetEffects()) {
 		OnResolveThisEvent resolveEvent = OnResolveThisEvent(tile);
@@ -502,14 +501,13 @@ void Game::Summon(Card* card, BoardTile* tile, bool actionBar) { Summon(card, ti
 void Game::Summon(Card* card, int x, int y, bool actionBar) {
 	if (!card->IsMinion())
 		return;
-	OnSummonEvent* event = new OnSummonEvent(GetTurnCount(), card->GetMinion(), actionBar);
-	eventManager.SendOnPreEvent(this, event);
+	OnSummonEvent event = OnSummonEvent(GetTurnCount(), card->GetMinion(), actionBar);
+	eventManager.SendOnPreEvent(this, &event);
 	minions.push_back(card->GetMinion());
 	minions.back()->SetPosition(x, y);
 	minions.back()->AddEffects();
 	minions.back()->InitState();
-	eventManager.SendOnPostEvent(this, event);
-	delete event;
+	eventManager.SendOnPostEvent(this, &event);
 }
 
 //Summon token at tile
@@ -559,10 +557,9 @@ void Game::ChangeTurn(bool newTurn) {
 
 	//Trigger end of turn, draw and reset replaces
 	if (turnCount > 0) {
-		OnTurnEndEvent* event = new OnTurnEndEvent(GetTurnCount(), &players[turn]);
-		eventManager.SendOnPreEvent(this, event);
-		eventManager.SendOnPostEvent(this, event);
-		delete event;
+		OnTurnEndEvent event = OnTurnEndEvent(GetTurnCount(), &players[turn]);
+		eventManager.SendOnPreEvent(this, &event);
+		eventManager.SendOnPostEvent(this, &event);
 		players[turn].Draw();
 		players[turn].replaces = players[turn].maxReplaces;
 	}
@@ -591,10 +588,9 @@ void Game::ChangeTurn(bool newTurn) {
 		light.SetColor(COLOR_LTBLUE);
 
 	//Trigger start of turn
-	OnTurnStartEvent* event = new OnTurnStartEvent(GetTurnCount(), &players[turn]);
-	eventManager.SendOnPreEvent(this, event);
-	eventManager.SendOnPostEvent(this, event);
-	delete event;
+	OnTurnStartEvent event = OnTurnStartEvent(GetTurnCount(), &players[turn]);
+	eventManager.SendOnPreEvent(this, &event);
+	eventManager.SendOnPostEvent(this, &event);
 
 	//Turn has ended
 	endTurn = false;

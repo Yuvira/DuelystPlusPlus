@@ -138,10 +138,9 @@ void Minion::DrawDetails(Renderer& renderer, int& y) {
 //Check if minion has died
 void Minion::Update(bool& shouldLoop) {
 	if (hp < 1 || destroyed) {
-		OnDeathEvent* event = new OnDeathEvent(game->GetTurnCount(), this);
-		game->eventManager.SendOnPreEvent(game, event);
-		game->eventManager.SendOnPostEvent(game, event);
-		delete event;
+		OnDeathEvent event = OnDeathEvent(game->GetTurnCount(), this);
+		game->eventManager.SendOnPreEvent(game, &event);
+		game->eventManager.SendOnPostEvent(game, &event);
 		for (; !effects.empty(); RemoveEffect(effects.front())) {}
 		isDead = true;
 		shouldLoop = true;
@@ -252,10 +251,9 @@ void Minion::MoveToPosition(int x, int y, bool byEffect) {
 		else
 			hasMoved = true;
 	}
-	OnMoveEvent* event = new OnMoveEvent(game->GetTurnCount(), this, byEffect);
-	game->eventManager.SendOnPreEvent(game, event);
-	game->eventManager.SendOnPostEvent(game, event);
-	delete event;
+	OnMoveEvent event = OnMoveEvent(game->GetTurnCount(), this, byEffect);
+	game->eventManager.SendOnPreEvent(game, &event);
+	game->eventManager.SendOnPostEvent(game, &event);
 }
 
 //Attack enemy
@@ -266,10 +264,9 @@ void Minion::Attack(Minion* target, bool counter) {
 	bool canCounter = target->CanAttack(this);
 
 	//Sent OnAttack event
-	OnAttackEvent* event = new OnAttackEvent(game->GetTurnCount(), this, target, counter);
-	game->eventManager.SendOnPreEvent(game, event);
-	game->eventManager.SendOnPostEvent(game, event);
-	delete event;
+	OnAttackEvent event = OnAttackEvent(game->GetTurnCount(), this, target, counter);
+	game->eventManager.SendOnPreEvent(game, &event);
+	game->eventManager.SendOnPostEvent(game, &event);
 
 	//Damage all adjacent minions if this has Frenzy and is targeting an adjacent tile
 	if (!counter && HasKeywords(KEYWORD_FRENZY) && curTile->IsNear(target->curTile)) {
@@ -319,39 +316,36 @@ void Minion::Refresh() {
 
 //Deal damage to this
 int Minion::DealDamage(Card* source, int damage) {
-	OnDamageEvent* event = new OnDamageEvent(game->GetTurnCount(), source, this, damage);
-	game->eventManager.SendOnPreEvent(game, event);
-	if (event->damage > 0) {
+	OnDamageEvent event = OnDamageEvent(game->GetTurnCount(), source, this, damage);
+	game->eventManager.SendOnPreEvent(game, &event);
+	if (event.damage > 0) {
 		if (HasKeywords(KEYWORD_FORCEFIELD) && !forcefieldBroken) {
 			forcefieldBroken = true;
-			event->damage = 0;
+			event.damage = 0;
 		}
 		else {
-			hp -= event->damage;
-			game->eventManager.SendOnPostEvent(game, event);
+			hp -= event.damage;
+			game->eventManager.SendOnPostEvent(game, &event);
 		}
 	}
-	damage = event->damage;
-	delete event;
-	return damage;
+	return event.damage;
 }
 
 //Heal this
 int Minion::Heal(Card* source, int heal) {
-	OnHealEvent* event = new OnHealEvent(game->GetTurnCount(), source, this, heal);
-	game->eventManager.SendOnPreEvent(game, event);
-	if (heal > 0) {
-		if (hp + heal > hpMax) {
-			heal = hpMax - hp;
+	OnHealEvent event = OnHealEvent(game->GetTurnCount(), source, this, heal);
+	game->eventManager.SendOnPreEvent(game, &event);
+	if (event.heal > 0) {
+		if (hp + event.heal > hpMax) {
+			event.heal = hpMax - hp;
 			hp = hpMax;
 		}
 		else
-			hp += heal;
-		if (heal > 0)
-			game->eventManager.SendOnPostEvent(game, event);
+			hp += event.heal;
+		if (event.heal > 0)
+			game->eventManager.SendOnPostEvent(game, &event);
 	}
-	delete event;
-	return heal;
+	return event.heal;
 }
 
 //Destroy this
