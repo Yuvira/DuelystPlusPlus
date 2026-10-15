@@ -31,864 +31,717 @@ Collections::Collections() {
 
 	//Abjudicator
 	effects[SKILL_ABJUDICATOR] = Effect(SKILL_ABJUDICATOR, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Lower the cost of all spells in your action bar by 1");
-	effects[SKILL_ABJUDICATOR].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
-		for (Card* card : context.card->owner->hand)
+	effects[SKILL_ABJUDICATOR].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
+		for (Card* card : ctx.GetOwner()->hand)
 			if (card->IsSpell())
-				card->AddEffect(EFFECT_ABJUDICATOR, context.effect, context.card);
-	};
+				card->AddEffect(EFFECT_ABJUDICATOR, nullptr, ctx.card);
+	});
 	effects[EFFECT_ABJUDICATOR] = Effect(EFFECT_ABJUDICATOR, KEYWORD_NONE, "Abjudicator");
 	effects[EFFECT_ABJUDICATOR].SetCostBuff(-1);
 
 	//Aethermaster
 	effects[SKILL_AETHERMASTER] = Effect(SKILL_AETHERMASTER, KEYWORD_NONE, "You may replace an additional card each turn");
-	effects[SKILL_AETHERMASTER].OnAddThis = [](EffectContext context) {
-		++context.card->owner->maxReplaces;
-		++context.card->owner->replaces;
-	};
-	effects[SKILL_AETHERMASTER].OnRemoveThis = [](EffectContext context) {
-		--context.card->owner->maxReplaces;
-		context.card->owner->replaces = min(context.card->owner->replaces, context.card->owner->maxReplaces);
-	};
+	effects[SKILL_AETHERMASTER].RegisterSelfTrigger<OnAddThisEvent>([](EffectContext ctx, OnAddThisEvent& ev) {
+		ctx.GetOwner()->ModifyReplaceCount(1); });
+	effects[SKILL_AETHERMASTER].RegisterSelfTrigger<OnRemoveThisEvent>([](EffectContext ctx, OnRemoveThisEvent& ev) {
+		ctx.GetOwner()->ModifyReplaceCount(-1); });
 
 	//Alcuin Loremaster
 	effects[SKILL_ALCUIN_LOREMASTER] = Effect(SKILL_ALCUIN_LOREMASTER, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Put a copy of the most recently cast spell into your action bar");
-	effects[SKILL_ALCUIN_LOREMASTER].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
-		for (Spell* spell : context.game->GetSpellHistory() | std::views::reverse) {
-			if (spell->IsSpell()) {
-				context.card->owner->AddNewToHand(spell->original);
-				break;
-			}
-		}
-	};
+	effects[SKILL_ALCUIN_LOREMASTER].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
+		if (ctx.game->GetSpellHistory().size() > 0)
+			ctx.GetOwner()->AddNewToHand(ctx.game->GetSpellHistory().back()->original);
+	});
 
 	//Araki Headhunter
 	effects[SKILL_ARAKI_HEADHUNTER] = Effect(SKILL_ARAKI_HEADHUNTER, KEYWORD_NONE, "Whenever you summon a minion with {Opening Gambit} from your action bar, gain +2 Attack");
-	effects[SKILL_ARAKI_HEADHUNTER].OnPostEvent = [](EffectContext context, Event* event) {
-		if (OnSummonEvent* summonEvent = event->As<OnSummonEvent>())
-			if (context.IsOnBoard() && context.IsAllied(summonEvent->minion) && summonEvent->minion->HasKeywords(KEYWORD_OPENING_GAMBIT) && summonEvent->wasCast)
-				context.card->AddEffect(EFFECT_ARAKI_HEADHUNTER, nullptr, context.card);
-	};
-	effects[EFFECT_ARAKI_HEADHUNTER] = Effect(EFFECT_ARAKI_HEADHUNTER, KEYWORD_NONE, "Headhunter");
+	effects[SKILL_ARAKI_HEADHUNTER].RegisterPostTrigger<OnSummonEvent>(
+		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsOnBoard() && ctx.IsAllied(ev.minion) && ev.minion->HasKeywords(KEYWORD_OPENING_GAMBIT) && ev.wasCast; },
+		[](EffectContext ctx, OnSummonEvent& ev) { ctx.card->AddEffect(EFFECT_ARAKI_HEADHUNTER, nullptr, ctx.card); });
+	effects[EFFECT_ARAKI_HEADHUNTER] = Effect(EFFECT_ARAKI_HEADHUNTER, KEYWORD_NONE, "Araki Headhunter");
 	effects[EFFECT_ARAKI_HEADHUNTER].SetAtkBuff(2);
 
 	//Archon Spellbinder
 	effects[SKILL_ARCHON_SPELLBINDER] = Effect(SKILL_ARCHON_SPELLBINDER, KEYWORD_NONE, "Your opponent's non-Bloodborn spells cost 1 more to cast");
-	effects[SKILL_ARCHON_SPELLBINDER].OnAddThis = [](EffectContext context) {
-		for (Card* card : context.card->owner->opponent->hand)
+	effects[SKILL_ARCHON_SPELLBINDER].RegisterSelfTrigger<OnAddThisEvent>([](EffectContext ctx, OnAddThisEvent& ev) {
+		for (Card* card : ctx.GetOpponent()->GetDeckAndHand())
 			if (card->IsSpell())
-				card->AddEffect(EFFECT_ARCHON_SPELLBINDER, context.effect, context.card);
-		for (Card* card : context.card->owner->opponent->deck)
-			if (card->IsSpell())
-				card->AddEffect(EFFECT_ARCHON_SPELLBINDER, context.effect, context.card);
-	};
-	effects[SKILL_ARCHON_SPELLBINDER].OnRemoveThis = [](EffectContext context) {
-		for (Card* card : context.card->owner->opponent->hand)
-			card->RemoveEffectsFromSource(context.effect);
-		for (Card* card : context.card->owner->opponent->deck)
-			card->RemoveEffectsFromSource(context.effect);
-	};
-	effects[SKILL_ARCHON_SPELLBINDER].OnPostEvent = [](EffectContext context, Event* event) {
-		if (OnAddToHandEvent* addToHandEvent = event->As<OnAddToHandEvent>())
-			if (context.IsOnBoard() && !context.SharesOwner(addToHandEvent->card) && addToHandEvent->card->IsSpell())
-				addToHandEvent->card->AddEffect(EFFECT_ARCHON_SPELLBINDER, context.effect, context.card);
-	};
-	effects[EFFECT_ARCHON_SPELLBINDER] = Effect(EFFECT_ARCHON_SPELLBINDER, KEYWORD_NONE, "{Spellbound}");
+				card->AddEffect(EFFECT_ARCHON_SPELLBINDER, ctx.effect, ctx.card);
+	});
+	effects[SKILL_ARCHON_SPELLBINDER].RegisterSelfTrigger<OnRemoveThisEvent>([](EffectContext ctx, OnRemoveThisEvent& ev) {
+		for (Card* card : ctx.GetOpponent()->GetDeckAndHand())
+			card->RemoveEffectsFromSource(ctx.effect);
+	});
+	effects[SKILL_ARCHON_SPELLBINDER].RegisterPostTrigger<OnAddToHandEvent>(
+		[](EffectContext ctx, OnAddToHandEvent& ev) { return ctx.IsOnBoard() && !ctx.SharesOwner(ev.card) && ev.card->IsSpell(); },
+		[](EffectContext ctx, OnAddToHandEvent& ev) { ev.card->AddEffect(EFFECT_ARCHON_SPELLBINDER, ctx.effect, ctx.card); });
+	effects[EFFECT_ARCHON_SPELLBINDER] = Effect(EFFECT_ARCHON_SPELLBINDER, KEYWORD_NONE, "Archon Spellbinder");
 	effects[EFFECT_ARCHON_SPELLBINDER].SetCostBuff(1);
 
 	//Arrow Whistler
 	effects[SKILL_ARROW_WHISTLER] = Effect(SKILL_ARROW_WHISTLER, KEYWORD_RANGED, "{Ranged}|Your other minions with {Ranged} have +1 Attack");
-	effects[SKILL_ARROW_WHISTLER].OnAddThis = [](EffectContext context) {
-		for (Minion* minion : context.game->GetMinions())
-			if (context.IsAllied(minion) && !minion->IsGeneral() && minion->HasKeywords(KEYWORD_RANGED))
-				minion->AddEffect(EFFECT_ARROW_WHISTLER, context.effect, context.card);
-	};
-	effects[SKILL_ARROW_WHISTLER].OnRemoveThis = [](EffectContext context) {
-		for (Minion* minion : context.game->GetMinions())
-			minion->RemoveEffectsFromSource(context.effect);
-	};
-	effects[SKILL_ARROW_WHISTLER].OnPostEvent = [](EffectContext context, Event* event) {
-		if (OnSummonEvent* summonEvent = event->As<OnSummonEvent>()) {
-			if (context.IsOnBoard() && context.IsAllied(summonEvent->minion) && !summonEvent->minion->IsGeneral() && summonEvent->minion->HasKeywords(KEYWORD_RANGED))
-				summonEvent->minion->AddEffect(EFFECT_ARROW_WHISTLER, context.effect, context.card);
-		}
-		else if (OnEffectsChangedEvent* effectsChangedEvent = event->As<OnEffectsChangedEvent>()) {
-			if (context.BothOnBoard(effectsChangedEvent->card) && context.IsAllied(effectsChangedEvent->card) && !effectsChangedEvent->card->IsGeneral()) {
-				if (effectsChangedEvent->card->GetMinion()->HasKeywords(KEYWORD_RANGED))
-					effectsChangedEvent->card->AddEffect(EFFECT_ARROW_WHISTLER, context.effect, context.card);
-				else
-					effectsChangedEvent->card->RemoveEffectsFromSource(context.effect);
-			}
-		}
-	};
-	effects[EFFECT_ARROW_WHISTLER] = Effect(EFFECT_ARROW_WHISTLER, KEYWORD_NONE, "{Whistling Arrows}");
+	effects[SKILL_ARROW_WHISTLER].RegisterSelfTrigger<OnAddThisEvent>([](EffectContext ctx, OnAddThisEvent& ev) {
+		for (Minion* minion : ctx.game->GetMinions())
+			if (ctx.IsAllied(minion) && !minion->IsGeneral() && minion->HasKeywords(KEYWORD_RANGED))
+				minion->AddEffect(EFFECT_ARROW_WHISTLER, ctx.effect, ctx.card);
+	});
+	effects[SKILL_ARROW_WHISTLER].RegisterSelfTrigger<OnRemoveThisEvent>([](EffectContext ctx, OnRemoveThisEvent& ev) {
+		for (Minion* minion : ctx.game->GetMinions())
+			minion->RemoveEffectsFromSource(ctx.effect);
+	});
+	effects[SKILL_ARROW_WHISTLER].RegisterPostTrigger<OnSummonEvent>(
+		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsOnBoard() && ctx.IsAllied(ev.minion) && !ev.minion->IsGeneral() && ev.minion->HasKeywords(KEYWORD_RANGED); },
+		[](EffectContext ctx, OnSummonEvent& ev) { ev.minion->AddEffect(EFFECT_ARROW_WHISTLER, ctx.effect, ctx.card); });
+	effects[SKILL_ARROW_WHISTLER].RegisterPostTrigger<OnEffectsChangedEvent>(
+		[](EffectContext ctx, OnEffectsChangedEvent& ev) { return ctx.BothOnBoard(ev.card) && ctx.IsAllied(ev.card) && !ev.card->IsGeneral(); },
+		[](EffectContext ctx, OnEffectsChangedEvent& ev) {
+			ev.card->GetMinion()->HasKeywords(KEYWORD_RANGED)
+				? ev.card->AddEffect(EFFECT_ARROW_WHISTLER, ctx.effect, ctx.card)
+				: ev.card->RemoveEffectsFromSource(ctx.effect);
+	});
+	effects[EFFECT_ARROW_WHISTLER] = Effect(EFFECT_ARROW_WHISTLER, KEYWORD_NONE, "Arrow Whistler");
 	effects[EFFECT_ARROW_WHISTLER].SetAtkBuff(1);
 
 	//Ash Mephyt
 	effects[SKILL_ASH_MEPHYT] = Effect(SKILL_ASH_MEPHYT, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Summon two copies of this minion on random spaces");
-	effects[SKILL_ASH_MEPHYT].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
-		if (context.card->IsMinion()) {
-			for (int i = 0; i < 2; ++i) {
-				BoardTile* newTile = context.game->map.GetRandomEmpty(tile);
-				if (newTile != nullptr)
-					context.game->SummonToken(context.card->cardId, newTile, context.card->owner);
-			}
-		}
-	};
+	effects[SKILL_ASH_MEPHYT].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
+		if (ctx.card->IsMinion())
+			for (int i = 0; i < 2; ++i)
+				if (BoardTile* tile = ctx.GetMap()->GetRandomEmpty(ev.tile))
+					ctx.game->SummonToken(ctx.card->cardId, tile, ctx.GetOwner());
+	});
 
 	//Astral Crusader
 	effects[SKILL_ASTRAL_CRUSADER] = Effect(SKILL_ASTRAL_CRUSADER, KEYWORD_NONE, "Whenever you replace this card, it costs 3 less and gains +3/+3");
-	effects[SKILL_ASTRAL_CRUSADER].OnPostEvent = [](EffectContext context, Event* event) {
-		if (OnReplaceEvent* replaceEvent = event->As<OnReplaceEvent>())
-			if (context.IsCard(replaceEvent->card))
-				replaceEvent->card->AddEffect(EFFECT_ASTRAL_CRUSADER, nullptr, context.card);
-	};
-	effects[EFFECT_ASTRAL_CRUSADER] = Effect(EFFECT_ASTRAL_CRUSADER, KEYWORD_NONE, "{Astral Crusader}");
+	effects[SKILL_ASTRAL_CRUSADER].RegisterPostTrigger<OnReplaceEvent>(
+		[](EffectContext ctx, OnReplaceEvent& ev) { return ctx.IsCard(ev.card); },
+		[](EffectContext ctx, OnReplaceEvent& ev) { ev.card->AddEffect(EFFECT_ASTRAL_CRUSADER, nullptr, ctx.card); });
+	effects[EFFECT_ASTRAL_CRUSADER] = Effect(EFFECT_ASTRAL_CRUSADER, KEYWORD_NONE, "Astral Crusader");
 	effects[EFFECT_ASTRAL_CRUSADER].SetCostBuff(-3);
 	effects[EFFECT_ASTRAL_CRUSADER].SetAtkBuff(3);
 	effects[EFFECT_ASTRAL_CRUSADER].SetHPBuff(3);
 
 	//Azure Herald
 	effects[SKILL_AZURE_HERALD] = Effect(SKILL_AZURE_HERALD, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Restore 3 Health to your General");
-	effects[SKILL_AZURE_HERALD].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
-		context.card->owner->general->Heal(context.card, 3);
-	};
+	effects[SKILL_AZURE_HERALD].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
+		ctx.GetAllyGeneral()->Heal(ctx.card, 3); });
 
 	//Azure Horn Shaman
 	effects[SKILL_AZURE_HORN_SHAMAN] = Effect(SKILL_AZURE_HORN_SHAMAN, KEYWORD_DYING_WISH, "{Dying Wish}: Give +4 Health to friendly minions around it");
-	effects[SKILL_AZURE_HORN_SHAMAN].OnPostEvent = [](EffectContext context, Event* event) {
-		if (OnDeathEvent* deathEvent = event->As<OnDeathEvent>())
-			if (context.IsCard(deathEvent->minion))
-				for (BoardTile* tile : context.game->map.GetAllNear(deathEvent->minion->curTile))
-					if (tile->HasMinion() && context.SharesOwner(tile->minion) && !tile->minion->IsGeneral())
-						tile->minion->AddEffect(EFFECT_AZURE_HORN_SHAMAN, nullptr, context.card);
-	};
-	effects[EFFECT_AZURE_HORN_SHAMAN] = Effect(EFFECT_AZURE_HORN_SHAMAN, KEYWORD_NONE, "{Azure Horn Shaman}");
+	effects[SKILL_AZURE_HORN_SHAMAN].RegisterPostTrigger<OnDeathEvent>(
+		[](EffectContext ctx, OnDeathEvent& ev) { return ctx.IsCard(ev.minion); },
+		[](EffectContext ctx, OnDeathEvent& ev) {
+			for (BoardTile* tile : ctx.GetMap()->GetAllNear(ctx.GetTile()))
+				if (tile->HasMinion() && ctx.SharesOwner(tile->minion) && !tile->minion->IsGeneral())
+					tile->minion->AddEffect(EFFECT_AZURE_HORN_SHAMAN, nullptr, ctx.card);
+	});
+	effects[EFFECT_AZURE_HORN_SHAMAN] = Effect(EFFECT_AZURE_HORN_SHAMAN, KEYWORD_NONE, "Azure Horn Shaman");
 	effects[EFFECT_AZURE_HORN_SHAMAN].SetHPBuff(4);
 
 	//Bastion
 	effects[SKILL_BASTION] = Effect(SKILL_BASTION, KEYWORD_NONE, "At the end of your turn, give other friendly minions +1 Health");
-	effects[SKILL_BASTION].OnPostEvent = [](EffectContext context, Event* event) {
-		if (OnTurnEndEvent* turnEndEvent = event->As<OnTurnEndEvent>())
-			if (context.IsOnBoard() && context.IsOwnedBy(turnEndEvent->player))
-				for (Minion* minion : context.game->GetMinions())
-					if (context.IsAllied(minion) && !minion->IsGeneral())
-						minion->AddEffect(EFFECT_BASTION, nullptr, context.card);
-	};
-	effects[EFFECT_BASTION] = Effect(EFFECT_BASTION, KEYWORD_NONE, "{Bastion}");
+	effects[SKILL_BASTION].RegisterPostTrigger<OnTurnEndEvent>(
+		[](EffectContext ctx, OnTurnEndEvent& ev) { return ctx.IsOnBoard() && ctx.IsOwnedBy(ev.player); },
+		[](EffectContext ctx, OnTurnEndEvent& ev) {
+			for (Minion* minion : ctx.game->GetMinions())
+				if (ctx.IsAllied(minion) && !minion->IsGeneral())
+					minion->AddEffect(EFFECT_BASTION, nullptr, ctx.card);
+	});
+	effects[EFFECT_BASTION] = Effect(EFFECT_BASTION, KEYWORD_NONE, "Bastion");
 	effects[EFFECT_BASTION].SetHPBuff(1);
 
 	//Black Locust
 	effects[SKILL_BLACK_LOCUST] = Effect(SKILL_BLACK_LOCUST, KEYWORD_FLYING, "{Flying}|After this minion moves, summon a Black Locust nearby");
-	effects[SKILL_BLACK_LOCUST].OnPostEvent = [](EffectContext context, Event* event) {
-		if (OnMoveEvent* onMoveEvent = event->As<OnMoveEvent>()) {
-			if (context.IsCardOnBoard(onMoveEvent->minion) && !onMoveEvent->wasTeleported) {
-				BoardTile* tile = context.game->map.GetRandomEmptyNear(onMoveEvent->minion->curTile);
-				if (tile != nullptr)
-					context.game->SummonToken(CARD_BLACK_LOCUST, tile, context.card->owner);
-			}
-		}
-	};
+	effects[SKILL_BLACK_LOCUST].RegisterPostTrigger<OnMoveEvent>(
+		[](EffectContext ctx, OnMoveEvent& ev) { return ctx.IsCardOnBoard(ev.minion) && !ev.wasTeleported; },
+		[](EffectContext ctx, OnMoveEvent& ev) {
+			if (BoardTile* tile = ctx.GetMap()->GetRandomEmptyNear(ctx.GetTile()))
+				ctx.game->SummonToken(CARD_BLACK_LOCUST, tile, ctx.card->owner);
+	});
 
 	//Blaze Hound
 	effects[SKILL_BLAZE_HOUND] = Effect(SKILL_BLAZE_HOUND, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Both players draw a card");
-	effects[SKILL_BLAZE_HOUND].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
-		context.game->players[0].Draw();
-		context.game->players[1].Draw();
-	};
+	effects[SKILL_BLAZE_HOUND].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
+		ctx.GetOwner()->Draw();
+		ctx.GetOpponent()->Draw();
+	});
 
 	//Blistering Skorn
 	effects[SKILL_BLISTERING_SKORN] = Effect(SKILL_BLISTERING_SKORN, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Deal 1 damage to everything (including itself)");
-	effects[SKILL_BLISTERING_SKORN].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
-		for (Minion* minion : context.game->GetMinions())
-			minion->DealDamage(context.card, 1);
-		if (context.card->IsMinion())
-			context.card->GetMinion()->DealDamage(context.card, 1);
-	};
+	effects[SKILL_BLISTERING_SKORN].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
+		for (Minion* minion : ctx.game->GetMinions())
+			minion->DealDamage(ctx.card, 1);
+		if (ctx.card->IsMinion())
+			ctx.card->GetMinion()->DealDamage(ctx.card, 1);
+	});
 
 	//Blood Taura
 	effects[SKILL_BLOOD_TAURA] = Effect(SKILL_BLOOD_TAURA, KEYWORD_PROVOKE, "{Provoke}|This minion's cost is equal to your General's Health");
 	effects[SKILL_BLOOD_TAURA].SetFixedCost(25);
-	effects[SKILL_BLOOD_TAURA].OnPostEvent = [](EffectContext context, Event* event) {
-		if (OnDamageEvent* onDamageEvent = event->As<OnDamageEvent>()) {
-			if (onDamageEvent->target == context.card->owner->general)
-				context.effect->SetFixedCost(max(onDamageEvent->target->hp, 0));
-			context.card->UpdateStatBuffs();
-		}
-		else if (OnHealEvent* onHealEvent = event->As<OnHealEvent>()) {
-			if (onHealEvent->target == context.card->owner->general)
-				context.effect->SetFixedCost(max(onHealEvent->target->hp, 0));
-			context.card->UpdateStatBuffs();
-		}
-		else if (OnAddToHandEvent* onAddToHandEvent = event->As<OnAddToHandEvent>()) {
-			if (context.IsCard(onAddToHandEvent->card)) {
-				context.effect->SetFixedCost(max(context.card->owner->general->hp, 0));
-				context.card->UpdateStatBuffs();
-			}
-		}
-	};
+	effects[SKILL_BLOOD_TAURA].RegisterPostTrigger<OnDamageEvent>(
+		[](EffectContext ctx, OnDamageEvent& ev) { return ev.target == ctx.GetAllyGeneral(); },
+		[](EffectContext ctx, OnDamageEvent& ev) {
+			ctx.effect->SetFixedCost(max(ev.target->hp, 0));
+			ctx.card->UpdateStatBuffs();
+	});
+	effects[SKILL_BLOOD_TAURA].RegisterPostTrigger<OnHealEvent>(
+		[](EffectContext ctx, OnHealEvent& ev) { return ev.target == ctx.GetAllyGeneral(); },
+		[](EffectContext ctx, OnHealEvent& ev) {
+			ctx.effect->SetFixedCost(max(ev.target->hp, 0));
+			ctx.card->UpdateStatBuffs();
+	});
+	effects[SKILL_BLOOD_TAURA].RegisterPostTrigger<OnAddToHandEvent>(
+		[](EffectContext ctx, OnAddToHandEvent& ev) { return ctx.IsCard(ev.card); },
+		[](EffectContext ctx, OnAddToHandEvent& ev) {
+			ctx.effect->SetFixedCost(max(ctx.GetAllyGeneral()->hp, 0));
+			ctx.card->UpdateStatBuffs();
+	});
 
 	//Bloodtear Alchemist
 	effects[SKILL_BLOODTEAR_ALCHEMIST] = Effect(SKILL_BLOODTEAR_ALCHEMIST, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Deal 1 damage to an enemy");
-	effects[SKILL_BLOODTEAR_ALCHEMIST].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
-		context.game->HighlightSelectable(TargetMode(TARGET_MODE_ALL, [](BoardTile* tile) {
-			return tile->HasMinion() && tile->minion->IsEnemy();
-		}));
-		if (context.game->HasSelectable()) {
-			context.game->callback = EffectCallback(context, tile);
-			context.game->callback.Callback = [](EffectContext context, BoardTile* source, BoardTile* target) {
+	effects[SKILL_BLOODTEAR_ALCHEMIST].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
+		ctx.game->HighlightSelectable(TargetMode(TARGET_MODE_ALL, [](BoardTile* tile) {
+			return tile->HasMinion() && tile->minion->IsEnemy(); }));
+		if (ctx.game->HasSelectable()) {
+			ctx.game->callback = EffectCallback(ctx, ev.tile);
+			ctx.game->callback.Callback = [](EffectContext ctx, BoardTile* source, BoardTile* target) {
 				if (target->HasMinion())
-					target->minion->DealDamage(context.card, 1);
+					target->minion->DealDamage(ctx.card, 1);
 			};
 		}
-	};
+	});
 
 	//Bluetip Scorpion
 	effects[SKILL_BLUETIP_SCORPION] = Effect(SKILL_BLUETIP_SCORPION, KEYWORD_NONE, "Deals double damage to minions");
-	effects[SKILL_BLUETIP_SCORPION].OnPreEvent = [](EffectContext context, Event* event) {
-		if (OnDamageEvent* damageEvent = event->As<OnDamageEvent>())
-			if (context.IsCard(damageEvent->source) && !damageEvent->target->IsGeneral())
-				damageEvent->damage *= 2;
-	};
+	effects[SKILL_BLUETIP_SCORPION].RegisterPreTrigger<OnDamageEvent>(
+		[](EffectContext ctx, OnDamageEvent& ev) { return ctx.IsCard(ev.source) && !ev.target->IsGeneral(); },
+		[](EffectContext ctx, OnDamageEvent& ev) { ev.damage *= 2; });
 
 	//Bonereaper
 	effects[SKILL_BONEREAPER] = Effect(SKILL_BONEREAPER, KEYWORD_PROVOKE, "{Provoke}|At the end of your turn, deal 2 damage to all nearby enemy minions");
-	effects[SKILL_BONEREAPER].OnPostEvent = [](EffectContext context, Event* event) {
-		if (OnTurnEndEvent* turnEndEvent = event->As<OnTurnEndEvent>())
-			if (context.IsOnBoard() && context.IsOwnedBy(turnEndEvent->player))
-				for (BoardTile* tile : context.game->map.GetAllNear(context.card->GetMinion()->curTile))
-					if (tile->HasMinion() && !context.SharesOwner(tile->minion) && !tile->minion->IsGeneral())
-						tile->minion->DealDamage(context.card, 2);
-	};
+	effects[SKILL_BONEREAPER].RegisterPostTrigger<OnTurnEndEvent>(
+		[](EffectContext ctx, OnTurnEndEvent& ev) { return ctx.IsOnBoard() && ctx.IsOwnedBy(ev.player); },
+		[](EffectContext ctx, OnTurnEndEvent& ev) {
+			for (BoardTile* tile : ctx.GetMap()->GetAllNear(ctx.GetTile()))
+				if (tile->HasMinion() && !ctx.SharesOwner(tile->minion) && !tile->minion->IsGeneral())
+					tile->minion->DealDamage(ctx.card, 2);
+	});
 
 	//Captain Hank Hart
 	effects[SKILL_CAPTAIN_HANK_HART] = Effect(SKILL_CAPTAIN_HANK_HART, KEYWORD_RANGED, "{Ranged}|Whenever this deals damage, restore that much Health to it");
-	effects[SKILL_CAPTAIN_HANK_HART].OnPostEvent = [](EffectContext context, Event* event) {
-		if (OnDamageEvent* damageEvent = event->As<OnDamageEvent>())
-			if (context.IsCardOnBoard(damageEvent->source) && context.card->GetMinion()->hp > 0)
-				context.card->GetMinion()->Heal(context.card, damageEvent->damage);
-	};
+	effects[SKILL_CAPTAIN_HANK_HART].RegisterPostTrigger<OnDamageEvent>(
+		[](EffectContext ctx, OnDamageEvent& ev) { return ctx.IsCardOnBoard(ev.source) && ctx.GetMinion()->hp > 0; },
+		[](EffectContext ctx, OnDamageEvent& ev) { ctx.GetMinion()->Heal(ctx.card, ev.damage); });
 
 	//Chakkram
 	effects[SKILL_CHAKKRAM] = Effect(SKILL_CHAKKRAM, KEYWORD_NONE, "Costs 2 less if your General took damage on your opponent's last turn");
-	effects[SKILL_CHAKKRAM].OnPostEvent = [](EffectContext context, Event* event) {
-		if (OnDamageEvent* damageEvent = event->As<OnDamageEvent>()) {
-			if (!context.IsOnBoard() && !context.IsOwnerTurn() && damageEvent->target == context.card->owner->general)
-				context.card->AddEffect(EFFECT_CHAKKRAM, context.effect, context.card);
-		}
-		else if (OnTurnEndEvent* turnEndEvent = event->As<OnTurnEndEvent>()) {
-			if (context.IsOwnedBy(turnEndEvent->player))
-				context.card->RemoveEffectsFromSource(context.effect);
-		}
-		else if (OnSummonEvent* summonEvent = event->As<OnSummonEvent>()) {
-			if (context.IsCard(summonEvent->minion))
-				context.card->RemoveEffectsFromSource(context.effect);
-		}
-		else if (OnAddToHandEvent* addToHandEvent = event->As<OnAddToHandEvent>()) {
-			if (context.IsCard(addToHandEvent->card)) {
-				for (Event* e : context.game->eventManager.GetMostRecentTurnEvents(context.card->owner->opponent)) {
-					if (e->type == EVENT_DAMAGE && e->As<OnDamageEvent>()->target == context.card->owner->general) {
-						context.card->AddEffect(EFFECT_CHAKKRAM, context.effect, context.card);
-						break;
-					}
+	effects[SKILL_CHAKKRAM].RegisterPostTrigger<OnDamageEvent>(
+		[](EffectContext ctx, OnDamageEvent& ev) { return !ctx.IsOnBoard() && !ctx.IsOwnerTurn() && ev.target == ctx.GetAllyGeneral(); },
+		[](EffectContext ctx, OnDamageEvent& ev) { ctx.card->AddEffect(EFFECT_CHAKKRAM, ctx.effect, ctx.card); });
+	effects[SKILL_CHAKKRAM].RegisterPostTrigger<OnTurnEndEvent>(
+		[](EffectContext ctx, OnTurnEndEvent& ev) { return ctx.IsOwnedBy(ev.player); },
+		[](EffectContext ctx, OnTurnEndEvent& ev) { ctx.card->RemoveEffectsFromSource(ctx.effect); });
+	effects[SKILL_CHAKKRAM].RegisterPostTrigger<OnSummonEvent>(
+		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsCard(ev.minion); },
+		[](EffectContext ctx, OnSummonEvent& ev) { ctx.card->RemoveEffectsFromSource(ctx.effect); });
+	effects[SKILL_CHAKKRAM].RegisterPostTrigger<OnAddToHandEvent>(
+		[](EffectContext ctx, OnAddToHandEvent& ev) { return ctx.IsCard(ev.card); },
+		[](EffectContext ctx, OnAddToHandEvent& ev) {
+			for (Event* event : ctx.game->eventManager.GetMostRecentTurnEvents(ctx.GetOpponent())) {
+				if (event->type == EVENT_DAMAGE && event->As<OnDamageEvent>()->target == ctx.GetAllyGeneral()) {
+					ctx.card->AddEffect(EFFECT_CHAKKRAM, ctx.effect, ctx.card);
+					break;
 				}
 			}
-		}
-	};
-	effects[EFFECT_CHAKKRAM] = Effect(EFFECT_CHAKKRAM, KEYWORD_NONE, "{Chakkram}");
+	});
+	effects[EFFECT_CHAKKRAM] = Effect(EFFECT_CHAKKRAM, KEYWORD_NONE, "Chakkram");
 	effects[EFFECT_CHAKKRAM].SetCostBuff(-2);
 
 	//Chaos Elemental
 	effects[SKILL_CHAOS_ELEMENTAL] = Effect(SKILL_CHAOS_ELEMENTAL, KEYWORD_NONE, "Whenever this minion takes damage, it randomly teleports");
-	effects[SKILL_CHAOS_ELEMENTAL].OnPostEvent = [](EffectContext context, Event* event) {
-		if (OnDamageEvent* damageEvent = event->As<OnDamageEvent>()) {
-			if (context.IsCard(damageEvent->target)) {
-				BoardTile* tile = context.game->map.GetRandomEmpty(damageEvent->target->curTile);
-				if (tile != nullptr)
-					damageEvent->target->MoveToTile(tile, true);
-			}
-		}
-	};
+	effects[SKILL_CHAOS_ELEMENTAL].RegisterPostTrigger<OnDamageEvent>(
+		[](EffectContext ctx, OnDamageEvent& ev) { return ctx.IsCard(ev.target); },
+		[](EffectContext ctx, OnDamageEvent& ev) {
+			if (BoardTile* tile = ctx.GetMap()->GetRandomEmpty(ctx.GetTile()))
+				ctx.GetMinion()->MoveToTile(tile, true);
+	});
 
 	//Crimson Oculus
 	effects[SKILL_CRIMSON_OCULUS] = Effect(SKILL_CRIMSON_OCULUS, KEYWORD_NONE, "Whenever opponent summons a minion, this minion gets +1/+1");
-	effects[SKILL_CRIMSON_OCULUS].OnPostEvent = [](EffectContext context, Event* event) {
-		if (OnSummonEvent* summonEvent = event->As<OnSummonEvent>()) {
-			if (context.IsOnBoard() && !context.SharesOwner(summonEvent->minion))
-				context.card->AddEffect(EFFECT_CRIMSON_OCULUS, nullptr, context.card);
-		}
-	};
-	effects[EFFECT_CRIMSON_OCULUS] = Effect(EFFECT_CRIMSON_OCULUS, KEYWORD_NONE, "{Crimson Oculus}");
+	effects[SKILL_CRIMSON_OCULUS].RegisterPostTrigger<OnSummonEvent>(
+		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsOnBoard() && !ctx.SharesOwner(ev.minion); },
+		[](EffectContext ctx, OnSummonEvent& ev) { ctx.card->AddEffect(EFFECT_CRIMSON_OCULUS, nullptr, ctx.card); });
+	effects[EFFECT_CRIMSON_OCULUS] = Effect(EFFECT_CRIMSON_OCULUS, KEYWORD_NONE, "Crimson Oculus");
 	effects[EFFECT_CRIMSON_OCULUS].SetAtkBuff(1);
 	effects[EFFECT_CRIMSON_OCULUS].SetHPBuff(1);
 
 	//Crossbones
 	effects[SKILL_CROSSBONES] = Effect(SKILL_CROSSBONES, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Destroy an enemy minion with Ranged");
-	effects[SKILL_CROSSBONES].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
-		context.game->HighlightSelectable(TargetMode(TARGET_MODE_ALL, [](BoardTile* tile) {
-			return tile->HasMinion() && tile->minion->IsEnemy() && !tile->minion->IsGeneral() && tile->minion->HasKeywords(KEYWORD_RANGED);
-		}));
-		if (context.game->HasSelectable()) {
-			context.game->callback = EffectCallback(context, tile);
-			context.game->callback.Callback = [](EffectContext context, BoardTile* source, BoardTile* target) {
+	effects[SKILL_CROSSBONES].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
+		ctx.game->HighlightSelectable(TargetMode(TARGET_MODE_ALL, [](BoardTile* tile) {
+			return tile->HasMinion() && tile->minion->IsEnemy() && !tile->minion->IsGeneral() && tile->minion->HasKeywords(KEYWORD_RANGED); }));
+		if (ctx.game->HasSelectable()) {
+			ctx.game->callback = EffectCallback(ctx, ev.tile);
+			ctx.game->callback.Callback = [](EffectContext ctx, BoardTile* source, BoardTile* target) {
 				if (target->HasMinion())
-					target->minion->Destroy(context.card);
+					target->minion->Destroy(ctx.card);
 			};
 		}
-	};
+	});
 
 	//Dancing Blades
 	effects[SKILL_DANCING_BLADES] = Effect(SKILL_DANCING_BLADES, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Deal 3 damage to ANY minion in front of this");
-	effects[SKILL_DANCING_BLADES].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
-		int x = tile->pos.x;
-		&context.game->players[0] == context.card->owner ? ++x : --x;
-		BoardTile* target = context.game->map.GetTile(x, tile->pos.y);
-		if (target != nullptr && target->HasMinion() && !target->minion->IsGeneral())
-			target->minion->DealDamage(context.card, 3);
-	};
+	effects[SKILL_DANCING_BLADES].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
+		if (BoardTile* tile = ctx.game->GetTileInFront(ev.tile, ctx.GetOwner()))
+			if (tile->HasMinion() && !tile->minion->IsGeneral())
+				tile->minion->DealDamage(ctx.card, 3);
+	});
 
 	//Dark Nemesis
 	effects[SKILL_DARK_NEMESIS] = Effect(SKILL_DARK_NEMESIS, KEYWORD_NONE, "At the start of your turn, deal 4 damage to the enemy General and this minion gains +4 Attack");
-	effects[SKILL_DARK_NEMESIS].OnPostEvent = [](EffectContext context, Event* event) {
-		if (OnTurnStartEvent* turnStartEvent = event->As<OnTurnStartEvent>()) {
-			if (context.IsOnBoard() && context.IsOwnedBy(turnStartEvent->player)) {
-				context.card->owner->opponent->general->DealDamage(context.card, 4);
-				context.card->AddEffect(EFFECT_DARK_NEMESIS, nullptr, context.card);
-			}
-		}
-	};
-	effects[EFFECT_DARK_NEMESIS] = Effect(EFFECT_DARK_NEMESIS, KEYWORD_NONE, "{Dark Nemesis}");
+	effects[SKILL_DARK_NEMESIS].RegisterPostTrigger<OnTurnStartEvent>(
+		[](EffectContext ctx, OnTurnStartEvent& ev) { return ctx.IsOnBoard() && ctx.IsOwnedBy(ev.player); },
+		[](EffectContext ctx, OnTurnStartEvent& ev) {
+			ctx.GetEnemyGeneral()->DealDamage(ctx.card, 4);
+			ctx.card->AddEffect(EFFECT_DARK_NEMESIS, nullptr, ctx.card);
+	});
+	effects[EFFECT_DARK_NEMESIS] = Effect(EFFECT_DARK_NEMESIS, KEYWORD_NONE, "Dark Nemesis");
 	effects[EFFECT_DARK_NEMESIS].SetAtkBuff(4);
 
 	//Day Watcher
 	effects[SKILL_DAY_WATCHER] = Effect(SKILL_DAY_WATCHER, KEYWORD_NONE, "Whenever a friendly minion attacks, restore 1 Health to your General");
-	effects[SKILL_DAY_WATCHER].OnPostEvent = [](EffectContext context, Event* event) {
-		if (OnAttackEvent* attackEvent = event->As<OnAttackEvent>())
-			if (context.IsOnBoard() && context.SharesOwner(attackEvent->source) && !attackEvent->source->IsGeneral() && !attackEvent->isCounterattack)
-				context.card->owner->general->Heal(context.card, 1);
-	};
+	effects[SKILL_DAY_WATCHER].RegisterPostTrigger<OnAttackEvent>(
+		[](EffectContext ctx, OnAttackEvent& ev) { return ctx.IsOnBoard() && ctx.SharesOwner(ev.source) && !ev.source->IsGeneral() && !ev.isCounterattack; },
+		[](EffectContext ctx, OnAttackEvent& ev) { ctx.GetAllyGeneral()->Heal(ctx.card, 1); });
 
 	//Deathblighter
 	effects[SKILL_DEATHBLIGHTER] = Effect(SKILL_DEATHBLIGHTER, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Deal 3 damage to all enemy minions around it");
-	effects[SKILL_DEATHBLIGHTER].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
-		for (BoardTile* tile : context.game->map.GetAllNear(tile))
-			if (tile->HasMinion() && !context.SharesOwner(tile->minion) && !tile->minion->IsGeneral())
-				tile->minion->DealDamage(context.card, 3);
-	};
+	effects[SKILL_DEATHBLIGHTER].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
+		for (BoardTile* tile : ctx.GetMap()->GetAllNear(ev.tile))
+			if (tile->HasMinion() && !ctx.SharesOwner(tile->minion) && !tile->minion->IsGeneral())
+				tile->minion->DealDamage(ctx.card, 3);
+	});
 
 	//Decimus
 	effects[SKILL_DECIMUS] = Effect(SKILL_DECIMUS, KEYWORD_NONE, "Whenever your opponent draws a card, deal 2 damage to the enemy General");
-	effects[SKILL_DECIMUS].OnPostEvent = [](EffectContext context, Event* event) {
-		if (OnDrawEvent* drawEvent = event->As<OnDrawEvent>())
-			if (context.IsOnBoard() && !context.SharesOwner(drawEvent->card))
-				context.card->owner->opponent->general->DealDamage(context.card, 2);
-	};
+	effects[SKILL_DECIMUS].RegisterPostTrigger<OnDrawEvent>(
+		[](EffectContext ctx, OnDrawEvent& ev) { return ctx.IsOnBoard() && !ctx.SharesOwner(ev.card); },
+		[](EffectContext ctx, OnDrawEvent& ev) { ctx.GetEnemyGeneral()->DealDamage(ctx.card, 2); });
 
 	//Dioltas
 	effects[SKILL_DIOLTAS] = Effect(SKILL_DIOLTAS, KEYWORD_DYING_WISH, "{Dying Wish}: Summon a 0/8 Tombstone minion with Provoke near your General");
-	effects[SKILL_DIOLTAS].OnPostEvent = [](EffectContext context, Event* event) {
-		if (OnDeathEvent* deathEvent = event->As<OnDeathEvent>()) {
-			if (context.IsCard(deathEvent->minion)) {
-				BoardTile* tile = context.game->map.GetRandomEmptyNear(context.card->owner->general->curTile);
-				if (tile != nullptr)
-					context.game->SummonToken(CARD_TOMBSTONE, tile, context.card->owner);
-			}
-		}
-	};
+	effects[SKILL_DIOLTAS].RegisterPostTrigger<OnDeathEvent>(
+		[](EffectContext ctx, OnDeathEvent& ev) { return ctx.IsCard(ev.minion); },
+		[](EffectContext ctx, OnDeathEvent& ev) {
+			if (BoardTile* tile = ctx.GetMap()->GetRandomEmptyNear(ctx.GetAllyGeneral()->curTile))
+				ctx.game->SummonToken(CARD_TOMBSTONE, tile, ctx.GetOwner());
+	});
 
 	//Dreamgazer
 	effects[SKILL_DREAMGAZER] = Effect(SKILL_DREAMGAZER, KEYWORD_NONE, "When you replace this card, summon it nearby. Your General takes 2 damage");
-	effects[SKILL_DREAMGAZER].OnPostEvent = [](EffectContext context, Event* event) {
-		if (OnReplaceEvent* replaceEvent = event->As<OnReplaceEvent>()) {
-			if (context.IsCard(replaceEvent->card) && context.card->IsMinion()) {
-				BoardTile* tile = context.game->map.GetRandomEmptyNear(context.card->owner->general->curTile);
-				if (tile != nullptr) {
-					context.game->Summon(context.card, tile, false);
-					context.card->owner->general->DealDamage(context.card, 2);
-					replaceEvent->sendToDeck = false;
-				}
+	effects[SKILL_DREAMGAZER].RegisterPostTrigger<OnReplaceEvent>(
+		[](EffectContext ctx, OnReplaceEvent& ev) { return ctx.IsCard(ev.card) && ctx.card->IsMinion(); },
+		[](EffectContext ctx, OnReplaceEvent& ev) {
+			if (BoardTile* tile = ctx.GetMap()->GetRandomEmptyNear(ctx.GetAllyGeneral()->curTile)) {
+				ctx.game->Summon(ctx.card, tile, false);
+				ctx.GetAllyGeneral()->DealDamage(ctx.card, 2);
+				ev.sendToDeck = false;
 			}
-		}
-	};
+	});
 
 	//Dust Wailer
 	effects[SKILL_DUST_WAILER] = Effect(SKILL_DUST_WAILER, KEYWORD_FLYING | KEYWORD_OPENING_GAMBIT, "{Flying}|{Opening Gambit}: Deal 3 damage to all enemies in front of this");
-	effects[SKILL_DUST_WAILER].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
-		int x = tile->pos.x;
-		while (true) {
-			&context.game->players[0] == context.card->owner ? ++x : --x;
-			BoardTile* target = context.game->map.GetTile(x, tile->pos.y);
-			if (target == nullptr)
-				break;
-			if (target->HasMinion() && !context.SharesOwner(target->minion))
-				target->minion->DealDamage(context.card, 3);
-		}
-	};
+	effects[SKILL_DUST_WAILER].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
+		BoardTile* tile = ev.tile;
+		while (tile = ctx.game->GetTileInFront(tile, ctx.GetOwner()))
+			if (tile->HasMinion() && !ctx.SharesOwner(tile->minion))
+				tile->minion->DealDamage(ctx.card, 3);
+	});
 
 	//Eclipse
 	effects[SKILL_ECLIPSE] = Effect(SKILL_ECLIPSE, KEYWORD_NONE, "Whenever this minion takes damage, it deals that much damage to the enemy General");
-	effects[SKILL_ECLIPSE].OnPostEvent = [](EffectContext context, Event* event) {
-		if (OnDamageEvent* damageEvent = event->As<OnDamageEvent>())
-			if (context.IsCardOnBoard(damageEvent->target))
-				context.card->owner->opponent->general->DealDamage(context.card, damageEvent->damage);
-	};
+	effects[SKILL_ECLIPSE].RegisterPostTrigger<OnDamageEvent>(
+		[](EffectContext ctx, OnDamageEvent& ev) { return ctx.IsCardOnBoard(ev.target); },
+		[](EffectContext ctx, OnDamageEvent& ev) { ctx.GetEnemyGeneral()->DealDamage(ctx.card, ev.damage); });
 
 	//Emerald Rejuvenator
 	effects[SKILL_EMERALD_REJUVENATOR] = Effect(SKILL_EMERALD_REJUVENATOR, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Restore 4 Health to BOTH Generals");
-	effects[SKILL_EMERALD_REJUVENATOR].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
-		context.card->owner->general->Heal(context.card, 4);
-		context.card->owner->opponent->general->Heal(context.card, 4);
-	};
+	effects[SKILL_EMERALD_REJUVENATOR].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
+		ctx.GetAllyGeneral()->Heal(ctx.card, 4);
+		ctx.GetEnemyGeneral()->Heal(ctx.card, 4);
+	});
 
 	//Envybaer
 	effects[SKILL_ENVYBAER] = Effect(SKILL_ENVYBAER, KEYWORD_NONE, "Whenever this minion damages an enemy, teleport that enemy to a random corner");
-	effects[SKILL_ENVYBAER].OnPostEvent = [](EffectContext context, Event* event) {
-		if (OnDamageEvent* damageEvent = event->As<OnDamageEvent>()) {
-			if (context.IsCardOnBoard(damageEvent->source) && !context.SharesOwner(damageEvent->target)) {
-				BoardTile* tile = context.game->map.GetRandomEmptyCorner();
-				if (tile != nullptr)
-					damageEvent->target->MoveToTile(tile, true);
-			}
-		}
-	};
+	effects[SKILL_ENVYBAER].RegisterPostTrigger<OnDamageEvent>(
+		[](EffectContext ctx, OnDamageEvent& ev) { return ctx.IsCardOnBoard(ev.source) && !ctx.SharesOwner(ev.target); },
+		[](EffectContext ctx, OnDamageEvent& ev) {
+			if (BoardTile* tile = ctx.GetMap()->GetRandomEmptyCorner())
+				ev.target->MoveToTile(tile, true);
+	});
 
 	//Ephemeral Shroud
 	effects[SKILL_EPHEMERAL_SHROUD] = Effect(SKILL_EPHEMERAL_SHROUD, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Dispel 1 nearby space");
-	effects[SKILL_EPHEMERAL_SHROUD].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
-		context.game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, nullptr), tile);
-		if (context.game->HasSelectable()) {
-			context.game->callback = EffectCallback(context, tile);
-			context.game->callback.Callback = [](EffectContext context, BoardTile* source, BoardTile* target) {
+	effects[SKILL_EPHEMERAL_SHROUD].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
+		ctx.game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, nullptr), ev.tile);
+		if (ctx.game->HasSelectable()) {
+			ctx.game->callback = EffectCallback(ctx, ev.tile);
+			ctx.game->callback.Callback = [](EffectContext context, BoardTile* source, BoardTile* target) {
 				target->SetFeature(TILE_NONE);
 				if (target->HasMinion())
 					target->minion->Dispel();
 			};
 		}
-	};
+	});
 
 	//E'Xun
 	effects[SKILL_EXUN] = Effect(SKILL_EXUN, KEYWORD_FORCEFIELD, "{Forcefield}|Whenever this minion attacks or is attacked, draw a card");
-	effects[SKILL_EXUN].OnPostEvent = [](EffectContext context, Event* event) {
-		if (OnAttackEvent* attackEvent = event->As<OnAttackEvent>())
-			if ((context.IsCardOnBoard(attackEvent->source) || context.IsCardOnBoard(attackEvent->target)) && !attackEvent->isCounterattack)
-				context.card->owner->Draw();
-	};
+	effects[SKILL_EXUN].RegisterPostTrigger<OnAttackEvent>(
+		[](EffectContext ctx, OnAttackEvent& ev) { return (ctx.IsCardOnBoard(ev.source) || ctx.IsCardOnBoard(ev.target)) && !ev.isCounterattack; },
+		[](EffectContext ctx, OnAttackEvent& ev) { ctx.GetOwner()->Draw(); });
 
 	//Facestriker
 	effects[SKILL_FACESTRIKER] = Effect(SKILL_FACESTRIKER, KEYWORD_NONE, "Deals double damage to Generals");
-	effects[SKILL_FACESTRIKER].OnPreEvent = [](EffectContext context, Event* event) {
-		if (OnDamageEvent* damageEvent = event->As<OnDamageEvent>())
-			if (context.IsCard(damageEvent->source) && damageEvent->target->IsGeneral())
-				damageEvent->damage *= 2;
-	};
+	effects[SKILL_FACESTRIKER].RegisterPreTrigger<OnDamageEvent>(
+		[](EffectContext ctx, OnDamageEvent& ev) { return ctx.IsCard(ev.source) && ev.target->IsGeneral(); },
+		[](EffectContext ctx, OnDamageEvent& ev) { ev.damage *= 2; });
 
 	//Firestarter
 	effects[SKILL_FIRESTARTER] = Effect(SKILL_FIRESTARTER, KEYWORD_NONE, "Whenever you cast a spell, summon a 1/1 Spellspark with Rush on a random nearby space");
-	effects[SKILL_FIRESTARTER].OnPostEvent = [](EffectContext context, Event* event) {
-		if (OnCastEvent* castEvent = event->As<OnCastEvent>()) {
-			if (context.IsOnBoard() && castEvent->card->IsSpell() && context.SharesOwner(castEvent->card)) {
-				BoardTile* tile = context.game->map.GetRandomEmptyNear(context.card->GetMinion()->curTile);
-				if (tile != nullptr)
-					context.game->SummonToken(CARD_SPELLSPARK, tile, context.card->owner);
-			}
-		}
-	};
+	effects[SKILL_FIRESTARTER].RegisterPostTrigger<OnCastEvent>(
+		[](EffectContext ctx, OnCastEvent& ev) { return ctx.IsOnBoard() && ev.card->IsSpell() && ctx.SharesOwner(ev.card); },
+		[](EffectContext ctx, OnCastEvent& ev) {
+			if (BoardTile* tile = ctx.GetMap()->GetRandomEmptyNear(ctx.GetMinion()->curTile))
+				ctx.game->SummonToken(CARD_SPELLSPARK, tile, ctx.GetOwner());
+	});
 
 	//First Sword of Akrane
 	effects[SKILL_FIRST_SWORD_OF_AKRANE] = Effect(SKILL_FIRST_SWORD_OF_AKRANE, KEYWORD_NONE, "Your other minions have +1 Attack");
-	effects[SKILL_FIRST_SWORD_OF_AKRANE].OnAddThis = [](EffectContext context) {
-		for (Minion* minion : context.game->GetMinions())
-			if (context.IsAllied(minion) && !minion->IsGeneral())
-				minion->AddEffect(EFFECT_FIRST_SWORD_OF_AKRANE, context.effect, context.card);
-	};
-	effects[SKILL_FIRST_SWORD_OF_AKRANE].OnRemoveThis = [](EffectContext context) {
-		for (Minion* minion : context.game->GetMinions())
-			minion->RemoveEffectsFromSource(context.effect);
-	};
-	effects[SKILL_FIRST_SWORD_OF_AKRANE].OnPostEvent = [](EffectContext context, Event* event) {
-		if (OnSummonEvent* summonEvent = event->As<OnSummonEvent>())
-			if (context.IsOnBoard() && context.IsAllied(summonEvent->minion))
-				summonEvent->minion->AddEffect(EFFECT_FIRST_SWORD_OF_AKRANE, context.effect, context.card);
-	};
-	effects[EFFECT_FIRST_SWORD_OF_AKRANE] = Effect(EFFECT_FIRST_SWORD_OF_AKRANE, KEYWORD_NONE, "{Akrane's First Sword}");
+	effects[SKILL_FIRST_SWORD_OF_AKRANE].RegisterSelfTrigger<OnAddThisEvent>([](EffectContext ctx, OnAddThisEvent& ev) {
+		for (Minion* minion : ctx.game->GetMinions())
+			if (ctx.IsAllied(minion) && !minion->IsGeneral())
+				minion->AddEffect(EFFECT_FIRST_SWORD_OF_AKRANE, ctx.effect, ctx.card);
+	});
+	effects[SKILL_FIRST_SWORD_OF_AKRANE].RegisterSelfTrigger<OnRemoveThisEvent>([](EffectContext ctx, OnRemoveThisEvent& ev) {
+		for (Minion* minion : ctx.game->GetMinions())
+			minion->RemoveEffectsFromSource(ctx.effect);
+	});
+	effects[SKILL_FIRST_SWORD_OF_AKRANE].RegisterPostTrigger<OnSummonEvent>(
+		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsOnBoard() && ctx.IsAllied(ev.minion); },
+		[](EffectContext ctx, OnSummonEvent& ev) { ev.minion->AddEffect(EFFECT_FIRST_SWORD_OF_AKRANE, ctx.effect, ctx.card); });
+	effects[EFFECT_FIRST_SWORD_OF_AKRANE] = Effect(EFFECT_FIRST_SWORD_OF_AKRANE, KEYWORD_NONE, "First Sword of Akrane");
 	effects[EFFECT_FIRST_SWORD_OF_AKRANE].SetAtkBuff(1);
 
 	//Flameblood Warlock
 	effects[SKILL_FLAMEBLOOD_WARLOCK] = Effect(SKILL_FLAMEBLOOD_WARLOCK, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Deal 3 damage to BOTH Generals");
-	effects[SKILL_FLAMEBLOOD_WARLOCK].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
-		context.card->owner->general->DealDamage(context.card, 3);
-		context.card->owner->opponent->general->DealDamage(context.card, 3);
-	};
+	effects[SKILL_FLAMEBLOOD_WARLOCK].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
+		ctx.GetAllyGeneral()->DealDamage(ctx.card, 3);
+		ctx.GetEnemyGeneral()->DealDamage(ctx.card, 3);
+	});
 
 	//Frostbone Naga
 	effects[SKILL_FROSTBONE_NAGA] = Effect(SKILL_FROSTBONE_NAGA, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Deal 2 damage to everything around it");
-	effects[SKILL_FROSTBONE_NAGA].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
-		for (BoardTile* tile : context.game->map.GetAllNear(tile))
+	effects[SKILL_FROSTBONE_NAGA].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
+		for (BoardTile* tile : ctx.GetMap()->GetAllNear(ev.tile))
 			if (tile->HasMinion())
-				tile->minion->DealDamage(context.card, 2);
-	};
+				tile->minion->DealDamage(ctx.card, 2);
+	});
 
 	//Ghost Lynx
 	effects[SKILL_GHOST_LYNX] = Effect(SKILL_GHOST_LYNX, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Teleport a nearby minion to a random space");
-	effects[SKILL_GHOST_LYNX].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
-		context.game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, [](BoardTile* tile) {
-			return tile->HasMinion() && !tile->minion->IsGeneral();
-		}), tile);
-		if (context.game->HasSelectable()) {
-			context.game->callback = EffectCallback(context, tile);
-			context.game->callback.Callback = [](EffectContext context, BoardTile* source, BoardTile* target) {
-				if (target->HasMinion()) {
-					BoardTile* tile = context.game->map.GetRandomEmpty(source, target);
-					if (tile != nullptr)
+	effects[SKILL_GHOST_LYNX].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
+		ctx.game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, [](BoardTile* tile) {
+			return tile->HasMinion() && !tile->minion->IsGeneral(); }), ev.tile);
+		if (ctx.game->HasSelectable()) {
+			ctx.game->callback = EffectCallback(ctx, ev.tile);
+			ctx.game->callback.Callback = [](EffectContext context, BoardTile* source, BoardTile* target) {
+				if (target->HasMinion())
+					if (BoardTile* tile = context.GetMap()->GetRandomEmpty(source, target))
 						target->minion->MoveToTile(tile, true);
-				}
 			};
 		}
-	};
+	});
 
 	//Golden Justicar
 	effects[SKILL_GOLDEN_JUSTICAR] = Effect(SKILL_GOLDEN_JUSTICAR, KEYWORD_PROVOKE, "{Provoke}|Your other minions with {Provoke} can move two additional spaces");
-	effects[SKILL_GOLDEN_JUSTICAR].OnAddThis = [](EffectContext context) {
-		for (Minion* minion : context.game->GetMinions())
-			if (context.IsAllied(minion) && !minion->IsGeneral() && minion->HasKeywords(KEYWORD_PROVOKE))
-				minion->AddEffect(EFFECT_GOLDEN_JUSTICAR, context.effect, context.card);
-	};
-	effects[SKILL_GOLDEN_JUSTICAR].OnRemoveThis = [](EffectContext context) {
-		for (Minion* minion : context.game->GetMinions())
-			minion->RemoveEffectsFromSource(context.effect);
-	};
-	effects[SKILL_GOLDEN_JUSTICAR].OnPostEvent = [](EffectContext context, Event* event) {
-		if (OnSummonEvent* summonEvent = event->As<OnSummonEvent>()) {
-			if (context.IsOnBoard() && context.IsAllied(summonEvent->minion) && summonEvent->minion->HasKeywords(KEYWORD_PROVOKE))
-				summonEvent->minion->AddEffect(EFFECT_GOLDEN_JUSTICAR, context.effect, context.card);
-		}
-		else if (OnEffectsChangedEvent* effectsChangedEvent = event->As<OnEffectsChangedEvent>()) {
-			if (context.BothOnBoard(effectsChangedEvent->card) && context.IsAllied(effectsChangedEvent->card) && !effectsChangedEvent->card->IsGeneral()) {
-				if (effectsChangedEvent->card->GetMinion()->HasKeywords(KEYWORD_PROVOKE))
-					effectsChangedEvent->card->AddEffect(EFFECT_GOLDEN_JUSTICAR, context.effect, context.card);
-				else
-					effectsChangedEvent->card->RemoveEffectsFromSource(context.effect);
-			}
-		}
-	};
-	effects[EFFECT_GOLDEN_JUSTICAR] = Effect(EFFECT_GOLDEN_JUSTICAR, KEYWORD_NONE, "{Golden Justicar}");
+	effects[SKILL_GOLDEN_JUSTICAR].RegisterSelfTrigger<OnAddThisEvent>([](EffectContext ctx, OnAddThisEvent& ev) {
+		for (Minion* minion : ctx.game->GetMinions())
+			if (ctx.IsAllied(minion) && !minion->IsGeneral() && minion->HasKeywords(KEYWORD_PROVOKE))
+				minion->AddEffect(EFFECT_GOLDEN_JUSTICAR, ctx.effect, ctx.card);
+	});
+	effects[SKILL_GOLDEN_JUSTICAR].RegisterSelfTrigger<OnRemoveThisEvent>([](EffectContext ctx, OnRemoveThisEvent& ev) {
+		for (Minion* minion : ctx.game->GetMinions())
+			minion->RemoveEffectsFromSource(ctx.effect);
+	});
+	effects[SKILL_GOLDEN_JUSTICAR].RegisterPostTrigger<OnSummonEvent>(
+		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsOnBoard() && ctx.IsAllied(ev.minion) && ev.minion->HasKeywords(KEYWORD_PROVOKE); },
+		[](EffectContext ctx, OnSummonEvent& ev) { ev.minion->AddEffect(EFFECT_GOLDEN_JUSTICAR, ctx.effect, ctx.card); });
+	effects[SKILL_GOLDEN_JUSTICAR].RegisterPostTrigger<OnEffectsChangedEvent>(
+		[](EffectContext ctx, OnEffectsChangedEvent& ev) { return ctx.BothOnBoard(ev.card) && ctx.IsAllied(ev.card) && !ev.card->IsGeneral(); },
+		[](EffectContext ctx, OnEffectsChangedEvent& ev) {
+			ev.card->GetMinion()->HasKeywords(KEYWORD_PROVOKE)
+				? ev.card->AddEffect(EFFECT_GOLDEN_JUSTICAR, ctx.effect, ctx.card)
+				: ev.card->RemoveEffectsFromSource(ctx.effect);
+	});
+	effects[EFFECT_GOLDEN_JUSTICAR] = Effect(EFFECT_GOLDEN_JUSTICAR, KEYWORD_NONE, "Golden Justicar");
 	effects[EFFECT_GOLDEN_JUSTICAR].SetMoveBuff(2);
 
 	//Golem Metallurgist
 	effects[SKILL_GOLEM_METALLURGIST] = Effect(SKILL_GOLEM_METALLURGIST, KEYWORD_NONE, "The first Golem you summon each turn costs 1 less");
-	effects[SKILL_GOLEM_METALLURGIST].OnAddThis = [](EffectContext context) {
-		for (Card* c : context.game->GetCardsCastThisTurn())
-			if (c->IsMinion() && c->GetMinion()->tribe == TRIBE_GOLEM)
-				return;
-		if (context.effect->ApplyEffect)
-			context.effect->ApplyEffect(context);
-	};
-	effects[SKILL_GOLEM_METALLURGIST].OnRemoveThis = [](EffectContext context) {
-		if (context.effect->RemoveEffect)
-			context.effect->RemoveEffect(context);
-	};
-	effects[SKILL_GOLEM_METALLURGIST].OnPostEvent = [](EffectContext context, Event* event) {
-		if (OnSummonEvent* summonEvent = event->As<OnSummonEvent>()) {
-			if (summonEvent->wasCast && context.SharesOwner(summonEvent->minion) && summonEvent->minion->tribe == TRIBE_GOLEM) {
-				summonEvent->minion->RemoveEffectsFromSource(context.effect);
-				if (context.effect->RemoveEffect)
-					context.effect->RemoveEffect(context);
-			}
-		}
-		else if (OnAddToHandEvent* addToHandEvent = event->As<OnAddToHandEvent>()) {
-			if (context.IsOnBoard() && context.SharesOwner(addToHandEvent->card) && addToHandEvent->card->IsMinion() && addToHandEvent->card->GetMinion()->tribe == TRIBE_GOLEM) {
-				for (Card* c : context.game->GetCardsCastThisTurn())
-					if (c->IsMinion() && c->GetMinion()->tribe == TRIBE_GOLEM)
-						return;
-				addToHandEvent->card->AddEffect(EFFECT_GOLEM_METALLURGIST, context.effect, context.card);
-			}
-		}
-		else if (OnTurnEndEvent* turnEndEvent = event->As<OnTurnEndEvent>()) {
-			if (context.IsOnBoard() && context.IsOwnedBy(turnEndEvent->player))
-				if (context.effect->ApplyEffect)
-					context.effect->ApplyEffect(context);
-		}
-	};
-	effects[SKILL_GOLEM_METALLURGIST].ApplyEffect = [](EffectContext context) {
-		for (Card* card : context.card->owner->hand)
+	effects[SKILL_GOLEM_METALLURGIST].RegisterSelfTrigger<OnAddThisEvent>([](EffectContext ctx, OnAddThisEvent& ev) {
+		if (ctx.game->GetTurnPlayer() == ctx.GetOwner() && !ctx.game->AnyCastThisTurn([](Card* card) { return card->IsMinion() && card->GetMinion()->tribe == TRIBE_GOLEM; }))
+		for (Card* card : ctx.GetOwner()->GetDeckAndHand())
 			if (card->IsMinion() && card->GetMinion()->tribe == TRIBE_GOLEM)
-				card->AddEffect(EFFECT_GOLEM_METALLURGIST, context.effect, context.card);
-		for (Card* card : context.card->owner->deck)
-			if (card->IsMinion() && card->GetMinion()->tribe == TRIBE_GOLEM)
-				card->AddEffect(EFFECT_GOLEM_METALLURGIST, context.effect, context.card);
-	};
-	effects[SKILL_GOLEM_METALLURGIST].RemoveEffect = [](EffectContext context) {
-		for (Card* card : context.card->owner->hand)
-			card->RemoveEffectsFromSource(context.effect);
-		for (Card* card : context.card->owner->deck)
-			card->RemoveEffectsFromSource(context.effect);
-	};
-	effects[EFFECT_GOLEM_METALLURGIST] = Effect(EFFECT_GOLEM_METALLURGIST, KEYWORD_NONE, "{Metallurgy}");
+				card->AddEffect(EFFECT_GOLEM_METALLURGIST, ctx.effect, ctx.card);
+	});
+	effects[SKILL_GOLEM_METALLURGIST].RegisterSelfTrigger<OnRemoveThisEvent>([](EffectContext ctx, OnRemoveThisEvent& ev) {
+		for (Card* card : ctx.GetOwner()->GetDeckAndHand())
+			card->RemoveEffectsFromSource(ctx.effect);
+	});
+	effects[SKILL_GOLEM_METALLURGIST].RegisterPostTrigger<OnSummonEvent>(
+		[](EffectContext ctx, OnSummonEvent& ev) { return ev.wasCast && ctx.SharesOwner(ev.minion) && ev.minion->tribe == TRIBE_GOLEM; },
+		[](EffectContext ctx, OnSummonEvent& ev) {
+			ev.minion->RemoveEffectsFromSource(ctx.effect);
+			for (Card* card : ctx.GetOwner()->GetDeckAndHand())
+				card->RemoveEffectsFromSource(ctx.effect);
+	});
+	effects[SKILL_GOLEM_METALLURGIST].RegisterPostTrigger<OnAddToHandEvent>(
+		[](EffectContext ctx, OnAddToHandEvent& ev) { return ctx.IsOnBoard() && ctx.SharesOwner(ev.card) && ev.card->IsMinion() && ev.card->GetMinion()->tribe == TRIBE_GOLEM; },
+		[](EffectContext ctx, OnAddToHandEvent& ev) {
+			if (ctx.game->GetTurnPlayer() == ctx.GetOwner() && !ctx.game->AnyCastThisTurn([](Card* card) { return card->IsMinion() && card->GetMinion()->tribe == TRIBE_GOLEM; }))
+				ev.card->AddEffect(EFFECT_GOLEM_METALLURGIST, ctx.effect, ctx.card);
+	});
+	effects[SKILL_GOLEM_METALLURGIST].RegisterPostTrigger<OnTurnEndEvent>(
+		[](EffectContext ctx, OnTurnEndEvent& ev) { return ctx.IsOnBoard() && ctx.IsOwnedBy(ev.player); },
+		[](EffectContext ctx, OnTurnEndEvent& ev) {
+			for (Card* card : ctx.GetOwner()->GetDeckAndHand())
+				if (card->IsMinion() && card->GetMinion()->tribe == TRIBE_GOLEM)
+					card->AddEffect(EFFECT_GOLEM_METALLURGIST, ctx.effect, ctx.card);
+	});
+	effects[EFFECT_GOLEM_METALLURGIST] = Effect(EFFECT_GOLEM_METALLURGIST, KEYWORD_NONE, "Golem Metallurgist");
 	effects[EFFECT_GOLEM_METALLURGIST].SetCostBuff(-1);
 
 	//Golem Vanquisher
 	effects[SKILL_GOLEM_VANQUISHER] = Effect(SKILL_GOLEM_VANQUISHER, KEYWORD_PROVOKE, "{Provoke}|Your other Golem minions have {Provoke}");
-	effects[SKILL_GOLEM_VANQUISHER].OnAddThis = [](EffectContext context) {
-		for (Minion* minion : context.game->GetMinions())
-			if (context.IsAllied(minion) && minion->tribe == TRIBE_GOLEM)
-				minion->AddEffect(EFFECT_GOLEM_VANQUISHER, context.effect, context.card);
-	};
-	effects[SKILL_GOLEM_VANQUISHER].OnRemoveThis = [](EffectContext context) {
-		for (Minion* minion : context.game->GetMinions())
-			minion->RemoveEffectsFromSource(context.effect);
-	};
-	effects[SKILL_GOLEM_VANQUISHER].OnPostEvent = [](EffectContext context, Event* event) {
-		if (OnSummonEvent* summonEvent = event->As<OnSummonEvent>()) {
-			if (context.card->IsOnBoard() && context.IsAllied(summonEvent->minion) && summonEvent->minion->tribe == TRIBE_GOLEM)
-				summonEvent->minion->AddEffect(EFFECT_GOLEM_VANQUISHER, context.effect, context.card);
-		}
-		else if (OnEffectsChangedEvent* effectsChangedEvent = event->As<OnEffectsChangedEvent>()) {
-			if (context.BothOnBoard(effectsChangedEvent->card) && context.IsAllied(effectsChangedEvent->card)) {
-				if (effectsChangedEvent->card->GetMinion()->tribe == TRIBE_GOLEM)
-					effectsChangedEvent->card->AddEffect(EFFECT_GOLEM_VANQUISHER, context.effect, context.card);
-				else
-					effectsChangedEvent->card->RemoveEffectsFromSource(context.effect);
-			}
-		}
-	};
-	effects[EFFECT_GOLEM_VANQUISHER] = Effect(EFFECT_GOLEM_VANQUISHER, KEYWORD_PROVOKE, "{Golem Vanquisher}|{Provoke}");
+	effects[SKILL_GOLEM_VANQUISHER].RegisterSelfTrigger<OnAddThisEvent>([](EffectContext ctx, OnAddThisEvent& ev) {
+		for (Minion* minion : ctx.game->GetMinions())
+			if (ctx.IsAllied(minion) && minion->tribe == TRIBE_GOLEM)
+				minion->AddEffect(EFFECT_GOLEM_VANQUISHER, ctx.effect, ctx.card);
+	});
+	effects[SKILL_GOLEM_VANQUISHER].RegisterSelfTrigger<OnRemoveThisEvent>([](EffectContext ctx, OnRemoveThisEvent& ev) {
+		for (Minion* minion : ctx.game->GetMinions())
+			minion->RemoveEffectsFromSource(ctx.effect);
+	});
+	effects[SKILL_GOLEM_VANQUISHER].RegisterPostTrigger<OnSummonEvent>(
+		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsOnBoard() && ctx.IsAllied(ev.minion) && ev.minion->tribe == TRIBE_GOLEM; },
+		[](EffectContext ctx, OnSummonEvent& ev) { ev.minion->AddEffect(EFFECT_GOLEM_VANQUISHER, ctx.effect, ctx.card); });
+	effects[SKILL_GOLEM_VANQUISHER].RegisterPostTrigger<OnEffectsChangedEvent>(
+		[](EffectContext ctx, OnEffectsChangedEvent& ev) { return ctx.BothOnBoard(ev.card) && ctx.IsAllied(ev.card); },
+		[](EffectContext ctx, OnEffectsChangedEvent& ev) {
+			ev.card->GetMinion()->tribe == TRIBE_GOLEM
+				? ev.card->AddEffect(EFFECT_GOLEM_VANQUISHER, ctx.effect, ctx.card)
+				: ev.card->RemoveEffectsFromSource(ctx.effect);
+	});
+	effects[EFFECT_GOLEM_VANQUISHER] = Effect(EFFECT_GOLEM_VANQUISHER, KEYWORD_PROVOKE, "Golem Vanquisher|{Provoke}");
 
 	//Grove Lion
 	effects[SKILL_GROVE_LION] = Effect(SKILL_GROVE_LION, KEYWORD_NONE, "While this minion is on the battlefield, your General has {Forcefield}");
-	effects[SKILL_GROVE_LION].OnAddThis = [](EffectContext context) {
-		context.card->owner->general->AddEffect(EFFECT_GROVE_LION, context.effect, context.card);
-	};
-	effects[SKILL_GROVE_LION].OnRemoveThis = [](EffectContext context) {
-		context.card->owner->general->RemoveEffectsFromSource(context.effect);
-	};
-	effects[EFFECT_GROVE_LION] = Effect(EFFECT_GROVE_LION, KEYWORD_FORCEFIELD, "{Grove Lion}|{Forcefield}");
+	effects[SKILL_GROVE_LION].RegisterSelfTrigger<OnAddThisEvent>([](EffectContext ctx, OnAddThisEvent& ev) {
+		ctx.GetAllyGeneral()->AddEffect(EFFECT_GROVE_LION, ctx.effect, ctx.card); });
+	effects[SKILL_GROVE_LION].RegisterSelfTrigger<OnRemoveThisEvent>([](EffectContext ctx, OnRemoveThisEvent& ev) {
+		ctx.GetAllyGeneral()->RemoveEffectsFromSource(ctx.effect); });
+	effects[EFFECT_GROVE_LION] = Effect(EFFECT_GROVE_LION, KEYWORD_FORCEFIELD, "Grove Lion|{Forcefield}");
 
 	//Healing Mystic
 	effects[SKILL_HEALING_MYSTIC] = Effect(SKILL_HEALING_MYSTIC, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Restore 2 Health to anything");
-	effects[SKILL_HEALING_MYSTIC].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
-		context.game->HighlightSelectable(TargetMode(TARGET_MODE_ALL, [](BoardTile* tile) {
-			return tile->HasMinion();
-		}));
-		if (context.game->HasSelectable()) {
-			context.game->callback = EffectCallback(context, tile);
-			context.game->callback.Callback = [](EffectContext context, BoardTile* source, BoardTile* target) {
+	effects[SKILL_HEALING_MYSTIC].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
+		ctx.game->HighlightSelectable(TargetMode(TARGET_MODE_ALL, [](BoardTile* tile) { return tile->HasMinion(); }));
+		if (ctx.game->HasSelectable()) {
+			ctx.game->callback = EffectCallback(ctx, ev.tile);
+			ctx.game->callback.Callback = [](EffectContext context, BoardTile* source, BoardTile* target) {
 				if (target->HasMinion())
 					target->minion->Heal(context.card, 2);
 			};
 		}
-	};
+	});
 
 	//Ironclad
 	effects[SKILL_IRONCLAD] = Effect(SKILL_IRONCLAD, KEYWORD_DYING_WISH, "{Dying Wish}: Dispel all enemy minions");
-	effects[SKILL_IRONCLAD].OnPostEvent = [](EffectContext context, Event* event) {
-		if (OnDeathEvent* deathEvent = event->As<OnDeathEvent>())
-			if (context.IsCard(deathEvent->minion))
-				for (Minion* target : context.game->GetMinions())
-					if (!context.SharesOwner(target) && target->tribe != TRIBE_GENERAL)
-						target->Dispel();
-	};
+	effects[SKILL_IRONCLAD].RegisterPostTrigger<OnDeathEvent>(
+		[](EffectContext ctx, OnDeathEvent& ev) { return ctx.IsCard(ev.minion); },
+		[](EffectContext ctx, OnDeathEvent& ev) {
+			for (Minion* minion : ctx.game->GetMinions())
+				if (!ctx.SharesOwner(minion) && !minion->IsGeneral())
+					minion->Dispel();
+	});
 
 	//Jax Truesight
 	effects[SKILL_JAX_TRUESIGHT] = Effect(SKILL_JAX_TRUESIGHT, KEYWORD_OPENING_GAMBIT | KEYWORD_RANGED, "{Ranged}|{Opening Gambit}: Summon a 1/1 {Ranged} Mini-Jax in each corner");
-	effects[SKILL_JAX_TRUESIGHT].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
-		for (BoardTile* target : context.game->map.GetEmptyCorners())
-			if (target != tile)
-				context.game->SummonToken(CARD_MINI_JAX, target, context.card->owner);
-	};
+	effects[SKILL_JAX_TRUESIGHT].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
+		for (BoardTile* tile : ctx.GetMap()->GetEmptyCorners())
+			if (tile != ev.tile)
+				ctx.game->SummonToken(CARD_MINI_JAX, tile, ctx.GetOwner());
+	});
 
 	//Jaxi
 	effects[SKILL_JAXI] = Effect(SKILL_JAXI, KEYWORD_DYING_WISH, "{Dying Wish}: Summon a 1/1 {Ranged} Mini-Jax in a random corner");
-	effects[SKILL_JAXI].OnPostEvent = [](EffectContext context, Event* event) {
-		if (OnDeathEvent* deathEvent = event->As<OnDeathEvent>()) {
-			if (context.IsCard(deathEvent->minion)) {
-				BoardTile* tile = context.game->map.GetRandomEmptyCorner();
-				if (tile != nullptr)
-					context.game->SummonToken(CARD_MINI_JAX, tile, context.card->owner);
-			}
-		}
-	};
+	effects[SKILL_JAXI].RegisterPostTrigger<OnDeathEvent>(
+		[](EffectContext ctx, OnDeathEvent& ev) { return ctx.IsCard(ev.minion); },
+		[](EffectContext ctx, OnDeathEvent& ev) {
+			if (BoardTile* tile = ctx.GetMap()->GetRandomEmptyCorner())
+				ctx.game->SummonToken(CARD_MINI_JAX, tile, ctx.GetOwner());
+	});
 
 	//Keeper of the Vale
 	effects[SKILL_KEEPER_OF_THE_VALE] = Effect(SKILL_KEEPER_OF_THE_VALE, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Summon a random non-token friendly minion destroyed this game nearby");
-	effects[SKILL_KEEPER_OF_THE_VALE].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
-		BoardTile* target = context.game->map.GetRandomEmptyNear(tile);
-		if (target != nullptr) {
-			std::vector<Card*> minions;
-			for (Card* destroyed : context.game->GetDestroyedMinions())
-				if (!destroyed->isToken && destroyed->IsMinion() && context.SharesOwner(destroyed))
-					minions.push_back(destroyed);
-			if (minions.size() > 0) {
-				int i = rand() % minions.size();
-				context.game->SummonToken(minions[i]->cardId, target, context.card->owner);
-			}
+	effects[SKILL_KEEPER_OF_THE_VALE].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
+		ctx.game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, [](BoardTile* tile) {
+			return !tile->HasMinion(); }), ev.tile);
+		if (ctx.game->HasSelectable()) {
+			ctx.game->callback = EffectCallback(ctx, ev.tile);
+			ctx.game->callback.Callback = [](EffectContext ctx, BoardTile* source, BoardTile* target) {
+				if (!target->HasMinion()) {
+					std::vector<Card*> valid;
+					for (Card* destroyed : ctx.game->GetDestroyedMinions())
+						if (!destroyed->isToken && destroyed->IsMinion() && ctx.SharesOwner(destroyed))
+							valid.push_back(destroyed);
+					if (valid.size() > 0)
+						ctx.game->SummonToken(valid[rand() % valid.size()]->cardId, target, ctx.GetOwner());
+				}
+			};
 		}
-	};
+	});
 
 	//Khymera
 	effects[SKILL_KHYMERA] = Effect(SKILL_KHYMERA, KEYWORD_NONE, "Whenever this minion takes damage, summon a random token minion nearby");
-	effects[SKILL_KHYMERA].OnPostEvent = [](EffectContext context, Event* event) {
-		if (OnDamageEvent* damageEvent = event->As<OnDamageEvent>()) {
-			if (context.IsCardOnBoard(damageEvent->target)) {
-				BoardTile* tile = context.game->map.GetRandomEmptyNear(damageEvent->target->curTile);
-				if (tile != nullptr)
-					context.game->SummonToken(context.game->collections->GetRandomTokenMinion()->cardId, tile, context.card->owner);
-			}
-		}
-	};
+	effects[SKILL_KHYMERA].RegisterPostTrigger<OnDamageEvent>(
+		[](EffectContext ctx, OnDamageEvent& ev) { return ctx.IsCardOnBoard(ev.target); },
+		[](EffectContext ctx, OnDamageEvent& ev) {
+			if (BoardTile* tile = ctx.GetMap()->GetRandomEmptyNear(ev.target->curTile))
+				ctx.game->SummonToken(ctx.game->collections->GetRandomTokenMinion()->cardId, tile, ctx.GetOwner());
+	});
 
 	//Lightbender
 	effects[SKILL_LIGHTBENDER] = Effect(SKILL_LIGHTBENDER, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Dispel ALL spaces around it");
-	effects[SKILL_LIGHTBENDER].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
-		for (BoardTile* tile : context.game->map.GetAllNear(tile)) {
+	effects[SKILL_LIGHTBENDER].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
+		for (BoardTile* tile : ctx.GetMap()->GetAllNear(ev.tile)) {
 			tile->SetFeature(TILE_NONE);
 			if (tile->HasMinion())
 				tile->minion->Dispel();
 		}
-	};
+	});
 
 	//Lux Ignis
 	effects[SKILL_LUX_IGNIS] = Effect(SKILL_LUX_IGNIS, KEYWORD_RANGED, "{Ranged}|At the end of your turn, restore 2 Health to all nearby friendly minions");
-	effects[SKILL_LUX_IGNIS].OnPostEvent = [](EffectContext context, Event* event) {
-		if (OnTurnEndEvent* turnEndEvent = event->As<OnTurnEndEvent>())
-			if (context.IsOnBoard() && context.IsOwnedBy(turnEndEvent->player))
-				for (BoardTile* tile : context.game->map.GetAllNear(context.card->GetMinion()->curTile))
-					if (tile->HasMinion() && context.IsAllied(tile->minion) && !tile->minion->IsGeneral())
-						tile->minion->Heal(context.card, 2);
-	};
+	effects[SKILL_LUX_IGNIS].RegisterPostTrigger<OnTurnEndEvent>(
+		[](EffectContext ctx, OnTurnEndEvent& ev) { return ctx.IsOnBoard() && ctx.IsOwnedBy(ev.player); },
+		[](EffectContext ctx, OnTurnEndEvent& ev) {
+			for (BoardTile* tile : ctx.GetMap()->GetAllNear(ctx.GetTile()))
+				if (tile->HasMinion() && ctx.IsAllied(tile->minion) && !tile->minion->IsGeneral())
+					tile->minion->Heal(ctx.card, 2);
+	});
 
 	//Lady Locke
 	effects[SKILL_LADY_LOCKE] = Effect(SKILL_LADY_LOCKE, KEYWORD_OPENING_GAMBIT | KEYWORD_PROVOKE, "{Provoke}|{Opening Gambit}: Other minions you summon this turn gain +1/+1 and gain {Provoke}");
-	effects[SKILL_LADY_LOCKE].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
-		context.card->owner->general->AddContinuousEffect(EFFECT_LADY_LOCKE_CONTINUOUS, context.card);
-	};
-	effects[EFFECT_LADY_LOCKE_CONTINUOUS] = Effect(EFFECT_LADY_LOCKE_CONTINUOUS, KEYWORD_NONE, "{Lady Locke}|Minions you summon this turn gain +1/+1 and gain {Provoke}");
-	effects[EFFECT_LADY_LOCKE_CONTINUOUS].OnPostEvent = [](EffectContext context, Event* event) {
-		if (OnSummonEvent* summonEvent = event->As<OnSummonEvent>()) {
-			if (context.IsOnBoard() && context.IsAllied(summonEvent->minion) && context.effect->GetRef() != summonEvent->minion)
-				summonEvent->minion->AddEffect(EFFECT_LADY_LOCKE_BUFF, nullptr, context.effect->GetRef());
-		}
-		else if (OnTurnEndEvent* turnEndEvent = event->As<OnTurnEndEvent>()) {
-			if (context.IsOnBoard() && context.IsOwnedBy(turnEndEvent->player))
-				context.card->RemoveEffectsFromSource(context.effect);
-		}
-	};
-	effects[EFFECT_LADY_LOCKE_BUFF] = Effect(EFFECT_LADY_LOCKE_BUFF, KEYWORD_PROVOKE, "{Lady Locke}|{Provoke}");
+	effects[SKILL_LADY_LOCKE].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
+		ctx.GetAllyGeneral()->AddContinuousEffect(EFFECT_LADY_LOCKE_CONTINUOUS, ctx.card); });
+	effects[EFFECT_LADY_LOCKE_CONTINUOUS] = Effect(EFFECT_LADY_LOCKE_CONTINUOUS, KEYWORD_NONE, "Lady Locke|Minions you summon this turn gain +1/+1 and gain {Provoke}");
+	effects[EFFECT_LADY_LOCKE_CONTINUOUS].RegisterPostTrigger<OnSummonEvent>(
+		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsOnBoard() && ctx.IsAllied(ev.minion) && ctx.effect->GetRef() != ev.minion; },
+		[](EffectContext ctx, OnSummonEvent& ev) { ev.minion->AddEffect(EFFECT_LADY_LOCKE_BUFF, nullptr, ctx.effect->GetRef()); });
+	effects[EFFECT_LADY_LOCKE_CONTINUOUS].RegisterPostTrigger<OnTurnEndEvent>(
+		[](EffectContext ctx, OnTurnEndEvent& ev) { return ctx.IsOnBoard() && ctx.IsOwnedBy(ev.player); },
+		[](EffectContext ctx, OnTurnEndEvent& ev) { ctx.card->RemoveEffectsFromSource(ctx.effect); });
+	effects[EFFECT_LADY_LOCKE_BUFF] = Effect(EFFECT_LADY_LOCKE_BUFF, KEYWORD_PROVOKE, "Lady Locke|{Provoke}");
 	effects[EFFECT_LADY_LOCKE_BUFF].SetAtkBuff(1);
 	effects[EFFECT_LADY_LOCKE_BUFF].SetHPBuff(1);
 	
 	//Manaforger
 	effects[SKILL_MANAFORGER] = Effect(SKILL_MANAFORGER, KEYWORD_NONE, "The first non-Bloodborn spell you cast each turn costs 1 less");
-	effects[SKILL_MANAFORGER].OnAddThis = [](EffectContext context) {
-		for (Card* c : context.game->GetCardsCastThisTurn())
-			if (c->IsSpell())
-				return;
-		if (context.effect->ApplyEffect)
-			context.effect->ApplyEffect(context);
-	};
-	effects[SKILL_MANAFORGER].OnRemoveThis = [](EffectContext context) {
-		if (context.effect->RemoveEffect)
-			context.effect->RemoveEffect(context);
-	};
-	effects[SKILL_MANAFORGER].OnPostEvent = [](EffectContext context, Event* event) {
-		if (OnCastEvent* castEvent = event->As<OnCastEvent>()) {
-			if (context.SharesOwner(castEvent->card) && castEvent->card->IsSpell()) {
-				castEvent->card->RemoveEffectsFromSource(context.effect);
-				if (context.effect->RemoveEffect)
-					context.effect->RemoveEffect(context);
-			}
-		}
-		else if (OnAddToHandEvent* addToHandEvent = event->As<OnAddToHandEvent>()) {
-			if (context.IsOnBoard() && context.SharesOwner(addToHandEvent->card) && addToHandEvent->card->IsSpell()) {
-				for (Card* c : context.game->GetCardsCastThisTurn())
-					if (c->IsSpell())
-						return;
-				addToHandEvent->card->AddEffect(EFFECT_MANAFORGER, context.effect, context.card);
-			}
-		}
-		else if (OnTurnEndEvent* turnEndEvent = event->As<OnTurnEndEvent>()) {
-			if (context.IsOnBoard() && context.IsOwnedBy(turnEndEvent->player))
-				if (context.effect->ApplyEffect)
-					context.effect->ApplyEffect(context);
-		}
-	};
-	effects[SKILL_MANAFORGER].ApplyEffect = [](EffectContext context) {
-		for (Card* card : context.card->owner->hand)
-			if (card->IsSpell())
-				card->AddEffect(EFFECT_MANAFORGER, context.effect, context.card);
-		for (Card* card : context.card->owner->deck)
-			if (card->IsSpell())
-				card->AddEffect(EFFECT_MANAFORGER, context.effect, context.card);
-	};
-	effects[SKILL_MANAFORGER].RemoveEffect = [](EffectContext context) {
-		for (Card* card : context.card->owner->hand)
-			card->RemoveEffectsFromSource(context.effect);
-		for (Card* card : context.card->owner->deck)
-			card->RemoveEffectsFromSource(context.effect);
-	};
-	effects[EFFECT_MANAFORGER] = Effect(EFFECT_MANAFORGER, KEYWORD_NONE, "{Manaforger}");
+	effects[SKILL_MANAFORGER].RegisterSelfTrigger<OnAddThisEvent>([](EffectContext ctx, OnAddThisEvent& ev) {
+		if (ctx.game->GetTurnPlayer() == ctx.GetOwner() && !ctx.game->AnyCastThisTurn([](Card* card) { return card->IsSpell(); }))
+			for (Card* card : ctx.GetOwner()->GetDeckAndHand())
+				if (card->IsSpell())
+					card->AddEffect(EFFECT_MANAFORGER, ctx.effect, ctx.card);
+	});
+	effects[SKILL_MANAFORGER].RegisterSelfTrigger<OnRemoveThisEvent>([](EffectContext ctx, OnRemoveThisEvent& ev) {
+		for (Card* card : ctx.GetOwner()->GetDeckAndHand())
+			card->RemoveEffectsFromSource(ctx.effect);
+	});
+	effects[SKILL_MANAFORGER].RegisterPostTrigger<OnCastEvent>(
+		[](EffectContext ctx, OnCastEvent& ev) { return ctx.SharesOwner(ev.card) && ev.card->IsSpell(); },
+		[](EffectContext ctx, OnCastEvent& ev) {
+			ev.card->RemoveEffectsFromSource(ctx.effect);
+			for (Card* card : ctx.GetOwner()->GetDeckAndHand())
+				card->RemoveEffectsFromSource(ctx.effect);
+	});
+	effects[SKILL_MANAFORGER].RegisterPostTrigger<OnAddToHandEvent>(
+		[](EffectContext ctx, OnAddToHandEvent& ev) { return ctx.IsOnBoard() && ctx.SharesOwner(ev.card) && ev.card->IsSpell(); },
+		[](EffectContext ctx, OnAddToHandEvent& ev) {
+			if (ctx.game->GetTurnPlayer() == ctx.GetOwner() && !ctx.game->AnyCastThisTurn([](Card* card) { return card->IsSpell(); }))
+				ev.card->AddEffect(EFFECT_MANAFORGER, ctx.effect, ctx.card);
+	});
+	effects[SKILL_MANAFORGER].RegisterPostTrigger<OnTurnEndEvent>(
+		[](EffectContext ctx, OnTurnEndEvent& ev) { return ctx.IsOnBoard() && ctx.IsOwnedBy(ev.player); },
+		[](EffectContext ctx, OnTurnEndEvent& ev) {
+			for (Card* card : ctx.GetOwner()->GetDeckAndHand())
+				if (card->IsSpell())
+					card->AddEffect(EFFECT_MANAFORGER, ctx.effect, ctx.card);
+	});
+	effects[EFFECT_MANAFORGER] = Effect(EFFECT_MANAFORGER, KEYWORD_NONE, "Manaforger");
 	effects[EFFECT_MANAFORGER].SetCostBuff(-1);
 
 	//Maw
 	effects[SKILL_MAW] = Effect(SKILL_MAW, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Deal 2 damage to a nearby enemy minion");
-	effects[SKILL_MAW].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
-		context.game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, [](BoardTile* tile) {
-			return tile->HasMinion() && tile->minion->IsEnemy() && !tile->minion->IsGeneral();
-		}), tile);
-		if (context.game->HasSelectable()) {
-			context.game->callback = EffectCallback(context, tile);
-			context.game->callback.Callback = [](EffectContext context, BoardTile* source, BoardTile* target) {
+	effects[SKILL_MAW].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
+		ctx.game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, [](BoardTile* tile) {
+			return tile->HasMinion() && tile->minion->IsEnemy() && !tile->minion->IsGeneral(); }), ev.tile);
+		if (ctx.game->HasSelectable()) {
+			ctx.game->callback = EffectCallback(ctx, ev.tile);
+			ctx.game->callback.Callback = [](EffectContext ctx, BoardTile* source, BoardTile* target) {
 				if (target->HasMinion())
-					target->minion->DealDamage(context.card, 2);
+					target->minion->DealDamage(ctx.card, 2);
 			};
 		}
-	};
+	});
 
 	//Mindwarper
 	effects[SKILL_MINDWARPER] = Effect(SKILL_MINDWARPER, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Gain a copy of a random spell from your opponent's action bar");
-	effects[SKILL_MINDWARPER].OnPreCastThis = [](EffectContext context, BoardTile* tile) {
+	effects[SKILL_MINDWARPER].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
 		std::vector<Card*> valid;
-		for (Card* card : context.card->owner->opponent->hand)
+		for (Card* card : ctx.GetOpponent()->hand)
 			if (card->IsSpell())
 				valid.push_back(card);
-		if (valid.size() > 0) {
-			int i = rand() % valid.size();
-			context.card->owner->AddNewToHand(valid[i]->original);
-		}
-	};
+		if (valid.size() > 0)
+			ctx.GetOwner()->AddNewToHand(valid[rand() % valid.size()]->original);
+	});
 
 	//Mirkblood Devourer
 	effects[SKILL_MIRKBLOOD_DEVOURER] = Effect(SKILL_MIRKBLOOD_DEVOURER, KEYWORD_NONE, "Friendly minions summoned nearby this minion gain +1/+1");
-	effects[SKILL_MIRKBLOOD_DEVOURER].OnPostEvent = [](EffectContext context, Event* event) {
-		if (OnSummonEvent* summonEvent = event->As<OnSummonEvent>())
-			if (context.IsOnBoard() && context.IsAllied(summonEvent->minion) && context.card->GetMinion()->curTile->IsNear(summonEvent->minion->curTile))
-				summonEvent->minion->AddEffect(EFFECT_MIRKBLOOD_DEVOURER, nullptr, context.card);
-	};
-	effects[EFFECT_MIRKBLOOD_DEVOURER] = Effect(EFFECT_MIRKBLOOD_DEVOURER, KEYWORD_NONE, "{Mirkblood Devourer}");
+	effects[SKILL_MIRKBLOOD_DEVOURER].RegisterPostTrigger<OnSummonEvent>(
+		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsOnBoard() && ctx.IsAllied(ev.minion) && ctx.GetTile()->IsNear(ev.minion->curTile); },
+		[](EffectContext ctx, OnSummonEvent& ev) { ev.minion->AddEffect(EFFECT_MIRKBLOOD_DEVOURER, nullptr, ctx.card); });
+	effects[EFFECT_MIRKBLOOD_DEVOURER] = Effect(EFFECT_MIRKBLOOD_DEVOURER, KEYWORD_NONE, "Mirkblood Devourer");
 	effects[EFFECT_MIRKBLOOD_DEVOURER].SetAtkBuff(1);
 	effects[EFFECT_MIRKBLOOD_DEVOURER].SetHPBuff(1);
 
 	//Mogwai
 	effects[SKILL_MOGWAI] = Effect(SKILL_MOGWAI, KEYWORD_NONE, "After this moves, draw a card");
-	effects[SKILL_MOGWAI].OnPostEvent = [](EffectContext context, Event* event) {
-		if (OnMoveEvent* moveEvent = event->As<OnMoveEvent>())
-			if (context.IsCardOnBoard(moveEvent->minion) && !moveEvent->wasTeleported)
-				context.card->owner->Draw();
-	};
+	effects[SKILL_MOGWAI].RegisterPostTrigger<OnMoveEvent>(
+		[](EffectContext ctx, OnMoveEvent& ev) { return ctx.IsCardOnBoard(ev.minion) && !ev.wasTeleported; },
+		[](EffectContext ctx, OnMoveEvent& ev) { ctx.GetOwner()->Draw(); });
 
 	//Necroseer
 	effects[SKILL_NECROSEER] = Effect(SKILL_NECROSEER, KEYWORD_DYING_WISH, "{Dying Wish}: Draw a card");
-	effects[SKILL_NECROSEER].OnPostEvent = [](EffectContext context, Event* event) {
-		if (OnDeathEvent* deathEvent = event->As<OnDeathEvent>())
-			if (context.IsCard(deathEvent->minion))
-				context.card->owner->Draw();
-	};
+	effects[SKILL_NECROSEER].RegisterPostTrigger<OnDeathEvent>(
+		[](EffectContext ctx, OnDeathEvent& ev) { return ctx.IsCard(ev.minion); },
+		[](EffectContext ctx, OnDeathEvent& ev) { ctx.GetOwner()->Draw(); });
 
 	//Night Watcher
 	effects[SKILL_NIGHT_WATCHER] = Effect(SKILL_NIGHT_WATCHER, KEYWORD_FORCEFIELD, "{Forcefield}|Whenever ANY player summons a minion with {Rush}, exhaust it");
-	effects[SKILL_NIGHT_WATCHER].OnPostEvent = [](EffectContext context, Event* event) {
-		if (OnSummonEvent* summonEvent = event->As<OnSummonEvent>())
-			if (context.IsOnBoard() && summonEvent->minion->HasKeywords(KEYWORD_RUSH))
-				summonEvent->minion->Exhaust();
-	};
+	effects[SKILL_NIGHT_WATCHER].RegisterPostTrigger<OnSummonEvent>(
+		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsOnBoard() && ev.minion->HasKeywords(KEYWORD_RUSH); },
+		[](EffectContext ctx, OnSummonEvent& ev) { ev.minion->Exhaust(); });
 
 #pragma endregion
 
@@ -896,25 +749,24 @@ Collections::Collections() {
 
 	//Breath of The Unborn
 	effects[SPELL_BREATH_OF_THE_UNBORN] = Effect(SPELL_BREATH_OF_THE_UNBORN, KEYWORD_NONE, "Deal 2 damage to all enemy minions. Fully heal all friendly minions");
-	effects[SPELL_BREATH_OF_THE_UNBORN].OnResolveThis = [](EffectContext context, BoardTile* tile) {
-		for (Minion* minion : context.game->GetMinions()) {
+	effects[SPELL_BREATH_OF_THE_UNBORN].RegisterSelfTrigger<OnResolveThisEvent>([](EffectContext ctx, OnResolveThisEvent& ev) {
+		for (Minion* minion : ctx.game->GetMinions()) {
 			if (!minion->IsGeneral()) {
-				if (context.SharesOwner(minion))
-					minion->Heal(context.card, 999);
-				else
-					minion->DealDamage(context.card, 2);
+				ctx.SharesOwner(minion)
+					? minion->Heal(ctx.card, 999)
+					: minion->DealDamage(ctx.card, 2);
 			}
 		}
-	};
+	});
 
 	//Dark Seed
 	effects[SPELL_DARK_SEED] = Effect(SPELL_DARK_SEED, KEYWORD_NONE, "Deal 1 damage to the enemy general for each card in the opponent's action bar");
-	effects[SPELL_DARK_SEED].OnResolveThis = [](EffectContext context, BoardTile* tile) {
-		if (tile->HasMinion()) {
-			int damage = context.card->owner == &context.game->players[0] ? context.game->players[1].hand.size() : context.game->players[0].hand.size();
-			tile->minion->DealDamage(context.card, damage);
+	effects[SPELL_DARK_SEED].RegisterSelfTrigger<OnResolveThisEvent>([](EffectContext ctx, OnResolveThisEvent& ev) {
+		if (ev.tile->HasMinion()) {
+			int damage = ctx.GetOpponent()->hand.size();
+			ev.tile->minion->DealDamage(ctx.card, damage);
 		}
-	};
+	});
 
 #pragma endregion
 
@@ -1068,10 +920,8 @@ Minion* Collections::GetRandomTokenMinion() {
 	for (int i = 0; i < minionList.size(); ++i)
 		if (minionList[i].isToken)
 			valid.push_back(&minionList[i]);
-	if (valid.size() > 0) {
-		int i = rand() % valid.size();
-		return valid[i];
-	}
+	if (valid.size() > 0)
+		return valid[rand() % valid.size()];
 	return nullptr;
 }
 

@@ -120,11 +120,13 @@ public:
 	const std::vector<Card*>& GetCardsCastThisTurn() const;
 	const int& GetTurnCount() const;
 	const Player* GetTurnPlayer() const;
+	BoardTile* GetTileInFront(BoardTile* tile, Player* player);
 
 	//Utils
 	void SetContext(Card* card, Player* player);
 	bool CanMove(int x, int y);
 	bool HasSelectable();
+	bool AnyCastThisTurn(bool (*Predicate)(Card*));
 	std::string GetPlayerString(Player* player);
 	std::string GetCardString(Card* card);
 	void Log(std::string log);

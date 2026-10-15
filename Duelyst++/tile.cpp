@@ -100,10 +100,8 @@ BoardTile* Map::GetRandomEmpty(BoardTile* ignore1, BoardTile* ignore2) {
 		for (int j = 0; j < 5; ++j)
 			if (tiles[i][j].minion == nullptr && &tiles[i][j] != ignore1 && &tiles[i][j] != ignore2)
 				valid.push_back(&tiles[i][j]);
-	if (valid.size() > 0) {
-		int i = rand() % valid.size();
-		return valid[i];
-	}
+	if (valid.size() > 0)
+		return valid[rand() % valid.size()];
 	return nullptr;
 }
 
@@ -114,10 +112,8 @@ BoardTile* Map::GetRandomEmptyCorner() {
 	if (tiles[8][0].minion == nullptr) { valid.push_back(&tiles[8][0]); }
 	if (tiles[0][4].minion == nullptr) { valid.push_back(&tiles[0][4]); }
 	if (tiles[8][4].minion == nullptr) { valid.push_back(&tiles[8][4]); }
-	if (valid.size() > 0) {
-		int i = rand() % valid.size();
-		return valid[i];
-	}
+	if (valid.size() > 0)
+		return valid[rand() % valid.size()];
 	return nullptr;
 }
 
@@ -130,10 +126,8 @@ BoardTile* Map::GetRandomEmptyNear(BoardTile* tile) {
 		for (int j = max(tile->pos.y - 1, 0); j < min(tile->pos.y + 2, 5); ++j)
 			if (&tiles[i][j] != tile && tiles[i][j].minion == nullptr)
 				valid.push_back(&tiles[i][j]);
-	if (valid.size() > 0) {
-		int i = rand() % valid.size();
-		return valid[i];
-	}
+	if (valid.size() > 0)
+		return valid[rand() % valid.size()];
 	return nullptr;
 }
 

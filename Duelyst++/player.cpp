@@ -185,4 +185,20 @@ void Player::Replace(int idx) {
 	}
 }
 
+//Change max replaces
+void Player::ModifyReplaceCount(int delta) {
+	maxReplaces += delta;
+	if (delta > 0) { replaces += delta; }
+	else { replaces = min(replaces, maxReplaces); }
+}
+
 #pragma endregion
+
+//Getters
+std::vector<Card*> Player::GetDeckAndHand() {
+	std::vector<Card*> valid;
+	valid.reserve(hand.size() + deck.size());
+	valid.insert(valid.end(), hand.begin(), hand.end());
+	valid.insert(valid.end(), deck.begin(), deck.end());
+	return valid;
+}

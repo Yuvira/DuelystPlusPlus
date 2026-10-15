@@ -321,16 +321,17 @@ void Minion::Refresh() {
 int Minion::DealDamage(Card* source, int damage) {
 	OnDamageEvent* event = new OnDamageEvent(game->GetTurnCount(), source, this, damage);
 	game->eventManager.SendOnPreEvent(game, event);
-	if (damage > 0) {
+	if (event->damage > 0) {
 		if (HasKeywords(KEYWORD_FORCEFIELD) && !forcefieldBroken) {
 			forcefieldBroken = true;
-			damage = 0;
+			event->damage = 0;
 		}
 		else {
-			hp -= damage;
+			hp -= event->damage;
 			game->eventManager.SendOnPostEvent(game, event);
 		}
 	}
+	damage = event->damage;
 	delete event;
 	return damage;
 }
@@ -384,8 +385,9 @@ void Minion::Dispel() {
 
 //Trigger OnAddThis on effects when summoned
 void Minion::AddEffects() {
+	OnAddThisEvent addEvent = OnAddThisEvent();
 	for (int i = 0; i < effects.size(); ++i)
-		effects[i]->TriggerOnAddThis(EffectContext(effects[i], this, game));
+		effects[i]->TriggerSelfEvent(EffectContext(effects[i], this, game), &addEvent);
 }
 
 #pragma endregion

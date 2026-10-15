@@ -2,6 +2,7 @@
 #include "effect.h"
 #include "game.h"
 #include "card.h"
+#include "tile.h"
 
 //Effect constructors
 Effect::Effect() : Effect(EFFECT_NONE, KEYWORD_NONE, "") {}
@@ -21,33 +22,17 @@ Effect::Effect(eEffect effectId, int keywords, std::string description) {
 }
 Effect::~Effect() {}
 
-//Trigger events
-void Effect::TriggerPreEvent(EffectContext context, Event* event) {
-	if (OnPreEvent)
-		OnPreEvent(context, event);
-}
-void Effect::TriggerPostEvent(EffectContext context, Event* event) {
-	if (OnPostEvent)
-		OnPostEvent(context, event);
+//Dispatch triggers
+void Effect::DispatchTrigger(const std::vector<EventTrigger>& triggers, EffectContext ctx, Event* ev) {
+	for (const EventTrigger& trigger : triggers)
+		if (trigger.type == ev->type)
+			trigger.Invoke(trigger, ctx, ev);
 }
 
-//Trigger legacy events
-void Effect::TriggerOnAddThis(EffectContext context) {
-	if (OnAddThis)
-		OnAddThis(context);
-}
-void Effect::TriggerOnRemoveThis(EffectContext context) {
-	if (OnRemoveThis)
-		OnRemoveThis(context);
-}
-void Effect::TriggerOnPreCastThis(EffectContext context, BoardTile* tile) {
-	if (OnPreCastThis)
-		OnPreCastThis(context, tile);
-}
-void Effect::TriggerOnResolveThis(EffectContext context, BoardTile* tile) {
-	if (OnResolveThis)
-		OnResolveThis(context, tile);
-}
+//Trigger events
+void Effect::TriggerPreEvent(EffectContext ctx, Event* ev) { DispatchTrigger(preTriggers, ctx, ev); }
+void Effect::TriggerPostEvent(EffectContext ctx, Event* ev) { DispatchTrigger(postTriggers, ctx, ev); }
+void Effect::TriggerSelfEvent(EffectContext ctx, Event* ev) { DispatchTrigger(selfTriggers, ctx, ev); }
 
 //Getters
 Card* Effect::GetToken() { return token; }
@@ -83,3 +68,10 @@ bool EffectContext::SharesOwner(Card* compare) { return card->owner == compare->
 bool EffectContext::IsOwnedBy(Player* compare) { return card->owner == compare; }
 bool EffectContext::IsAllied(Card* compare) { return card != compare && card->owner == compare->owner; }
 bool EffectContext::IsOwnerTurn() { return game->GetTurnPlayer() == card->owner; }
+Player* EffectContext::GetOwner() { return card->owner; }
+Player* EffectContext::GetOpponent() { return card->owner->opponent; }
+Minion* EffectContext::GetMinion() { return card->GetMinion(); }
+Minion* EffectContext::GetAllyGeneral() { return card->owner->general; }
+Minion* EffectContext::GetEnemyGeneral() { return card->owner->opponent->general; }
+BoardTile* EffectContext::GetTile() { return card->IsOnBoard() ? card->GetMinion()->curTile : nullptr; }
+Map* EffectContext::GetMap() { return &game->map; }

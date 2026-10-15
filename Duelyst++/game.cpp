@@ -444,9 +444,10 @@ void Game::UseCard() {
 
 	//Remove from hand and do pre-cast effect targeting
 	players[turn].hand.erase(players[turn].hand.begin() + handIdx);
-	for (Effect* effect : activeCard->GetEffects())
-		if (effect->OnPreCastThis)
-			effect->OnPreCastThis(EffectContext(effect, activeCard, this), &map.tiles[pos.x][pos.y]);
+	for (Effect* effect : activeCard->GetEffects()) {
+		OnPreCastThisEvent preCastEvent = OnPreCastThisEvent(&map.tiles[pos.x][pos.y]);
+		effect->TriggerSelfEvent(EffectContext(effect, activeCard, this), &preCastEvent);
+	}
 	if (activeCard->GetMinion() != nullptr)
 		activeCard->GetMinion()->SetPosition(pos.x, pos.y);
 	castPos = pos;
@@ -483,9 +484,10 @@ void Game::PostCast() {
 	eventManager.SendOnPostEvent(this, event);
 	delete event;
 	castThisTurn.push_back(activeCard->original);
-	for (Effect* effect : activeCard->GetEffects())
-		if (effect->OnResolveThis)
-			effect->OnResolveThis(EffectContext(effect, activeCard, this), tile);
+	for (Effect* effect : activeCard->GetEffects()) {
+		OnResolveThisEvent resolveEvent = OnResolveThisEvent(tile);
+		effect->TriggerSelfEvent(EffectContext(effect, activeCard, this), &resolveEvent);
+	}
 	if (activeCard->IsMinion())
 		Summon(activeCard->GetMinion(), tile, true);
 	else if (activeCard->IsSpell()) {
@@ -1054,6 +1056,8 @@ const std::vector<Card*>& Game::GetCardsCastThisTurn() const { return castThisTu
 //Util getters
 const int& Game::GetTurnCount() const { return turnCount; }
 const Player* Game::GetTurnPlayer() const { return &players[turn]; }
+BoardTile* Game::GetTileInFront(BoardTile* tile, Player* player) {
+	return map.GetTile(&players[0] == player ? tile->pos.x + 1 : tile->pos.x - 1, tile->pos.y); }
 
 #pragma endregion
 
@@ -1080,6 +1084,16 @@ bool Game::CanMove(int x, int y) {
 
 //Check if any tiles are selectable
 bool Game::HasSelectable() { return selectable.size() > 0; }
+
+//Check if any cards matching predicate were cast this turn
+bool Game::AnyCastThisTurn(bool (*Predicate)(Card*)) {
+	if (!Predicate)
+		return true;
+	for (Card* card : castThisTurn)
+		if (Predicate(card))
+			return true;
+	return false;
+}
 
 //Get string for player objects
 std::string Game::GetPlayerString(Player* player) {

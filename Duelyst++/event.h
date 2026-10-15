@@ -15,7 +15,11 @@ enum eEventType {
 	EVENT_REPLACE,
 	EVENT_EFFECTS_CHANGED,
 	EVENT_TURN_END,
-	EVENT_TURN_START
+	EVENT_TURN_START,
+	EVENT_ADD_THIS,
+	EVENT_REMOVE_THIS,
+	EVENT_PRE_CAST_THIS,
+	EVENT_RESOLVE_THIS
 };
 
 //Define
@@ -184,4 +188,40 @@ struct OnTurnStartEvent : Event {
 		this->player = player;
 	}
 	Player* player;
+};
+
+//Triggers on an effect when it's added to a card or enters the field
+struct OnAddThisEvent : Event {
+	static constexpr eEventType typeKey = EVENT_ADD_THIS;
+	OnAddThisEvent() : Event(-1) {
+		type = EVENT_ADD_THIS;
+	}
+};
+
+//Triggers on an effect when it's removed from a card or leaves the field
+struct OnRemoveThisEvent : Event {
+	static constexpr eEventType typeKey = EVENT_REMOVE_THIS;
+	OnRemoveThisEvent() : Event(-1) {
+		type = EVENT_REMOVE_THIS;
+	}
+};
+
+//Triggers on an effect just before it's cast (Opening Gambit)
+struct OnPreCastThisEvent : Event {
+	static constexpr eEventType typeKey = EVENT_PRE_CAST_THIS;
+	OnPreCastThisEvent(BoardTile* tile) : Event(-1) {
+		type = EVENT_PRE_CAST_THIS;
+		this->tile = tile;
+	}
+	BoardTile* tile;
+};
+
+//Triggers on an effect as the card it's attached to resolves (spell effects)
+struct OnResolveThisEvent : Event {
+	static constexpr eEventType typeKey = EVENT_RESOLVE_THIS;
+	OnResolveThisEvent(BoardTile* tile) : Event(-1) {
+		type = EVENT_RESOLVE_THIS;
+		this->tile = tile;
+	}
+	BoardTile* tile;
 };

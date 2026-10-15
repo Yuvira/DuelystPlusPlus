@@ -167,8 +167,10 @@ void Card::AddEffect(Effect effect, Effect* source, Card* refCard) {
 				return;
 	effects.push_back(new Effect(effect));
 	effects.back()->SetSources(source, refCard);
-	if (IsOnBoard())
-		effects.back()->TriggerOnAddThis(EffectContext(effects.back(), this, game));
+	if (IsOnBoard()) {
+		OnAddThisEvent addEvent = OnAddThisEvent();
+		effects.back()->TriggerSelfEvent(EffectContext(effects.back(), this, game), &addEvent);
+	}
 	if (game != nullptr) {
 		OnEffectsChangedEvent* event = new OnEffectsChangedEvent(game->GetTurnCount(), this);
 		game->eventManager.SendOnPreEvent(game, event);
@@ -187,8 +189,10 @@ void Card::AddContinuousEffect(eEffect effectId, Card* refCard) {
 void Card::AddContinuousEffect(Effect effect, Card* refCard) {
 	effects.push_back(new Effect(effect));
 	effects.back()->SetSources(effects.back(), refCard);
-	if (IsOnBoard())
-		effects.back()->TriggerOnAddThis(EffectContext(effects.back(), this, game));
+	if (IsOnBoard()) {
+		OnAddThisEvent addEvent = OnAddThisEvent();
+		effects.back()->TriggerSelfEvent(EffectContext(effects.back(), this, game), &addEvent);
+	}
 	if (game != nullptr) {
 		OnEffectsChangedEvent* event = new OnEffectsChangedEvent(game->GetTurnCount(), this);
 		game->eventManager.SendOnPreEvent(game, event);
@@ -227,8 +231,10 @@ void Card::RemoveEffectAt(std::vector<int> indices) {
 		removed.push_back(effects[indices[i]]);
 		effects.erase(effects.begin() + indices[i]);
 	}
-	for (int i = 0; i < removed.size(); ++i)
-		removed[i]->TriggerOnRemoveThis(EffectContext(removed[i], this, game));
+	for (int i = 0; i < removed.size(); ++i) {
+		OnRemoveThisEvent removeEvent = OnRemoveThisEvent();
+		removed[i]->TriggerSelfEvent(EffectContext(removed[i], this, game), &removeEvent);
+	}
 	OnEffectsChangedEvent* event = new OnEffectsChangedEvent(game->GetTurnCount(), this);
 	game->eventManager.SendOnPreEvent(game, event);
 	game->eventManager.SendOnPostEvent(game, event);

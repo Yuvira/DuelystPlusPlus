@@ -2,17 +2,19 @@
 
 //Include
 #include <string>
+#include <vector>
 #include "effectids.h"
+#include "event.h"
 
 //Definitions
 class Game;
 class BoardTile;
+class Map;
 class Player;
 class Card;
 class Effect;
-struct Event;
 
-#pragma region Effect Context
+#pragma region Helper Structs
 
 //Self reference container for passing to lambdas
 struct EffectContext {
@@ -29,9 +31,44 @@ struct EffectContext {
 	bool IsOwnedBy(Player* compare);
 	bool IsAllied(Card* compare);
 	bool IsOwnerTurn();
+	Player* GetOwner();
+	Player* GetOpponent();
+	Minion* GetMinion();
+	Minion* GetAllyGeneral();
+	Minion* GetEnemyGeneral();
+	BoardTile* GetTile();
+	Map* GetMap();
 	Effect* effect;
 	Card* card;
 	Game* game;
+};
+
+//Event trigger
+struct EventTrigger {
+
+	//Constructor
+	template <typename T>
+	EventTrigger(bool (*Predicate)(EffectContext ctx, T& ev), void (*Trigger)(EffectContext ctx, T& ev)) :
+		type(T::typeKey),
+		Invoke(&InvokeTrigger<T>),
+		Predicate(reinterpret_cast<void (*)()>(Predicate)),
+		Trigger(reinterpret_cast<void (*)()>(Trigger)) {}
+
+	//Invoke method
+	template <typename T>
+	static void InvokeTrigger(const EventTrigger& trigger, EffectContext ctx, Event* ev) {
+		T& typedEv = *static_cast<T*>(ev);
+		bool (*Predicate)(EffectContext ctx, T & ev) = reinterpret_cast<bool (*)(EffectContext ctx, T& ev)>(trigger.Predicate);
+		void (*Trigger)(EffectContext ctx, T & ev) = reinterpret_cast<void (*)(EffectContext ctx, T& ev)>(trigger.Trigger);
+		if (!Predicate || Predicate(ctx, typedEv))
+			Trigger(ctx, typedEv);
+	}
+
+	//Properties
+	eEventType type;
+	void (*Invoke)(const EventTrigger& trigger, EffectContext ctx, Event* ev);
+	void (*Predicate)();
+	void (*Trigger)();
 };
 
 #pragma endregion
@@ -39,7 +76,6 @@ struct EffectContext {
 //Effect class
 class Effect {
 
-//Methods
 public:
 
 	//Constructors
@@ -47,15 +83,22 @@ public:
 	Effect(eEffect effectId, int keywords, std::string description);
 	~Effect();
 
-	//Triggers
-	void TriggerPreEvent(EffectContext context, Event* event);
-	void TriggerPostEvent(EffectContext context, Event* event);
+	//Trigger registration
+	template <typename T>
+	void RegisterPreTrigger(bool (*Predicate)(EffectContext ctx, T& ev), void (*Trigger)(EffectContext ctx, T& ev)) {
+		preTriggers.emplace_back(Predicate, Trigger); }
+	template <typename T>
+	void RegisterPostTrigger(bool (*Predicate)(EffectContext ctx, T& ev), void (*Trigger)(EffectContext ctx, T& ev)) {
+		postTriggers.emplace_back(Predicate, Trigger); }
+	template <typename T>
+	void RegisterSelfTrigger(void (*Trigger)(EffectContext ctx, T& ev)) {
+		selfTriggers.emplace_back(static_cast<bool (*)(EffectContext ctx, T& ev)>(nullptr), Trigger); }
 
-	//Legacy triggers
-	void TriggerOnAddThis(EffectContext context);
-	void TriggerOnRemoveThis(EffectContext context);
-	void TriggerOnPreCastThis(EffectContext context, BoardTile* tile);
-	void TriggerOnResolveThis(EffectContext context, BoardTile* tile);
+	//Trigger dispatch
+	static void DispatchTrigger(const std::vector<EventTrigger>& triggers, EffectContext ctx, Event* ev);
+	void TriggerPreEvent(EffectContext ctx, Event* ev);
+	void TriggerPostEvent(EffectContext ctx, Event* ev);
+	void TriggerSelfEvent(EffectContext ctx, Event* ev);
 
 	//Getters & Setters
 	Card* GetToken();
@@ -80,18 +123,9 @@ public:
 	//Utils
 	bool IsContinuous() { return source != nullptr; }
 
-	//Function pointers
-	void (*OnPreEvent)(EffectContext context, Event* event) = nullptr;
-	void (*OnPostEvent)(EffectContext context, Event* event) = nullptr;
-	void (*OnAddThis)(EffectContext) = nullptr;
-	void (*OnRemoveThis)(EffectContext) = nullptr;
-	void (*OnPreCastThis)(EffectContext, BoardTile* tile) = nullptr;
-	void (*OnResolveThis)(EffectContext, BoardTile* tile) = nullptr;
-	void (*ApplyEffect)(EffectContext) = nullptr;
-	void (*RemoveEffect)(EffectContext) = nullptr;
-
-//Properties
 private:
+
+	//Properties
 	eEffect effectId;
 	int keywords;
 	std::string description;
@@ -104,5 +138,8 @@ private:
 	Card* token;
 	Card* refCard;
 	Effect* source;
+	std::vector<EventTrigger> preTriggers;
+	std::vector<EventTrigger> postTriggers;
+	std::vector<EventTrigger> selfTriggers;
 
 };
