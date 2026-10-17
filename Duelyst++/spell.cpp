@@ -77,15 +77,7 @@ void Spell::DrawDetails(Renderer& renderer, int& y) {
 #pragma region Updates
 
 //Update cost when buffs change
-void Spell::UpdateStatBuffs() {
-	int costBuff = 0;
-	for (int i = 0; i < effects.size(); ++i)
-		costBuff += effects[i]->GetCostBuff();
-	cost = max(original->cost + costBuff, 0);
-	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i]->GetFixedCost() > -1)
-			cost = effects[i]->GetFixedCost();
-}
+void Spell::UpdateStatBuffs() { cost = GetStat(STAT_COST, baseCost); }
 
 //Update card stats
 void Spell::UpdateDetailStats() {

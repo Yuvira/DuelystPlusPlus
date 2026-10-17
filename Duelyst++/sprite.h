@@ -37,7 +37,6 @@ public:
 	void CreateFromFile(std::string filename);
 	void CreateFromString(const std::string& str);
 	void CreateFromTextBlock(const std::vector<std::string>& lines);
-	int TextWidth(std::string str);
 	int width, height;
 	COORD pos;
 	std::vector<CHAR_INFO> buffer;

@@ -54,6 +54,9 @@
     <ClCompile Include="collections.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="modifiers.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="renderer.h">
@@ -90,6 +93,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="effectids.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modifiers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

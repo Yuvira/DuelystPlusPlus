@@ -23,10 +23,14 @@ Minion::Minion(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, 
 	this->cardId = cardId;
 	this->faction = faction;
 	this->tribe = tribe;
+	baseCost = cost;
 	this->cost = cost;
+	baseAtk = atk;
 	this->atk = atk;
 	this->hp = hp;
+	baseHpMax = hp;
 	hpMax = hp;
+	baseMoveRange = 2;
 	moveRange = 2;
 	this->isToken = isToken;
 	this->name = name;
@@ -149,25 +153,12 @@ void Minion::Update(bool& shouldLoop) {
 
 //Update attack/health/cost when buffs change
 void Minion::UpdateStatBuffs() {
-	int costBuff = 0;
-	int atkBuff = 0;
-	int hpBuff = 0;
 	int hpDelta = hp - hpMax;
-	int moveBuff = 0;
-	for (int i = 0; i < effects.size(); ++i) {
-		costBuff += effects[i]->GetCostBuff();
-		atkBuff += effects[i]->GetAtkBuff();
-		hpBuff += effects[i]->GetHPBuff();
-		moveBuff += effects[i]->GetMoveBuff();
-	}
-	cost = max(original->GetMinion()->cost + costBuff, 0);
-	atk = max(original->GetMinion()->atk + atkBuff, 0);
-	hpMax = original->GetMinion()->hpMax + hpBuff;
+	cost = GetStat(STAT_COST, baseCost);
+	atk = GetStat(STAT_ATK, baseAtk);
+	hpMax = GetStat(STAT_HP, baseHpMax);
+	moveRange = GetStat(STAT_MOVE, baseMoveRange);
 	hp = hpMax + hpDelta;
-	moveRange = max(original->GetMinion()->moveRange + moveBuff, 0);
-	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i]->GetFixedCost() > -1)
-			cost = effects[i]->GetFixedCost();
 }
 
 //Update HP & ATK sprites
@@ -415,7 +406,7 @@ bool Minion::IsMoveable() {
 	return true;
 }
 
-//Check if minion has given keywords
+//Check if minion has all given keywords
 bool Minion::HasKeywords(int keywords) {
 	int flags = KEYWORD_NONE;
 	for (int i = 0; i < effects.size(); ++i)

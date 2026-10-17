@@ -125,6 +125,7 @@
     <ClCompile Include="eventmanager.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="modifiers.cpp" />
     <ClCompile Include="player.cpp" />
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="spell.cpp" />
@@ -143,9 +144,11 @@
     <ClInclude Include="event.h" />
     <ClInclude Include="eventmanager.h" />
     <ClInclude Include="game.h" />
+    <ClInclude Include="modifiers.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="sprite.h" />
     <ClInclude Include="tile.h" />
+    <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="player.h" />

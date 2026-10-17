@@ -5,6 +5,7 @@
 #include <vector>
 #include "effectids.h"
 #include "event.h"
+#include "modifiers.h"
 
 //Definitions
 class Game;
@@ -69,6 +70,7 @@ struct EventTrigger {
 	void (*Invoke)(const EventTrigger& trigger, EffectContext ctx, Event* ev);
 	void (*Predicate)();
 	void (*Trigger)();
+
 };
 
 #pragma endregion
@@ -100,25 +102,22 @@ public:
 	void TriggerPostEvent(EffectContext ctx, Event* ev);
 	void TriggerSelfEvent(EffectContext ctx, Event* ev);
 
+	//Modifier updates
+	Effect& AddModifier(eStat stat, eModifier type, int value);
+	void UpdateModifier(eStat stat, int value);
+
 	//Getters & Setters
 	Card* GetToken();
 	Card* GetRef();
-	const Effect* const& GetSource() const;
-	const eEffect& GetID() const;
-	const int& GetKeywords() const;
-	const std::string& GetDescription() const;
-	const int& GetCostBuff() const;
-	const int& GetFixedCost() const;
-	const int& GetAtkBuff() const;
-	const int& GetHPBuff() const;
-	const int& GetMoveBuff() const;
-	void SetCostBuff(int costBuff);
-	void SetFixedCost(int costBuff);
-	void SetAtkBuff(int costBuff);
-	void SetHPBuff(int costBuff);
-	void SetMoveBuff(int costBuff);
 	void SetToken(Card* token);
 	void SetSources(Effect* source, Card* refCard);
+
+	//Readonly getters
+	const eEffect& GetID() const;
+	const std::string& GetDescription() const;
+	const int& GetKeywords() const;
+	const ModifierGroup& GetModifiers() const;
+	const Effect* const& GetSource() const;
 
 	//Utils
 	bool IsContinuous() { return source != nullptr; }
@@ -127,14 +126,9 @@ private:
 
 	//Properties
 	eEffect effectId;
-	int keywords;
 	std::string description;
-	bool triggered;
-	int fixedCost;
-	int costBuff;
-	int atkBuff;
-	int hpBuff;
-	int moveBuff;
+	int keywords;
+	ModifierGroup modifiers;
 	Card* token;
 	Card* refCard;
 	Effect* source;

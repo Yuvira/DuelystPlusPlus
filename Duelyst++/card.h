@@ -4,6 +4,7 @@
 #include "cardids.h"
 #include "effectids.h"
 #include "sprite.h"
+#include "modifiers.h"
 
 //Definitions
 class Renderer;
@@ -45,10 +46,13 @@ public:
 	Card();
 	~Card();
 
-	//Updates & Rendering
+	//Detail rendering
 	void UpdateDetails();
-	virtual void UpdateStatBuffs() {}
 	virtual void DrawDetails(Renderer& renderer, int& y) {}
+
+	//Stats
+	virtual void UpdateStatBuffs() {}
+	int GetStat(eStat stat, int base);
 
 	//Effects
 	void AddEffect(eEffect effectId, Effect* source, Card* refCard);
@@ -66,8 +70,6 @@ public:
 	virtual TargetMode GetTargetMode() { return TargetMode(); }
 	virtual bool IsGeneral() { return false; }
 	virtual bool IsOnBoard() { return false; }
-	std::string ValueString(int value);
-	int TextWidth(std::string str);
 	bool IsAlly();
 	bool IsEnemy();
 
@@ -81,6 +83,7 @@ public:
 	eCard cardId;
 	eFaction faction;
 	bool isToken;
+	int baseCost;
 	int cost;
 	Game* game;
 	Player* owner;
@@ -145,9 +148,12 @@ public:
 
 	//Properties
 	eTribe tribe;
+	int baseAtk;
 	int atk;
 	int hp;
+	int baseHpMax;
 	int hpMax;
+	int baseMoveRange;
 	int moveRange;
 	bool destroyed;
 	bool isDead;

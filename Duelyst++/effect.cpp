@@ -10,12 +10,6 @@ Effect::Effect(eEffect effectId, int keywords, std::string description) {
 	this->effectId = effectId;
 	this->keywords = keywords;
 	this->description = description;
-	triggered = false;
-	fixedCost = -1;
-	costBuff = 0;
-	atkBuff = 0;
-	hpBuff = 0;
-	moveBuff = 0;
 	token = nullptr;
 	refCard = nullptr;
 	source = nullptr;
@@ -34,30 +28,32 @@ void Effect::TriggerPreEvent(EffectContext ctx, Event* ev) { DispatchTrigger(pre
 void Effect::TriggerPostEvent(EffectContext ctx, Event* ev) { DispatchTrigger(postTriggers, ctx, ev); }
 void Effect::TriggerSelfEvent(EffectContext ctx, Event* ev) { DispatchTrigger(selfTriggers, ctx, ev); }
 
-//Getters
-Card* Effect::GetToken() { return token; }
-const eEffect& Effect::GetID() const { return effectId; }
-const int& Effect::GetKeywords() const { return keywords; }
-const std::string& Effect::GetDescription() const { return description; }
-const int& Effect::GetCostBuff() const { return costBuff; }
-const int& Effect::GetFixedCost() const { return fixedCost; }
-const int& Effect::GetAtkBuff() const { return atkBuff; }
-const int& Effect::GetHPBuff() const { return hpBuff; }
-const int& Effect::GetMoveBuff() const { return moveBuff; }
-const Effect* const& Effect::GetSource() const { return source; };
-Card* Effect::GetRef() { return refCard; };
+//Modifier updates
+Effect& Effect::AddModifier(eStat stat, eModifier type, int value) {
+	if (!modifiers.AddModifier(stat, type, value))
+		description = "AddModifier Error";
+	return *this;
+}
+void Effect::UpdateModifier(eStat stat, int value) {
+	if (!modifiers.UpdateModifier(stat, value))
+		description = "UpdateModifier Error";
+}
 
-//Setters
-void Effect::SetCostBuff(int costBuff) { this->costBuff = costBuff; }
-void Effect::SetFixedCost(int fixedCost) { this->fixedCost = fixedCost; }
-void Effect::SetAtkBuff(int atkBuff) { this->atkBuff = atkBuff; }
-void Effect::SetHPBuff(int hpBuff) { this->hpBuff = hpBuff; }
-void Effect::SetMoveBuff(int moveBuff) { this->moveBuff = moveBuff; }
+//Getters & Setters
+Card* Effect::GetToken() { return token; }
+Card* Effect::GetRef() { return refCard; };
 void Effect::SetToken(Card* token) { this->token = token; }
 void Effect::SetSources(Effect* source, Card* refCard) {
 	this->source = source;
 	this->refCard = refCard;
 }
+
+//Readonly getters
+const eEffect& Effect::GetID() const { return effectId; }
+const std::string& Effect::GetDescription() const { return description; }
+const int& Effect::GetKeywords() const { return keywords; }
+const ModifierGroup& Effect::GetModifiers() const { return modifiers; }
+const Effect* const& Effect::GetSource() const { return source; };
 
 //Utilities
 bool EffectContext::IsOnBoard() { return card->IsOnBoard(); }

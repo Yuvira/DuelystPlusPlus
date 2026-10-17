@@ -1,6 +1,7 @@
 //Include
 #include <fstream>
 #include "sprite.h"
+#include "utils.h"
 
 #pragma region Constructors
 
@@ -86,7 +87,7 @@ void Sprite::CreateFromString(const std::string& str) {
 void Sprite::CreateFromTextBlock(const std::vector<std::string>& lines) {
 	int maxWidth = 0;
 	for (int i = 0; i < lines.size(); ++i)
-		maxWidth = max(maxWidth, TextWidth(lines[i]));
+		maxWidth = max(maxWidth, Utils::TextWidth(lines[i]));
 	Resize(maxWidth, lines.size());
 	int idxDelta = 0;
 	WORD color = COLOR_GRAY;
@@ -115,19 +116,6 @@ void Sprite::CreateFromTextBlock(const std::vector<std::string>& lines) {
 		}
 		idxDelta = 0;
 	}
-}
-
-#pragma endregion
-
-#pragma region Utils
-
-//Get width of text ignoring style tags
-int Sprite::TextWidth(std::string str) {
-	int width = 0;
-	for (int i = 0; i < str.length(); ++i)
-		if (str[i] != '{' && str[i] != '}' && str[1] != '`' && str[i] != '~')
-			++width;
-	return width;
 }
 
 #pragma endregion

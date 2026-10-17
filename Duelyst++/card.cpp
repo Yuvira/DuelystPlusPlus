@@ -4,6 +4,7 @@
 #include "collections.h"
 #include "effect.h"
 #include "event.h"
+#include "utils.h"
 
 //Constants
 const int MAX_DESCRIPTION_WIDTH = 42;
@@ -27,6 +28,7 @@ Card::Card() {
 	cardId = CARD_NONE;
 	faction = FACTION_NEUTRAL;
 	isToken = false;
+	baseCost = 0;
 	cost = 0;
 	game = nullptr;
 	owner = nullptr;
@@ -43,111 +45,63 @@ Card::~Card() {}
 //Update effect details
 void Card::UpdateDetails() {
 
-	//Text lines
+	//Line list
 	std::vector<std::string> lines;
 
-	//Create pointer list
-	std::vector<Effect*> effectRefs;
-	for (int i = 0; i < effects.size(); ++i)
-		effectRefs.push_back(effects[i]);
-
-	//Loop by removing elements from list until list is empty
-	for (; !effectRefs.empty(); effectRefs.erase(effectRefs.begin())) {
-
-		//Get current effect
-		Effect* effect = effectRefs.front();
+	//Loop effects
+	for (int i = 0; i < effects.size(); ++i) {
 
 		//Add newline if this isn't the first effect in the list
 		if (lines.size() > 0)
 			lines.push_back("");
 
-		//Add description to lines
+		//Get index of header and add description text
 		int headerIdx = lines.size();
-		std::string line = "";
-		std::string word = "";
-		std::string description = effect->GetDescription();
-		for (int i = 0; i < description.length(); ++i) {
-			if (line.length() == 0 && (description[i] == '|' || description[i] == ' ')) {
-				if (description[i] == '|')
-					lines.push_back(word);
-				else if (description[i] == ' ')
-					line += word;
-				word = "";
-			}
-			else if (description[i] == '|') {
-				if (TextWidth(line) + TextWidth(word) + 1 > MAX_DESCRIPTION_WIDTH) {
-					lines.push_back(line);
-					lines.push_back(word);
-				}
-				else {
-					line += ' ' + word;
-					lines.push_back(line);
-				}
-				line = "";
-				word = "";
-			}
-			else if (description[i] == ' ') {
-				if (TextWidth(line) + TextWidth(word) + 1 > MAX_DESCRIPTION_WIDTH) {
-					lines.push_back(line);
-					line = word;
-				}
-				else
-					line += ' ' + word;
-				word = "";
-			}
-			else
-				word += description[i];
-		}
-		if (line.length() == 0)
-			lines.push_back(word);
-		else if (TextWidth(line) + TextWidth(word) + 1 > MAX_DESCRIPTION_WIDTH) {
-			lines.push_back(line);
-			lines.push_back(word);
-		}
-		else
-			lines.push_back(line + ' ' + word);
-
-		//Stack count
-		int stacks = 1;
-		if (effectRefs.size() > 1) {
-			for (int i = 1; i < effectRefs.size(); ++i) {
-				if (effectRefs[i]->GetID() == effect->GetID()) {
-					effectRefs.erase(effectRefs.begin() + i);
-					++stacks;
-					--i;
-				}
-			}
-			if (stacks > 1 && headerIdx < lines.size())
-				lines[headerIdx] += " {[x" + std::to_string(stacks) + "]}";
-		}
+		Utils::WrapText(effects[i]->GetDescription(), lines, MAX_DESCRIPTION_WIDTH);
 
 		//Add buffs line if applicable
-		if (effect->GetCostBuff() != 0 || effect->GetAtkBuff() != 0 || effect->GetHPBuff() != 0 || effect->GetMoveBuff() != 0) {
-			std::string str = "";
-			if (effect->GetAtkBuff() != 0 && effect->GetHPBuff() != 0)
-				str += ValueString(effect->GetAtkBuff() * stacks) + "/" + ValueString(effect->GetHPBuff() * stacks);
-			else if (effect->GetAtkBuff() != 0)
-				str += ValueString(effect->GetAtkBuff() * stacks) + " Attack";
-			else if (effect->GetHPBuff() != 0)
-				str += ValueString(effect->GetHPBuff() * stacks) + " Health";
-			if (effect->GetCostBuff() != 0) {
-				if (str != "")
-					str += ", ";
-				str += ValueString(effect->GetCostBuff() * stacks) + " Cost";
-			}
-			if (effect->GetMoveBuff() != 0) {
-				if (str != "")
-					str += ", ";
-				str += ValueString(effect->GetMoveBuff() * stacks) + " Movement";
-			}
-			str = "{" + str + "}";
-			lines.push_back(str);
-		}
+		effects[i]->GetModifiers().WriteValues(lines);
 
 	}
 
 	//Generate
 	details.CreateFromTextBlock(lines);
+
+}
+
+#pragma endregion
+
+#pragma region Stat Updates
+
+//Get stat with modifiers applied
+int Card::GetStat(eStat stat, int base) {
+
+	//If any fixers exist, apply them and ignore everything else
+	bool fixed = false;
+	for (Effect* effect : effects) {
+		if (effect->GetModifiers().ReadModifier(stat).type == MODTYPE_FIXED) {
+			base = effect->GetModifiers().ReadModifier(stat).value;
+			fixed = true;
+		}
+	}
+	if (fixed)
+		return max(base, 0);
+
+	//Apply any rebases
+	for (Effect* effect : effects)
+		if (effect->GetModifiers().ReadModifier(stat).type == MODTYPE_REBASE)
+			base = effect->GetModifiers().ReadModifier(stat).value;
+
+	//Apply buffs and overrides in order
+	for (Effect* effect : effects) {
+		if (effect->GetModifiers().ReadModifier(stat).type == MODTYPE_BUFF)
+			base += effect->GetModifiers().ReadModifier(stat).value;
+		if (effect->GetModifiers().ReadModifier(stat).type == MODTYPE_OVERRIDE)
+			base += effect->GetModifiers().ReadModifier(stat).value;
+	}
+
+	//Return modified value
+	return max(base, 0);
 
 }
 
@@ -253,18 +207,6 @@ std::vector<Effect*> Card::GetEffects() {
 #pragma endregion
 
 #pragma region Utils
-
-//Get value with +/- indicator converted to string
-std::string Card::ValueString(int value) { return (value > 0 ? "+" : "-") + std::to_string(abs(value)); }
-
-//Get width of text ignoring style tags
-int Card::TextWidth(std::string str) {
-	int width = 0;
-	for (int i = 0; i < str.length(); ++i)
-		if (str[i] != '{' && str[i] != '}')
-			++width;
-	return width;
-}
 
 //Get card ownership
 bool Card::IsAlly() {
