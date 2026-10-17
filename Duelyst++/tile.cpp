@@ -33,7 +33,7 @@ void Tile::SetColor(eColor color) { border.SetColor(color); }
 BoardTile::BoardTile() : Tile() {
 	sprite.Resize(5, 5);
 	SetFeature(TILE_NONE);
-	minion = nullptr;
+	unit = nullptr;
 }
 BoardTile::~BoardTile() {}
 
@@ -98,7 +98,7 @@ BoardTile* Map::GetRandomEmpty(BoardTile* ignore1, BoardTile* ignore2) {
 	std::vector<BoardTile*> valid;
 	for (int i = 0; i < 9; ++i)
 		for (int j = 0; j < 5; ++j)
-			if (tiles[i][j].minion == nullptr && &tiles[i][j] != ignore1 && &tiles[i][j] != ignore2)
+			if (tiles[i][j].unit == nullptr && &tiles[i][j] != ignore1 && &tiles[i][j] != ignore2)
 				valid.push_back(&tiles[i][j]);
 	if (valid.size() > 0)
 		return valid[rand() % valid.size()];
@@ -108,10 +108,10 @@ BoardTile* Map::GetRandomEmpty(BoardTile* ignore1, BoardTile* ignore2) {
 //Get random empty corner
 BoardTile* Map::GetRandomEmptyCorner() {
 	std::vector<BoardTile*> valid;
-	if (tiles[0][0].minion == nullptr) { valid.push_back(&tiles[0][0]); }
-	if (tiles[8][0].minion == nullptr) { valid.push_back(&tiles[8][0]); }
-	if (tiles[0][4].minion == nullptr) { valid.push_back(&tiles[0][4]); }
-	if (tiles[8][4].minion == nullptr) { valid.push_back(&tiles[8][4]); }
+	if (tiles[0][0].unit == nullptr) { valid.push_back(&tiles[0][0]); }
+	if (tiles[8][0].unit == nullptr) { valid.push_back(&tiles[8][0]); }
+	if (tiles[0][4].unit == nullptr) { valid.push_back(&tiles[0][4]); }
+	if (tiles[8][4].unit == nullptr) { valid.push_back(&tiles[8][4]); }
 	if (valid.size() > 0)
 		return valid[rand() % valid.size()];
 	return nullptr;
@@ -124,7 +124,7 @@ BoardTile* Map::GetRandomEmptyNear(BoardTile* tile) {
 	std::vector<BoardTile*> valid;
 	for (int i = max(tile->pos.x - 1, 0); i < min(tile->pos.x + 2, 9); ++i)
 		for (int j = max(tile->pos.y - 1, 0); j < min(tile->pos.y + 2, 5); ++j)
-			if (&tiles[i][j] != tile && tiles[i][j].minion == nullptr)
+			if (&tiles[i][j] != tile && tiles[i][j].unit == nullptr)
 				valid.push_back(&tiles[i][j]);
 	if (valid.size() > 0)
 		return valid[rand() % valid.size()];
@@ -134,10 +134,10 @@ BoardTile* Map::GetRandomEmptyNear(BoardTile* tile) {
 //Get all empty corners
 std::vector<BoardTile*> Map::GetEmptyCorners() {
 	std::vector<BoardTile*> valid;
-	if (tiles[0][0].minion == nullptr) { valid.push_back(&tiles[0][0]); }
-	if (tiles[8][0].minion == nullptr) { valid.push_back(&tiles[8][0]); }
-	if (tiles[0][4].minion == nullptr) { valid.push_back(&tiles[0][4]); }
-	if (tiles[8][4].minion == nullptr) { valid.push_back(&tiles[8][4]); }
+	if (tiles[0][0].unit == nullptr) { valid.push_back(&tiles[0][0]); }
+	if (tiles[8][0].unit == nullptr) { valid.push_back(&tiles[8][0]); }
+	if (tiles[0][4].unit == nullptr) { valid.push_back(&tiles[0][4]); }
+	if (tiles[8][4].unit == nullptr) { valid.push_back(&tiles[8][4]); }
 	return valid;
 }
 

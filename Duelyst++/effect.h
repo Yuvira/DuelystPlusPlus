@@ -34,9 +34,9 @@ struct EffectContext {
 	bool IsOwnerTurn();
 	Player* GetOwner();
 	Player* GetOpponent();
-	Minion* GetMinion();
-	Minion* GetAllyGeneral();
-	Minion* GetEnemyGeneral();
+	Unit* GetUnit();
+	Unit* GetAllyGeneral();
+	Unit* GetEnemyGeneral();
 	BoardTile* GetTile();
 	Map* GetMap();
 	Effect* effect;

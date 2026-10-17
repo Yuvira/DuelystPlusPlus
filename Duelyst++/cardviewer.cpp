@@ -56,7 +56,7 @@ void CardViewer::RenderCollection(Renderer& renderer) {
 
 	//Card counts
 	count[0].CreateFromString("Generals  : " + std::to_string(collections->CountCardsWhere([](Card* card) { return card->IsGeneral(); })));
-	count[1].CreateFromString("Minions   : " + std::to_string(collections->CountCardsWhere([](Card* card) { return card->IsMinion(); })));
+	count[1].CreateFromString("Minions   : " + std::to_string(collections->CountCardsWhere([](Card* card) { return card->IsUnit() && !card->IsGeneral(); })));
 	count[2].CreateFromString("Spells    : " + std::to_string(collections->CountCardsWhere([](Card* card) { return card->IsSpell(); })));
 	count[3].CreateFromString("Artifacts : 0");
 	count[4].CreateFromString("TOTAL : " + std::to_string(collections->GetCardCount()));

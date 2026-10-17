@@ -26,7 +26,7 @@ enum eEventType {
 class Player;
 class BoardTile;
 class Card;
-class Minion;
+class Unit;
 
 //Event object
 struct Event {
@@ -55,76 +55,76 @@ struct OnCastEvent : Event {
 //Triggers whenever a unit is summoned to the board
 struct OnSummonEvent : Event {
 	static constexpr eEventType typeKey = EVENT_SUMMON;
-	OnSummonEvent(int turn, Minion* minion, bool wasCast) : Event(turn) {
+	OnSummonEvent(int turn, Unit* unit, bool wasCast) : Event(turn) {
 		type = EVENT_SUMMON;
-		this->minion = minion;
+		this->unit = unit;
 		this->wasCast = wasCast;
 	}
-	Minion* minion;
+	Unit* unit;
 	bool wasCast;
 };
 
 //Triggers whenever a unit dies
 struct OnDeathEvent : Event {
 	static constexpr eEventType typeKey = EVENT_DEATH;
-	OnDeathEvent(int turn, Minion* minion) : Event(turn) {
+	OnDeathEvent(int turn, Unit* unit) : Event(turn) {
 		type = EVENT_DEATH;
-		this->minion = minion;
+		this->unit = unit;
 	}
-	Minion* minion;
+	Unit* unit;
 };
 
 //Triggers whenever a unit attacks another unit
 struct OnAttackEvent : Event {
 	static constexpr eEventType typeKey = EVENT_ATTACK;
-	OnAttackEvent(int turn, Minion* source, Minion* target, bool isCounterattack) : Event(turn) {
+	OnAttackEvent(int turn, Unit* source, Unit* target, bool isCounterattack) : Event(turn) {
 		type = EVENT_ATTACK;
 		this->source = source;
 		this->target = target;
 		this->isCounterattack = isCounterattack;
 	}
-	Minion* source;
-	Minion* target;
+	Unit* source;
+	Unit* target;
 	bool isCounterattack;
 };
 
 //Triggers whenever a unit is dealt damage
 struct OnDamageEvent : Event {
 	static constexpr eEventType typeKey = EVENT_DAMAGE;
-	OnDamageEvent(int turn, Card* source, Minion* target, int damage) : Event(turn) {
+	OnDamageEvent(int turn, Card* source, Unit* target, int damage) : Event(turn) {
 		type = EVENT_DAMAGE;
 		this->source = source;
 		this->target = target;
 		this->damage = damage;
 	}
 	Card* source;
-	Minion* target;
+	Unit* target;
 	int damage;
 };
 
 //Triggers whenever a unit is healed
 struct OnHealEvent : Event {
 	static constexpr eEventType typeKey = EVENT_HEAL;
-	OnHealEvent(int turn, Card* source, Minion* target, int heal) : Event(turn) {
+	OnHealEvent(int turn, Card* source, Unit* target, int heal) : Event(turn) {
 		type = EVENT_HEAL;
 		this->source = source;
 		this->target = target;
 		this->heal = heal;
 	}
 	Card* source;
-	Minion* target;
+	Unit* target;
 	int heal;
 };
 
 //Triggers whenever a unit moves or is moved
 struct OnMoveEvent : Event {
 	static constexpr eEventType typeKey = EVENT_MOVE;
-	OnMoveEvent(int turn, Minion* minion, bool wasTeleported) : Event(turn) {
+	OnMoveEvent(int turn, Unit* unit, bool wasTeleported) : Event(turn) {
 		type = EVENT_MOVE;
-		this->minion = minion;
+		this->unit = unit;
 		this->wasTeleported = wasTeleported;
 	}
-	Minion* minion;
+	Unit* unit;
 	bool wasTeleported;
 };
 

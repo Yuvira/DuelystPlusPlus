@@ -5,7 +5,7 @@
 #include "sprite.h"
 
 //Definition
-class Minion;
+class Unit;
 
 //Tile features
 enum eFeature {
@@ -42,9 +42,9 @@ public:
 	~BoardTile();
 	void SetFeature(eFeature newFeature);
 	bool IsNear(BoardTile* tile);
-	bool HasMinion() { return minion != nullptr; }
+	bool HasUnit() { return unit != nullptr; }
 	eFeature feature;
-	Minion* minion;
+	Unit* unit;
 	Sprite sprite;
 	Coord pos;
 };

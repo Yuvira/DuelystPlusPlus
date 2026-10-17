@@ -12,7 +12,7 @@ class Game;
 class BoardTile;
 class Effect;
 class Player;
-class Minion;
+class Unit;
 class Spell;
 struct Event;
 
@@ -74,9 +74,9 @@ public:
 	bool IsEnemy();
 
 	//Subclass getters
-	virtual Minion* GetMinion() { return nullptr; }
+	virtual Unit* GetUnit() { return nullptr; }
 	virtual Spell* GetSpell() { return nullptr; }
-	bool IsMinion() { return GetMinion() != nullptr; }
+	bool IsUnit() { return GetUnit() != nullptr; }
 	bool IsSpell() { return GetSpell() != nullptr; }
 
 	//Properties
@@ -97,17 +97,17 @@ public:
 
 };
 
-//Minion class
-class Minion : public Card {
+//Unit class
+class Unit : public Card {
 public:
 
 	//Constructors / Initialization
-	Minion();
-	Minion(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name);
-	Minion(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name, bool isToken);
-	Minion(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name, Effect* effect);
-	Minion(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name, bool isToken, Effect* effect);
-	~Minion();
+	Unit();
+	Unit(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name);
+	Unit(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name, bool isToken);
+	Unit(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name, Effect* effect);
+	Unit(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name, bool isToken, Effect* effect);
+	~Unit();
 	void GenerateDetails();
 
 	//Rendering
@@ -125,7 +125,7 @@ public:
 	void SetPosition(int x, int y);
 	void MoveToTile(BoardTile* tile, bool byEffect);
 	void MoveToPosition(int x, int y, bool byEffect);
-	void Attack(Minion* target, bool counter);
+	void Attack(Unit* target, bool counter);
 	void Exhaust();
 	void Refresh();
 	int DealDamage(Card* source, int damage);
@@ -137,14 +137,14 @@ public:
 	//Utils
 	TargetMode GetTargetMode();
 	bool IsGeneral() { return tribe == TRIBE_GENERAL; }
-	bool CanAttack(Minion* target);
+	bool CanAttack(Unit* target);
 	bool IsMoveable();
 	bool HasKeywords(int keywords);
 	bool IsProvoked();
 	bool IsOnBoard() { return curTile != nullptr; }
 
 	//Getter
-	Minion* GetMinion() { return this; }
+	Unit* GetUnit() { return this; }
 
 	//Properties
 	eTribe tribe;

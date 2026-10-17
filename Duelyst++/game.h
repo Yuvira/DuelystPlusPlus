@@ -13,7 +13,7 @@
 class Collections;
 class Card;
 class Spell;
-class Minion;
+class Unit;
 struct TargetMode;
 
 //Debug mode
@@ -113,9 +113,9 @@ public:
 
 	//Getters
 	std::vector<Player*> GetPlayers();
-	const std::vector<Minion*>& GetMinions() const;
+	const std::vector<Unit*>& GetUnits() const;
 	const std::vector<Card*>& GetGrave() const;
-	const std::vector<Minion*>& GetDestroyedMinions() const;
+	const std::vector<Unit*>& GetDestroyedUnits() const;
 	const std::vector<Spell*>& GetSpellHistory() const;
 	const std::vector<Card*>& GetCardsCastThisTurn() const;
 	const int& GetTurnCount() const;
@@ -143,9 +143,9 @@ public:
 private:
 
 	//Card object references
-	std::vector<Minion*> minions;
+	std::vector<Unit*> units;
 	std::vector<Card*> grave;
-	std::vector<Minion*> destroyedMinions;
+	std::vector<Unit*> destroyedUnits;
 	std::vector<Spell*> spellHistory;
 	std::vector<Card*> castThisTurn;
 
@@ -166,7 +166,7 @@ private:
 	//Gameplay properties
 	std::vector<PathCoord> pathList;
 	std::vector<Coord> path;
-	Minion* activeUnit;
+	Unit* activeUnit;
 	Card* activeCard;
 	eMode mode;
 	Coord pos;
@@ -182,7 +182,7 @@ private:
 	bool debugMode;
 	Sprite debugP1Deck;
 	Sprite debugP2Deck;
-	Sprite debugMinions;
+	Sprite debugUnits;
 	Sprite debugGrave;
 	std::vector<std::string> debugLog;
 	Sprite debugLogSprite;

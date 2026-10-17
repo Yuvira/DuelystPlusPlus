@@ -9,7 +9,7 @@ class Game;
 class Collections;
 class Renderer;
 class Card;
-class Minion;
+class Unit;
 
 //Player class
 class Player {
@@ -44,7 +44,7 @@ public:
 	int maxReplaces;
 	Sprite uiReplace;
 	Sprite uiCrystal[9];
-	Minion* general;
+	Unit* general;
 	Game* game;
 	Player* opponent;
 	std::vector<Card*> deck;

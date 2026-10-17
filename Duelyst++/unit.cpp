@@ -10,16 +10,16 @@
 
 #pragma region Constructors / Initialization
 
-//Minion constructors
-Minion::Minion()
-	: Minion(CARD_NONE, FACTION_NEUTRAL, TRIBE_NONE, 0, 0, 0, "", "???", false, nullptr) {}
-Minion::Minion(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name)
-	: Minion(cardId, faction, tribe, cost, atk, hp, path, name, false, nullptr) {}
-Minion::Minion(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name, bool isToken)
-	: Minion(cardId, faction, tribe, cost, atk, hp, path, name, isToken, nullptr) {}
-Minion::Minion(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name, Effect* effect)
-	: Minion(cardId, faction, tribe, cost, atk, hp, path, name, false, effect) {}
-Minion::Minion(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name, bool isToken, Effect* effect) {
+//Unit constructors
+Unit::Unit()
+	: Unit(CARD_NONE, FACTION_NEUTRAL, TRIBE_NONE, 0, 0, 0, "", "???", false, nullptr) {}
+Unit::Unit(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name)
+	: Unit(cardId, faction, tribe, cost, atk, hp, path, name, false, nullptr) {}
+Unit::Unit(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name, bool isToken)
+	: Unit(cardId, faction, tribe, cost, atk, hp, path, name, isToken, nullptr) {}
+Unit::Unit(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name, Effect* effect)
+	: Unit(cardId, faction, tribe, cost, atk, hp, path, name, false, effect) {}
+Unit::Unit(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name, bool isToken, Effect* effect) {
 	this->cardId = cardId;
 	this->faction = faction;
 	this->tribe = tribe;
@@ -53,10 +53,10 @@ Minion::Minion(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, 
 	if (effect != nullptr && effect->GetID() != EFFECT_NONE)
 		AddEffect(*effect, nullptr, this);
 }
-Minion::~Minion() {}
+Unit::~Unit() {}
 
 //Generate sidebar details
-void Minion::GenerateDetails() {
+void Unit::GenerateDetails() {
 	std::string str;
 	str.resize(name.size());
 	std::transform(name.begin(), name.end(), str.begin(), ::toupper);
@@ -103,7 +103,7 @@ void Minion::GenerateDetails() {
 #pragma region Rendering
 
 //Render sprites
-void Minion::Render(Renderer& renderer) {
+void Unit::Render(Renderer& renderer) {
 	hasAttacked ? sprite.SetColor(COLOR_GRAY) : sprite.SetColor(COLOR_LTWHITE);
 	renderer.Render(sprite);
 	renderer.Render(atkSprite);
@@ -113,7 +113,7 @@ void Minion::Render(Renderer& renderer) {
 }
 
 //Draw card data
-void Minion::DrawDetails(Renderer& renderer, int& y) {
+void Unit::DrawDetails(Renderer& renderer, int& y) {
 	sprite.SetColor(COLOR_LTWHITE);
 	renderer.Render(sprite, 66, y);
 	renderer.Render(header[0], 72, y); ++y;
@@ -139,8 +139,8 @@ void Minion::DrawDetails(Renderer& renderer, int& y) {
 
 #pragma region Updates
 
-//Check if minion has died
-void Minion::Update(bool& shouldLoop) {
+//Check if unit has died
+void Unit::Update(bool& shouldLoop) {
 	if (hp < 1 || destroyed) {
 		OnDeathEvent event = OnDeathEvent(game->GetTurnCount(), this);
 		game->eventManager.SendOnPreEvent(game, &event);
@@ -152,7 +152,7 @@ void Minion::Update(bool& shouldLoop) {
 }
 
 //Update attack/health/cost when buffs change
-void Minion::UpdateStatBuffs() {
+void Unit::UpdateStatBuffs() {
 	int hpDelta = hp - hpMax;
 	cost = GetStat(STAT_COST, baseCost);
 	atk = GetStat(STAT_ATK, baseAtk);
@@ -162,7 +162,7 @@ void Minion::UpdateStatBuffs() {
 }
 
 //Update HP & ATK sprites
-void Minion::UpdateStatSprites() {
+void Unit::UpdateStatSprites() {
 	std::string str = std::to_string(atk);
 	atkSprite.Resize(str.length(), 1);
 	for (int i = 0; i < str.length(); ++i)
@@ -178,7 +178,7 @@ void Minion::UpdateStatSprites() {
 }
 
 //Update card stats
-void Minion::UpdateDetailStats() {
+void Unit::UpdateDetailStats() {
 	eColor color = COLOR_LTBLUE;
 	std::string str = "";
 	if (tribe != TRIBE_GENERAL)
@@ -205,7 +205,7 @@ void Minion::UpdateDetailStats() {
 #pragma region Actions
 
 //Initialize states
-void Minion::InitState() {
+void Unit::InitState() {
 	hasMoved = !HasKeywords(KEYWORD_RUSH);
 	hasAttacked = !HasKeywords(KEYWORD_RUSH);
 	hasCelerityMoved = !HasKeywords(KEYWORD_RUSH) || !HasKeywords(KEYWORD_CELERITY);
@@ -214,8 +214,8 @@ void Minion::InitState() {
 }
 
 //Set sprite position
-void Minion::SetPosition(int x, int y) {
-	if (curTile != nullptr) { curTile->minion = nullptr; }
+void Unit::SetPosition(int x, int y) {
+	if (curTile != nullptr) { curTile->unit = nullptr; }
 	int spriteX = (x * 7) + 2;
 	int spriteY = (y * 7) + 6;
 	sprite.pos.X = spriteX;
@@ -225,7 +225,7 @@ void Minion::SetPosition(int x, int y) {
 	hpSprite.pos.X = (spriteX + 4) - (hpSprite.buffer.size() - 1);
 	hpSprite.pos.Y = spriteY + 4;
 	curTile = &game->map.tiles[x][y];
-	curTile->minion = this;
+	curTile->unit = this;
 	if (curTile->feature == TILE_MANA) {
 		curTile->SetFeature(TILE_NONE);
 		if (owner->mana < 9) { ++owner->mana; }
@@ -233,8 +233,8 @@ void Minion::SetPosition(int x, int y) {
 }
 
 //Move on board
-void Minion::MoveToTile(BoardTile* tile, bool byEffect) { MoveToPosition(tile->pos.x, tile->pos.y, byEffect); }
-void Minion::MoveToPosition(int x, int y, bool byEffect) {
+void Unit::MoveToTile(BoardTile* tile, bool byEffect) { MoveToPosition(tile->pos.x, tile->pos.y, byEffect); }
+void Unit::MoveToPosition(int x, int y, bool byEffect) {
 	SetPosition(x, y);
 	if (!byEffect) {
 		if (!hasCelerityMoved)
@@ -248,7 +248,7 @@ void Minion::MoveToPosition(int x, int y, bool byEffect) {
 }
 
 //Attack enemy
-void Minion::Attack(Minion* target, bool counter) {
+void Unit::Attack(Unit* target, bool counter) {
 
 	//Initialize damage value and whether the target can counterattack
 	int damage = atk;
@@ -259,11 +259,11 @@ void Minion::Attack(Minion* target, bool counter) {
 	game->eventManager.SendOnPreEvent(game, &event);
 	game->eventManager.SendOnPostEvent(game, &event);
 
-	//Damage all adjacent minions if this has Frenzy and is targeting an adjacent tile
+	//Damage all adjacent units if this has Frenzy and is targeting an adjacent tile
 	if (!counter && HasKeywords(KEYWORD_FRENZY) && curTile->IsNear(target->curTile)) {
 		for (BoardTile* tile : game->map.GetAllNear(curTile))
-			if (tile->minion != nullptr && tile->minion->owner != owner)
-				tile->minion->DealDamage(this, damage);
+			if (tile->unit != nullptr && tile->unit->owner != owner)
+				tile->unit->DealDamage(this, damage);
 	}
 
 	//Otherwise just damage target
@@ -289,7 +289,7 @@ void Minion::Attack(Minion* target, bool counter) {
 }
 
 //Exhaust this
-void Minion::Exhaust() {
+void Unit::Exhaust() {
 	hasMoved = true;
 	hasCelerityMoved = true;
 	hasAttacked = true;
@@ -297,7 +297,7 @@ void Minion::Exhaust() {
 }
 
 //Refresh state
-void Minion::Refresh() {
+void Unit::Refresh() {
 	hasMoved = false;
 	hasAttacked = false;
 	hasCelerityMoved = !HasKeywords(KEYWORD_CELERITY);
@@ -306,7 +306,7 @@ void Minion::Refresh() {
 }
 
 //Deal damage to this
-int Minion::DealDamage(Card* source, int damage) {
+int Unit::DealDamage(Card* source, int damage) {
 	OnDamageEvent event = OnDamageEvent(game->GetTurnCount(), source, this, damage);
 	game->eventManager.SendOnPreEvent(game, &event);
 	if (event.damage > 0) {
@@ -323,7 +323,7 @@ int Minion::DealDamage(Card* source, int damage) {
 }
 
 //Heal this
-int Minion::Heal(Card* source, int heal) {
+int Unit::Heal(Card* source, int heal) {
 	OnHealEvent event = OnHealEvent(game->GetTurnCount(), source, this, heal);
 	game->eventManager.SendOnPreEvent(game, &event);
 	if (event.heal > 0) {
@@ -340,12 +340,12 @@ int Minion::Heal(Card* source, int heal) {
 }
 
 //Destroy this
-void Minion::Destroy(Card* source) {
+void Unit::Destroy(Card* source) {
 	destroyed = true;
 }
 
-//Dispel minion
-void Minion::Dispel() {
+//Dispel unit
+void Unit::Dispel() {
 
 	//Remove effects
 	for (int i = 0; i < effects.size(); ++i) {
@@ -369,7 +369,7 @@ void Minion::Dispel() {
 }
 
 //Trigger OnAddThis on effects when summoned
-void Minion::AddEffects() {
+void Unit::AddEffects() {
 	OnAddThisEvent addEvent = OnAddThisEvent();
 	for (int i = 0; i < effects.size(); ++i)
 		effects[i]->TriggerSelfEvent(EffectContext(effects[i], this, game), &addEvent);
@@ -380,14 +380,14 @@ void Minion::AddEffects() {
 #pragma region Utils
 
 //Get targeting mode
-TargetMode Minion::GetTargetMode() {
+TargetMode Unit::GetTargetMode() {
 	if (HasKeywords(KEYWORD_AIRDROP))
-		return TargetMode(TARGET_MODE_ALL, [](BoardTile* tile) { return tile->minion == nullptr; });
-	return TargetMode(TARGET_MODE_NEAR_ALLIES, [](BoardTile* tile) { return tile->minion == nullptr; });
+		return TargetMode(TARGET_MODE_ALL, [](BoardTile* tile) { return tile->unit == nullptr; });
+	return TargetMode(TARGET_MODE_NEAR_ALLIES, [](BoardTile* tile) { return tile->unit == nullptr; });
 }
 
-//Can minion attack target
-bool Minion::CanAttack(Minion* target) {
+//Can unit attack target
+bool Unit::CanAttack(Unit* target) {
 	if (target != nullptr) {
 		if (atk > 0) {
 			if (HasKeywords(KEYWORD_RANGED))
@@ -399,28 +399,28 @@ bool Minion::CanAttack(Minion* target) {
 	return false;
 }
 
-//Can minion move
-bool Minion::IsMoveable() {
+//Can unit move
+bool Unit::IsMoveable() {
 	if (tribe == TRIBE_STRUCTURE)
 		return false;
 	return true;
 }
 
-//Check if minion has all given keywords
-bool Minion::HasKeywords(int keywords) {
+//Check if unit has all given keywords
+bool Unit::HasKeywords(int keywords) {
 	int flags = KEYWORD_NONE;
 	for (int i = 0; i < effects.size(); ++i)
 		flags |= effects[i]->GetKeywords();
 	return (flags & keywords) == keywords;
 }
 
-//Is minion being provoked
-bool Minion::IsProvoked() {
+//Is unit being provoked
+bool Unit::IsProvoked() {
 	for (int i = max(curTile->pos.x - 1, 0); i < min(curTile->pos.x + 2, 9); ++i)
 		for (int j = max(curTile->pos.y - 1, 0); j < min(curTile->pos.y + 2, 5); ++j)
-			if (game->map.tiles[i][j].minion != nullptr)
-				if (game->map.tiles[i][j].minion->owner != owner)
-					if (game->map.tiles[i][j].minion->HasKeywords(KEYWORD_PROVOKE))
+			if (game->map.tiles[i][j].unit != nullptr)
+				if (game->map.tiles[i][j].unit->owner != owner)
+					if (game->map.tiles[i][j].unit->HasKeywords(KEYWORD_PROVOKE))
 						return true;
 	return false;
 }

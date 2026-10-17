@@ -18,9 +18,9 @@ EventManager::~EventManager() {}
 
 //Send pre-events (for modifying event properties before resolution)
 void EventManager::SendOnPreEvent(Game* game, Event* event) {
-	for (Minion* m : game->GetMinions())
-		for (Effect* e : m->GetEffects())
-			e->TriggerPreEvent(EffectContext(e, m, game), event);
+	for (Unit* u : game->GetUnits())
+		for (Effect* e : u->GetEffects())
+			e->TriggerPreEvent(EffectContext(e, u, game), event);
 	for (Player* p : game->GetPlayers()) {
 		for (Card* c : p->hand)
 			for (Effect* e : c->GetEffects())
@@ -34,9 +34,9 @@ void EventManager::SendOnPreEvent(Game* game, Event* event) {
 //Send post-events (for triggers in response to resolution) and log history
 void EventManager::SendOnPostEvent(Game* game, Event* event) {
 	LogEvent(game, event);
-	for (Minion* m : game->GetMinions())
-		for (Effect* e : m->GetEffects())
-			e->TriggerPostEvent(EffectContext(e, m, game), event);
+	for (Unit* u : game->GetUnits())
+		for (Effect* e : u->GetEffects())
+			e->TriggerPostEvent(EffectContext(e, u, game), event);
 	for (Player* p : game->GetPlayers()) {
 		for (Card* c : p->hand)
 			for (Effect* e : c->GetEffects())
@@ -61,15 +61,15 @@ void EventManager::LogEvent(Game* game, Event* event) {
 	{
 		OnSummonEvent* summonEvent = event->As<OnSummonEvent>();
 		if (summonEvent->wasCast)
-			game->Log(game->GetCardString(summonEvent->minion) + " was summoned");
+			game->Log(game->GetCardString(summonEvent->unit) + " was summoned");
 		else
-			game->Log(game->GetCardString(summonEvent->minion) + " was created");
+			game->Log(game->GetCardString(summonEvent->unit) + " was created");
 		break;
 	}
 	case EVENT_DEATH:
 	{
 		OnDeathEvent* deathEvent = event->As<OnDeathEvent>();
-		game->Log(game->GetCardString(deathEvent->minion) + " died");
+		game->Log(game->GetCardString(deathEvent->unit) + " died");
 		break;
 	}
 	case EVENT_ATTACK:
@@ -97,9 +97,9 @@ void EventManager::LogEvent(Game* game, Event* event) {
 	{
 		OnMoveEvent* moveEvent = event->As<OnMoveEvent>();
 		if (moveEvent->wasTeleported)
-			game->Log(game->GetCardString(moveEvent->minion) + " was teleported");
+			game->Log(game->GetCardString(moveEvent->unit) + " was teleported");
 		else
-			game->Log(game->GetCardString(moveEvent->minion) + " moved");
+			game->Log(game->GetCardString(moveEvent->unit) + " moved");
 		break;
 	}
 	case EVENT_DRAW:

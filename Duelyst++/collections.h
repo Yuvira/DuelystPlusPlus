@@ -8,7 +8,7 @@
 
 //Define
 class Card;
-class Minion;
+class Unit;
 class Spell;
 class Effect;
 
@@ -25,7 +25,7 @@ public:
 	//Search functions
 	Effect* FindEffect(eEffect effect);
 	Card* FindCard(eCard card);
-	Minion* GetRandomTokenMinion();
+	Unit* GetRandomTokenMinion();
 
 	//Getters
 	const std::vector<Card*>& GetCards() const;
@@ -39,7 +39,7 @@ private:
 
 	//Object containers
 	std::unordered_map<eEffect, Effect> effects;
-	std::vector<Minion> minionList;
+	std::vector<Unit> unitList;
 	std::vector<Spell> spellList;
 
 	//Reference lists

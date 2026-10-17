@@ -28,12 +28,14 @@ Player::~Player() {}
 //Preset deck
 void Player::Preset(Collections* collections, Game* game) {
 	this->game = game;
-	deck.push_back(new Minion(*(collections->FindCard(CARD_ARGEON_HIGHMAYNE)->GetMinion())));
-	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(collections->FindCard(CARD_EPHEMERAL_SHROUD)->GetMinion()))); }
-	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(collections->FindCard(CARD_BLISTERING_SKORN)->GetMinion()))); }
-	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(collections->FindCard(CARD_CAPTAIN_HANK_HART)->GetMinion()))); }
-	for (int i = 0; i < 7; ++i) { deck.push_back(new Minion(*(collections->FindCard(CARD_CHAOS_ELEMENTAL)->GetMinion()))); }
-	//for (int i = 0; i < 7; ++i) { deck.push_back(new Spell(*(collections->FindCard(CARD_DARK_SEED)->GetSpell()))); }
+	deck.push_back(new Unit(*(collections->FindCard(CARD_ARGEON_HIGHMAYNE)->GetUnit())));
+	for (int i = 0; i < 5; ++i) { deck.push_back(new Unit(*(collections->FindCard(CARD_ASTRAL_CRUSADER)->GetUnit()))); }
+	for (int i = 0; i < 5; ++i) { deck.push_back(new Unit(*(collections->FindCard(CARD_CRIMSON_OCULUS)->GetUnit()))); }
+	for (int i = 0; i < 5; ++i) { deck.push_back(new Unit(*(collections->FindCard(CARD_FIRST_SWORD_OF_AKRANE)->GetUnit()))); }
+	for (int i = 0; i < 5; ++i) { deck.push_back(new Unit(*(collections->FindCard(CARD_LADY_LOCKE)->GetUnit()))); }
+	for (int i = 0; i < 5; ++i) { deck.push_back(new Unit(*(collections->FindCard(CARD_EPHEMERAL_SHROUD)->GetUnit()))); }
+	//for (int i = 0; i < 5; ++i) { deck.push_back(new Spell(*(collections->FindCard(CARD_DARK_SEED)->GetSpell()))); }
+	//for (int i = 0; i < 5; ++i) { deck.push_back(new Spell(*(collections->FindCard(CARD_BREATH_OF_THE_UNBORN)->GetSpell()))); }
 	for (int i = 0; i < deck.size(); ++i)
 		this->game->SetContext(deck[i], this);
 }
@@ -129,8 +131,8 @@ void Player::Draw() {
 //Add card to hand
 void Player::AddNewToHand(Card* original) {
 	Card* newCard = nullptr;
-	if (original->IsMinion())
-		newCard = new Minion(*(original->GetMinion()));
+	if (original->IsUnit())
+		newCard = new Unit(*(original->GetUnit()));
 	else if (original->IsSpell())
 		newCard = new Spell(*(original->GetSpell()));
 	game->SetContext(newCard, this);

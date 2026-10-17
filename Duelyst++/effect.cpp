@@ -66,8 +66,8 @@ bool EffectContext::IsAllied(Card* compare) { return card != compare && card->ow
 bool EffectContext::IsOwnerTurn() { return game->GetTurnPlayer() == card->owner; }
 Player* EffectContext::GetOwner() { return card->owner; }
 Player* EffectContext::GetOpponent() { return card->owner->opponent; }
-Minion* EffectContext::GetMinion() { return card->GetMinion(); }
-Minion* EffectContext::GetAllyGeneral() { return card->owner->general; }
-Minion* EffectContext::GetEnemyGeneral() { return card->owner->opponent->general; }
-BoardTile* EffectContext::GetTile() { return card->IsOnBoard() ? card->GetMinion()->curTile : nullptr; }
+Unit* EffectContext::GetUnit() { return card->GetUnit(); }
+Unit* EffectContext::GetAllyGeneral() { return card->owner->general; }
+Unit* EffectContext::GetEnemyGeneral() { return card->owner->opponent->general; }
+BoardTile* EffectContext::GetTile() { return card->IsOnBoard() ? card->GetUnit()->curTile : nullptr; }
 Map* EffectContext::GetMap() { return &game->map; }

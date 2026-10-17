@@ -56,7 +56,7 @@ Collections::Collections() {
 	//Araki Headhunter
 	effects[SKILL_ARAKI_HEADHUNTER] = Effect(SKILL_ARAKI_HEADHUNTER, KEYWORD_NONE, "Whenever you summon a minion with {Opening Gambit} from your action bar, gain +2 Attack");
 	effects[SKILL_ARAKI_HEADHUNTER].RegisterPostTrigger<OnSummonEvent>(
-		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsOnBoard() && ctx.IsAllied(ev.minion) && ev.minion->HasKeywords(KEYWORD_OPENING_GAMBIT) && ev.wasCast; },
+		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsOnBoard() && ctx.IsAllied(ev.unit) && ev.unit->HasKeywords(KEYWORD_OPENING_GAMBIT) && ev.wasCast; },
 		[](EffectContext ctx, OnSummonEvent& ev) { ctx.card->AddEffect(MODIFIER_ARAKI_HEADHUNTER, nullptr, ctx.card); });
 	effects[MODIFIER_ARAKI_HEADHUNTER] = Effect(MODIFIER_ARAKI_HEADHUNTER, KEYWORD_NONE, "Araki Headhunter");
 	effects[MODIFIER_ARAKI_HEADHUNTER].AddModifier(STAT_ATK, MODTYPE_BUFF, 2);
@@ -81,21 +81,21 @@ Collections::Collections() {
 	//Arrow Whistler
 	effects[SKILL_ARROW_WHISTLER] = Effect(SKILL_ARROW_WHISTLER, KEYWORD_RANGED, "{Ranged}|Your other minions with {Ranged} have +1 Attack");
 	effects[SKILL_ARROW_WHISTLER].RegisterSelfTrigger<OnAddThisEvent>([](EffectContext ctx, OnAddThisEvent& ev) {
-		for (Minion* minion : ctx.game->GetMinions())
-			if (ctx.IsAllied(minion) && !minion->IsGeneral() && minion->HasKeywords(KEYWORD_RANGED))
-				minion->AddEffect(AURA_ARROW_WHISTLER, ctx.effect, ctx.card);
+		for (Unit* unit : ctx.game->GetUnits())
+			if (ctx.IsAllied(unit) && !unit->IsGeneral() && unit->HasKeywords(KEYWORD_RANGED))
+				unit->AddEffect(AURA_ARROW_WHISTLER, ctx.effect, ctx.card);
 	});
 	effects[SKILL_ARROW_WHISTLER].RegisterSelfTrigger<OnRemoveThisEvent>([](EffectContext ctx, OnRemoveThisEvent& ev) {
-		for (Minion* minion : ctx.game->GetMinions())
-			minion->RemoveEffectsFromSource(ctx.effect);
+		for (Unit* unit : ctx.game->GetUnits())
+			unit->RemoveEffectsFromSource(ctx.effect);
 	});
 	effects[SKILL_ARROW_WHISTLER].RegisterPostTrigger<OnSummonEvent>(
-		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsOnBoard() && ctx.IsAllied(ev.minion) && !ev.minion->IsGeneral() && ev.minion->HasKeywords(KEYWORD_RANGED); },
-		[](EffectContext ctx, OnSummonEvent& ev) { ev.minion->AddEffect(AURA_ARROW_WHISTLER, ctx.effect, ctx.card); });
+		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsOnBoard() && ctx.IsAllied(ev.unit) && !ev.unit->IsGeneral() && ev.unit->HasKeywords(KEYWORD_RANGED); },
+		[](EffectContext ctx, OnSummonEvent& ev) { ev.unit->AddEffect(AURA_ARROW_WHISTLER, ctx.effect, ctx.card); });
 	effects[SKILL_ARROW_WHISTLER].RegisterPostTrigger<OnEffectsChangedEvent>(
 		[](EffectContext ctx, OnEffectsChangedEvent& ev) { return ctx.BothOnBoard(ev.card) && ctx.IsAllied(ev.card) && !ev.card->IsGeneral(); },
 		[](EffectContext ctx, OnEffectsChangedEvent& ev) {
-			ev.card->GetMinion()->HasKeywords(KEYWORD_RANGED)
+			ev.card->GetUnit()->HasKeywords(KEYWORD_RANGED)
 				? ev.card->AddEffect(AURA_ARROW_WHISTLER, ctx.effect, ctx.card)
 				: ev.card->RemoveEffectsFromSource(ctx.effect);
 	});
@@ -105,7 +105,7 @@ Collections::Collections() {
 	//Ash Mephyt
 	effects[SKILL_ASH_MEPHYT] = Effect(SKILL_ASH_MEPHYT, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Summon two copies of this minion on random spaces");
 	effects[SKILL_ASH_MEPHYT].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
-		if (ctx.card->IsMinion())
+		if (ctx.card->IsUnit())
 			for (int i = 0; i < 2; ++i)
 				if (BoardTile* tile = ctx.GetMap()->GetRandomEmpty(ev.tile))
 					ctx.game->SummonToken(ctx.card->cardId, tile, ctx.GetOwner());
@@ -127,11 +127,11 @@ Collections::Collections() {
 	//Azure Horn Shaman
 	effects[SKILL_AZURE_HORN_SHAMAN] = Effect(SKILL_AZURE_HORN_SHAMAN, KEYWORD_DYING_WISH, "{Dying Wish}: Give +4 Health to friendly minions around it");
 	effects[SKILL_AZURE_HORN_SHAMAN].RegisterPostTrigger<OnDeathEvent>(
-		[](EffectContext ctx, OnDeathEvent& ev) { return ctx.IsCard(ev.minion); },
+		[](EffectContext ctx, OnDeathEvent& ev) { return ctx.IsCard(ev.unit); },
 		[](EffectContext ctx, OnDeathEvent& ev) {
 			for (BoardTile* tile : ctx.GetMap()->GetAllNear(ctx.GetTile()))
-				if (tile->HasMinion() && ctx.SharesOwner(tile->minion) && !tile->minion->IsGeneral())
-					tile->minion->AddEffect(MODIFIER_AZURE_HORN_SHAMAN, nullptr, ctx.card);
+				if (tile->HasUnit() && ctx.SharesOwner(tile->unit) && !tile->unit->IsGeneral())
+					tile->unit->AddEffect(MODIFIER_AZURE_HORN_SHAMAN, nullptr, ctx.card);
 	});
 	effects[MODIFIER_AZURE_HORN_SHAMAN] = Effect(MODIFIER_AZURE_HORN_SHAMAN, KEYWORD_NONE, "Azure Horn Shaman");
 	effects[MODIFIER_AZURE_HORN_SHAMAN].AddModifier(STAT_HP, MODTYPE_BUFF, 4);
@@ -141,9 +141,9 @@ Collections::Collections() {
 	effects[SKILL_BASTION].RegisterPostTrigger<OnTurnEndEvent>(
 		[](EffectContext ctx, OnTurnEndEvent& ev) { return ctx.IsOnBoard() && ctx.IsOwnedBy(ev.player); },
 		[](EffectContext ctx, OnTurnEndEvent& ev) {
-			for (Minion* minion : ctx.game->GetMinions())
-				if (ctx.IsAllied(minion) && !minion->IsGeneral())
-					minion->AddEffect(MODIFIER_BASTION, nullptr, ctx.card);
+			for (Unit* unit : ctx.game->GetUnits())
+				if (ctx.IsAllied(unit) && !unit->IsGeneral())
+					unit->AddEffect(MODIFIER_BASTION, nullptr, ctx.card);
 	});
 	effects[MODIFIER_BASTION] = Effect(MODIFIER_BASTION, KEYWORD_NONE, "Bastion");
 	effects[MODIFIER_BASTION].AddModifier(STAT_HP, MODTYPE_BUFF, 1);
@@ -151,7 +151,7 @@ Collections::Collections() {
 	//Black Locust
 	effects[SKILL_BLACK_LOCUST] = Effect(SKILL_BLACK_LOCUST, KEYWORD_FLYING, "{Flying}|After this minion moves, summon a Black Locust nearby");
 	effects[SKILL_BLACK_LOCUST].RegisterPostTrigger<OnMoveEvent>(
-		[](EffectContext ctx, OnMoveEvent& ev) { return ctx.IsCardOnBoard(ev.minion) && !ev.wasTeleported; },
+		[](EffectContext ctx, OnMoveEvent& ev) { return ctx.IsCardOnBoard(ev.unit) && !ev.wasTeleported; },
 		[](EffectContext ctx, OnMoveEvent& ev) {
 			if (BoardTile* tile = ctx.GetMap()->GetRandomEmptyNear(ctx.GetTile()))
 				ctx.game->SummonToken(CARD_BLACK_LOCUST, tile, ctx.card->owner);
@@ -167,10 +167,10 @@ Collections::Collections() {
 	//Blistering Skorn
 	effects[SKILL_BLISTERING_SKORN] = Effect(SKILL_BLISTERING_SKORN, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Deal 1 damage to everything (including itself)");
 	effects[SKILL_BLISTERING_SKORN].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
-		for (Minion* minion : ctx.game->GetMinions())
-			minion->DealDamage(ctx.card, 1);
-		if (ctx.card->IsMinion())
-			ctx.card->GetMinion()->DealDamage(ctx.card, 1);
+		for (Unit* unit : ctx.game->GetUnits())
+			unit->DealDamage(ctx.card, 1);
+		if (ctx.card->IsUnit())
+			ctx.card->GetUnit()->DealDamage(ctx.card, 1);
 	});
 
 	//Blood Taura
@@ -199,12 +199,12 @@ Collections::Collections() {
 	effects[SKILL_BLOODTEAR_ALCHEMIST] = Effect(SKILL_BLOODTEAR_ALCHEMIST, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Deal 1 damage to an enemy");
 	effects[SKILL_BLOODTEAR_ALCHEMIST].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
 		ctx.game->HighlightSelectable(TargetMode(TARGET_MODE_ALL, [](BoardTile* tile) {
-			return tile->HasMinion() && tile->minion->IsEnemy(); }));
+			return tile->HasUnit() && tile->unit->IsEnemy(); }));
 		if (ctx.game->HasSelectable()) {
 			ctx.game->callback = EffectCallback(ctx, ev.tile);
 			ctx.game->callback.Callback = [](EffectContext ctx, BoardTile* source, BoardTile* target) {
-				if (target->HasMinion())
-					target->minion->DealDamage(ctx.card, 1);
+				if (target->HasUnit())
+					target->unit->DealDamage(ctx.card, 1);
 			};
 		}
 	});
@@ -221,15 +221,15 @@ Collections::Collections() {
 		[](EffectContext ctx, OnTurnEndEvent& ev) { return ctx.IsOnBoard() && ctx.IsOwnedBy(ev.player); },
 		[](EffectContext ctx, OnTurnEndEvent& ev) {
 			for (BoardTile* tile : ctx.GetMap()->GetAllNear(ctx.GetTile()))
-				if (tile->HasMinion() && !ctx.SharesOwner(tile->minion) && !tile->minion->IsGeneral())
-					tile->minion->DealDamage(ctx.card, 2);
+				if (tile->HasUnit() && !ctx.SharesOwner(tile->unit) && !tile->unit->IsGeneral())
+					tile->unit->DealDamage(ctx.card, 2);
 	});
 
 	//Captain Hank Hart
 	effects[SKILL_CAPTAIN_HANK_HART] = Effect(SKILL_CAPTAIN_HANK_HART, KEYWORD_RANGED, "{Ranged}|Whenever this deals damage, restore that much Health to it");
 	effects[SKILL_CAPTAIN_HANK_HART].RegisterPostTrigger<OnDamageEvent>(
-		[](EffectContext ctx, OnDamageEvent& ev) { return ctx.IsCardOnBoard(ev.source) && ctx.GetMinion()->hp > 0; },
-		[](EffectContext ctx, OnDamageEvent& ev) { ctx.GetMinion()->Heal(ctx.card, ev.damage); });
+		[](EffectContext ctx, OnDamageEvent& ev) { return ctx.IsCardOnBoard(ev.source) && ctx.GetUnit()->hp > 0; },
+		[](EffectContext ctx, OnDamageEvent& ev) { ctx.GetUnit()->Heal(ctx.card, ev.damage); });
 
 	//Chakkram
 	effects[SKILL_CHAKKRAM] = Effect(SKILL_CHAKKRAM, KEYWORD_NONE, "Costs 2 less if your General took damage on your opponent's last turn");
@@ -240,7 +240,7 @@ Collections::Collections() {
 		[](EffectContext ctx, OnTurnEndEvent& ev) { return ctx.IsOwnedBy(ev.player); },
 		[](EffectContext ctx, OnTurnEndEvent& ev) { ctx.card->RemoveEffectsFromSource(ctx.effect); });
 	effects[SKILL_CHAKKRAM].RegisterPostTrigger<OnSummonEvent>(
-		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsCard(ev.minion); },
+		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsCard(ev.unit); },
 		[](EffectContext ctx, OnSummonEvent& ev) { ctx.card->RemoveEffectsFromSource(ctx.effect); });
 	effects[SKILL_CHAKKRAM].RegisterPostTrigger<OnAddToHandEvent>(
 		[](EffectContext ctx, OnAddToHandEvent& ev) { return ctx.IsCard(ev.card); },
@@ -261,13 +261,13 @@ Collections::Collections() {
 		[](EffectContext ctx, OnDamageEvent& ev) { return ctx.IsCard(ev.target); },
 		[](EffectContext ctx, OnDamageEvent& ev) {
 			if (BoardTile* tile = ctx.GetMap()->GetRandomEmpty(ctx.GetTile()))
-				ctx.GetMinion()->MoveToTile(tile, true);
+				ctx.GetUnit()->MoveToTile(tile, true);
 	});
 
 	//Crimson Oculus
 	effects[SKILL_CRIMSON_OCULUS] = Effect(SKILL_CRIMSON_OCULUS, KEYWORD_NONE, "Whenever opponent summons a minion, this minion gets +1/+1");
 	effects[SKILL_CRIMSON_OCULUS].RegisterPostTrigger<OnSummonEvent>(
-		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsOnBoard() && !ctx.SharesOwner(ev.minion); },
+		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsOnBoard() && !ctx.SharesOwner(ev.unit); },
 		[](EffectContext ctx, OnSummonEvent& ev) { ctx.card->AddEffect(MODIFIER_CRIMSON_OCULUS, nullptr, ctx.card); });
 	effects[MODIFIER_CRIMSON_OCULUS] = Effect(MODIFIER_CRIMSON_OCULUS, KEYWORD_NONE, "Crimson Oculus");
 	effects[MODIFIER_CRIMSON_OCULUS].AddModifier(STAT_ATK, MODTYPE_BUFF, 1).AddModifier(STAT_HP, MODTYPE_BUFF, 1);
@@ -276,12 +276,12 @@ Collections::Collections() {
 	effects[SKILL_CROSSBONES] = Effect(SKILL_CROSSBONES, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Destroy an enemy minion with Ranged");
 	effects[SKILL_CROSSBONES].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
 		ctx.game->HighlightSelectable(TargetMode(TARGET_MODE_ALL, [](BoardTile* tile) {
-			return tile->HasMinion() && tile->minion->IsEnemy() && !tile->minion->IsGeneral() && tile->minion->HasKeywords(KEYWORD_RANGED); }));
+			return tile->HasUnit() && tile->unit->IsEnemy() && !tile->unit->IsGeneral() && tile->unit->HasKeywords(KEYWORD_RANGED); }));
 		if (ctx.game->HasSelectable()) {
 			ctx.game->callback = EffectCallback(ctx, ev.tile);
 			ctx.game->callback.Callback = [](EffectContext ctx, BoardTile* source, BoardTile* target) {
-				if (target->HasMinion())
-					target->minion->Destroy(ctx.card);
+				if (target->HasUnit())
+					target->unit->Destroy(ctx.card);
 			};
 		}
 	});
@@ -290,8 +290,8 @@ Collections::Collections() {
 	effects[SKILL_DANCING_BLADES] = Effect(SKILL_DANCING_BLADES, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Deal 3 damage to ANY minion in front of this");
 	effects[SKILL_DANCING_BLADES].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
 		if (BoardTile* tile = ctx.game->GetTileInFront(ev.tile, ctx.GetOwner()))
-			if (tile->HasMinion() && !tile->minion->IsGeneral())
-				tile->minion->DealDamage(ctx.card, 3);
+			if (tile->HasUnit() && !tile->unit->IsGeneral())
+				tile->unit->DealDamage(ctx.card, 3);
 	});
 
 	//Dark Nemesis
@@ -315,8 +315,8 @@ Collections::Collections() {
 	effects[SKILL_DEATHBLIGHTER] = Effect(SKILL_DEATHBLIGHTER, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Deal 3 damage to all enemy minions around it");
 	effects[SKILL_DEATHBLIGHTER].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
 		for (BoardTile* tile : ctx.GetMap()->GetAllNear(ev.tile))
-			if (tile->HasMinion() && !ctx.SharesOwner(tile->minion) && !tile->minion->IsGeneral())
-				tile->minion->DealDamage(ctx.card, 3);
+			if (tile->HasUnit() && !ctx.SharesOwner(tile->unit) && !tile->unit->IsGeneral())
+				tile->unit->DealDamage(ctx.card, 3);
 	});
 
 	//Decimus
@@ -328,7 +328,7 @@ Collections::Collections() {
 	//Dioltas
 	effects[SKILL_DIOLTAS] = Effect(SKILL_DIOLTAS, KEYWORD_DYING_WISH, "{Dying Wish}: Summon a 0/8 Tombstone minion with Provoke near your General");
 	effects[SKILL_DIOLTAS].RegisterPostTrigger<OnDeathEvent>(
-		[](EffectContext ctx, OnDeathEvent& ev) { return ctx.IsCard(ev.minion); },
+		[](EffectContext ctx, OnDeathEvent& ev) { return ctx.IsCard(ev.unit); },
 		[](EffectContext ctx, OnDeathEvent& ev) {
 			if (BoardTile* tile = ctx.GetMap()->GetRandomEmptyNear(ctx.GetAllyGeneral()->curTile))
 				ctx.game->SummonToken(CARD_TOMBSTONE, tile, ctx.GetOwner());
@@ -337,7 +337,7 @@ Collections::Collections() {
 	//Dreamgazer
 	effects[SKILL_DREAMGAZER] = Effect(SKILL_DREAMGAZER, KEYWORD_NONE, "When you replace this card, summon it nearby. Your General takes 2 damage");
 	effects[SKILL_DREAMGAZER].RegisterPostTrigger<OnReplaceEvent>(
-		[](EffectContext ctx, OnReplaceEvent& ev) { return ctx.IsCard(ev.card) && ctx.card->IsMinion(); },
+		[](EffectContext ctx, OnReplaceEvent& ev) { return ctx.IsCard(ev.card) && ctx.card->IsUnit(); },
 		[](EffectContext ctx, OnReplaceEvent& ev) {
 			if (BoardTile* tile = ctx.GetMap()->GetRandomEmptyNear(ctx.GetAllyGeneral()->curTile)) {
 				ctx.game->Summon(ctx.card, tile, false);
@@ -351,8 +351,8 @@ Collections::Collections() {
 	effects[SKILL_DUST_WAILER].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
 		BoardTile* tile = ev.tile;
 		while (tile = ctx.game->GetTileInFront(tile, ctx.GetOwner()))
-			if (tile->HasMinion() && !ctx.SharesOwner(tile->minion))
-				tile->minion->DealDamage(ctx.card, 3);
+			if (tile->HasUnit() && !ctx.SharesOwner(tile->unit))
+				tile->unit->DealDamage(ctx.card, 3);
 	});
 
 	//Eclipse
@@ -385,8 +385,8 @@ Collections::Collections() {
 			ctx.game->callback = EffectCallback(ctx, ev.tile);
 			ctx.game->callback.Callback = [](EffectContext context, BoardTile* source, BoardTile* target) {
 				target->SetFeature(TILE_NONE);
-				if (target->HasMinion())
-					target->minion->Dispel();
+				if (target->HasUnit())
+					target->unit->Dispel();
 			};
 		}
 	});
@@ -408,24 +408,24 @@ Collections::Collections() {
 	effects[SKILL_FIRESTARTER].RegisterPostTrigger<OnCastEvent>(
 		[](EffectContext ctx, OnCastEvent& ev) { return ctx.IsOnBoard() && ev.card->IsSpell() && ctx.SharesOwner(ev.card); },
 		[](EffectContext ctx, OnCastEvent& ev) {
-			if (BoardTile* tile = ctx.GetMap()->GetRandomEmptyNear(ctx.GetMinion()->curTile))
+			if (BoardTile* tile = ctx.GetMap()->GetRandomEmptyNear(ctx.GetUnit()->curTile))
 				ctx.game->SummonToken(CARD_SPELLSPARK, tile, ctx.GetOwner());
 	});
 
 	//First Sword of Akrane
 	effects[SKILL_FIRST_SWORD_OF_AKRANE] = Effect(SKILL_FIRST_SWORD_OF_AKRANE, KEYWORD_NONE, "Your other minions have +1 Attack");
 	effects[SKILL_FIRST_SWORD_OF_AKRANE].RegisterSelfTrigger<OnAddThisEvent>([](EffectContext ctx, OnAddThisEvent& ev) {
-		for (Minion* minion : ctx.game->GetMinions())
-			if (ctx.IsAllied(minion) && !minion->IsGeneral())
-				minion->AddEffect(AURA_FIRST_SWORD_OF_AKRANE, ctx.effect, ctx.card);
+		for (Unit* unit : ctx.game->GetUnits())
+			if (ctx.IsAllied(unit) && !unit->IsGeneral())
+				unit->AddEffect(AURA_FIRST_SWORD_OF_AKRANE, ctx.effect, ctx.card);
 	});
 	effects[SKILL_FIRST_SWORD_OF_AKRANE].RegisterSelfTrigger<OnRemoveThisEvent>([](EffectContext ctx, OnRemoveThisEvent& ev) {
-		for (Minion* minion : ctx.game->GetMinions())
-			minion->RemoveEffectsFromSource(ctx.effect);
+		for (Unit* unit : ctx.game->GetUnits())
+			unit->RemoveEffectsFromSource(ctx.effect);
 	});
 	effects[SKILL_FIRST_SWORD_OF_AKRANE].RegisterPostTrigger<OnSummonEvent>(
-		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsOnBoard() && ctx.IsAllied(ev.minion); },
-		[](EffectContext ctx, OnSummonEvent& ev) { ev.minion->AddEffect(AURA_FIRST_SWORD_OF_AKRANE, ctx.effect, ctx.card); });
+		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsOnBoard() && ctx.IsAllied(ev.unit); },
+		[](EffectContext ctx, OnSummonEvent& ev) { ev.unit->AddEffect(AURA_FIRST_SWORD_OF_AKRANE, ctx.effect, ctx.card); });
 	effects[AURA_FIRST_SWORD_OF_AKRANE] = Effect(AURA_FIRST_SWORD_OF_AKRANE, KEYWORD_NONE, "First Sword of Akrane");
 	effects[AURA_FIRST_SWORD_OF_AKRANE].AddModifier(STAT_ATK, MODTYPE_BUFF, 1);
 
@@ -440,21 +440,21 @@ Collections::Collections() {
 	effects[SKILL_FROSTBONE_NAGA] = Effect(SKILL_FROSTBONE_NAGA, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Deal 2 damage to everything around it");
 	effects[SKILL_FROSTBONE_NAGA].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
 		for (BoardTile* tile : ctx.GetMap()->GetAllNear(ev.tile))
-			if (tile->HasMinion())
-				tile->minion->DealDamage(ctx.card, 2);
+			if (tile->HasUnit())
+				tile->unit->DealDamage(ctx.card, 2);
 	});
 
 	//Ghost Lynx
 	effects[SKILL_GHOST_LYNX] = Effect(SKILL_GHOST_LYNX, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Teleport a nearby minion to a random space");
 	effects[SKILL_GHOST_LYNX].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
 		ctx.game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, [](BoardTile* tile) {
-			return tile->HasMinion() && !tile->minion->IsGeneral(); }), ev.tile);
+			return tile->HasUnit() && !tile->unit->IsGeneral(); }), ev.tile);
 		if (ctx.game->HasSelectable()) {
 			ctx.game->callback = EffectCallback(ctx, ev.tile);
 			ctx.game->callback.Callback = [](EffectContext context, BoardTile* source, BoardTile* target) {
-				if (target->HasMinion())
+				if (target->HasUnit())
 					if (BoardTile* tile = context.GetMap()->GetRandomEmpty(source, target))
-						target->minion->MoveToTile(tile, true);
+						target->unit->MoveToTile(tile, true);
 			};
 		}
 	});
@@ -462,21 +462,21 @@ Collections::Collections() {
 	//Golden Justicar
 	effects[SKILL_GOLDEN_JUSTICAR] = Effect(SKILL_GOLDEN_JUSTICAR, KEYWORD_PROVOKE, "{Provoke}|Your other minions with {Provoke} can move two additional spaces");
 	effects[SKILL_GOLDEN_JUSTICAR].RegisterSelfTrigger<OnAddThisEvent>([](EffectContext ctx, OnAddThisEvent& ev) {
-		for (Minion* minion : ctx.game->GetMinions())
-			if (ctx.IsAllied(minion) && !minion->IsGeneral() && minion->HasKeywords(KEYWORD_PROVOKE))
-				minion->AddEffect(AURA_GOLDEN_JUSTICAR, ctx.effect, ctx.card);
+		for (Unit* unit : ctx.game->GetUnits())
+			if (ctx.IsAllied(unit) && !unit->IsGeneral() && unit->HasKeywords(KEYWORD_PROVOKE))
+				unit->AddEffect(AURA_GOLDEN_JUSTICAR, ctx.effect, ctx.card);
 	});
 	effects[SKILL_GOLDEN_JUSTICAR].RegisterSelfTrigger<OnRemoveThisEvent>([](EffectContext ctx, OnRemoveThisEvent& ev) {
-		for (Minion* minion : ctx.game->GetMinions())
-			minion->RemoveEffectsFromSource(ctx.effect);
+		for (Unit* unit : ctx.game->GetUnits())
+			unit->RemoveEffectsFromSource(ctx.effect);
 	});
 	effects[SKILL_GOLDEN_JUSTICAR].RegisterPostTrigger<OnSummonEvent>(
-		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsOnBoard() && ctx.IsAllied(ev.minion) && ev.minion->HasKeywords(KEYWORD_PROVOKE); },
-		[](EffectContext ctx, OnSummonEvent& ev) { ev.minion->AddEffect(AURA_GOLDEN_JUSTICAR, ctx.effect, ctx.card); });
+		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsOnBoard() && ctx.IsAllied(ev.unit) && ev.unit->HasKeywords(KEYWORD_PROVOKE); },
+		[](EffectContext ctx, OnSummonEvent& ev) { ev.unit->AddEffect(AURA_GOLDEN_JUSTICAR, ctx.effect, ctx.card); });
 	effects[SKILL_GOLDEN_JUSTICAR].RegisterPostTrigger<OnEffectsChangedEvent>(
 		[](EffectContext ctx, OnEffectsChangedEvent& ev) { return ctx.BothOnBoard(ev.card) && ctx.IsAllied(ev.card) && !ev.card->IsGeneral(); },
 		[](EffectContext ctx, OnEffectsChangedEvent& ev) {
-			ev.card->GetMinion()->HasKeywords(KEYWORD_PROVOKE)
+			ev.card->GetUnit()->HasKeywords(KEYWORD_PROVOKE)
 				? ev.card->AddEffect(AURA_GOLDEN_JUSTICAR, ctx.effect, ctx.card)
 				: ev.card->RemoveEffectsFromSource(ctx.effect);
 	});
@@ -486,9 +486,9 @@ Collections::Collections() {
 	//Golem Metallurgist
 	effects[SKILL_GOLEM_METALLURGIST] = Effect(SKILL_GOLEM_METALLURGIST, KEYWORD_NONE, "The first Golem you summon each turn costs 1 less");
 	effects[SKILL_GOLEM_METALLURGIST].RegisterSelfTrigger<OnAddThisEvent>([](EffectContext ctx, OnAddThisEvent& ev) {
-		if (ctx.game->GetTurnPlayer() == ctx.GetOwner() && !ctx.game->AnyCastThisTurn([](Card* card) { return card->IsMinion() && card->GetMinion()->tribe == TRIBE_GOLEM; }))
+		if (ctx.game->GetTurnPlayer() == ctx.GetOwner() && !ctx.game->AnyCastThisTurn([](Card* card) { return card->IsUnit() && card->GetUnit()->tribe == TRIBE_GOLEM; }))
 		for (Card* card : ctx.GetOwner()->GetDeckAndHand())
-			if (card->IsMinion() && card->GetMinion()->tribe == TRIBE_GOLEM)
+			if (card->IsUnit() && card->GetUnit()->tribe == TRIBE_GOLEM)
 				card->AddEffect(AURA_GOLEM_METALLURGIST, ctx.effect, ctx.card);
 	});
 	effects[SKILL_GOLEM_METALLURGIST].RegisterSelfTrigger<OnRemoveThisEvent>([](EffectContext ctx, OnRemoveThisEvent& ev) {
@@ -496,23 +496,23 @@ Collections::Collections() {
 			card->RemoveEffectsFromSource(ctx.effect);
 	});
 	effects[SKILL_GOLEM_METALLURGIST].RegisterPostTrigger<OnSummonEvent>(
-		[](EffectContext ctx, OnSummonEvent& ev) { return ev.wasCast && ctx.SharesOwner(ev.minion) && ev.minion->tribe == TRIBE_GOLEM; },
+		[](EffectContext ctx, OnSummonEvent& ev) { return ev.wasCast && ctx.SharesOwner(ev.unit) && ev.unit->tribe == TRIBE_GOLEM; },
 		[](EffectContext ctx, OnSummonEvent& ev) {
-			ev.minion->RemoveEffectsFromSource(ctx.effect);
+			ev.unit->RemoveEffectsFromSource(ctx.effect);
 			for (Card* card : ctx.GetOwner()->GetDeckAndHand())
 				card->RemoveEffectsFromSource(ctx.effect);
 	});
 	effects[SKILL_GOLEM_METALLURGIST].RegisterPostTrigger<OnAddToHandEvent>(
-		[](EffectContext ctx, OnAddToHandEvent& ev) { return ctx.IsOnBoard() && ctx.SharesOwner(ev.card) && ev.card->IsMinion() && ev.card->GetMinion()->tribe == TRIBE_GOLEM; },
+		[](EffectContext ctx, OnAddToHandEvent& ev) { return ctx.IsOnBoard() && ctx.SharesOwner(ev.card) && ev.card->IsUnit() && ev.card->GetUnit()->tribe == TRIBE_GOLEM; },
 		[](EffectContext ctx, OnAddToHandEvent& ev) {
-			if (ctx.game->GetTurnPlayer() == ctx.GetOwner() && !ctx.game->AnyCastThisTurn([](Card* card) { return card->IsMinion() && card->GetMinion()->tribe == TRIBE_GOLEM; }))
+			if (ctx.game->GetTurnPlayer() == ctx.GetOwner() && !ctx.game->AnyCastThisTurn([](Card* card) { return card->IsUnit() && card->GetUnit()->tribe == TRIBE_GOLEM; }))
 				ev.card->AddEffect(AURA_GOLEM_METALLURGIST, ctx.effect, ctx.card);
 	});
 	effects[SKILL_GOLEM_METALLURGIST].RegisterPostTrigger<OnTurnEndEvent>(
 		[](EffectContext ctx, OnTurnEndEvent& ev) { return ctx.IsOnBoard() && ctx.IsOwnedBy(ev.player); },
 		[](EffectContext ctx, OnTurnEndEvent& ev) {
 			for (Card* card : ctx.GetOwner()->GetDeckAndHand())
-				if (card->IsMinion() && card->GetMinion()->tribe == TRIBE_GOLEM)
+				if (card->IsUnit() && card->GetUnit()->tribe == TRIBE_GOLEM)
 					card->AddEffect(AURA_GOLEM_METALLURGIST, ctx.effect, ctx.card);
 	});
 	effects[AURA_GOLEM_METALLURGIST] = Effect(AURA_GOLEM_METALLURGIST, KEYWORD_NONE, "Golem Metallurgist");
@@ -521,21 +521,21 @@ Collections::Collections() {
 	//Golem Vanquisher
 	effects[SKILL_GOLEM_VANQUISHER] = Effect(SKILL_GOLEM_VANQUISHER, KEYWORD_PROVOKE, "{Provoke}|Your other Golem minions have {Provoke}");
 	effects[SKILL_GOLEM_VANQUISHER].RegisterSelfTrigger<OnAddThisEvent>([](EffectContext ctx, OnAddThisEvent& ev) {
-		for (Minion* minion : ctx.game->GetMinions())
-			if (ctx.IsAllied(minion) && minion->tribe == TRIBE_GOLEM)
-				minion->AddEffect(AURA_GOLEM_VANQUISHER, ctx.effect, ctx.card);
+		for (Unit* unit : ctx.game->GetUnits())
+			if (ctx.IsAllied(unit) && unit->tribe == TRIBE_GOLEM)
+				unit->AddEffect(AURA_GOLEM_VANQUISHER, ctx.effect, ctx.card);
 	});
 	effects[SKILL_GOLEM_VANQUISHER].RegisterSelfTrigger<OnRemoveThisEvent>([](EffectContext ctx, OnRemoveThisEvent& ev) {
-		for (Minion* minion : ctx.game->GetMinions())
-			minion->RemoveEffectsFromSource(ctx.effect);
+		for (Unit* unit : ctx.game->GetUnits())
+			unit->RemoveEffectsFromSource(ctx.effect);
 	});
 	effects[SKILL_GOLEM_VANQUISHER].RegisterPostTrigger<OnSummonEvent>(
-		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsOnBoard() && ctx.IsAllied(ev.minion) && ev.minion->tribe == TRIBE_GOLEM; },
-		[](EffectContext ctx, OnSummonEvent& ev) { ev.minion->AddEffect(AURA_GOLEM_VANQUISHER, ctx.effect, ctx.card); });
+		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsOnBoard() && ctx.IsAllied(ev.unit) && ev.unit->tribe == TRIBE_GOLEM; },
+		[](EffectContext ctx, OnSummonEvent& ev) { ev.unit->AddEffect(AURA_GOLEM_VANQUISHER, ctx.effect, ctx.card); });
 	effects[SKILL_GOLEM_VANQUISHER].RegisterPostTrigger<OnEffectsChangedEvent>(
 		[](EffectContext ctx, OnEffectsChangedEvent& ev) { return ctx.BothOnBoard(ev.card) && ctx.IsAllied(ev.card); },
 		[](EffectContext ctx, OnEffectsChangedEvent& ev) {
-			ev.card->GetMinion()->tribe == TRIBE_GOLEM
+			ev.card->GetUnit()->tribe == TRIBE_GOLEM
 				? ev.card->AddEffect(AURA_GOLEM_VANQUISHER, ctx.effect, ctx.card)
 				: ev.card->RemoveEffectsFromSource(ctx.effect);
 	});
@@ -552,12 +552,12 @@ Collections::Collections() {
 	//Healing Mystic
 	effects[SKILL_HEALING_MYSTIC] = Effect(SKILL_HEALING_MYSTIC, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Restore 2 Health to anything");
 	effects[SKILL_HEALING_MYSTIC].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
-		ctx.game->HighlightSelectable(TargetMode(TARGET_MODE_ALL, [](BoardTile* tile) { return tile->HasMinion(); }));
+		ctx.game->HighlightSelectable(TargetMode(TARGET_MODE_ALL, [](BoardTile* tile) { return tile->HasUnit(); }));
 		if (ctx.game->HasSelectable()) {
 			ctx.game->callback = EffectCallback(ctx, ev.tile);
 			ctx.game->callback.Callback = [](EffectContext context, BoardTile* source, BoardTile* target) {
-				if (target->HasMinion())
-					target->minion->Heal(context.card, 2);
+				if (target->HasUnit())
+					target->unit->Heal(context.card, 2);
 			};
 		}
 	});
@@ -565,11 +565,11 @@ Collections::Collections() {
 	//Ironclad
 	effects[SKILL_IRONCLAD] = Effect(SKILL_IRONCLAD, KEYWORD_DYING_WISH, "{Dying Wish}: Dispel all enemy minions");
 	effects[SKILL_IRONCLAD].RegisterPostTrigger<OnDeathEvent>(
-		[](EffectContext ctx, OnDeathEvent& ev) { return ctx.IsCard(ev.minion); },
+		[](EffectContext ctx, OnDeathEvent& ev) { return ctx.IsCard(ev.unit); },
 		[](EffectContext ctx, OnDeathEvent& ev) {
-			for (Minion* minion : ctx.game->GetMinions())
-				if (!ctx.SharesOwner(minion) && !minion->IsGeneral())
-					minion->Dispel();
+			for (Unit* unit : ctx.game->GetUnits())
+				if (!ctx.SharesOwner(unit) && !unit->IsGeneral())
+					unit->Dispel();
 	});
 
 	//Jax Truesight
@@ -583,7 +583,7 @@ Collections::Collections() {
 	//Jaxi
 	effects[SKILL_JAXI] = Effect(SKILL_JAXI, KEYWORD_DYING_WISH, "{Dying Wish}: Summon a 1/1 {Ranged} Mini-Jax in a random corner");
 	effects[SKILL_JAXI].RegisterPostTrigger<OnDeathEvent>(
-		[](EffectContext ctx, OnDeathEvent& ev) { return ctx.IsCard(ev.minion); },
+		[](EffectContext ctx, OnDeathEvent& ev) { return ctx.IsCard(ev.unit); },
 		[](EffectContext ctx, OnDeathEvent& ev) {
 			if (BoardTile* tile = ctx.GetMap()->GetRandomEmptyCorner())
 				ctx.game->SummonToken(CARD_MINI_JAX, tile, ctx.GetOwner());
@@ -593,14 +593,14 @@ Collections::Collections() {
 	effects[SKILL_KEEPER_OF_THE_VALE] = Effect(SKILL_KEEPER_OF_THE_VALE, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Summon a random non-token friendly minion destroyed this game nearby");
 	effects[SKILL_KEEPER_OF_THE_VALE].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
 		ctx.game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, [](BoardTile* tile) {
-			return !tile->HasMinion(); }), ev.tile);
+			return !tile->HasUnit(); }), ev.tile);
 		if (ctx.game->HasSelectable()) {
 			ctx.game->callback = EffectCallback(ctx, ev.tile);
 			ctx.game->callback.Callback = [](EffectContext ctx, BoardTile* source, BoardTile* target) {
-				if (!target->HasMinion()) {
+				if (!target->HasUnit()) {
 					std::vector<Card*> valid;
-					for (Card* destroyed : ctx.game->GetDestroyedMinions())
-						if (!destroyed->isToken && destroyed->IsMinion() && ctx.SharesOwner(destroyed))
+					for (Card* destroyed : ctx.game->GetDestroyedUnits())
+						if (!destroyed->isToken && destroyed->IsUnit() && ctx.SharesOwner(destroyed))
 							valid.push_back(destroyed);
 					if (valid.size() > 0)
 						ctx.game->SummonToken(valid[rand() % valid.size()]->cardId, target, ctx.GetOwner());
@@ -624,8 +624,8 @@ Collections::Collections() {
 		ctx.GetAllyGeneral()->AddContinuousEffect(AURA_LADY_LOCKE, ctx.card); });
 	effects[AURA_LADY_LOCKE] = Effect(AURA_LADY_LOCKE, KEYWORD_NONE, "Lady Locke|Minions you summon this turn gain +1/+1 and gain {Provoke}");
 	effects[AURA_LADY_LOCKE].RegisterPostTrigger<OnSummonEvent>(
-		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsOnBoard() && ctx.IsAllied(ev.minion) && ctx.effect->GetRef() != ev.minion; },
-		[](EffectContext ctx, OnSummonEvent& ev) { ev.minion->AddEffect(MODIFIER_LADY_LOCKE, nullptr, ctx.effect->GetRef()); });
+		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsOnBoard() && ctx.IsAllied(ev.unit) && ctx.effect->GetRef() != ev.unit; },
+		[](EffectContext ctx, OnSummonEvent& ev) { ev.unit->AddEffect(MODIFIER_LADY_LOCKE, nullptr, ctx.effect->GetRef()); });
 	effects[AURA_LADY_LOCKE].RegisterPostTrigger<OnTurnEndEvent>(
 		[](EffectContext ctx, OnTurnEndEvent& ev) { return ctx.IsOnBoard() && ctx.IsOwnedBy(ev.player); },
 		[](EffectContext ctx, OnTurnEndEvent& ev) { ctx.card->RemoveEffectsFromSource(ctx.effect); });
@@ -637,8 +637,8 @@ Collections::Collections() {
 	effects[SKILL_LIGHTBENDER].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
 		for (BoardTile* tile : ctx.GetMap()->GetAllNear(ev.tile)) {
 			tile->SetFeature(TILE_NONE);
-			if (tile->HasMinion())
-				tile->minion->Dispel();
+			if (tile->HasUnit())
+				tile->unit->Dispel();
 		}
 	});
 
@@ -648,8 +648,8 @@ Collections::Collections() {
 		[](EffectContext ctx, OnTurnEndEvent& ev) { return ctx.IsOnBoard() && ctx.IsOwnedBy(ev.player); },
 		[](EffectContext ctx, OnTurnEndEvent& ev) {
 			for (BoardTile* tile : ctx.GetMap()->GetAllNear(ctx.GetTile()))
-				if (tile->HasMinion() && ctx.IsAllied(tile->minion) && !tile->minion->IsGeneral())
-					tile->minion->Heal(ctx.card, 2);
+				if (tile->HasUnit() && ctx.IsAllied(tile->unit) && !tile->unit->IsGeneral())
+					tile->unit->Heal(ctx.card, 2);
 	});
 	
 	//Manaforger
@@ -691,12 +691,12 @@ Collections::Collections() {
 	effects[SKILL_MAW] = Effect(SKILL_MAW, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Deal 2 damage to a nearby enemy minion");
 	effects[SKILL_MAW].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
 		ctx.game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, [](BoardTile* tile) {
-			return tile->HasMinion() && tile->minion->IsEnemy() && !tile->minion->IsGeneral(); }), ev.tile);
+			return tile->HasUnit() && tile->unit->IsEnemy() && !tile->unit->IsGeneral(); }), ev.tile);
 		if (ctx.game->HasSelectable()) {
 			ctx.game->callback = EffectCallback(ctx, ev.tile);
 			ctx.game->callback.Callback = [](EffectContext ctx, BoardTile* source, BoardTile* target) {
-				if (target->HasMinion())
-					target->minion->DealDamage(ctx.card, 2);
+				if (target->HasUnit())
+					target->unit->DealDamage(ctx.card, 2);
 			};
 		}
 	});
@@ -715,28 +715,28 @@ Collections::Collections() {
 	//Mirkblood Devourer
 	effects[SKILL_MIRKBLOOD_DEVOURER] = Effect(SKILL_MIRKBLOOD_DEVOURER, KEYWORD_NONE, "Friendly minions summoned nearby this minion gain +1/+1");
 	effects[SKILL_MIRKBLOOD_DEVOURER].RegisterPostTrigger<OnSummonEvent>(
-		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsOnBoard() && ctx.IsAllied(ev.minion) && ctx.GetTile()->IsNear(ev.minion->curTile); },
-		[](EffectContext ctx, OnSummonEvent& ev) { ev.minion->AddEffect(MODIFIER_MIRKBLOOD_DEVOURER, nullptr, ctx.card); });
+		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsOnBoard() && ctx.IsAllied(ev.unit) && ctx.GetTile()->IsNear(ev.unit->curTile); },
+		[](EffectContext ctx, OnSummonEvent& ev) { ev.unit->AddEffect(MODIFIER_MIRKBLOOD_DEVOURER, nullptr, ctx.card); });
 	effects[MODIFIER_MIRKBLOOD_DEVOURER] = Effect(MODIFIER_MIRKBLOOD_DEVOURER, KEYWORD_NONE, "Mirkblood Devourer");
 	effects[MODIFIER_MIRKBLOOD_DEVOURER].AddModifier(STAT_ATK, MODTYPE_BUFF, 1).AddModifier(STAT_HP, MODTYPE_BUFF, 1);
 
 	//Mogwai
 	effects[SKILL_MOGWAI] = Effect(SKILL_MOGWAI, KEYWORD_NONE, "After this moves, draw a card");
 	effects[SKILL_MOGWAI].RegisterPostTrigger<OnMoveEvent>(
-		[](EffectContext ctx, OnMoveEvent& ev) { return ctx.IsCardOnBoard(ev.minion) && !ev.wasTeleported; },
+		[](EffectContext ctx, OnMoveEvent& ev) { return ctx.IsCardOnBoard(ev.unit) && !ev.wasTeleported; },
 		[](EffectContext ctx, OnMoveEvent& ev) { ctx.GetOwner()->Draw(); });
 
 	//Necroseer
 	effects[SKILL_NECROSEER] = Effect(SKILL_NECROSEER, KEYWORD_DYING_WISH, "{Dying Wish}: Draw a card");
 	effects[SKILL_NECROSEER].RegisterPostTrigger<OnDeathEvent>(
-		[](EffectContext ctx, OnDeathEvent& ev) { return ctx.IsCard(ev.minion); },
+		[](EffectContext ctx, OnDeathEvent& ev) { return ctx.IsCard(ev.unit); },
 		[](EffectContext ctx, OnDeathEvent& ev) { ctx.GetOwner()->Draw(); });
 
 	//Night Watcher
 	effects[SKILL_NIGHT_WATCHER] = Effect(SKILL_NIGHT_WATCHER, KEYWORD_FORCEFIELD, "{Forcefield}|Whenever ANY player summons a minion with {Rush}, exhaust it");
 	effects[SKILL_NIGHT_WATCHER].RegisterPostTrigger<OnSummonEvent>(
-		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsOnBoard() && ev.minion->HasKeywords(KEYWORD_RUSH); },
-		[](EffectContext ctx, OnSummonEvent& ev) { ev.minion->Exhaust(); });
+		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsOnBoard() && ev.unit->HasKeywords(KEYWORD_RUSH); },
+		[](EffectContext ctx, OnSummonEvent& ev) { ev.unit->Exhaust(); });
 
 #pragma endregion
 
@@ -745,11 +745,11 @@ Collections::Collections() {
 	//Breath of The Unborn
 	effects[SPELL_BREATH_OF_THE_UNBORN] = Effect(SPELL_BREATH_OF_THE_UNBORN, KEYWORD_NONE, "Deal 2 damage to all enemy minions. Fully heal all friendly minions");
 	effects[SPELL_BREATH_OF_THE_UNBORN].RegisterSelfTrigger<OnResolveThisEvent>([](EffectContext ctx, OnResolveThisEvent& ev) {
-		for (Minion* minion : ctx.game->GetMinions()) {
-			if (!minion->IsGeneral()) {
-				ctx.SharesOwner(minion)
-					? minion->Heal(ctx.card, 999)
-					: minion->DealDamage(ctx.card, 2);
+		for (Unit* unit : ctx.game->GetUnits()) {
+			if (!unit->IsGeneral()) {
+				ctx.SharesOwner(unit)
+					? unit->Heal(ctx.card, 999)
+					: unit->DealDamage(ctx.card, 2);
 			}
 		}
 	});
@@ -757,9 +757,9 @@ Collections::Collections() {
 	//Dark Seed
 	effects[SPELL_DARK_SEED] = Effect(SPELL_DARK_SEED, KEYWORD_NONE, "Deal 1 damage to the enemy general for each card in the opponent's action bar");
 	effects[SPELL_DARK_SEED].RegisterSelfTrigger<OnResolveThisEvent>([](EffectContext ctx, OnResolveThisEvent& ev) {
-		if (ev.tile->HasMinion()) {
+		if (ev.tile->HasUnit()) {
 			int damage = ctx.GetOpponent()->hand.size();
-			ev.tile->minion->DealDamage(ctx.card, damage);
+			ev.tile->unit->DealDamage(ctx.card, damage);
 		}
 	});
 
@@ -770,106 +770,106 @@ Collections::Collections() {
 #pragma region Cards
 
 	//Generals
-	minionList.push_back(Minion(CARD_ARGEON_HIGHMAYNE, FACTION_LYONAR, TRIBE_GENERAL, 0, 2, 25, "argeonhighmayne", "Argeon Highmayne"));
+	unitList.push_back(Unit(CARD_ARGEON_HIGHMAYNE, FACTION_LYONAR, TRIBE_GENERAL, 0, 2, 25, "argeonhighmayne", "Argeon Highmayne"));
 
 	//Minions
-	minionList.push_back(Minion(CARD_ABJUDICATOR, FACTION_NEUTRAL, TRIBE_ARCANYST, 3, 3, 1, "abjudicator", "Abjudicator", FindEffect(SKILL_ABJUDICATOR)));
-	minionList.push_back(Minion(CARD_AETHERMASTER, FACTION_NEUTRAL, TRIBE_ARCANYST, 2, 1, 3, "aethermaster", "Aethermaster", FindEffect(SKILL_AETHERMASTER)));
-	minionList.push_back(Minion(CARD_ALCUIN_LOREMASTER, FACTION_NEUTRAL, TRIBE_ARCANYST, 3, 3, 1, "alcuinloremaster", "Alcuin Loremaster", FindEffect(SKILL_ALCUIN_LOREMASTER)));
-	minionList.push_back(Minion(CARD_ARAKI_HEADHUNTER, FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 3, "arakiheadhunter", "Araki Headhunter", FindEffect(SKILL_ARAKI_HEADHUNTER)));
-	minionList.push_back(Minion(CARD_ARCHON_SPELLBINDER, FACTION_NEUTRAL, TRIBE_ARCANYST, 6, 7, 7, "archonspellbinder", "Archon Spellbinder", FindEffect(SKILL_ARCHON_SPELLBINDER)));
-	minionList.push_back(Minion(CARD_ARROW_WHISTLER, FACTION_NEUTRAL, TRIBE_WARMASTER, 4, 2, 4, "arrowwhistler", "Arrow Whistler", FindEffect(SKILL_ARROW_WHISTLER)));
-	minionList.push_back(Minion(CARD_ASH_MEPHYT, FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 3, "ashmephyt", "Ash Mephyt", FindEffect(SKILL_ASH_MEPHYT)));
-	minionList.push_back(Minion(CARD_ASTRAL_CRUSADER, FACTION_NEUTRAL, TRIBE_NONE, 7, 7, 6, "astralcrusader", "Astral Crusader", FindEffect(SKILL_ASTRAL_CRUSADER)));
-	minionList.push_back(Minion(CARD_AZURE_HERALD, FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 4, "azureherald", "Azure Herald", FindEffect(SKILL_AZURE_HERALD)));
-	minionList.push_back(Minion(CARD_AZURE_HORN_SHAMAN, FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 4, "azurehornshaman", "Azure Horn Shaman", FindEffect(SKILL_AZURE_HORN_SHAMAN)));
-	minionList.push_back(Minion(CARD_BASTION, FACTION_NEUTRAL, TRIBE_STRUCTURE, 3, 0, 5, "bastion", "Bastion", FindEffect(SKILL_BASTION)));
-	minionList.push_back(Minion(CARD_BLACK_LOCUST, FACTION_NEUTRAL, TRIBE_NONE, 4, 2, 2, "blacklocust", "Black Locust", FindEffect(SKILL_BLACK_LOCUST)));
-	minionList.push_back(Minion(CARD_BLAZE_HOUND, FACTION_NEUTRAL, TRIBE_NONE, 3, 4, 3, "blazehound", "Blaze Hound", FindEffect(SKILL_BLAZE_HOUND)));
-	minionList.push_back(Minion(CARD_BLISTERING_SKORN, FACTION_NEUTRAL, TRIBE_NONE, 4, 4, 5, "blisteringskorn", "Blistering Skorn", FindEffect(SKILL_BLISTERING_SKORN)));
-	minionList.push_back(Minion(CARD_BLOOD_TAURA, FACTION_NEUTRAL, TRIBE_NONE, 25, 12, 12, "bloodtaura", "Blood Taura", FindEffect(SKILL_BLOOD_TAURA)));
-	minionList.push_back(Minion(CARD_BLOODSHARD_GOLEM, FACTION_NEUTRAL, TRIBE_GOLEM, 3, 4, 3, "bloodshardgolem", "Bloodshard Golem"));
-	minionList.push_back(Minion(CARD_BLOODTEAR_ALCHEMIST, FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "bloodtearalchemist", "Bloodtear Alchemist", FindEffect(SKILL_BLOODTEAR_ALCHEMIST)));
-	minionList.push_back(Minion(CARD_BLUETIP_SCORPION, FACTION_NEUTRAL, TRIBE_NONE, 2, 3, 1, "bluetipscorpion", "Bluetip Scorpion", FindEffect(SKILL_BLUETIP_SCORPION)));
-	minionList.push_back(Minion(CARD_BONEREAPER, FACTION_NEUTRAL, TRIBE_NONE, 6, 2, 9, "bonereaper", "Bonereaper", FindEffect(SKILL_BONEREAPER)));
-	minionList.push_back(Minion(CARD_BRIGHTMOSS_GOLEM, FACTION_NEUTRAL, TRIBE_GOLEM, 5, 4, 9, "brightmossgolem", "Brightmoss Golem"));
-	minionList.push_back(Minion(CARD_CAPTAIN_HANK_HART, FACTION_NEUTRAL, TRIBE_NONE, 4, 2, 4, "captainhankhart", "Captain Hank Hart", FindEffect(SKILL_CAPTAIN_HANK_HART)));
-	minionList.push_back(Minion(CARD_CHAKKRAM, FACTION_NEUTRAL, TRIBE_NONE, 5, 5, 5, "chakkram", "Chakkram", FindEffect(SKILL_CHAKKRAM)));
-	minionList.push_back(Minion(CARD_CHAOS_ELEMENTAL, FACTION_NEUTRAL, TRIBE_NONE, 3, 4, 4, "chaoselemental", "Chaos Elemental", FindEffect(SKILL_CHAOS_ELEMENTAL)));
-	minionList.push_back(Minion(CARD_CRIMSON_OCULUS, FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 3, "crimsonoculus", "Crimson Oculus", FindEffect(SKILL_CRIMSON_OCULUS)));
-	minionList.push_back(Minion(CARD_CROSSBONES, FACTION_NEUTRAL, TRIBE_NONE, 3, 3, 3, "crossbones", "Crossbones", FindEffect(SKILL_CROSSBONES)));
-	minionList.push_back(Minion(CARD_DAGGER_KIRI, FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 8, "daggerkiri", "Dagger Kiri", FindEffect(SKILL_CELERITY)));
-	minionList.push_back(Minion(CARD_DARK_NEMESIS, FACTION_NEUTRAL, TRIBE_NONE, 7, 4, 10, "darknemesis", "Dark Nemesis", FindEffect(SKILL_DARK_NEMESIS)));
-	minionList.push_back(Minion(CARD_DANCING_BLADES, FACTION_NEUTRAL, TRIBE_NONE, 5, 4, 6, "dancingblades", "Dancing Blades", FindEffect(SKILL_DANCING_BLADES)));
-	minionList.push_back(Minion(CARD_DAY_WATCHER, FACTION_NEUTRAL, TRIBE_NONE, 3, 3, 3, "daywatcher", "Day Watcher", FindEffect(SKILL_DAY_WATCHER)));
-	minionList.push_back(Minion(CARD_DEATHBLIGHTER, FACTION_NEUTRAL, TRIBE_NONE, 6, 3, 4, "deathblighter", "Deathblighter", FindEffect(SKILL_DEATHBLIGHTER)));
-	minionList.push_back(Minion(CARD_DECIMUS, FACTION_NEUTRAL, TRIBE_NONE, 4, 4, 4, "decimus", "Decimus", FindEffect(SKILL_DECIMUS)));
-	minionList.push_back(Minion(CARD_DIAMOND_GOLEM, FACTION_NEUTRAL, TRIBE_GOLEM, 6, 5, 11, "diamondgolem", "Diamond Golem"));
-	minionList.push_back(Minion(CARD_DIOLTAS, FACTION_NEUTRAL, TRIBE_NONE, 4, 5, 3, "dioltas", "Dioltas", FindEffect(SKILL_DIOLTAS)));
-	minionList.push_back(Minion(CARD_DRAGONLARK, FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "dragonlark", "Dragonlark", FindEffect(SKILL_FLYING)));
-	minionList.push_back(Minion(CARD_DREAMGAZER, FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 1, "dreamgazer", "Dreamgazer", FindEffect(SKILL_DREAMGAZER)));
-	minionList.push_back(Minion(CARD_DRYBONE_GOLEM, FACTION_NEUTRAL, TRIBE_GOLEM, 7, 10, 10, "drybonegolem", "Drybone Golem"));
-	minionList.push_back(Minion(CARD_DUST_WAILER, FACTION_NEUTRAL, TRIBE_NONE, 6, 3, 4, "dustwailer", "Dust Wailer", FindEffect(SKILL_DUST_WAILER)));
-	minionList.push_back(Minion(CARD_ECLIPSE, FACTION_NEUTRAL, TRIBE_ARCANYST, 6, 3, 7, "eclipse", "Eclipse", FindEffect(SKILL_ECLIPSE)));
-	minionList.push_back(Minion(CARD_EMERALD_REJUVENATOR, FACTION_NEUTRAL, TRIBE_NONE, 4, 4, 4, "emeraldrejuvenator", "Emerald Rejuvenator", FindEffect(SKILL_EMERALD_REJUVENATOR)));
-	minionList.push_back(Minion(CARD_ENVYBAER, FACTION_NEUTRAL, TRIBE_NONE, 5, 3, 10, "envybaer", "Envybaer", FindEffect(SKILL_ENVYBAER)));
-	minionList.push_back(Minion(CARD_EPHEMERAL_SHROUD, FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 1, "ephemeralshroud", "Ephemeral Shroud", FindEffect(SKILL_EPHEMERAL_SHROUD)));
-	minionList.push_back(Minion(CARD_EXUN, FACTION_NEUTRAL, TRIBE_NONE, 7, 5, 5, "exun", "E'Xun", FindEffect(SKILL_EXUN)));
-	minionList.push_back(Minion(CARD_FACESTRIKER, FACTION_NEUTRAL, TRIBE_NONE, 6, 4, 6, "facestriker", "Facestriker", FindEffect(SKILL_FACESTRIKER)));
-	minionList.push_back(Minion(CARD_FIREBLAZER, FACTION_NEUTRAL, TRIBE_NONE, 5, 5, 5, "fireblazer", "Fireblazer", FindEffect(SKILL_PROVOKE)));
-	minionList.push_back(Minion(CARD_FIRESTARTER, FACTION_NEUTRAL, TRIBE_ARCANYST, 5, 3, 5, "firestarter", "Firestarter", FindEffect(SKILL_FIRESTARTER)));
-	minionList.push_back(Minion(CARD_FIRE_SPITTER, FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "firespitter", "Fire Spitter", FindEffect(SKILL_RANGED)));
-	minionList.push_back(Minion(CARD_FIRST_SWORD_OF_AKRANE, FACTION_NEUTRAL, TRIBE_NONE, 6, 7, 7, "firstswordofakrane", "First Sword of Akrane", FindEffect(SKILL_FIRST_SWORD_OF_AKRANE)));
-	minionList.push_back(Minion(CARD_FLAMEBLOOD_WARLOCK, FACTION_NEUTRAL, TRIBE_NONE, 2, 3, 1, "flamebloodwarlock", "Flameblood Warlock", FindEffect(SKILL_FLAMEBLOOD_WARLOCK)));
-	minionList.push_back(Minion(CARD_FROSTBONE_NAGA, FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 3, "frostbonenaga", "Frostbone Naga", FindEffect(SKILL_FROSTBONE_NAGA)));
-	minionList.push_back(Minion(CARD_GHOST_LYNX, FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 1, "ghostlynx", "Ghost Lynx", FindEffect(SKILL_GHOST_LYNX)));
-	minionList.push_back(Minion(CARD_GOLDEN_JUSTICAR, FACTION_NEUTRAL, TRIBE_WARMASTER, 5, 4, 6, "goldenjusticar", "Golden Justicar", FindEffect(SKILL_GOLDEN_JUSTICAR)));
-	minionList.push_back(Minion(CARD_GOLEM_METALLURGIST, FACTION_NEUTRAL, TRIBE_GOLEM, 2, 2, 3, "golemmetallurgist", "Golem Metallurgist", FindEffect(SKILL_GOLEM_METALLURGIST)));
-	minionList.push_back(Minion(CARD_GOLEM_VANQUISHER, FACTION_NEUTRAL, TRIBE_GOLEM, 3, 2, 4, "golemvanquisher", "Golem Vanquisher", FindEffect(SKILL_GOLEM_VANQUISHER)));
-	minionList.push_back(Minion(CARD_GROVE_LION, FACTION_NEUTRAL, TRIBE_NONE, 6, 5, 5, "grovelion", "Grove Lion", FindEffect(SKILL_GROVE_LION)));
-	minionList.push_back(Minion(CARD_HAILSTONE_GOLEM, FACTION_NEUTRAL, TRIBE_GOLEM, 4, 4, 6, "hailstonegolem", "Hailstone Golem"));
-	minionList.push_back(Minion(CARD_HEALING_MYSTIC, FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 3, "healingmystic", "Healing Mystic", FindEffect(SKILL_HEALING_MYSTIC)));
-	minionList.push_back(Minion(CARD_IRONCLAD, FACTION_NEUTRAL, TRIBE_NONE, 5, 4, 3, "ironclad", "Ironclad", FindEffect(SKILL_IRONCLAD)));
-	minionList.push_back(Minion(CARD_JAX_TRUESIGHT, FACTION_NEUTRAL, TRIBE_NONE, 6, 1, 1, "jaxtruesight", "Jax Truesight", FindEffect(SKILL_JAX_TRUESIGHT)));
-	minionList.push_back(Minion(CARD_JAXI, FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 1, "jaxi", "Jaxi", FindEffect(SKILL_JAXI)));
-	minionList.push_back(Minion(CARD_KEEPER_OF_THE_VALE, FACTION_NEUTRAL, TRIBE_NONE, 5, 3, 4, "keeperofthevale", "Keeper of the Vale", FindEffect(SKILL_KEEPER_OF_THE_VALE)));
-	minionList.push_back(Minion(CARD_KHYMERA, FACTION_NEUTRAL, TRIBE_NONE, 8, 5, 12, "khymera", "Khymera", FindEffect(SKILL_KHYMERA)));
-	minionList.push_back(Minion(CARD_KOMODO_CHARGER, FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 3, "komodocharger", "Komodo Charger"));
-	minionList.push_back(Minion(CARD_LADY_LOCKE, FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 3, "ladylocke", "Lady Locke", FindEffect(SKILL_LADY_LOCKE)));
-	minionList.push_back(Minion(CARD_LIGHTBENDER, FACTION_NEUTRAL, TRIBE_ARCANYST, 4, 3, 3, "lightbender", "Lightbender", FindEffect(SKILL_LIGHTBENDER)));
-	minionList.push_back(Minion(CARD_LUX_IGNIS, FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 5, "luxignis", "Lux Ignis", FindEffect(SKILL_LUX_IGNIS)));
-	minionList.push_back(Minion(CARD_MANAFORGER, FACTION_NEUTRAL, TRIBE_ARCANYST, 2, 1, 3, "manaforger", "Manaforger", FindEffect(SKILL_MANAFORGER)));
-	minionList.push_back(Minion(CARD_MAW, FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 2, "maw", "Maw", FindEffect(SKILL_MAW)));
-	minionList.push_back(Minion(CARD_MINDWARPER, FACTION_NEUTRAL, TRIBE_ARCANYST, 4, 4, 3, "mindwarper", "Mindwarper", FindEffect(SKILL_MINDWARPER)));
-	minionList.push_back(Minion(CARD_MIRKBLOOD_DEVOURER, FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 4, "mirkblooddevourer", "Mirkblood Devourer", FindEffect(SKILL_MIRKBLOOD_DEVOURER)));
-	minionList.push_back(Minion(CARD_MOGWAI, FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 3, "mogwai", "Mogwai", FindEffect(SKILL_MOGWAI)));
-	minionList.push_back(Minion(CARD_NECROSEER, FACTION_NEUTRAL, TRIBE_NONE, 5, 5, 4, "necroseer", "Necroseer", FindEffect(SKILL_NECROSEER)));
-	minionList.push_back(Minion(CARD_NIGHT_WATCHER, FACTION_NEUTRAL, TRIBE_NONE, 4, 2, 4, "nightwatcher", "Night Watcher", FindEffect(SKILL_NIGHT_WATCHER)));
-	minionList.push_back(Minion(CARD_PIERCING_MANTIS, FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 2, "piercingmantis", "Piercing Mantis", FindEffect(SKILL_FRENZY)));
-	minionList.push_back(Minion(CARD_PLANAR_SCOUT, FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "planarscout", "Planar Scout", FindEffect(SKILL_AIRDROP)));
-	minionList.push_back(Minion(CARD_SABERSPINE_TIGER, FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "saberspinetiger", "Saberspine Tiger", FindEffect(SKILL_RUSH)));
-	minionList.push_back(Minion(CARD_SAPPHIRE_SEER, FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 2, "sapphireseer", "Sapphire Seer", FindEffect(SKILL_FORCEFIELD)));
+	unitList.push_back(Unit(CARD_ABJUDICATOR, FACTION_NEUTRAL, TRIBE_ARCANYST, 3, 3, 1, "abjudicator", "Abjudicator", FindEffect(SKILL_ABJUDICATOR)));
+	unitList.push_back(Unit(CARD_AETHERMASTER, FACTION_NEUTRAL, TRIBE_ARCANYST, 2, 1, 3, "aethermaster", "Aethermaster", FindEffect(SKILL_AETHERMASTER)));
+	unitList.push_back(Unit(CARD_ALCUIN_LOREMASTER, FACTION_NEUTRAL, TRIBE_ARCANYST, 3, 3, 1, "alcuinloremaster", "Alcuin Loremaster", FindEffect(SKILL_ALCUIN_LOREMASTER)));
+	unitList.push_back(Unit(CARD_ARAKI_HEADHUNTER, FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 3, "arakiheadhunter", "Araki Headhunter", FindEffect(SKILL_ARAKI_HEADHUNTER)));
+	unitList.push_back(Unit(CARD_ARCHON_SPELLBINDER, FACTION_NEUTRAL, TRIBE_ARCANYST, 6, 7, 7, "archonspellbinder", "Archon Spellbinder", FindEffect(SKILL_ARCHON_SPELLBINDER)));
+	unitList.push_back(Unit(CARD_ARROW_WHISTLER, FACTION_NEUTRAL, TRIBE_WARMASTER, 4, 2, 4, "arrowwhistler", "Arrow Whistler", FindEffect(SKILL_ARROW_WHISTLER)));
+	unitList.push_back(Unit(CARD_ASH_MEPHYT, FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 3, "ashmephyt", "Ash Mephyt", FindEffect(SKILL_ASH_MEPHYT)));
+	unitList.push_back(Unit(CARD_ASTRAL_CRUSADER, FACTION_NEUTRAL, TRIBE_NONE, 7, 7, 6, "astralcrusader", "Astral Crusader", FindEffect(SKILL_ASTRAL_CRUSADER)));
+	unitList.push_back(Unit(CARD_AZURE_HERALD, FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 4, "azureherald", "Azure Herald", FindEffect(SKILL_AZURE_HERALD)));
+	unitList.push_back(Unit(CARD_AZURE_HORN_SHAMAN, FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 4, "azurehornshaman", "Azure Horn Shaman", FindEffect(SKILL_AZURE_HORN_SHAMAN)));
+	unitList.push_back(Unit(CARD_BASTION, FACTION_NEUTRAL, TRIBE_STRUCTURE, 3, 0, 5, "bastion", "Bastion", FindEffect(SKILL_BASTION)));
+	unitList.push_back(Unit(CARD_BLACK_LOCUST, FACTION_NEUTRAL, TRIBE_NONE, 4, 2, 2, "blacklocust", "Black Locust", FindEffect(SKILL_BLACK_LOCUST)));
+	unitList.push_back(Unit(CARD_BLAZE_HOUND, FACTION_NEUTRAL, TRIBE_NONE, 3, 4, 3, "blazehound", "Blaze Hound", FindEffect(SKILL_BLAZE_HOUND)));
+	unitList.push_back(Unit(CARD_BLISTERING_SKORN, FACTION_NEUTRAL, TRIBE_NONE, 4, 4, 5, "blisteringskorn", "Blistering Skorn", FindEffect(SKILL_BLISTERING_SKORN)));
+	unitList.push_back(Unit(CARD_BLOOD_TAURA, FACTION_NEUTRAL, TRIBE_NONE, 25, 12, 12, "bloodtaura", "Blood Taura", FindEffect(SKILL_BLOOD_TAURA)));
+	unitList.push_back(Unit(CARD_BLOODSHARD_GOLEM, FACTION_NEUTRAL, TRIBE_GOLEM, 3, 4, 3, "bloodshardgolem", "Bloodshard Golem"));
+	unitList.push_back(Unit(CARD_BLOODTEAR_ALCHEMIST, FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "bloodtearalchemist", "Bloodtear Alchemist", FindEffect(SKILL_BLOODTEAR_ALCHEMIST)));
+	unitList.push_back(Unit(CARD_BLUETIP_SCORPION, FACTION_NEUTRAL, TRIBE_NONE, 2, 3, 1, "bluetipscorpion", "Bluetip Scorpion", FindEffect(SKILL_BLUETIP_SCORPION)));
+	unitList.push_back(Unit(CARD_BONEREAPER, FACTION_NEUTRAL, TRIBE_NONE, 6, 2, 9, "bonereaper", "Bonereaper", FindEffect(SKILL_BONEREAPER)));
+	unitList.push_back(Unit(CARD_BRIGHTMOSS_GOLEM, FACTION_NEUTRAL, TRIBE_GOLEM, 5, 4, 9, "brightmossgolem", "Brightmoss Golem"));
+	unitList.push_back(Unit(CARD_CAPTAIN_HANK_HART, FACTION_NEUTRAL, TRIBE_NONE, 4, 2, 4, "captainhankhart", "Captain Hank Hart", FindEffect(SKILL_CAPTAIN_HANK_HART)));
+	unitList.push_back(Unit(CARD_CHAKKRAM, FACTION_NEUTRAL, TRIBE_NONE, 5, 5, 5, "chakkram", "Chakkram", FindEffect(SKILL_CHAKKRAM)));
+	unitList.push_back(Unit(CARD_CHAOS_ELEMENTAL, FACTION_NEUTRAL, TRIBE_NONE, 3, 4, 4, "chaoselemental", "Chaos Elemental", FindEffect(SKILL_CHAOS_ELEMENTAL)));
+	unitList.push_back(Unit(CARD_CRIMSON_OCULUS, FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 3, "crimsonoculus", "Crimson Oculus", FindEffect(SKILL_CRIMSON_OCULUS)));
+	unitList.push_back(Unit(CARD_CROSSBONES, FACTION_NEUTRAL, TRIBE_NONE, 3, 3, 3, "crossbones", "Crossbones", FindEffect(SKILL_CROSSBONES)));
+	unitList.push_back(Unit(CARD_DAGGER_KIRI, FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 8, "daggerkiri", "Dagger Kiri", FindEffect(SKILL_CELERITY)));
+	unitList.push_back(Unit(CARD_DARK_NEMESIS, FACTION_NEUTRAL, TRIBE_NONE, 7, 4, 10, "darknemesis", "Dark Nemesis", FindEffect(SKILL_DARK_NEMESIS)));
+	unitList.push_back(Unit(CARD_DANCING_BLADES, FACTION_NEUTRAL, TRIBE_NONE, 5, 4, 6, "dancingblades", "Dancing Blades", FindEffect(SKILL_DANCING_BLADES)));
+	unitList.push_back(Unit(CARD_DAY_WATCHER, FACTION_NEUTRAL, TRIBE_NONE, 3, 3, 3, "daywatcher", "Day Watcher", FindEffect(SKILL_DAY_WATCHER)));
+	unitList.push_back(Unit(CARD_DEATHBLIGHTER, FACTION_NEUTRAL, TRIBE_NONE, 6, 3, 4, "deathblighter", "Deathblighter", FindEffect(SKILL_DEATHBLIGHTER)));
+	unitList.push_back(Unit(CARD_DECIMUS, FACTION_NEUTRAL, TRIBE_NONE, 4, 4, 4, "decimus", "Decimus", FindEffect(SKILL_DECIMUS)));
+	unitList.push_back(Unit(CARD_DIAMOND_GOLEM, FACTION_NEUTRAL, TRIBE_GOLEM, 6, 5, 11, "diamondgolem", "Diamond Golem"));
+	unitList.push_back(Unit(CARD_DIOLTAS, FACTION_NEUTRAL, TRIBE_NONE, 4, 5, 3, "dioltas", "Dioltas", FindEffect(SKILL_DIOLTAS)));
+	unitList.push_back(Unit(CARD_DRAGONLARK, FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "dragonlark", "Dragonlark", FindEffect(SKILL_FLYING)));
+	unitList.push_back(Unit(CARD_DREAMGAZER, FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 1, "dreamgazer", "Dreamgazer", FindEffect(SKILL_DREAMGAZER)));
+	unitList.push_back(Unit(CARD_DRYBONE_GOLEM, FACTION_NEUTRAL, TRIBE_GOLEM, 7, 10, 10, "drybonegolem", "Drybone Golem"));
+	unitList.push_back(Unit(CARD_DUST_WAILER, FACTION_NEUTRAL, TRIBE_NONE, 6, 3, 4, "dustwailer", "Dust Wailer", FindEffect(SKILL_DUST_WAILER)));
+	unitList.push_back(Unit(CARD_ECLIPSE, FACTION_NEUTRAL, TRIBE_ARCANYST, 6, 3, 7, "eclipse", "Eclipse", FindEffect(SKILL_ECLIPSE)));
+	unitList.push_back(Unit(CARD_EMERALD_REJUVENATOR, FACTION_NEUTRAL, TRIBE_NONE, 4, 4, 4, "emeraldrejuvenator", "Emerald Rejuvenator", FindEffect(SKILL_EMERALD_REJUVENATOR)));
+	unitList.push_back(Unit(CARD_ENVYBAER, FACTION_NEUTRAL, TRIBE_NONE, 5, 3, 10, "envybaer", "Envybaer", FindEffect(SKILL_ENVYBAER)));
+	unitList.push_back(Unit(CARD_EPHEMERAL_SHROUD, FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 1, "ephemeralshroud", "Ephemeral Shroud", FindEffect(SKILL_EPHEMERAL_SHROUD)));
+	unitList.push_back(Unit(CARD_EXUN, FACTION_NEUTRAL, TRIBE_NONE, 7, 5, 5, "exun", "E'Xun", FindEffect(SKILL_EXUN)));
+	unitList.push_back(Unit(CARD_FACESTRIKER, FACTION_NEUTRAL, TRIBE_NONE, 6, 4, 6, "facestriker", "Facestriker", FindEffect(SKILL_FACESTRIKER)));
+	unitList.push_back(Unit(CARD_FIREBLAZER, FACTION_NEUTRAL, TRIBE_NONE, 5, 5, 5, "fireblazer", "Fireblazer", FindEffect(SKILL_PROVOKE)));
+	unitList.push_back(Unit(CARD_FIRESTARTER, FACTION_NEUTRAL, TRIBE_ARCANYST, 5, 3, 5, "firestarter", "Firestarter", FindEffect(SKILL_FIRESTARTER)));
+	unitList.push_back(Unit(CARD_FIRE_SPITTER, FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "firespitter", "Fire Spitter", FindEffect(SKILL_RANGED)));
+	unitList.push_back(Unit(CARD_FIRST_SWORD_OF_AKRANE, FACTION_NEUTRAL, TRIBE_NONE, 6, 7, 7, "firstswordofakrane", "First Sword of Akrane", FindEffect(SKILL_FIRST_SWORD_OF_AKRANE)));
+	unitList.push_back(Unit(CARD_FLAMEBLOOD_WARLOCK, FACTION_NEUTRAL, TRIBE_NONE, 2, 3, 1, "flamebloodwarlock", "Flameblood Warlock", FindEffect(SKILL_FLAMEBLOOD_WARLOCK)));
+	unitList.push_back(Unit(CARD_FROSTBONE_NAGA, FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 3, "frostbonenaga", "Frostbone Naga", FindEffect(SKILL_FROSTBONE_NAGA)));
+	unitList.push_back(Unit(CARD_GHOST_LYNX, FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 1, "ghostlynx", "Ghost Lynx", FindEffect(SKILL_GHOST_LYNX)));
+	unitList.push_back(Unit(CARD_GOLDEN_JUSTICAR, FACTION_NEUTRAL, TRIBE_WARMASTER, 5, 4, 6, "goldenjusticar", "Golden Justicar", FindEffect(SKILL_GOLDEN_JUSTICAR)));
+	unitList.push_back(Unit(CARD_GOLEM_METALLURGIST, FACTION_NEUTRAL, TRIBE_GOLEM, 2, 2, 3, "golemmetallurgist", "Golem Metallurgist", FindEffect(SKILL_GOLEM_METALLURGIST)));
+	unitList.push_back(Unit(CARD_GOLEM_VANQUISHER, FACTION_NEUTRAL, TRIBE_GOLEM, 3, 2, 4, "golemvanquisher", "Golem Vanquisher", FindEffect(SKILL_GOLEM_VANQUISHER)));
+	unitList.push_back(Unit(CARD_GROVE_LION, FACTION_NEUTRAL, TRIBE_NONE, 6, 5, 5, "grovelion", "Grove Lion", FindEffect(SKILL_GROVE_LION)));
+	unitList.push_back(Unit(CARD_HAILSTONE_GOLEM, FACTION_NEUTRAL, TRIBE_GOLEM, 4, 4, 6, "hailstonegolem", "Hailstone Golem"));
+	unitList.push_back(Unit(CARD_HEALING_MYSTIC, FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 3, "healingmystic", "Healing Mystic", FindEffect(SKILL_HEALING_MYSTIC)));
+	unitList.push_back(Unit(CARD_IRONCLAD, FACTION_NEUTRAL, TRIBE_NONE, 5, 4, 3, "ironclad", "Ironclad", FindEffect(SKILL_IRONCLAD)));
+	unitList.push_back(Unit(CARD_JAX_TRUESIGHT, FACTION_NEUTRAL, TRIBE_NONE, 6, 1, 1, "jaxtruesight", "Jax Truesight", FindEffect(SKILL_JAX_TRUESIGHT)));
+	unitList.push_back(Unit(CARD_JAXI, FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 1, "jaxi", "Jaxi", FindEffect(SKILL_JAXI)));
+	unitList.push_back(Unit(CARD_KEEPER_OF_THE_VALE, FACTION_NEUTRAL, TRIBE_NONE, 5, 3, 4, "keeperofthevale", "Keeper of the Vale", FindEffect(SKILL_KEEPER_OF_THE_VALE)));
+	unitList.push_back(Unit(CARD_KHYMERA, FACTION_NEUTRAL, TRIBE_NONE, 8, 5, 12, "khymera", "Khymera", FindEffect(SKILL_KHYMERA)));
+	unitList.push_back(Unit(CARD_KOMODO_CHARGER, FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 3, "komodocharger", "Komodo Charger"));
+	unitList.push_back(Unit(CARD_LADY_LOCKE, FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 3, "ladylocke", "Lady Locke", FindEffect(SKILL_LADY_LOCKE)));
+	unitList.push_back(Unit(CARD_LIGHTBENDER, FACTION_NEUTRAL, TRIBE_ARCANYST, 4, 3, 3, "lightbender", "Lightbender", FindEffect(SKILL_LIGHTBENDER)));
+	unitList.push_back(Unit(CARD_LUX_IGNIS, FACTION_NEUTRAL, TRIBE_NONE, 5, 2, 5, "luxignis", "Lux Ignis", FindEffect(SKILL_LUX_IGNIS)));
+	unitList.push_back(Unit(CARD_MANAFORGER, FACTION_NEUTRAL, TRIBE_ARCANYST, 2, 1, 3, "manaforger", "Manaforger", FindEffect(SKILL_MANAFORGER)));
+	unitList.push_back(Unit(CARD_MAW, FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 2, "maw", "Maw", FindEffect(SKILL_MAW)));
+	unitList.push_back(Unit(CARD_MINDWARPER, FACTION_NEUTRAL, TRIBE_ARCANYST, 4, 4, 3, "mindwarper", "Mindwarper", FindEffect(SKILL_MINDWARPER)));
+	unitList.push_back(Unit(CARD_MIRKBLOOD_DEVOURER, FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 4, "mirkblooddevourer", "Mirkblood Devourer", FindEffect(SKILL_MIRKBLOOD_DEVOURER)));
+	unitList.push_back(Unit(CARD_MOGWAI, FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 3, "mogwai", "Mogwai", FindEffect(SKILL_MOGWAI)));
+	unitList.push_back(Unit(CARD_NECROSEER, FACTION_NEUTRAL, TRIBE_NONE, 5, 5, 4, "necroseer", "Necroseer", FindEffect(SKILL_NECROSEER)));
+	unitList.push_back(Unit(CARD_NIGHT_WATCHER, FACTION_NEUTRAL, TRIBE_NONE, 4, 2, 4, "nightwatcher", "Night Watcher", FindEffect(SKILL_NIGHT_WATCHER)));
+	unitList.push_back(Unit(CARD_PIERCING_MANTIS, FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 2, "piercingmantis", "Piercing Mantis", FindEffect(SKILL_FRENZY)));
+	unitList.push_back(Unit(CARD_PLANAR_SCOUT, FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "planarscout", "Planar Scout", FindEffect(SKILL_AIRDROP)));
+	unitList.push_back(Unit(CARD_SABERSPINE_TIGER, FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "saberspinetiger", "Saberspine Tiger", FindEffect(SKILL_RUSH)));
+	unitList.push_back(Unit(CARD_SAPPHIRE_SEER, FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 2, "sapphireseer", "Sapphire Seer", FindEffect(SKILL_FORCEFIELD)));
 
 	//Token Minions
-	minionList.push_back(Minion(CARD_MINI_JAX, FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 1, "minijax", "Mini-Jax", true, FindEffect(SKILL_RANGED)));
-	minionList.push_back(Minion(CARD_SPELLSPARK, FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 1, "spellspark", "Spellspark", true, FindEffect(SKILL_RUSH)));
-	minionList.push_back(Minion(CARD_TOMBSTONE, FACTION_NEUTRAL, TRIBE_NONE, 3, 0, 10, "tombstone", "Tombstone", true, FindEffect(SKILL_PROVOKE)));
+	unitList.push_back(Unit(CARD_MINI_JAX, FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 1, "minijax", "Mini-Jax", true, FindEffect(SKILL_RANGED)));
+	unitList.push_back(Unit(CARD_SPELLSPARK, FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 1, "spellspark", "Spellspark", true, FindEffect(SKILL_RUSH)));
+	unitList.push_back(Unit(CARD_TOMBSTONE, FACTION_NEUTRAL, TRIBE_NONE, 3, 0, 10, "tombstone", "Tombstone", true, FindEffect(SKILL_PROVOKE)));
 
 	//Spells
 	spellList.push_back(Spell(CARD_BREATH_OF_THE_UNBORN, FACTION_ABYSSIAN, 4, "breathoftheunborn", "Breath of The Unborn", FindEffect(SPELL_BREATH_OF_THE_UNBORN)));
 	spellList.back().SetTargetMode(TargetMode(TARGET_MODE_ALL, [](BoardTile* tile) {
-		return tile->minion != nullptr;
+		return tile->HasUnit();
 	}));
 	spellList.push_back(Spell(CARD_DARK_SEED, FACTION_ABYSSIAN, 4, "darkseed", "Dark Seed", FindEffect(SPELL_DARK_SEED)));
 	spellList.back().SetTargetMode(TargetMode(TARGET_MODE_ALL, [](BoardTile* tile) {
-		return tile->minion != nullptr && tile->minion->IsEnemy() && tile->minion->tribe == TRIBE_GENERAL;
+		return tile->HasUnit() && tile->unit->IsEnemy() && tile->unit->tribe == TRIBE_GENERAL;
 	}));
 
 	//Generate card map
-	for (int i = 0; i < minionList.size(); ++i) {
-		cards[minionList[i].cardId] = &minionList[i];
-		cards[minionList[i].cardId]->original = cards[minionList[i].cardId];
-		cardList.push_back(cards[minionList[i].cardId]);
+	for (int i = 0; i < unitList.size(); ++i) {
+		cards[unitList[i].cardId] = &unitList[i];
+		cards[unitList[i].cardId]->original = cards[unitList[i].cardId];
+		cardList.push_back(cards[unitList[i].cardId]);
 	}
 	for (int i = 0; i < spellList.size(); ++i) {
 		cards[spellList[i].cardId] = &spellList[i];
@@ -910,11 +910,11 @@ Card* Collections::FindCard(eCard card) {
 }
 
 //Get random token minion
-Minion* Collections::GetRandomTokenMinion() {
-	std::vector<Minion*> valid;
-	for (int i = 0; i < minionList.size(); ++i)
-		if (minionList[i].isToken)
-			valid.push_back(&minionList[i]);
+Unit* Collections::GetRandomTokenMinion() {
+	std::vector<Unit*> valid;
+	for (int i = 0; i < unitList.size(); ++i)
+		if (unitList[i].isToken)
+			valid.push_back(&unitList[i]);
 	if (valid.size() > 0)
 		return valid[rand() % valid.size()];
 	return nullptr;
