@@ -112,6 +112,8 @@ public:
 	void DrawForcefield(int x, int y, Renderer& renderer);
 
 	//Getters
+	Player* GetTurnPlayer();
+	Player* GetNonTurnPlayer();
 	std::vector<Player*> GetPlayers();
 	const std::vector<Unit*>& GetUnits() const;
 	const std::vector<Card*>& GetGrave() const;
@@ -119,7 +121,6 @@ public:
 	const std::vector<Spell*>& GetSpellHistory() const;
 	const std::vector<Card*>& GetCardsCastThisTurn() const;
 	const int& GetTurnCount() const;
-	const Player* GetTurnPlayer() const;
 	BoardTile* GetTileInFront(BoardTile* tile, Player* player);
 
 	//Utils

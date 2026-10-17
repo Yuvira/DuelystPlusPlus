@@ -1036,6 +1036,8 @@ void Game::DrawForcefield(int x, int y, Renderer& renderer) {
 #pragma region Getters
 
 //Players
+Player* Game::GetTurnPlayer() { return &players[turn]; }
+Player* Game::GetNonTurnPlayer() { return &players[!turn]; }
 std::vector<Player*> Game::GetPlayers() {
 	std::vector<Player*> p;
 	p.insert(p.end(), { &players[0], &players[1] });
@@ -1051,7 +1053,6 @@ const std::vector<Card*>& Game::GetCardsCastThisTurn() const { return castThisTu
 
 //Util getters
 const int& Game::GetTurnCount() const { return turnCount; }
-const Player* Game::GetTurnPlayer() const { return &players[turn]; }
 BoardTile* Game::GetTileInFront(BoardTile* tile, Player* player) {
 	return map.GetTile(&players[0] == player ? tile->pos.x + 1 : tile->pos.x - 1, tile->pos.y); }
 
