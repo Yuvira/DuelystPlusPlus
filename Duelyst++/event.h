@@ -13,7 +13,6 @@ enum eEventType {
 	EVENT_DRAW,
 	EVENT_ADD_TO_HAND,
 	EVENT_REPLACE,
-	EVENT_EFFECTS_CHANGED,
 	EVENT_TURN_END,
 	EVENT_TURN_START,
 	EVENT_ADD_THIS,
@@ -158,16 +157,6 @@ struct OnReplaceEvent : Event {
 	}
 	Card* card;
 	bool sendToDeck;
-};
-
-//Triggers whenever the effects on a card change
-struct OnEffectsChangedEvent : Event {
-	static constexpr eEventType typeKey = EVENT_EFFECTS_CHANGED;
-	OnEffectsChangedEvent(int turn, Card* card) : Event(turn) {
-		type = EVENT_EFFECTS_CHANGED;
-		this->card = card;
-	}
-	Card* card;
 };
 
 //Triggers whenever a player's turn ends

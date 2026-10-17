@@ -148,12 +148,6 @@ void EventManager::LogEvent(Game* game, Event* event) {
 		game->Log("Replaced " + game->GetCardString(replaceEvent->card));
 		break;
 	}
-	case EVENT_EFFECTS_CHANGED:
-	{
-		OnEffectsChangedEvent* effectsChangedEvent = event->As<OnEffectsChangedEvent>();
-		game->Log("Effects changed on " + game->GetCardString(effectsChangedEvent->card));
-		break;
-	}
 	case EVENT_TURN_END:
 	{
 		OnTurnEndEvent* turnEndEvent = event->As<OnTurnEndEvent>();
