@@ -72,7 +72,7 @@ void EventManager::SendOnPostEvent(Game* game, Event* event) {
 		a->TriggerPostEvent(EffectContext(a, a->GetRef(), game), event);
 
 	//Push to event history
-	eventLog.push_back(new Event(*event));
+	eventLog.push_back(event->Clone());
 
 }
 
