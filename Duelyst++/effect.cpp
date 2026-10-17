@@ -13,6 +13,7 @@ Effect::Effect(eEffect effectId, int keywords, std::string description) {
 	token = nullptr;
 	refCard = nullptr;
 	source = nullptr;
+	AuraPredicate = nullptr;
 }
 Effect::~Effect() {}
 
@@ -42,6 +43,7 @@ void Effect::UpdateModifier(eStat stat, int value) {
 //Getters & Setters
 Card* Effect::GetToken() { return token; }
 Card* Effect::GetRef() { return refCard; };
+Effect* Effect::GetSource() { return source; };
 void Effect::SetToken(Card* token) { this->token = token; }
 void Effect::SetSources(Effect* source, Card* refCard) {
 	this->source = source;
@@ -53,7 +55,6 @@ const eEffect& Effect::GetID() const { return effectId; }
 const std::string& Effect::GetDescription() const { return description; }
 const int& Effect::GetKeywords() const { return keywords; }
 const ModifierGroup& Effect::GetModifiers() const { return modifiers; }
-const Effect* const& Effect::GetSource() const { return source; };
 
 //Utilities
 bool EffectContext::IsOnBoard() { return card->IsOnBoard(); }

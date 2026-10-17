@@ -37,6 +37,9 @@ public:
 	//Getters
 	std::vector<Card*> GetDeckAndHand();
 
+	//Utils
+	bool HasCardInHand(Card* match);
+
 	//Properties
 	int mana;
 	int manaMax;

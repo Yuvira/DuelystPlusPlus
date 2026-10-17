@@ -51,7 +51,7 @@ Unit::Unit(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, int 
 	game = nullptr;
 	owner = nullptr;
 	if (effect != nullptr && effect->GetID() != EFFECT_NONE)
-		AddEffect(*effect, nullptr, this);
+		AddEffect(*effect, this);
 }
 Unit::~Unit() {}
 
@@ -119,6 +119,7 @@ void Unit::DrawDetails(Renderer& renderer, int& y) {
 	renderer.Render(header[0], 72, y); ++y;
 	UpdateDetailStats();
 	renderer.Render(header[1], 72, y); y += 2;
+	UpdateDetails();
 	renderer.Render(details, 72, y); y += details.height + 1;
 	bool tokens = false;
 	for (int i = 0; i < effects.size(); ++i) {
@@ -133,32 +134,6 @@ void Unit::DrawDetails(Renderer& renderer, int& y) {
 			effects[i]->GetToken()->DrawDetails(renderer, y);
 		}
 	}
-}
-
-#pragma endregion
-
-#pragma region Updates
-
-//Check if unit has died
-void Unit::Update(bool& shouldLoop) {
-	if (hp < 1 || destroyed) {
-		OnDeathEvent event = OnDeathEvent(game->GetTurnCount(), this);
-		game->eventManager.SendOnPreEvent(game, &event);
-		game->eventManager.SendOnPostEvent(game, &event);
-		for (; !effects.empty(); RemoveEffect(effects.front())) {}
-		isDead = true;
-		shouldLoop = true;
-	}
-}
-
-//Update attack/health/cost when buffs change
-void Unit::UpdateStatBuffs() {
-	int hpDelta = hp - hpMax;
-	cost = GetStat(STAT_COST, baseCost);
-	atk = GetStat(STAT_ATK, baseAtk);
-	hpMax = GetStat(STAT_HP, baseHpMax);
-	moveRange = GetStat(STAT_MOVE, baseMoveRange);
-	hp = hpMax + hpDelta;
 }
 
 //Update HP & ATK sprites
@@ -198,6 +173,37 @@ void Unit::UpdateDetailStats() {
 				color = COLOR_RED;
 		}
 	}
+}
+
+#pragma endregion
+
+#pragma region Updates
+
+//Check if unit has died
+void Unit::Update(bool& shouldLoop) {
+	if (hp < 1 || destroyed) {
+		OnDeathEvent event = OnDeathEvent(game->GetTurnCount(), this);
+		game->eventManager.SendOnPreEvent(game, &event);
+		game->eventManager.SendOnPostEvent(game, &event);
+		for (; !effects.empty(); RemoveEffect(effects.front())) {}
+		isDead = true;
+		shouldLoop = true;
+	}
+}
+
+//Update attack/health/cost when buffs change
+void Unit::UpdateModifiers() {
+	int hpDelta = hp - hpMax;
+	cost = GetStat(STAT_COST, baseCost);
+	atk = GetStat(STAT_ATK, baseAtk);
+	hpMax = GetStat(STAT_HP, baseHpMax);
+	moveRange = GetStat(STAT_MOVE, baseMoveRange);
+	hp = hpMax + hpDelta;
+	keywords = KEYWORD_NONE;
+	for (Effect* effect : effects)
+		keywords |= effect->GetKeywords();
+	for (Effect* aura : auras)
+		keywords |= aura->GetKeywords();
 }
 
 #pragma endregion
@@ -349,14 +355,12 @@ void Unit::Dispel() {
 
 	//Remove effects
 	for (int i = 0; i < effects.size(); ++i) {
-		if (!effects[i]->IsContinuous()) {
-			RemoveEffect(effects[i]);
-			--i;
-		}
+		RemoveEffect(effects[i]);
+		--i;
 	}
 
 	//Add dispelled effect
-	AddEffect(EFFECT_DISPELLED, nullptr, nullptr);
+	AddEffect(EFFECT_DISPELLED, nullptr);
 
 	//Remove misc
 	hasCelerityMoved = true;
@@ -364,7 +368,7 @@ void Unit::Dispel() {
 	forcefieldBroken = true;
 
 	//Update
-	UpdateStatBuffs();
+	UpdateModifiers();
 
 }
 
@@ -407,12 +411,7 @@ bool Unit::IsMoveable() {
 }
 
 //Check if unit has all given keywords
-bool Unit::HasKeywords(int keywords) {
-	int flags = KEYWORD_NONE;
-	for (int i = 0; i < effects.size(); ++i)
-		flags |= effects[i]->GetKeywords();
-	return (flags & keywords) == keywords;
-}
+bool Unit::HasKeywords(int match) { return (keywords & match) == match; }
 
 //Is unit being provoked
 bool Unit::IsProvoked() {

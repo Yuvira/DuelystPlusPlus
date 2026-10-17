@@ -18,6 +18,7 @@ Spell::Spell(eCard cardId, eFaction faction, int cost, std::string path, std::st
 Spell::Spell(eCard cardId, eFaction faction, int cost, std::string path, std::string name, bool isToken, Effect* effect) {
 	this->cardId = cardId;
 	this->faction = faction;
+	baseCost = cost;
 	this->cost = cost;
 	this->isToken = isToken;
 	this->name = name;
@@ -29,7 +30,7 @@ Spell::Spell(eCard cardId, eFaction faction, int cost, std::string path, std::st
 	game = nullptr;
 	owner = nullptr;
 	if (effect != nullptr && effect->GetID() != EFFECT_NONE)
-		AddEffect(*effect, nullptr, this);
+		AddEffect(*effect, this);
 }
 Spell::~Spell() {}
 
@@ -56,6 +57,7 @@ void Spell::DrawDetails(Renderer& renderer, int& y) {
 	renderer.Render(header[0], 72, y); ++y;
 	UpdateDetailStats();
 	renderer.Render(header[1], 72, y); y += 2;
+	UpdateDetails();
 	renderer.Render(details, 72, y); y += details.height + 1;
 	bool tokens = false;
 	for (int i = 0; i < effects.size(); ++i) {
@@ -72,13 +74,6 @@ void Spell::DrawDetails(Renderer& renderer, int& y) {
 	}
 }
 
-#pragma endregion
-
-#pragma region Updates
-
-//Update cost when buffs change
-void Spell::UpdateStatBuffs() { cost = GetStat(STAT_COST, baseCost); }
-
 //Update card stats
 void Spell::UpdateDetailStats() {
 	std::string s = "COST:" + std::to_string(cost);
@@ -87,6 +82,13 @@ void Spell::UpdateDetailStats() {
 		if (s[i] != ':')
 			header[1].buffer[i].Attributes = COLOR_LTBLUE;
 }
+
+#pragma endregion
+
+#pragma region Updates
+
+//Update cost when buffs change
+void Spell::UpdateModifiers() { cost = GetStat(STAT_COST, baseCost); }
 
 #pragma endregion
 

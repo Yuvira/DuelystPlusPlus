@@ -74,6 +74,14 @@ public:
 	void Input();
 	void Update();
 
+	//Aura effects
+	void ApplyAura(eEffect effectId, Effect* source, Card* refCard);
+	void ApplyAura(Effect effect, Effect* source, Card* refCard);
+	void RemoveAura(Effect* effect);
+	void RemoveAurasFromSource(Effect* source);
+	void RemoveAurasAt(std::vector<int> indices);
+	bool IsTrackingAura(Effect* aura);
+
 	//Actions
 	void UseCard();
 	void UseEffect();
@@ -114,7 +122,7 @@ public:
 	//Getters
 	Player* GetTurnPlayer();
 	Player* GetNonTurnPlayer();
-	std::vector<Player*> GetPlayers();
+	std::vector<Effect*> GetAuras();
 	const std::vector<Unit*>& GetUnits() const;
 	const std::vector<Card*>& GetGrave() const;
 	const std::vector<Unit*>& GetDestroyedUnits() const;
@@ -149,6 +157,9 @@ private:
 	std::vector<Unit*> destroyedUnits;
 	std::vector<Spell*> spellHistory;
 	std::vector<Card*> castThisTurn;
+
+	//Auras
+	std::vector<Effect*> auras;
 
 	//Sprites
 	Sprite light;

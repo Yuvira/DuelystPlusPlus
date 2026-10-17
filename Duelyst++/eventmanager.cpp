@@ -37,6 +37,10 @@ void EventManager::SendOnPreEvent(Game* game, Event* event) {
 		for (Effect* e : c->GetEffects())
 			e->TriggerPreEvent(EffectContext(e, c, game), event);
 
+	//Auras
+	for (Effect* a : game->GetAuras())
+		a->TriggerPreEvent(EffectContext(a, a->GetRef(), game), event);
+
 }
 
 //Send post-events (for triggers in response to resolution) and log history
@@ -62,6 +66,10 @@ void EventManager::SendOnPostEvent(Game* game, Event* event) {
 	for (Card* c : game->GetNonTurnPlayer()->GetDeckAndHand())
 		for (Effect* e : c->GetEffects())
 			e->TriggerPostEvent(EffectContext(e, c, game), event);
+
+	//Auras
+	for (Effect* a : game->GetAuras())
+		a->TriggerPostEvent(EffectContext(a, a->GetRef(), game), event);
 
 	//Push to event history
 	eventLog.push_back(new Event(*event));

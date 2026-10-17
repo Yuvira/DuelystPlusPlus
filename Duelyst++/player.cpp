@@ -120,8 +120,10 @@ void Player::Draw() {
 		OnDrawEvent event = OnDrawEvent(game->GetTurnCount(), card);
 		game->eventManager.SendOnPreEvent(game, &event);
 		deck.erase(deck.begin());
-		if (hand.size() < 6)
+		if (hand.size() < 6) {
 			hand.push_back(card);
+			hand.back()->UpdateAuras();
+		}
 		else
 			game->Overflow(card);
 		game->eventManager.SendOnPostEvent(game, &event);
@@ -138,8 +140,10 @@ void Player::AddNewToHand(Card* original) {
 	game->SetContext(newCard, this);
 	OnAddToHandEvent event = OnAddToHandEvent(game->GetTurnCount(), newCard);
 	game->eventManager.SendOnPreEvent(game, &event);
-	if (hand.size() < 6)
+	if (hand.size() < 6) {
 		hand.push_back(newCard);
+		hand.back()->UpdateAuras();
+	}
 	else
 		game->Overflow(newCard);
 	game->eventManager.SendOnPostEvent(game, &event);
@@ -166,8 +170,10 @@ void Player::Replace(int idx) {
 		if (deck.size() > 0) {
 			hand.insert(hand.begin() + idx, deck[0]);
 			deck.erase(deck.begin());
+			hand[idx]->UpdateAuras();
 			if (event.sendToDeck) {
 				deck.push_back(replaced);
+				deck.back()->UpdateAuras();
 				Shuffle();
 			}
 		}
@@ -198,4 +204,12 @@ std::vector<Card*> Player::GetDeckAndHand() {
 	valid.insert(valid.end(), hand.begin(), hand.end());
 	valid.insert(valid.end(), deck.begin(), deck.end());
 	return valid;
+}
+
+//Check if player has a specific card in their hand
+bool Player::HasCardInHand(Card* match) {
+	for (Card* card : hand)
+		if (card == match)
+			return true;
+	return false;
 }

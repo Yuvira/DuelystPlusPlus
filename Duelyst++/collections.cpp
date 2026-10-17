@@ -34,7 +34,7 @@ Collections::Collections() {
 	effects[SKILL_ABJUDICATOR].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
 		for (Card* card : ctx.GetOwner()->hand)
 			if (card->IsSpell())
-				card->AddEffect(MODIFIER_ABJUDICATOR, nullptr, ctx.card);
+				card->AddEffect(MODIFIER_ABJUDICATOR, ctx.card);
 	});
 	effects[MODIFIER_ABJUDICATOR] = Effect(MODIFIER_ABJUDICATOR, KEYWORD_NONE, "Abjudicator");
 	effects[MODIFIER_ABJUDICATOR].AddModifier(STAT_COST, MODTYPE_BUFF, -1);
@@ -57,49 +57,30 @@ Collections::Collections() {
 	effects[SKILL_ARAKI_HEADHUNTER] = Effect(SKILL_ARAKI_HEADHUNTER, KEYWORD_NONE, "Whenever you summon a minion with {Opening Gambit} from your action bar, gain +2 Attack");
 	effects[SKILL_ARAKI_HEADHUNTER].RegisterPostTrigger<OnSummonEvent>(
 		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsOnBoard() && ctx.IsAllied(ev.unit) && ev.unit->HasKeywords(KEYWORD_OPENING_GAMBIT) && ev.wasCast; },
-		[](EffectContext ctx, OnSummonEvent& ev) { ctx.card->AddEffect(MODIFIER_ARAKI_HEADHUNTER, nullptr, ctx.card); });
+		[](EffectContext ctx, OnSummonEvent& ev) { ctx.card->AddEffect(MODIFIER_ARAKI_HEADHUNTER, ctx.card); });
 	effects[MODIFIER_ARAKI_HEADHUNTER] = Effect(MODIFIER_ARAKI_HEADHUNTER, KEYWORD_NONE, "Araki Headhunter");
 	effects[MODIFIER_ARAKI_HEADHUNTER].AddModifier(STAT_ATK, MODTYPE_BUFF, 2);
 
 	//Archon Spellbinder
 	effects[SKILL_ARCHON_SPELLBINDER] = Effect(SKILL_ARCHON_SPELLBINDER, KEYWORD_NONE, "Your opponent's non-Bloodborn spells cost 1 more to cast");
 	effects[SKILL_ARCHON_SPELLBINDER].RegisterSelfTrigger<OnAddThisEvent>([](EffectContext ctx, OnAddThisEvent& ev) {
-		for (Card* card : ctx.GetOpponent()->GetDeckAndHand())
-			if (card->IsSpell())
-				card->AddEffect(AURA_ARCHON_SPELLBINDER, ctx.effect, ctx.card);
-	});
+		ctx.game->ApplyAura(AURA_ARCHON_SPELLBINDER, ctx.effect, ctx.card); });
 	effects[SKILL_ARCHON_SPELLBINDER].RegisterSelfTrigger<OnRemoveThisEvent>([](EffectContext ctx, OnRemoveThisEvent& ev) {
-		for (Card* card : ctx.GetOpponent()->GetDeckAndHand())
-			card->RemoveEffectsFromSource(ctx.effect);
-	});
-	effects[SKILL_ARCHON_SPELLBINDER].RegisterPostTrigger<OnAddToHandEvent>(
-		[](EffectContext ctx, OnAddToHandEvent& ev) { return ctx.IsOnBoard() && !ctx.SharesOwner(ev.card) && ev.card->IsSpell(); },
-		[](EffectContext ctx, OnAddToHandEvent& ev) { ev.card->AddEffect(AURA_ARCHON_SPELLBINDER, ctx.effect, ctx.card); });
+		ctx.game->RemoveAurasFromSource(ctx.effect); });
 	effects[AURA_ARCHON_SPELLBINDER] = Effect(AURA_ARCHON_SPELLBINDER, KEYWORD_NONE, "Archon Spellbinder");
+	effects[AURA_ARCHON_SPELLBINDER].SetAuraPredicate([](Effect* aura, Game* game, Card* card) {
+		return card->owner->HasCardInHand(card) && aura->GetRef()->owner != card->owner && card->IsSpell(); });
 	effects[AURA_ARCHON_SPELLBINDER].AddModifier(STAT_COST, MODTYPE_BUFF, 1);
 
 	//Arrow Whistler
 	effects[SKILL_ARROW_WHISTLER] = Effect(SKILL_ARROW_WHISTLER, KEYWORD_RANGED, "{Ranged}|Your other minions with {Ranged} have +1 Attack");
 	effects[SKILL_ARROW_WHISTLER].RegisterSelfTrigger<OnAddThisEvent>([](EffectContext ctx, OnAddThisEvent& ev) {
-		for (Unit* unit : ctx.game->GetUnits())
-			if (ctx.IsAllied(unit) && !unit->IsGeneral() && unit->HasKeywords(KEYWORD_RANGED))
-				unit->AddEffect(AURA_ARROW_WHISTLER, ctx.effect, ctx.card);
-	});
+		ctx.game->ApplyAura(AURA_ARROW_WHISTLER, ctx.effect, ctx.card); });
 	effects[SKILL_ARROW_WHISTLER].RegisterSelfTrigger<OnRemoveThisEvent>([](EffectContext ctx, OnRemoveThisEvent& ev) {
-		for (Unit* unit : ctx.game->GetUnits())
-			unit->RemoveEffectsFromSource(ctx.effect);
-	});
-	effects[SKILL_ARROW_WHISTLER].RegisterPostTrigger<OnSummonEvent>(
-		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsOnBoard() && ctx.IsAllied(ev.unit) && !ev.unit->IsGeneral() && ev.unit->HasKeywords(KEYWORD_RANGED); },
-		[](EffectContext ctx, OnSummonEvent& ev) { ev.unit->AddEffect(AURA_ARROW_WHISTLER, ctx.effect, ctx.card); });
-	effects[SKILL_ARROW_WHISTLER].RegisterPostTrigger<OnEffectsChangedEvent>(
-		[](EffectContext ctx, OnEffectsChangedEvent& ev) { return ctx.BothOnBoard(ev.card) && ctx.IsAllied(ev.card) && !ev.card->IsGeneral(); },
-		[](EffectContext ctx, OnEffectsChangedEvent& ev) {
-			ev.card->GetUnit()->HasKeywords(KEYWORD_RANGED)
-				? ev.card->AddEffect(AURA_ARROW_WHISTLER, ctx.effect, ctx.card)
-				: ev.card->RemoveEffectsFromSource(ctx.effect);
-	});
+		ctx.game->RemoveAurasFromSource(ctx.effect); });
 	effects[AURA_ARROW_WHISTLER] = Effect(AURA_ARROW_WHISTLER, KEYWORD_NONE, "Arrow Whistler");
+	effects[AURA_ARROW_WHISTLER].SetAuraPredicate([](Effect* aura, Game* game, Card* card) {
+		return card->IsOnBoard() && card->owner == aura->GetRef()->owner && card != aura->GetRef() && !card->IsGeneral() && card->GetUnit()->HasKeywords(KEYWORD_RANGED); });
 	effects[AURA_ARROW_WHISTLER].AddModifier(STAT_ATK, MODTYPE_BUFF, 1);
 
 	//Ash Mephyt
@@ -115,7 +96,7 @@ Collections::Collections() {
 	effects[SKILL_ASTRAL_CRUSADER] = Effect(SKILL_ASTRAL_CRUSADER, KEYWORD_NONE, "Whenever you replace this card, it costs 3 less and gains +3/+3");
 	effects[SKILL_ASTRAL_CRUSADER].RegisterPostTrigger<OnReplaceEvent>(
 		[](EffectContext ctx, OnReplaceEvent& ev) { return ctx.IsCard(ev.card); },
-		[](EffectContext ctx, OnReplaceEvent& ev) { ev.card->AddEffect(MODIFIER_ASTRAL_CRUSADER, nullptr, ctx.card); });
+		[](EffectContext ctx, OnReplaceEvent& ev) { ev.card->AddEffect(MODIFIER_ASTRAL_CRUSADER, ctx.card); });
 	effects[MODIFIER_ASTRAL_CRUSADER] = Effect(MODIFIER_ASTRAL_CRUSADER, KEYWORD_NONE, "Astral Crusader");
 	effects[MODIFIER_ASTRAL_CRUSADER].AddModifier(STAT_ATK, MODTYPE_BUFF, 3).AddModifier(STAT_HP, MODTYPE_BUFF, 3).AddModifier(STAT_COST, MODTYPE_BUFF, -3);
 
@@ -131,7 +112,7 @@ Collections::Collections() {
 		[](EffectContext ctx, OnDeathEvent& ev) {
 			for (BoardTile* tile : ctx.GetMap()->GetAllNear(ctx.GetTile()))
 				if (tile->HasUnit() && ctx.SharesOwner(tile->unit) && !tile->unit->IsGeneral())
-					tile->unit->AddEffect(MODIFIER_AZURE_HORN_SHAMAN, nullptr, ctx.card);
+					tile->unit->AddEffect(MODIFIER_AZURE_HORN_SHAMAN, ctx.card);
 	});
 	effects[MODIFIER_AZURE_HORN_SHAMAN] = Effect(MODIFIER_AZURE_HORN_SHAMAN, KEYWORD_NONE, "Azure Horn Shaman");
 	effects[MODIFIER_AZURE_HORN_SHAMAN].AddModifier(STAT_HP, MODTYPE_BUFF, 4);
@@ -143,7 +124,7 @@ Collections::Collections() {
 		[](EffectContext ctx, OnTurnEndEvent& ev) {
 			for (Unit* unit : ctx.game->GetUnits())
 				if (ctx.IsAllied(unit) && !unit->IsGeneral())
-					unit->AddEffect(MODIFIER_BASTION, nullptr, ctx.card);
+					unit->AddEffect(MODIFIER_BASTION, ctx.card);
 	});
 	effects[MODIFIER_BASTION] = Effect(MODIFIER_BASTION, KEYWORD_NONE, "Bastion");
 	effects[MODIFIER_BASTION].AddModifier(STAT_HP, MODTYPE_BUFF, 1);
@@ -179,19 +160,19 @@ Collections::Collections() {
 		[](EffectContext ctx, OnDamageEvent& ev) { return ev.target == ctx.GetAllyGeneral(); },
 		[](EffectContext ctx, OnDamageEvent& ev) {
 			ctx.effect->UpdateModifier(STAT_COST, max(ev.target->hp, 0));
-			ctx.card->UpdateStatBuffs();
+			ctx.card->UpdateModifiers();
 	});
 	effects[SKILL_BLOOD_TAURA].RegisterPostTrigger<OnHealEvent>(
 		[](EffectContext ctx, OnHealEvent& ev) { return ev.target == ctx.GetAllyGeneral(); },
 		[](EffectContext ctx, OnHealEvent& ev) {
 			ctx.effect->UpdateModifier(STAT_COST, max(ev.target->hp, 0));
-			ctx.card->UpdateStatBuffs();
+			ctx.card->UpdateModifiers();
 	});
 	effects[SKILL_BLOOD_TAURA].RegisterPostTrigger<OnAddToHandEvent>(
 		[](EffectContext ctx, OnAddToHandEvent& ev) { return ctx.IsCard(ev.card); },
 		[](EffectContext ctx, OnAddToHandEvent& ev) {
 			ctx.effect->UpdateModifier(STAT_COST, max(ctx.GetAllyGeneral()->hp, 0));
-			ctx.card->UpdateStatBuffs();
+			ctx.card->UpdateModifiers();
 	});
 	effects[SKILL_BLOOD_TAURA].AddModifier(STAT_COST, MODTYPE_FIXED, 25);
 
@@ -233,26 +214,33 @@ Collections::Collections() {
 
 	//Chakkram
 	effects[SKILL_CHAKKRAM] = Effect(SKILL_CHAKKRAM, KEYWORD_NONE, "Costs 2 less if your General took damage on your opponent's last turn");
-	effects[SKILL_CHAKKRAM].RegisterPostTrigger<OnDamageEvent>(
-		[](EffectContext ctx, OnDamageEvent& ev) { return !ctx.IsOnBoard() && !ctx.IsOwnerTurn() && ev.target == ctx.GetAllyGeneral(); },
-		[](EffectContext ctx, OnDamageEvent& ev) { ctx.card->AddEffect(MODIFIER_CHAKKRAM, ctx.effect, ctx.card); });
-	effects[SKILL_CHAKKRAM].RegisterPostTrigger<OnTurnEndEvent>(
-		[](EffectContext ctx, OnTurnEndEvent& ev) { return ctx.IsOwnedBy(ev.player); },
-		[](EffectContext ctx, OnTurnEndEvent& ev) { ctx.card->RemoveEffectsFromSource(ctx.effect); });
-	effects[SKILL_CHAKKRAM].RegisterPostTrigger<OnSummonEvent>(
-		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsCard(ev.unit); },
-		[](EffectContext ctx, OnSummonEvent& ev) { ctx.card->RemoveEffectsFromSource(ctx.effect); });
+	effects[SKILL_CHAKKRAM].RegisterPostTrigger<OnTurnStartEvent>(
+		[](EffectContext ctx, OnTurnStartEvent& ev) { return ctx.IsOwnerTurn(); },
+		[](EffectContext ctx, OnTurnStartEvent& ev) {
+			for (Event* event : ctx.game->eventManager.GetMostRecentTurnEvents(ctx.GetOpponent())) {
+				if (event->type == EVENT_DAMAGE && event->As<OnDamageEvent>()->target == ctx.GetAllyGeneral()) {
+					ctx.card->AddEffect(MODIFIER_CHAKKRAM, ctx.card);
+					break;
+				}
+			}
+	});
 	effects[SKILL_CHAKKRAM].RegisterPostTrigger<OnAddToHandEvent>(
 		[](EffectContext ctx, OnAddToHandEvent& ev) { return ctx.IsCard(ev.card); },
 		[](EffectContext ctx, OnAddToHandEvent& ev) {
 			for (Event* event : ctx.game->eventManager.GetMostRecentTurnEvents(ctx.GetOpponent())) {
 				if (event->type == EVENT_DAMAGE && event->As<OnDamageEvent>()->target == ctx.GetAllyGeneral()) {
-					ctx.card->AddEffect(MODIFIER_CHAKKRAM, ctx.effect, ctx.card);
+					ctx.card->AddEffect(MODIFIER_CHAKKRAM, ctx.card);
 					break;
 				}
 			}
 	});
 	effects[MODIFIER_CHAKKRAM] = Effect(MODIFIER_CHAKKRAM, KEYWORD_NONE, "Chakkram");
+	effects[MODIFIER_CHAKKRAM].RegisterPostTrigger<OnTurnEndEvent>(
+		[](EffectContext ctx, OnTurnEndEvent& ev) { return ctx.IsOwnedBy(ev.player); },
+		[](EffectContext ctx, OnTurnEndEvent& ev) { ctx.card->RemoveEffect(ctx.effect); });
+	effects[MODIFIER_CHAKKRAM].RegisterPostTrigger<OnSummonEvent>(
+		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsCard(ev.unit); },
+		[](EffectContext ctx, OnSummonEvent& ev) { ctx.card->RemoveEffect(ctx.effect); });
 	effects[MODIFIER_CHAKKRAM].AddModifier(STAT_COST, MODTYPE_BUFF, -2);
 
 	//Chaos Elemental
@@ -268,7 +256,7 @@ Collections::Collections() {
 	effects[SKILL_CRIMSON_OCULUS] = Effect(SKILL_CRIMSON_OCULUS, KEYWORD_NONE, "Whenever opponent summons a minion, this minion gets +1/+1");
 	effects[SKILL_CRIMSON_OCULUS].RegisterPostTrigger<OnSummonEvent>(
 		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsOnBoard() && !ctx.SharesOwner(ev.unit); },
-		[](EffectContext ctx, OnSummonEvent& ev) { ctx.card->AddEffect(MODIFIER_CRIMSON_OCULUS, nullptr, ctx.card); });
+		[](EffectContext ctx, OnSummonEvent& ev) { ctx.card->AddEffect(MODIFIER_CRIMSON_OCULUS, ctx.card); });
 	effects[MODIFIER_CRIMSON_OCULUS] = Effect(MODIFIER_CRIMSON_OCULUS, KEYWORD_NONE, "Crimson Oculus");
 	effects[MODIFIER_CRIMSON_OCULUS].AddModifier(STAT_ATK, MODTYPE_BUFF, 1).AddModifier(STAT_HP, MODTYPE_BUFF, 1);
 
@@ -300,7 +288,7 @@ Collections::Collections() {
 		[](EffectContext ctx, OnTurnStartEvent& ev) { return ctx.IsOnBoard() && ctx.IsOwnedBy(ev.player); },
 		[](EffectContext ctx, OnTurnStartEvent& ev) {
 			ctx.GetEnemyGeneral()->DealDamage(ctx.card, 4);
-			ctx.card->AddEffect(MODIFIER_DARK_NEMESIS, nullptr, ctx.card);
+			ctx.card->AddEffect(MODIFIER_DARK_NEMESIS, ctx.card);
 	});
 	effects[MODIFIER_DARK_NEMESIS] = Effect(MODIFIER_DARK_NEMESIS, KEYWORD_NONE, "Dark Nemesis");
 	effects[MODIFIER_DARK_NEMESIS].AddModifier(STAT_ATK, MODTYPE_BUFF, 4);
@@ -415,18 +403,12 @@ Collections::Collections() {
 	//First Sword of Akrane
 	effects[SKILL_FIRST_SWORD_OF_AKRANE] = Effect(SKILL_FIRST_SWORD_OF_AKRANE, KEYWORD_NONE, "Your other minions have +1 Attack");
 	effects[SKILL_FIRST_SWORD_OF_AKRANE].RegisterSelfTrigger<OnAddThisEvent>([](EffectContext ctx, OnAddThisEvent& ev) {
-		for (Unit* unit : ctx.game->GetUnits())
-			if (ctx.IsAllied(unit) && !unit->IsGeneral())
-				unit->AddEffect(AURA_FIRST_SWORD_OF_AKRANE, ctx.effect, ctx.card);
-	});
+		ctx.game->ApplyAura(AURA_FIRST_SWORD_OF_AKRANE, ctx.effect, ctx.card); });
 	effects[SKILL_FIRST_SWORD_OF_AKRANE].RegisterSelfTrigger<OnRemoveThisEvent>([](EffectContext ctx, OnRemoveThisEvent& ev) {
-		for (Unit* unit : ctx.game->GetUnits())
-			unit->RemoveEffectsFromSource(ctx.effect);
-	});
-	effects[SKILL_FIRST_SWORD_OF_AKRANE].RegisterPostTrigger<OnSummonEvent>(
-		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsOnBoard() && ctx.IsAllied(ev.unit); },
-		[](EffectContext ctx, OnSummonEvent& ev) { ev.unit->AddEffect(AURA_FIRST_SWORD_OF_AKRANE, ctx.effect, ctx.card); });
+		ctx.game->RemoveAurasFromSource(ctx.effect); });
 	effects[AURA_FIRST_SWORD_OF_AKRANE] = Effect(AURA_FIRST_SWORD_OF_AKRANE, KEYWORD_NONE, "First Sword of Akrane");
+	effects[AURA_FIRST_SWORD_OF_AKRANE].SetAuraPredicate([](Effect* aura, Game* game, Card* card) {
+		return card->IsOnBoard() && card->owner == aura->GetRef()->owner && card != aura->GetRef() && !card->IsGeneral(); });
 	effects[AURA_FIRST_SWORD_OF_AKRANE].AddModifier(STAT_ATK, MODTYPE_BUFF, 1);
 
 	//Flameblood Warlock
@@ -462,92 +444,52 @@ Collections::Collections() {
 	//Golden Justicar
 	effects[SKILL_GOLDEN_JUSTICAR] = Effect(SKILL_GOLDEN_JUSTICAR, KEYWORD_PROVOKE, "{Provoke}|Your other minions with {Provoke} can move two additional spaces");
 	effects[SKILL_GOLDEN_JUSTICAR].RegisterSelfTrigger<OnAddThisEvent>([](EffectContext ctx, OnAddThisEvent& ev) {
-		for (Unit* unit : ctx.game->GetUnits())
-			if (ctx.IsAllied(unit) && !unit->IsGeneral() && unit->HasKeywords(KEYWORD_PROVOKE))
-				unit->AddEffect(AURA_GOLDEN_JUSTICAR, ctx.effect, ctx.card);
-	});
+		ctx.game->ApplyAura(AURA_GOLDEN_JUSTICAR, ctx.effect, ctx.card); });
 	effects[SKILL_GOLDEN_JUSTICAR].RegisterSelfTrigger<OnRemoveThisEvent>([](EffectContext ctx, OnRemoveThisEvent& ev) {
-		for (Unit* unit : ctx.game->GetUnits())
-			unit->RemoveEffectsFromSource(ctx.effect);
-	});
-	effects[SKILL_GOLDEN_JUSTICAR].RegisterPostTrigger<OnSummonEvent>(
-		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsOnBoard() && ctx.IsAllied(ev.unit) && ev.unit->HasKeywords(KEYWORD_PROVOKE); },
-		[](EffectContext ctx, OnSummonEvent& ev) { ev.unit->AddEffect(AURA_GOLDEN_JUSTICAR, ctx.effect, ctx.card); });
-	effects[SKILL_GOLDEN_JUSTICAR].RegisterPostTrigger<OnEffectsChangedEvent>(
-		[](EffectContext ctx, OnEffectsChangedEvent& ev) { return ctx.BothOnBoard(ev.card) && ctx.IsAllied(ev.card) && !ev.card->IsGeneral(); },
-		[](EffectContext ctx, OnEffectsChangedEvent& ev) {
-			ev.card->GetUnit()->HasKeywords(KEYWORD_PROVOKE)
-				? ev.card->AddEffect(AURA_GOLDEN_JUSTICAR, ctx.effect, ctx.card)
-				: ev.card->RemoveEffectsFromSource(ctx.effect);
-	});
+		ctx.game->RemoveAurasFromSource(ctx.effect); });
 	effects[AURA_GOLDEN_JUSTICAR] = Effect(AURA_GOLDEN_JUSTICAR, KEYWORD_NONE, "Golden Justicar");
+	effects[AURA_GOLDEN_JUSTICAR].SetAuraPredicate([](Effect* aura, Game* game, Card* card) {
+		return card->IsOnBoard() && card->owner == aura->GetRef()->owner && card != aura->GetRef() && !card->IsGeneral() && card->GetUnit()->HasKeywords(KEYWORD_PROVOKE); });
 	effects[AURA_GOLDEN_JUSTICAR].AddModifier(STAT_MOVE, MODTYPE_BUFF, 2);
 
 	//Golem Metallurgist
 	effects[SKILL_GOLEM_METALLURGIST] = Effect(SKILL_GOLEM_METALLURGIST, KEYWORD_NONE, "The first Golem you summon each turn costs 1 less");
 	effects[SKILL_GOLEM_METALLURGIST].RegisterSelfTrigger<OnAddThisEvent>([](EffectContext ctx, OnAddThisEvent& ev) {
 		if (ctx.game->GetTurnPlayer() == ctx.GetOwner() && !ctx.game->AnyCastThisTurn([](Card* card) { return card->IsUnit() && card->GetUnit()->tribe == TRIBE_GOLEM; }))
-		for (Card* card : ctx.GetOwner()->GetDeckAndHand())
-			if (card->IsUnit() && card->GetUnit()->tribe == TRIBE_GOLEM)
-				card->AddEffect(AURA_GOLEM_METALLURGIST, ctx.effect, ctx.card);
+			ctx.game->ApplyAura(AURA_GOLEM_METALLURGIST, ctx.effect, ctx.card);
 	});
 	effects[SKILL_GOLEM_METALLURGIST].RegisterSelfTrigger<OnRemoveThisEvent>([](EffectContext ctx, OnRemoveThisEvent& ev) {
-		for (Card* card : ctx.GetOwner()->GetDeckAndHand())
-			card->RemoveEffectsFromSource(ctx.effect);
-	});
-	effects[SKILL_GOLEM_METALLURGIST].RegisterPostTrigger<OnSummonEvent>(
-		[](EffectContext ctx, OnSummonEvent& ev) { return ev.wasCast && ctx.SharesOwner(ev.unit) && ev.unit->tribe == TRIBE_GOLEM; },
-		[](EffectContext ctx, OnSummonEvent& ev) {
-			ev.unit->RemoveEffectsFromSource(ctx.effect);
-			for (Card* card : ctx.GetOwner()->GetDeckAndHand())
-				card->RemoveEffectsFromSource(ctx.effect);
-	});
-	effects[SKILL_GOLEM_METALLURGIST].RegisterPostTrigger<OnAddToHandEvent>(
-		[](EffectContext ctx, OnAddToHandEvent& ev) { return ctx.IsOnBoard() && ctx.SharesOwner(ev.card) && ev.card->IsUnit() && ev.card->GetUnit()->tribe == TRIBE_GOLEM; },
-		[](EffectContext ctx, OnAddToHandEvent& ev) {
-			if (ctx.game->GetTurnPlayer() == ctx.GetOwner() && !ctx.game->AnyCastThisTurn([](Card* card) { return card->IsUnit() && card->GetUnit()->tribe == TRIBE_GOLEM; }))
-				ev.card->AddEffect(AURA_GOLEM_METALLURGIST, ctx.effect, ctx.card);
-	});
+		ctx.game->RemoveAurasFromSource(ctx.effect); });
+	effects[SKILL_GOLEM_METALLURGIST].RegisterPostTrigger<OnCastEvent>(
+		[](EffectContext ctx, OnCastEvent& ev) { return ev.card->HasAuraFromSource(ctx.effect); },
+		[](EffectContext ctx, OnCastEvent& ev) { ctx.game->RemoveAurasFromSource(ctx.effect); });
 	effects[SKILL_GOLEM_METALLURGIST].RegisterPostTrigger<OnTurnEndEvent>(
 		[](EffectContext ctx, OnTurnEndEvent& ev) { return ctx.IsOnBoard() && ctx.IsOwnedBy(ev.player); },
-		[](EffectContext ctx, OnTurnEndEvent& ev) {
-			for (Card* card : ctx.GetOwner()->GetDeckAndHand())
-				if (card->IsUnit() && card->GetUnit()->tribe == TRIBE_GOLEM)
-					card->AddEffect(AURA_GOLEM_METALLURGIST, ctx.effect, ctx.card);
-	});
+		[](EffectContext ctx, OnTurnEndEvent& ev) { ctx.game->ApplyAura(AURA_GOLEM_METALLURGIST, ctx.effect, ctx.card); });
 	effects[AURA_GOLEM_METALLURGIST] = Effect(AURA_GOLEM_METALLURGIST, KEYWORD_NONE, "Golem Metallurgist");
+	effects[AURA_GOLEM_METALLURGIST].SetAuraPredicate([](Effect* aura, Game* game, Card* card) {
+		return card->owner->HasCardInHand(card) && aura->GetRef()->owner == card->owner && card->IsUnit() && card->GetUnit()->tribe == TRIBE_GOLEM; });
 	effects[AURA_GOLEM_METALLURGIST].AddModifier(STAT_COST, MODTYPE_BUFF, -1);
 
 	//Golem Vanquisher
 	effects[SKILL_GOLEM_VANQUISHER] = Effect(SKILL_GOLEM_VANQUISHER, KEYWORD_PROVOKE, "{Provoke}|Your other Golem minions have {Provoke}");
 	effects[SKILL_GOLEM_VANQUISHER].RegisterSelfTrigger<OnAddThisEvent>([](EffectContext ctx, OnAddThisEvent& ev) {
-		for (Unit* unit : ctx.game->GetUnits())
-			if (ctx.IsAllied(unit) && unit->tribe == TRIBE_GOLEM)
-				unit->AddEffect(AURA_GOLEM_VANQUISHER, ctx.effect, ctx.card);
-	});
+		ctx.game->ApplyAura(AURA_GOLEM_VANQUISHER, ctx.effect, ctx.card); });
 	effects[SKILL_GOLEM_VANQUISHER].RegisterSelfTrigger<OnRemoveThisEvent>([](EffectContext ctx, OnRemoveThisEvent& ev) {
-		for (Unit* unit : ctx.game->GetUnits())
-			unit->RemoveEffectsFromSource(ctx.effect);
-	});
-	effects[SKILL_GOLEM_VANQUISHER].RegisterPostTrigger<OnSummonEvent>(
-		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsOnBoard() && ctx.IsAllied(ev.unit) && ev.unit->tribe == TRIBE_GOLEM; },
-		[](EffectContext ctx, OnSummonEvent& ev) { ev.unit->AddEffect(AURA_GOLEM_VANQUISHER, ctx.effect, ctx.card); });
-	effects[SKILL_GOLEM_VANQUISHER].RegisterPostTrigger<OnEffectsChangedEvent>(
-		[](EffectContext ctx, OnEffectsChangedEvent& ev) { return ctx.BothOnBoard(ev.card) && ctx.IsAllied(ev.card); },
-		[](EffectContext ctx, OnEffectsChangedEvent& ev) {
-			ev.card->GetUnit()->tribe == TRIBE_GOLEM
-				? ev.card->AddEffect(AURA_GOLEM_VANQUISHER, ctx.effect, ctx.card)
-				: ev.card->RemoveEffectsFromSource(ctx.effect);
-	});
+		ctx.game->RemoveAurasFromSource(ctx.effect); });
 	effects[AURA_GOLEM_VANQUISHER] = Effect(AURA_GOLEM_VANQUISHER, KEYWORD_PROVOKE, "Golem Vanquisher|{Provoke}");
+	effects[AURA_GOLEM_VANQUISHER].SetAuraPredicate([](Effect* aura, Game* game, Card* card) {
+		return card->IsOnBoard() && card->owner == aura->GetRef()->owner && card != aura->GetRef() && !card->IsGeneral() && card->GetUnit()->tribe == TRIBE_GOLEM; });
 
 	//Grove Lion
 	effects[SKILL_GROVE_LION] = Effect(SKILL_GROVE_LION, KEYWORD_NONE, "While this minion is on the battlefield, your General has {Forcefield}");
 	effects[SKILL_GROVE_LION].RegisterSelfTrigger<OnAddThisEvent>([](EffectContext ctx, OnAddThisEvent& ev) {
-		ctx.GetAllyGeneral()->AddEffect(AURA_GROVE_LION, ctx.effect, ctx.card); });
+		ctx.game->ApplyAura(AURA_GROVE_LION, ctx.effect, ctx.card); });
 	effects[SKILL_GROVE_LION].RegisterSelfTrigger<OnRemoveThisEvent>([](EffectContext ctx, OnRemoveThisEvent& ev) {
-		ctx.GetAllyGeneral()->RemoveEffectsFromSource(ctx.effect); });
+		ctx.game->RemoveAurasFromSource(ctx.effect); });
 	effects[AURA_GROVE_LION] = Effect(AURA_GROVE_LION, KEYWORD_FORCEFIELD, "Grove Lion|{Forcefield}");
+	effects[AURA_GROVE_LION].SetAuraPredicate([](Effect* aura, Game* game, Card* card) {
+		return card->IsOnBoard() && card == aura->GetRef()->owner->general; });
 
 	//Healing Mystic
 	effects[SKILL_HEALING_MYSTIC] = Effect(SKILL_HEALING_MYSTIC, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Restore 2 Health to anything");
@@ -621,14 +563,14 @@ Collections::Collections() {
 	//Lady Locke
 	effects[SKILL_LADY_LOCKE] = Effect(SKILL_LADY_LOCKE, KEYWORD_OPENING_GAMBIT | KEYWORD_PROVOKE, "{Provoke}|{Opening Gambit}: Other minions you summon this turn gain +1/+1 and gain {Provoke}");
 	effects[SKILL_LADY_LOCKE].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
-		ctx.GetAllyGeneral()->AddContinuousEffect(AURA_LADY_LOCKE, ctx.card); });
+		ctx.game->ApplyAura(AURA_LADY_LOCKE, ctx.effect, ctx.card); });
 	effects[AURA_LADY_LOCKE] = Effect(AURA_LADY_LOCKE, KEYWORD_NONE, "Lady Locke|Minions you summon this turn gain +1/+1 and gain {Provoke}");
 	effects[AURA_LADY_LOCKE].RegisterPostTrigger<OnSummonEvent>(
-		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsOnBoard() && ctx.IsAllied(ev.unit) && ctx.effect->GetRef() != ev.unit; },
-		[](EffectContext ctx, OnSummonEvent& ev) { ev.unit->AddEffect(MODIFIER_LADY_LOCKE, nullptr, ctx.effect->GetRef()); });
+		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsAllied(ev.unit) && !ev.unit->IsGeneral(); },
+		[](EffectContext ctx, OnSummonEvent& ev) { ev.unit->AddEffect(MODIFIER_LADY_LOCKE, ctx.card); });
 	effects[AURA_LADY_LOCKE].RegisterPostTrigger<OnTurnEndEvent>(
-		[](EffectContext ctx, OnTurnEndEvent& ev) { return ctx.IsOnBoard() && ctx.IsOwnedBy(ev.player); },
-		[](EffectContext ctx, OnTurnEndEvent& ev) { ctx.card->RemoveEffectsFromSource(ctx.effect); });
+		[](EffectContext ctx, OnTurnEndEvent& ev) { return ctx.IsOwnedBy(ev.player); },
+		[](EffectContext ctx, OnTurnEndEvent& ev) { ctx.game->RemoveAura(ctx.effect); });
 	effects[MODIFIER_LADY_LOCKE] = Effect(MODIFIER_LADY_LOCKE, KEYWORD_PROVOKE, "Lady Locke|{Provoke}");
 	effects[MODIFIER_LADY_LOCKE].AddModifier(STAT_ATK, MODTYPE_BUFF, 1).AddModifier(STAT_HP, MODTYPE_BUFF, 1);
 
@@ -656,35 +598,19 @@ Collections::Collections() {
 	effects[SKILL_MANAFORGER] = Effect(SKILL_MANAFORGER, KEYWORD_NONE, "The first non-Bloodborn spell you cast each turn costs 1 less");
 	effects[SKILL_MANAFORGER].RegisterSelfTrigger<OnAddThisEvent>([](EffectContext ctx, OnAddThisEvent& ev) {
 		if (ctx.game->GetTurnPlayer() == ctx.GetOwner() && !ctx.game->AnyCastThisTurn([](Card* card) { return card->IsSpell(); }))
-			for (Card* card : ctx.GetOwner()->GetDeckAndHand())
-				if (card->IsSpell())
-					card->AddEffect(AURA_MANAFORGER, ctx.effect, ctx.card);
+			ctx.game->ApplyAura(AURA_MANAFORGER, ctx.effect, ctx.card);
 	});
 	effects[SKILL_MANAFORGER].RegisterSelfTrigger<OnRemoveThisEvent>([](EffectContext ctx, OnRemoveThisEvent& ev) {
-		for (Card* card : ctx.GetOwner()->GetDeckAndHand())
-			card->RemoveEffectsFromSource(ctx.effect);
-	});
+		ctx.game->RemoveAurasFromSource(ctx.effect); });
 	effects[SKILL_MANAFORGER].RegisterPostTrigger<OnCastEvent>(
-		[](EffectContext ctx, OnCastEvent& ev) { return ctx.SharesOwner(ev.card) && ev.card->IsSpell(); },
-		[](EffectContext ctx, OnCastEvent& ev) {
-			ev.card->RemoveEffectsFromSource(ctx.effect);
-			for (Card* card : ctx.GetOwner()->GetDeckAndHand())
-				card->RemoveEffectsFromSource(ctx.effect);
-	});
-	effects[SKILL_MANAFORGER].RegisterPostTrigger<OnAddToHandEvent>(
-		[](EffectContext ctx, OnAddToHandEvent& ev) { return ctx.IsOnBoard() && ctx.SharesOwner(ev.card) && ev.card->IsSpell(); },
-		[](EffectContext ctx, OnAddToHandEvent& ev) {
-			if (ctx.game->GetTurnPlayer() == ctx.GetOwner() && !ctx.game->AnyCastThisTurn([](Card* card) { return card->IsSpell(); }))
-				ev.card->AddEffect(AURA_MANAFORGER, ctx.effect, ctx.card);
-	});
+		[](EffectContext ctx, OnCastEvent& ev) { return ev.card->HasAuraFromSource(ctx.effect); },
+		[](EffectContext ctx, OnCastEvent& ev) { ctx.game->RemoveAurasFromSource(ctx.effect); });
 	effects[SKILL_MANAFORGER].RegisterPostTrigger<OnTurnEndEvent>(
 		[](EffectContext ctx, OnTurnEndEvent& ev) { return ctx.IsOnBoard() && ctx.IsOwnedBy(ev.player); },
-		[](EffectContext ctx, OnTurnEndEvent& ev) {
-			for (Card* card : ctx.GetOwner()->GetDeckAndHand())
-				if (card->IsSpell())
-					card->AddEffect(AURA_MANAFORGER, ctx.effect, ctx.card);
-	});
+		[](EffectContext ctx, OnTurnEndEvent& ev) { ctx.game->ApplyAura(AURA_MANAFORGER, ctx.effect, ctx.card); });
 	effects[AURA_MANAFORGER] = Effect(AURA_MANAFORGER, KEYWORD_NONE, "Manaforger");
+	effects[AURA_MANAFORGER].SetAuraPredicate([](Effect* aura, Game* game, Card* card) {
+		return card->owner->HasCardInHand(card) && aura->GetRef()->owner == card->owner && card->IsSpell(); });
 	effects[AURA_MANAFORGER].AddModifier(STAT_COST, MODTYPE_BUFF, -1);
 
 	//Maw
@@ -716,7 +642,7 @@ Collections::Collections() {
 	effects[SKILL_MIRKBLOOD_DEVOURER] = Effect(SKILL_MIRKBLOOD_DEVOURER, KEYWORD_NONE, "Friendly minions summoned nearby this minion gain +1/+1");
 	effects[SKILL_MIRKBLOOD_DEVOURER].RegisterPostTrigger<OnSummonEvent>(
 		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsOnBoard() && ctx.IsAllied(ev.unit) && ctx.GetTile()->IsNear(ev.unit->curTile); },
-		[](EffectContext ctx, OnSummonEvent& ev) { ev.unit->AddEffect(MODIFIER_MIRKBLOOD_DEVOURER, nullptr, ctx.card); });
+		[](EffectContext ctx, OnSummonEvent& ev) { ev.unit->AddEffect(MODIFIER_MIRKBLOOD_DEVOURER, ctx.card); });
 	effects[MODIFIER_MIRKBLOOD_DEVOURER] = Effect(MODIFIER_MIRKBLOOD_DEVOURER, KEYWORD_NONE, "Mirkblood Devourer");
 	effects[MODIFIER_MIRKBLOOD_DEVOURER].AddModifier(STAT_ATK, MODTYPE_BUFF, 1).AddModifier(STAT_HP, MODTYPE_BUFF, 1);
 

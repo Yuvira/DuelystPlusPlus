@@ -106,9 +106,14 @@ public:
 	Effect& AddModifier(eStat stat, eModifier type, int value);
 	void UpdateModifier(eStat stat, int value);
 
+	//Aura predicate
+	void SetAuraPredicate(bool (*Predicate)(Effect* aura, Game* game, Card* card)) { AuraPredicate = Predicate; }
+	bool MatchesAuraPredicate(Game* game, Card* card) { return AuraPredicate && AuraPredicate(this, game, card); }
+
 	//Getters & Setters
 	Card* GetToken();
 	Card* GetRef();
+	Effect* GetSource();
 	void SetToken(Card* token);
 	void SetSources(Effect* source, Card* refCard);
 
@@ -117,7 +122,6 @@ public:
 	const std::string& GetDescription() const;
 	const int& GetKeywords() const;
 	const ModifierGroup& GetModifiers() const;
-	const Effect* const& GetSource() const;
 
 	//Utils
 	bool IsContinuous() { return source != nullptr; }
@@ -132,6 +136,7 @@ private:
 	Card* token;
 	Card* refCard;
 	Effect* source;
+	bool (*AuraPredicate)(Effect* aura, Game* game, Card* card);
 	std::vector<EventTrigger> preTriggers;
 	std::vector<EventTrigger> postTriggers;
 	std::vector<EventTrigger> selfTriggers;

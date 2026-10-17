@@ -40,7 +40,7 @@ Card::~Card() {}
 
 #pragma endregion
 
-#pragma region Updates & Rendering
+#pragma region Rendering
 
 //Update effect details
 void Card::UpdateDetails() {
@@ -64,6 +64,22 @@ void Card::UpdateDetails() {
 
 	}
 
+	//Loop auras
+	for (int i = 0; i < auras.size(); ++i) {
+
+		//Add newline if this isn't the first effect in the list
+		if (lines.size() > 0)
+			lines.push_back("");
+
+		//Get index of header and add description text
+		int headerIdx = lines.size();
+		Utils::WrapText(auras[i]->GetDescription(), lines, MAX_DESCRIPTION_WIDTH);
+
+		//Add buffs line if applicable
+		auras[i]->GetModifiers().WriteValues(lines);
+
+	}
+
 	//Generate
 	details.CreateFromTextBlock(lines);
 
@@ -84,6 +100,12 @@ int Card::GetStat(eStat stat, int base) {
 			fixed = true;
 		}
 	}
+	for (Effect* aura : auras) {
+		if (aura->GetModifiers().ReadModifier(stat).type == MODTYPE_FIXED) {
+			base = aura->GetModifiers().ReadModifier(stat).value;
+			fixed = true;
+		}
+	}
 	if (fixed)
 		return max(base, 0);
 
@@ -91,14 +113,25 @@ int Card::GetStat(eStat stat, int base) {
 	for (Effect* effect : effects)
 		if (effect->GetModifiers().ReadModifier(stat).type == MODTYPE_REBASE)
 			base = effect->GetModifiers().ReadModifier(stat).value;
+	for (Effect* aura : auras)
+		if (aura->GetModifiers().ReadModifier(stat).type == MODTYPE_REBASE)
+			base = aura->GetModifiers().ReadModifier(stat).value;
 
 	//Apply buffs and overrides in order
 	for (Effect* effect : effects) {
 		if (effect->GetModifiers().ReadModifier(stat).type == MODTYPE_BUFF)
 			base += effect->GetModifiers().ReadModifier(stat).value;
 		if (effect->GetModifiers().ReadModifier(stat).type == MODTYPE_OVERRIDE)
-			base += effect->GetModifiers().ReadModifier(stat).value;
+			base = effect->GetModifiers().ReadModifier(stat).value;
 	}
+
+	//Auras apply overrides first
+	for (Effect* aura : auras)
+		if (aura->GetModifiers().ReadModifier(stat).type == MODTYPE_OVERRIDE)
+			base = aura->GetModifiers().ReadModifier(stat).value;
+	for (Effect* aura : auras)
+		if (aura->GetModifiers().ReadModifier(stat).type == MODTYPE_BUFF)
+			base += aura->GetModifiers().ReadModifier(stat).value;
 
 	//Return modified value
 	return max(base, 0);
@@ -110,49 +143,19 @@ int Card::GetStat(eStat stat, int base) {
 #pragma region Card Effects
 
 //Add effect to list
-void Card::AddEffect(eEffect effectId, Effect* source, Card* refCard) {
+void Card::AddEffect(eEffect effectId, Card* refCard) {
 	if (game != nullptr)
-		AddEffect(*game->collections->FindEffect(effectId), source, refCard);
+		AddEffect(*game->collections->FindEffect(effectId), refCard);
 }
-void Card::AddEffect(Effect effect, Effect* source, Card* refCard) {
-	if (source != nullptr)
-		for (int i = 0; i < effects.size(); ++i)
-			if (effects[i]->GetID() == effect.GetID() && effects[i]->GetSource() == source)
-				return;
+void Card::AddEffect(Effect effect, Card* refCard) {
 	effects.push_back(new Effect(effect));
-	effects.back()->SetSources(source, refCard);
+	effects.back()->SetSources(nullptr, refCard);
 	if (IsOnBoard()) {
 		OnAddThisEvent addEvent = OnAddThisEvent();
 		effects.back()->TriggerSelfEvent(EffectContext(effects.back(), this, game), &addEvent);
 	}
-	if (game != nullptr) {
-		OnEffectsChangedEvent event = OnEffectsChangedEvent(game->GetTurnCount(), this);
-		game->eventManager.SendOnPreEvent(game, &event);
-		game->eventManager.SendOnPostEvent(game, &event);
-	}
-	UpdateDetails();
-	UpdateStatBuffs();
-}
-
-//Add continuous effect to list
-void Card::AddContinuousEffect(eEffect effectId, Card* refCard) {
-	if (game != nullptr)
-		AddContinuousEffect(*game->collections->FindEffect(effectId), refCard);
-}
-void Card::AddContinuousEffect(Effect effect, Card* refCard) {
-	effects.push_back(new Effect(effect));
-	effects.back()->SetSources(effects.back(), refCard);
-	if (IsOnBoard()) {
-		OnAddThisEvent addEvent = OnAddThisEvent();
-		effects.back()->TriggerSelfEvent(EffectContext(effects.back(), this, game), &addEvent);
-	}
-	if (game != nullptr) {
-		OnEffectsChangedEvent event = OnEffectsChangedEvent(game->GetTurnCount(), this);
-		game->eventManager.SendOnPreEvent(game, &event);
-		game->eventManager.SendOnPostEvent(game, &event);
-	}
-	UpdateDetails();
-	UpdateStatBuffs();
+	UpdateModifiers();
+	UpdateAuras();
 }
 
 //Remove effect from list
@@ -163,15 +166,6 @@ void Card::RemoveEffect(Effect* effect) {
 			return;
 		}
 	}
-}
-
-//Remove all effects from a given source
-void Card::RemoveEffectsFromSource(Effect* source) {
-	std::vector<int> indices;
-	for (int i = 0; i < effects.size(); ++i)
-		if (effects[i]->GetSource() == source)
-			indices.push_back(i);
-	RemoveEffectAt(indices);
 }
 
 //Remove effects at indices
@@ -187,11 +181,65 @@ void Card::RemoveEffectAt(std::vector<int> indices) {
 		OnRemoveThisEvent removeEvent = OnRemoveThisEvent();
 		removed[i]->TriggerSelfEvent(EffectContext(removed[i], this, game), &removeEvent);
 	}
-	OnEffectsChangedEvent event = OnEffectsChangedEvent(game->GetTurnCount(), this);
-	game->eventManager.SendOnPreEvent(game, &event);
-	game->eventManager.SendOnPostEvent(game, &event);
-	UpdateDetails();
-	UpdateStatBuffs();
+	UpdateModifiers();
+	UpdateAuras();
+}
+
+//Update aura list
+void Card::UpdateAuras() {
+
+	//Return if no game reference to pull auras from
+	if (game == nullptr)
+		return;
+
+	//Start loop
+	bool loop = true;
+	while (loop) {
+
+		//Disable flag
+		loop = false;
+
+		//Remove untracked auras and those that no longer apply
+		std::vector<Effect*> removed;
+		for (int i = 0; i < auras.size(); ++i) {
+			if (!game->IsTrackingAura(auras[i]) || !auras[i]->MatchesAuraPredicate(game, this)) {
+				removed.push_back(auras[i]);
+				auras.erase(auras.begin() + i);
+				loop = true;
+				--i;
+			}
+		}
+		for (Effect* aura : removed) {
+			OnRemoveThisEvent removeEvent = OnRemoveThisEvent();
+			aura->TriggerSelfEvent(EffectContext(aura, this, game), &removeEvent);
+		}
+
+		//Add auras that match predicate
+		for (Effect* aura : game->GetAuras()) {
+			if (!HasAuraFromSource(aura->GetSource()) && aura->MatchesAuraPredicate(game, this)) {
+				auras.push_back(aura);
+				if (IsOnBoard()) {
+					OnAddThisEvent addEvent = OnAddThisEvent();
+					auras.back()->TriggerSelfEvent(EffectContext(auras.back(), this, game), &addEvent);
+				}
+				loop = true;
+			}
+		}
+
+		//Update modifiers
+		if (loop)
+			UpdateModifiers();
+
+	}
+
+}
+
+//Card is tracking an aura from a given source
+bool Card::HasAuraFromSource(Effect* source) {
+	for (Effect* aura : auras)
+		if (aura->GetSource() == source)
+			return true;
+	return false;
 }
 
 #pragma endregion

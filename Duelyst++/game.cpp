@@ -427,6 +427,86 @@ void Game::Update() {
 
 #pragma endregion
 
+#pragma region Effects
+
+//Add effect to list
+void Game::ApplyAura(eEffect effectId, Effect* source, Card* refCard) {
+	ApplyAura(*collections->FindEffect(effectId), source, refCard); }
+void Game::ApplyAura(Effect effect, Effect* source, Card* refCard) {
+
+	//Ignore if source is already applying this aura
+	if (source != nullptr)
+		for (int i = 0; i < auras.size(); ++i)
+			if (auras[i]->GetID() == effect.GetID() && auras[i]->GetSource() == source)
+				return;
+
+	//Add aura to list
+	auras.push_back(new Effect(effect));
+	auras.back()->SetSources(source, refCard);
+
+	//Update cards
+	for (Unit* unit : units)
+		unit->UpdateAuras();
+	for (Card* card : players[0].GetDeckAndHand())
+		card->UpdateAuras();
+	for (Card* card : players[1].GetDeckAndHand())
+		card->UpdateAuras();
+
+}
+
+//Remove aura from list
+void Game::RemoveAura(Effect* effect) {
+	for (int i = 0; i < auras.size(); ++i) {
+		if (auras[i] == effect) {
+			RemoveAurasAt({ i });
+			return;
+		}
+	}
+}
+
+//Remove all auras from a given source
+void Game::RemoveAurasFromSource(Effect* source) {
+	std::vector<int> indices;
+	for (int i = 0; i < auras.size(); ++i)
+		if (auras[i]->GetSource() == source)
+			indices.push_back(i);
+	RemoveAurasAt(indices);
+}
+
+//Remove effects at indices
+void Game::RemoveAurasAt(std::vector<int> indices) {
+
+	//Return if no indices provided
+	if (indices.empty())
+		return;
+
+	//Remove auras
+	std::vector<Effect*> removed;
+	for (int i = indices.size() - 1; i >= 0; --i) {
+		removed.push_back(auras[indices[i]]);
+		auras.erase(auras.begin() + indices[i]);
+	}
+
+	//Update cards
+	for (Unit* unit : units)
+		unit->UpdateAuras();
+	for (Card* card : players[0].GetDeckAndHand())
+		card->UpdateAuras();
+	for (Card* card : players[1].GetDeckAndHand())
+		card->UpdateAuras();
+
+}
+
+//Check if aura is still being tracked
+bool Game::IsTrackingAura(Effect* match) {
+	for (Effect* aura : auras)
+		if (aura == match)
+			return true;
+	return false;
+}
+
+#pragma endregion
+
 #pragma region Actions
 
 //Use active card
@@ -479,9 +559,9 @@ void Game::UseEffect() {
 //Send cast event after pre-cast effect targets have been set
 void Game::PostCast() {
 	BoardTile* tile = &map.tiles[castPos.x][castPos.y];
-	OnCastEvent event = OnCastEvent(GetTurnCount(), activeCard, tile);
-	eventManager.SendOnPreEvent(this, &event);
-	eventManager.SendOnPostEvent(this, &event);
+	OnCastEvent castEvent = OnCastEvent(GetTurnCount(), activeCard, tile);
+	eventManager.SendOnPreEvent(this, &castEvent);
+	eventManager.SendOnPostEvent(this, &castEvent);
 	castThisTurn.push_back(activeCard->original);
 	for (Effect* effect : activeCard->GetEffects()) {
 		OnResolveThisEvent resolveEvent = OnResolveThisEvent(tile);
@@ -506,6 +586,7 @@ void Game::Summon(Card* card, int x, int y, bool actionBar) {
 	units.push_back(card->GetUnit());
 	units.back()->SetPosition(x, y);
 	units.back()->AddEffects();
+	units.back()->UpdateAuras();
 	units.back()->InitState();
 	eventManager.SendOnPostEvent(this, &event);
 }
@@ -1038,10 +1119,9 @@ void Game::DrawForcefield(int x, int y, Renderer& renderer) {
 //Players
 Player* Game::GetTurnPlayer() { return &players[turn]; }
 Player* Game::GetNonTurnPlayer() { return &players[!turn]; }
-std::vector<Player*> Game::GetPlayers() {
-	std::vector<Player*> p;
-	p.insert(p.end(), { &players[0], &players[1] });
-	return p;
+std::vector<Effect*> Game::GetAuras() {
+	std::vector<Effect*> auraIterator = auras;
+	return auraIterator;
 }
 
 //Unit list

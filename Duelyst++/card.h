@@ -51,17 +51,16 @@ public:
 	virtual void DrawDetails(Renderer& renderer, int& y) {}
 
 	//Stats
-	virtual void UpdateStatBuffs() {}
+	virtual void UpdateModifiers() {}
 	int GetStat(eStat stat, int base);
 
 	//Effects
-	void AddEffect(eEffect effectId, Effect* source, Card* refCard);
-	void AddEffect(Effect effect, Effect* source, Card* refCard);
-	void AddContinuousEffect(eEffect effectId, Card* refCard);
-	void AddContinuousEffect(Effect effect, Card* refCard);
+	void AddEffect(eEffect effectId, Card* refCard);
+	void AddEffect(Effect effect, Card* refCard);
 	void RemoveEffect(Effect* effect);
-	void RemoveEffectsFromSource(Effect* source);
 	void RemoveEffectAt(std::vector<int> indices);
+	void UpdateAuras();
+	bool HasAuraFromSource(Effect* source);
 
 	//Getters
 	std::vector<Effect*> GetEffects();
@@ -90,6 +89,7 @@ public:
 	Card* original;
 	std::string name;
 	std::vector<Effect*> effects;
+	std::vector<Effect*> auras;
 	Sprite sprite;
 	Sprite header[2];
 	Sprite details;
@@ -113,12 +113,12 @@ public:
 	//Rendering
 	void Render(Renderer& renderer);
 	void DrawDetails(Renderer& renderer, int& y);
+	void UpdateStatSprites();
+	void UpdateDetailStats();
 
 	//Updates
 	void Update(bool& shouldLoop);
-	void UpdateStatBuffs();
-	void UpdateStatSprites();
-	void UpdateDetailStats();
+	void UpdateModifiers();
 
 	//Actions
 	void InitState();
@@ -139,7 +139,7 @@ public:
 	bool IsGeneral() { return tribe == TRIBE_GENERAL; }
 	bool CanAttack(Unit* target);
 	bool IsMoveable();
-	bool HasKeywords(int keywords);
+	bool HasKeywords(int match);
 	bool IsProvoked();
 	bool IsOnBoard() { return curTile != nullptr; }
 
@@ -155,6 +155,7 @@ public:
 	int hpMax;
 	int baseMoveRange;
 	int moveRange;
+	int keywords;
 	bool destroyed;
 	bool isDead;
 	bool hasMoved;
@@ -185,10 +186,10 @@ public:
 
 	//Rendering
 	void DrawDetails(Renderer& renderer, int& y);
+	void UpdateDetailStats();
 
 	//Updates
-	void UpdateStatBuffs();
-	void UpdateDetailStats();
+	void UpdateModifiers();
 
 	//Getters
 	TargetMode GetTargetMode() { return targetMode; }
