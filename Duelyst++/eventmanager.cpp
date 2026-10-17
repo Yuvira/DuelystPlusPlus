@@ -184,4 +184,21 @@ std::vector<Event*> EventManager::GetMostRecentTurnEvents(Player* player) {
 	return valid;
 }
 
+//Check if any events from a player's most recent turn match a predicate
+bool EventManager::MostRecentPlayerTurnHasEvent(Player* player, bool (*Predicate)(Player* player, Event* event)) {
+	int max = -1;
+	OnTurnStartEvent* turnStartEvent = nullptr;
+	for (Event* event : eventLog) {
+		if (turnStartEvent = event->As<OnTurnStartEvent>())
+			if (turnStartEvent->player == player && turnStartEvent->turn > max)
+				max = turnStartEvent->turn;
+	}
+	for (Event* event : eventLog) {
+		if (event->turn == max)
+			if (Predicate && Predicate(player, event))
+				return true;
+	}
+	return false;
+}
+
 #pragma endregion

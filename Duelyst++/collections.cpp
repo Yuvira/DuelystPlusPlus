@@ -217,22 +217,16 @@ Collections::Collections() {
 	effects[SKILL_CHAKKRAM].RegisterPostTrigger<OnTurnStartEvent>(
 		[](EffectContext ctx, OnTurnStartEvent& ev) { return ctx.IsOwnerTurn(); },
 		[](EffectContext ctx, OnTurnStartEvent& ev) {
-			for (Event* event : ctx.game->eventManager.GetMostRecentTurnEvents(ctx.GetOpponent())) {
-				if (event->type == EVENT_DAMAGE && event->As<OnDamageEvent>()->target == ctx.GetAllyGeneral()) {
-					ctx.card->AddEffect(MODIFIER_CHAKKRAM, ctx.card);
-					break;
-				}
-			}
+			if (ctx.game->eventManager.MostRecentPlayerTurnHasEvent(ctx.GetOpponent(), [](Player* player, Event* event) {
+				return event->type == EVENT_DAMAGE && event->As<OnDamageEvent>()->target == player->opponent->general;
+			})) ctx.card->AddEffect(MODIFIER_CHAKKRAM, ctx.card);
 	});
 	effects[SKILL_CHAKKRAM].RegisterPostTrigger<OnAddToHandEvent>(
-		[](EffectContext ctx, OnAddToHandEvent& ev) { return ctx.IsCard(ev.card); },
+		[](EffectContext ctx, OnAddToHandEvent& ev) { return ctx.IsCard(ev.card) && ctx.IsOwnerTurn(); },
 		[](EffectContext ctx, OnAddToHandEvent& ev) {
-			for (Event* event : ctx.game->eventManager.GetMostRecentTurnEvents(ctx.GetOpponent())) {
-				if (event->type == EVENT_DAMAGE && event->As<OnDamageEvent>()->target == ctx.GetAllyGeneral()) {
-					ctx.card->AddEffect(MODIFIER_CHAKKRAM, ctx.card);
-					break;
-				}
-			}
+			if (ctx.game->eventManager.MostRecentPlayerTurnHasEvent(ctx.GetOpponent(), [](Player* player, Event* event) {
+				return event->type == EVENT_DAMAGE && event->As<OnDamageEvent>()->target == player->opponent->general;
+			})) ctx.card->AddEffect(MODIFIER_CHAKKRAM, ctx.card);
 	});
 	effects[MODIFIER_CHAKKRAM] = Effect(MODIFIER_CHAKKRAM, KEYWORD_NONE, "Chakkram");
 	effects[MODIFIER_CHAKKRAM].RegisterPostTrigger<OnTurnEndEvent>(
