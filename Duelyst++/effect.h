@@ -32,6 +32,8 @@ struct EffectContext {
 	bool IsOwnedBy(Player* compare);
 	bool IsAllied(Card* compare);
 	bool IsOwnerTurn();
+	bool CardIsAuraSource();
+	bool CardSharesAuraOwner();
 	Player* GetOwner();
 	Player* GetOpponent();
 	Unit* GetUnit();
@@ -107,8 +109,8 @@ public:
 	void UpdateModifier(eStat stat, int value);
 
 	//Aura predicate
-	void SetAuraPredicate(bool (*Predicate)(Effect* aura, Game* game, Card* card)) { AuraPredicate = Predicate; }
-	bool MatchesAuraPredicate(Game* game, Card* card) { return AuraPredicate && AuraPredicate(this, game, card); }
+	void SetAuraPredicate(bool (*Predicate)(EffectContext ctx)) { AuraPredicate = Predicate; }
+	bool MatchesAuraPredicate(Game* game, Card* card) { return AuraPredicate && AuraPredicate(EffectContext(this, card, game)); }
 
 	//Getters & Setters
 	Card* GetToken();
@@ -136,7 +138,7 @@ private:
 	Card* token;
 	Card* refCard;
 	Effect* source;
-	bool (*AuraPredicate)(Effect* aura, Game* game, Card* card);
+	bool (*AuraPredicate)(EffectContext ctx);
 	std::vector<EventTrigger> preTriggers;
 	std::vector<EventTrigger> postTriggers;
 	std::vector<EventTrigger> selfTriggers;

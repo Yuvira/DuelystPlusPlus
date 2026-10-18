@@ -182,10 +182,7 @@ void Unit::UpdateDetailStats() {
 //Check if unit has died
 void Unit::Update(bool& shouldLoop) {
 	if (hp < 1 || destroyed) {
-		OnDeathEvent event = OnDeathEvent(game->GetTurnCount(), this);
-		game->eventManager.SendOnPreEvent(game, &event);
-		game->eventManager.SendOnPostEvent(game, &event);
-		for (; !effects.empty(); RemoveEffect(effects.front())) {}
+		game->QueueEvent(new OnDeathEvent(game->GetTurnCount(), this));
 		isDead = true;
 		shouldLoop = true;
 	}
@@ -248,22 +245,14 @@ void Unit::MoveToPosition(int x, int y, bool byEffect) {
 		else
 			hasMoved = true;
 	}
-	OnMoveEvent event = OnMoveEvent(game->GetTurnCount(), this, byEffect);
-	game->eventManager.SendOnPreEvent(game, &event);
-	game->eventManager.SendOnPostEvent(game, &event);
+	game->QueueEvent(new OnMoveEvent(game->GetTurnCount(), this, byEffect));
 }
 
 //Attack enemy
 void Unit::Attack(Unit* target, bool counter) {
 
-	//Initialize damage value and whether the target can counterattack
+	//Initialize damage value
 	int damage = atk;
-	bool canCounter = target->CanAttack(this);
-
-	//Sent OnAttack event
-	OnAttackEvent event = OnAttackEvent(game->GetTurnCount(), this, target, counter);
-	game->eventManager.SendOnPreEvent(game, &event);
-	game->eventManager.SendOnPostEvent(game, &event);
 
 	//Damage all adjacent units if this has Frenzy and is targeting an adjacent tile
 	if (!counter && HasKeywords(KEYWORD_FRENZY) && curTile->IsNear(target->curTile)) {
@@ -276,7 +265,7 @@ void Unit::Attack(Unit* target, bool counter) {
 	else
 		target->DealDamage(this, damage);
 
-	//If this is an attack, allow target to counterattack
+	//Exhaust this if attacking
 	if (!counter) {
 		if (!hasCelerityAttacked && !hasMoved) {
 			hasCelerityMoved = true;
@@ -288,8 +277,6 @@ void Unit::Attack(Unit* target, bool counter) {
 			hasCelerityMoved = true;
 			hasCelerityAttacked = true;
 		}
-		if (canCounter)
-			target->Attack(this, true);
 	}
 
 }
@@ -313,36 +300,62 @@ void Unit::Refresh() {
 
 //Deal damage to this
 int Unit::DealDamage(Card* source, int damage) {
-	OnDamageEvent event = OnDamageEvent(game->GetTurnCount(), source, this, damage);
-	game->eventManager.SendOnPreEvent(game, &event);
-	if (event.damage > 0) {
+
+	//Create event and notify
+	OnDamageEvent* damageEvent = new OnDamageEvent(game->GetTurnCount(), source, this, damage);
+	game->eventManager.NotifyPreEvent(game, damageEvent);
+
+	//Ensure damage is greater than zero
+	if (damageEvent->damage > 0) {
+
+		//Negate if target has forcefield
 		if (HasKeywords(KEYWORD_FORCEFIELD) && !forcefieldBroken) {
 			forcefieldBroken = true;
-			event.damage = 0;
+			damageEvent->damage = 0;
 		}
+
+		//Otherwise deal damage
 		else {
-			hp -= event.damage;
-			game->eventManager.SendOnPostEvent(game, &event);
+			hp -= damageEvent->damage;
+			game->QueueEvent(damageEvent);
 		}
+
 	}
-	return event.damage;
+
+	//Return damage value
+	return damageEvent->damage;
+
 }
 
 //Heal this
 int Unit::Heal(Card* source, int heal) {
-	OnHealEvent event = OnHealEvent(game->GetTurnCount(), source, this, heal);
-	game->eventManager.SendOnPreEvent(game, &event);
-	if (event.heal > 0) {
-		if (hp + event.heal > hpMax) {
-			event.heal = hpMax - hp;
+
+	//Create event and notify
+	OnHealEvent* healEvent = new OnHealEvent(game->GetTurnCount(), source, this, heal);
+	game->eventManager.NotifyPreEvent(game, healEvent);
+
+	//Ensure healing is greater than zero
+	if (healEvent->heal > 0) {
+
+		//Cap healing at current health delta
+		if (hp + healEvent->heal > hpMax) {
+			healEvent->heal = hpMax - hp;
 			hp = hpMax;
 		}
+
+		//Otherwise heal full amount
 		else
-			hp += event.heal;
-		if (event.heal > 0)
-			game->eventManager.SendOnPostEvent(game, &event);
+			hp += healEvent->heal;
+
+		//Queue event if any healing was done
+		if (healEvent->heal > 0)
+			game->QueueEvent(healEvent);
+
 	}
-	return event.heal;
+
+	//Return heal value
+	return healEvent->heal;
+
 }
 
 //Destroy this

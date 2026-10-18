@@ -117,8 +117,6 @@ void Player::Shuffle() {
 void Player::Draw() {
 	if (deck.size() > 0) {
 		Card* card = deck[0];
-		OnDrawEvent event = OnDrawEvent(game->GetTurnCount(), card);
-		game->eventManager.SendOnPreEvent(game, &event);
 		deck.erase(deck.begin());
 		if (hand.size() < 6) {
 			hand.push_back(card);
@@ -126,7 +124,7 @@ void Player::Draw() {
 		}
 		else
 			game->Overflow(card);
-		game->eventManager.SendOnPostEvent(game, &event);
+		game->QueueEvent(new OnDrawEvent(game->GetTurnCount(), card));
 	}
 }
 
@@ -138,52 +136,38 @@ void Player::AddNewToHand(Card* original) {
 	else if (original->IsSpell())
 		newCard = new Spell(*(original->GetSpell()));
 	game->SetContext(newCard, this);
-	OnAddToHandEvent event = OnAddToHandEvent(game->GetTurnCount(), newCard);
-	game->eventManager.SendOnPreEvent(game, &event);
 	if (hand.size() < 6) {
 		hand.push_back(newCard);
 		hand.back()->UpdateAuras();
 	}
 	else
 		game->Overflow(newCard);
-	game->eventManager.SendOnPostEvent(game, &event);
+	game->QueueEvent(new OnAddToHandEvent(game->GetTurnCount(), newCard));
 }
 
 //Replace card
 void Player::Replace(int idx) {
-	if (replaces > 0 && hand.size() > idx) {
+	if (replaces > 0 && deck.size() > 0 && hand.size() > idx) {
 
 		//Remove card from hand
 		Card* replaced = hand[idx];
 		hand.erase(hand.begin() + idx);
 
-		//Send replace event
-		OnReplaceEvent event = OnReplaceEvent(game->GetTurnCount(), replaced, true);
-		game->eventManager.SendOnPreEvent(game, &event);
-		for (Effect* e : replaced->GetEffects())
-			e->TriggerPreEvent(EffectContext(e, replaced, game), &event);
-		game->eventManager.SendOnPostEvent(game, &event);
-		for (Effect* e : replaced->GetEffects())
-			e->TriggerPostEvent(EffectContext(e, replaced, game), &event);
+		//Draw new card
+		hand.insert(hand.begin() + idx, deck[0]);
+		deck.erase(deck.begin());
+		hand[idx]->UpdateAuras();
 
-		//Draw new card and put replaced card back in the deck if able
-		if (deck.size() > 0) {
-			hand.insert(hand.begin() + idx, deck[0]);
-			deck.erase(deck.begin());
-			hand[idx]->UpdateAuras();
-			if (event.sendToDeck) {
-				deck.push_back(replaced);
-				deck.back()->UpdateAuras();
-				Shuffle();
-			}
-		}
-
-		//If no cards in deck, put replaced card back in hand
-		else if (event.sendToDeck)
-			hand.insert(hand.begin() + idx, replaced);
+		//Put replaced card in deck and shuffle
+		deck.push_back(replaced);
+		deck.back()->UpdateAuras();
+		Shuffle();
 
 		//Decrement replace count
 		--replaces;
+
+		//Queue event
+		game->QueueEvent(new OnReplaceEvent(game->GetTurnCount(), replaced));
 
 	}
 }
@@ -193,6 +177,17 @@ void Player::ModifyReplaceCount(int delta) {
 	maxReplaces += delta;
 	if (delta > 0) { replaces += delta; }
 	else { replaces = min(replaces, maxReplaces); }
+}
+
+//Remove card from deck
+bool Player::RemoveFromDeck(Card* card) {
+	for (int i = 0; i < deck.size(); ++i) {
+		if (deck[i] == card) {
+			deck.erase(deck.begin() + i);
+			return true;
+		}
+	}
+	return false;
 }
 
 #pragma endregion

@@ -17,7 +17,7 @@ EventManager::~EventManager() {}
 #pragma region Events
 
 //Send pre-events (for modifying event properties before resolution)
-void EventManager::SendOnPreEvent(Game* game, Event* event) {
+void EventManager::NotifyPreEvent(Game* game, Event* event) {
 
 	//Turn player
 	for (Unit* u : game->GetUnits())
@@ -44,25 +44,27 @@ void EventManager::SendOnPreEvent(Game* game, Event* event) {
 }
 
 //Send post-events (for triggers in response to resolution) and log history
-void EventManager::SendOnPostEvent(Game* game, Event* event) {
+void EventManager::TriggerPostEvent(Game* game, Event* event) {
 
 	//Log to console
 	LogEvent(game, event);
 
 	//Turn player
-	for (Unit* u : game->GetUnits())
-		if (u->owner == game->GetTurnPlayer())
-			for (Effect* e : u->GetEffects())
+	for (Unit* u : game->GetUnits()) {
+		if (u->owner == game->GetTurnPlayer()) {
+			for (Effect* e : u->GetEffects()) {
 				e->TriggerPostEvent(EffectContext(e, u, game), event);
+	}}}
 	for (Card* c : game->GetTurnPlayer()->GetDeckAndHand())
 		for (Effect* e : c->GetEffects())
 			e->TriggerPostEvent(EffectContext(e, c, game), event);
 
 	//Non-turn player
-	for (Unit* u : game->GetUnits())
-		if (u->owner == game->GetNonTurnPlayer())
-			for (Effect* e : u->GetEffects())
+	for (Unit* u : game->GetUnits()) {
+		if (u->owner == game->GetNonTurnPlayer()) {
+			for (Effect* e : u->GetEffects()) {
 				e->TriggerPostEvent(EffectContext(e, u, game), event);
+	}}}
 	for (Card* c : game->GetNonTurnPlayer()->GetDeckAndHand())
 		for (Effect* e : c->GetEffects())
 			e->TriggerPostEvent(EffectContext(e, c, game), event);

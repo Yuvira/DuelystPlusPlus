@@ -33,6 +33,7 @@ public:
 	void AddNewToHand(Card* original);
 	void Replace(int idx);
 	void ModifyReplaceCount(int delta);
+	bool RemoveFromDeck(Card* card);
 
 	//Getters
 	std::vector<Card*> GetDeckAndHand();

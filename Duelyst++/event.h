@@ -162,13 +162,11 @@ struct OnAddToHandEvent : Event {
 struct OnReplaceEvent : Event {
 	static constexpr eEventType typeKey = EVENT_REPLACE;
 	Event* Clone() const override { return new OnReplaceEvent(*this); }
-	OnReplaceEvent(int turn, Card* card, bool sendToDeck) : Event(turn) {
+	OnReplaceEvent(int turn, Card* card) : Event(turn) {
 		type = EVENT_REPLACE;
 		this->card = card;
-		this->sendToDeck = sendToDeck;
 	}
 	Card* card;
-	bool sendToDeck;
 };
 
 //Triggers whenever a player's turn ends

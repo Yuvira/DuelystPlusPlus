@@ -241,7 +241,7 @@ void Game::Input() {
 	//Get keyPress
 	int asciiVal = _getch();
 
-	//Standard mode
+	//Navigating board
 	if (mode == MODE_NONE) {
 
 		//Move pointer
@@ -283,7 +283,7 @@ void Game::Input() {
 
 	}
 
-	//Hand mode
+	//Navigating hand
 	else if (mode == MODE_HAND) {
 
 		//Move pointer
@@ -294,7 +294,7 @@ void Game::Input() {
 
 		//Replace card
 		else if (asciiVal == 114 || asciiVal == 82)                            //R
-			players[turn].Replace(handIdx);
+			Replace();
 
 		//Select card
 		else if (asciiVal == 32)                                               //Space
@@ -303,7 +303,7 @@ void Game::Input() {
 
 	}
 
-	//Move mode
+	//Moving a unit
 	else if (mode == MODE_MOVE) {
 
 		//Move arrow
@@ -326,7 +326,7 @@ void Game::Input() {
 
 	}
 
-	//Select mode
+	//Selecting targets
 	else if (mode == MODE_SELECT) {
 
 		//Move selection
@@ -361,14 +361,20 @@ void Game::Input() {
 //Update loop
 void Game::Update() {
 
-	//Update units
-	bool reloop;
-	do { 
+	//Update unit states and process events until no units are dead and no events are queued
+	bool reloop = true;
+	while (reloop) { 
 		reloop = false;
 		for (int a = 0; a < units.size(); ++a)
 			if (!units[a]->isDead)
 				units[a]->Update(reloop);
-	} while (reloop);
+		if (eventStack.size() > 0) {
+			ProcessEventStack();
+			reloop = true;
+		}
+	}
+
+	//Clean up dead units from board and update stat sprites
 	for (int i = 0; i < units.size(); ++i) {
 		if (units[i]->isDead) {
 			if (units[i] == units[i]->curTile->unit)
@@ -423,6 +429,23 @@ void Game::Update() {
 		HighlightTile(pos.x, pos.y, COLOR_AQUA);
 	}
 
+}
+
+#pragma endregion
+
+#pragma region Events
+
+//Add event to queue
+void Game::QueueEvent(Event* event) { eventStack.push_back(event); }
+
+//Process waiting events
+void Game::ProcessEventStack() {
+	while (eventStack.size() > 0) {
+		std::vector<Event*> eventsToProcess = eventStack;
+		eventStack.clear();
+		for (Event* event : eventsToProcess)
+			eventManager.TriggerPostEvent(this, event);
+	}
 }
 
 #pragma endregion
@@ -541,64 +564,59 @@ void Game::UseCard() {
 
 }
 
-//Use active effect
+//Use active callback effect
 void Game::UseEffect() {
+
+	//Get target and clear selectables
 	BoardTile* tile = selectable[selectionIdx];
 	pos = tile->pos;
 	selectable.clear();
 	selectionIdx = -1;
 	mode = MODE_NONE;
+
+	//Execute callback
 	if (callback.Callback) {
 		callback.Execute(tile);
 		callback = EffectCallback();
 	}
+
+	//Trigger cast event for active card
 	if (activeCard != nullptr)
 		PostCast();
+
 }
 
 //Send cast event after pre-cast effect targets have been set
 void Game::PostCast() {
+
+	//Get target tile
 	BoardTile* tile = &map.tiles[castPos.x][castPos.y];
-	OnCastEvent castEvent = OnCastEvent(GetTurnCount(), activeCard, tile);
-	eventManager.SendOnPreEvent(this, &castEvent);
-	eventManager.SendOnPostEvent(this, &castEvent);
+
+	//Process cast event
+	QueueEvent(new OnCastEvent(GetTurnCount(), activeCard, tile));
+	ProcessEventStack();
+
+	//Track card cast this turn
 	castThisTurn.push_back(activeCard->original);
+
+	//Trigger resolve event on card
 	for (Effect* effect : activeCard->GetEffects()) {
 		OnResolveThisEvent resolveEvent = OnResolveThisEvent(tile);
 		effect->TriggerSelfEvent(EffectContext(effect, activeCard, this), &resolveEvent);
 	}
+
+	//Process post-cast behaviour
 	if (activeCard->IsUnit())
 		Summon(activeCard->GetUnit(), tile, true);
 	else if (activeCard->IsSpell()) {
 		grave.push_back(activeCard);
 		spellHistory.push_back(activeCard->GetSpell());
 	}
+	ProcessEventStack();
+
+	//Remove active card reference
 	activeCard = nullptr;
-}
 
-//Summon at tile / position
-void Game::Summon(Card* card, BoardTile* tile, bool actionBar) { Summon(card, tile->pos.x, tile->pos.y, actionBar); }
-void Game::Summon(Card* card, int x, int y, bool actionBar) {
-	if (!card->IsUnit())
-		return;
-	OnSummonEvent event = OnSummonEvent(GetTurnCount(), card->GetUnit(), actionBar);
-	eventManager.SendOnPreEvent(this, &event);
-	units.push_back(card->GetUnit());
-	units.back()->SetPosition(x, y);
-	units.back()->AddEffects();
-	units.back()->UpdateAuras();
-	units.back()->InitState();
-	eventManager.SendOnPostEvent(this, &event);
-}
-
-//Summon token at tile
-void Game::SummonToken(eCard cardId, BoardTile* tile, Player* owner) {
-	Card* card = collections->FindCard(cardId);
-	if (card->IsUnit()) {
-		Unit* token = new Unit(*(card->GetUnit()));
-		SetContext(token, owner);
-		Summon(token, tile, false);
-	}
 }
 
 //Move selected unit
@@ -607,6 +625,7 @@ void Game::MoveUnit() {
 		if (selectable[selectionIdx] != &map.tiles[pos.x][pos.y]) {
 			activeUnit->MoveToPosition(selectable[selectionIdx]->pos.x, selectable[selectionIdx]->pos.y, false);
 			pos = selectable[selectionIdx]->pos;
+			ProcessEventStack();
 		}
 		moveable.clear();
 		attackable.clear();
@@ -618,17 +637,50 @@ void Game::MoveUnit() {
 
 //Attack unit
 void Game::AttackUnit() {
-	activeUnit->Attack(selectable[selectionIdx]->unit, false);
+
+	//Set source and target
+	Unit* source = activeUnit;
+	Unit* target = selectable[selectionIdx]->unit;
+
+	//Flag whether target can counterattack (in case it moves during combat or otherwise)
+	bool canCounter = target->CanAttack(source);
+
+	//Process attack event
+	QueueEvent(new OnAttackEvent(turnCount, source, target, false));
+	ProcessEventStack();
+
+	//Attack target and process events
+	source->Attack(target, false);
+	ProcessEventStack();
+
+	//Counterattack
+	if (canCounter) {
+
+		//Process counterattack event
+		QueueEvent(new OnAttackEvent(turnCount, target, source, true));
+		ProcessEventStack();
+
+		//Attack target and process events
+		target->Attack(source, true);
+		ProcessEventStack();
+
+	}
+
+	//Clear selectables and return to normal interaction mode
 	pos = selectable[selectionIdx]->pos;
 	moveable.clear();
 	attackable.clear();
 	selectable.clear();
 	activeUnit = nullptr;
 	mode = MODE_NONE;
+
 }
 
-//Send card that can't be added to hand to graveyard instead
-void Game::Overflow(Card* card) { grave.push_back(card); }
+//Replace active card
+void Game::Replace() {
+	players[turn].Replace(handIdx);
+	ProcessEventStack();
+}
 
 //Change turn
 void Game::ChangeTurn(bool newTurn) {
@@ -638,11 +690,10 @@ void Game::ChangeTurn(bool newTurn) {
 
 	//Trigger end of turn, draw and reset replaces
 	if (turnCount > 0) {
-		OnTurnEndEvent event = OnTurnEndEvent(GetTurnCount(), &players[turn]);
-		eventManager.SendOnPreEvent(this, &event);
-		eventManager.SendOnPostEvent(this, &event);
 		players[turn].Draw();
 		players[turn].replaces = players[turn].maxReplaces;
+		QueueEvent(new OnTurnEndEvent(GetTurnCount(), &players[turn]));
+		ProcessEventStack();
 	}
 
 	//Clear cast history
@@ -669,14 +720,39 @@ void Game::ChangeTurn(bool newTurn) {
 		light.SetColor(COLOR_LTBLUE);
 
 	//Trigger start of turn
-	OnTurnStartEvent event = OnTurnStartEvent(GetTurnCount(), &players[turn]);
-	eventManager.SendOnPreEvent(this, &event);
-	eventManager.SendOnPostEvent(this, &event);
+	QueueEvent(new OnTurnStartEvent(GetTurnCount(), &players[turn]));
+	ProcessEventStack();
 
 	//Turn has ended
 	endTurn = false;
 
 }
+
+//Summon at tile / position
+void Game::Summon(Card* card, BoardTile* tile, bool actionBar) { Summon(card, tile->pos.x, tile->pos.y, actionBar); }
+void Game::Summon(Card* card, int x, int y, bool actionBar) {
+	if (!card->IsUnit())
+		return;
+	units.push_back(card->GetUnit());
+	units.back()->SetPosition(x, y);
+	units.back()->AddEffects();
+	units.back()->UpdateAuras();
+	units.back()->InitState();
+	QueueEvent(new OnSummonEvent(GetTurnCount(), card->GetUnit(), actionBar));
+}
+
+//Summon token at tile
+void Game::SummonToken(eCard cardId, BoardTile* tile, Player* owner) {
+	Card* card = collections->FindCard(cardId);
+	if (card->IsUnit()) {
+		Unit* token = new Unit(*(card->GetUnit()));
+		SetContext(token, owner);
+		Summon(token, tile, false);
+	}
+}
+
+//Send card that can't be added to hand to graveyard instead
+void Game::Overflow(Card* card) { grave.push_back(card); }
 
 #pragma endregion
 
@@ -1119,13 +1195,18 @@ void Game::DrawForcefield(int x, int y, Renderer& renderer) {
 //Players
 Player* Game::GetTurnPlayer() { return &players[turn]; }
 Player* Game::GetNonTurnPlayer() { return &players[!turn]; }
+
+//Indirect iterators
 std::vector<Effect*> Game::GetAuras() {
 	std::vector<Effect*> auraIterator = auras;
 	return auraIterator;
 }
+std::vector<Unit*> Game::GetUnits() {
+	std::vector<Unit*> unitIterator = units;
+	return unitIterator;
+}
 
 //Unit list
-const std::vector<Unit*>& Game::GetUnits() const { return units; }
 const std::vector<Card*>& Game::GetGrave() const { return grave; }
 const std::vector<Unit*>& Game::GetDestroyedUnits() const { return destroyedUnits; }
 const std::vector<Spell*>& Game::GetSpellHistory() const { return spellHistory; }
@@ -1196,6 +1277,8 @@ void Game::Log(std::string log) {
 		if (log[i] == '|')
 			log[i] = ' ';
 	debugLog.push_back(log);
+	while (debugLog.size() > 46)
+		debugLog.erase(debugLog.begin());
 }
 
 #pragma endregion

@@ -65,6 +65,8 @@ bool EffectContext::SharesOwner(Card* compare) { return card->owner == compare->
 bool EffectContext::IsOwnedBy(Player* compare) { return card->owner == compare; }
 bool EffectContext::IsAllied(Card* compare) { return card != compare && card->owner == compare->owner; }
 bool EffectContext::IsOwnerTurn() { return game->GetTurnPlayer() == card->owner; }
+bool EffectContext::CardIsAuraSource() { return card == effect->GetRef(); }
+bool EffectContext::CardSharesAuraOwner() { return card->owner == effect->GetRef()->owner; }
 Player* EffectContext::GetOwner() { return card->owner; }
 Player* EffectContext::GetOpponent() { return card->owner->opponent; }
 Unit* EffectContext::GetUnit() { return card->GetUnit(); }

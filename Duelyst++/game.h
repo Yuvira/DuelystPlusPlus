@@ -74,6 +74,10 @@ public:
 	void Input();
 	void Update();
 
+	//Events
+	void QueueEvent(Event* event);
+	void ProcessEventStack();
+
 	//Aura effects
 	void ApplyAura(eEffect effectId, Effect* source, Card* refCard);
 	void ApplyAura(Effect effect, Effect* source, Card* refCard);
@@ -86,13 +90,14 @@ public:
 	void UseCard();
 	void UseEffect();
 	void PostCast();
+	void MoveUnit();
+	void AttackUnit();
+	void Replace();
+	void ChangeTurn(bool newTurn);
 	void Summon(Card* card, BoardTile* tile, bool actionBar);
 	void Summon(Card* card, int x, int y, bool actionBar);
 	void SummonToken(eCard cardId, BoardTile* tile, Player* owner);
-	void MoveUnit();
-	void AttackUnit();
 	void Overflow(Card* card);
-	void ChangeTurn(bool newTurn);
 
 	//Selection & Movement
 	void SelectTile(BoardTile& tile);
@@ -123,7 +128,7 @@ public:
 	Player* GetTurnPlayer();
 	Player* GetNonTurnPlayer();
 	std::vector<Effect*> GetAuras();
-	const std::vector<Unit*>& GetUnits() const;
+	std::vector<Unit*> GetUnits();
 	const std::vector<Card*>& GetGrave() const;
 	const std::vector<Unit*>& GetDestroyedUnits() const;
 	const std::vector<Spell*>& GetSpellHistory() const;
@@ -158,15 +163,14 @@ private:
 	std::vector<Spell*> spellHistory;
 	std::vector<Card*> castThisTurn;
 
-	//Auras
-	std::vector<Effect*> auras;
-
 	//Sprites
 	Sprite light;
 	Sprite board;
 	Sprite chars[10];
 
 	//Gameplay objects
+	std::vector<Event*> eventStack;
+	std::vector<Effect*> auras;
 
 	//Selection objects
 	std::vector<BoardTile*> highlighted;
