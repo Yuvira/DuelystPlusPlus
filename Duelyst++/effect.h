@@ -118,6 +118,7 @@ public:
 	Effect* GetSource();
 	void SetToken(Card* token);
 	void SetSources(Effect* source, Card* refCard);
+	void HideModifiers() { modifiers.HideValues(); }
 
 	//Readonly getters
 	const eEffect& GetID() const;

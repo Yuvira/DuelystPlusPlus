@@ -36,6 +36,7 @@ class ModifierGroup {
 public:
 	bool AddModifier(eStat stat, eModifier type, int value);
 	bool UpdateModifier(eStat stat, int value);
+	void HideValues() { hide = true; }
 	void WriteValues(std::vector<std::string>& out) const;
 	const StatModifier& ReadModifier(eStat stat) const;
 private:
@@ -48,4 +49,5 @@ private:
 	StatModifier hp;
 	StatModifier cost;
 	StatModifier move;
+	bool hide = false;
 };

@@ -175,6 +175,7 @@ Collections::Collections() {
 			ctx.card->UpdateModifiers();
 	});
 	effects[SKILL_BLOOD_TAURA].AddModifier(STAT_COST, MODTYPE_FIXED, 25);
+	effects[SKILL_BLOOD_TAURA].HideModifiers();
 
 	//Bloodtear Alchemist
 	effects[SKILL_BLOODTEAR_ALCHEMIST] = Effect(SKILL_BLOODTEAR_ALCHEMIST, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Deal 1 damage to an enemy");

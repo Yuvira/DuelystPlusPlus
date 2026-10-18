@@ -22,6 +22,8 @@ bool ModifierGroup::UpdateModifier(eStat stat, int value) {
 
 //Write values to string list
 void ModifierGroup::WriteValues(std::vector<std::string>& out) const {
+	if (hide)
+		return;
 	WriteValuesForType(MODTYPE_REBASE, out);
 	WriteValuesForType(MODTYPE_OVERRIDE, out);
 	WriteValuesForType(MODTYPE_BUFF, out);
