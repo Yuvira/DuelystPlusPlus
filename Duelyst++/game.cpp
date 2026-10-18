@@ -386,6 +386,7 @@ void Game::Update() {
 	//Clean up dead units from board and update stat sprites
 	for (int i = 0; i < units.size(); ++i) {
 		if (units[i]->isDead) {
+			units[i]->RemoveEffects();
 			if (units[i] == units[i]->curTile->unit)
 				units[i]->curTile->unit = nullptr;
 			units[i]->curTile = nullptr;

@@ -133,6 +133,7 @@ public:
 	void Destroy(Card* source);
 	void Dispel();
 	void AddEffects();
+	void RemoveEffects();
 
 	//Utils
 	TargetMode GetTargetMode();

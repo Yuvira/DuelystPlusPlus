@@ -392,6 +392,13 @@ void Unit::AddEffects() {
 		effects[i]->TriggerSelfEvent(EffectContext(effects[i], this, game), &addEvent);
 }
 
+//Trigger OnRemoveThis on effects when leaving the field
+void Unit::RemoveEffects() {
+	OnRemoveThisEvent removeEvent = OnRemoveThisEvent();
+	for (int i = 0; i < effects.size(); ++i)
+		effects[i]->TriggerSelfEvent(EffectContext(effects[i], this, game), &removeEvent);
+}
+
 #pragma endregion
 
 #pragma region Utils
