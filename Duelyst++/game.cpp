@@ -87,6 +87,7 @@ Game::Game(Collections* collections, bool* modeSwitch) {
 	debugP2Deck.CreateFromString("P2 Deck");
 	debugUnits.CreateFromString("Units");
 	debugGrave.CreateFromString("Graveyard");
+	debugAuras.CreateFromString("Auras");
 	debugMode = false;
 
 }
@@ -220,6 +221,14 @@ void Game::RenderDebug(Renderer& renderer) {
 			lines.push_back(card->name);
 		debugGrave.CreateFromTextBlock(lines);
 		renderer.Render(debugGrave, 190, 1);
+		lines.clear();
+
+		//Aura data
+		lines.push_back("{Auras}");
+		for (Effect* aura : auras)
+			lines.push_back(aura->GetRef()->name);
+		debugAuras.CreateFromTextBlock(lines);
+		renderer.Render(debugAuras, 215, 1);
 
 	}
 

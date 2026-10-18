@@ -200,6 +200,7 @@ private:
 	Sprite debugP2Deck;
 	Sprite debugUnits;
 	Sprite debugGrave;
+	Sprite debugAuras;
 	std::vector<std::string> debugLog;
 	Sprite debugLogSprite;
 
