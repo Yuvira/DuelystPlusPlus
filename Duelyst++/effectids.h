@@ -18,6 +18,10 @@ enum eKeywordFlags {
 //Skill & Effect IDs
 enum eEffect {
 
+	//Effects
+	EFFECT_NONE,
+	EFFECT_DISPELLED,
+
 	//Keyword Skills
 	SKILL_AIRDROP,
 	SKILL_CELERITY,
@@ -94,10 +98,6 @@ enum eEffect {
 	SKILL_NECROSEER,
 	SKILL_NIGHT_WATCHER,
 	SKILL_OWLBEAST_SAGE,
-
-	//Effects
-	EFFECT_NONE,
-	EFFECT_DISPELLED,
 
 	//Modifiers
 	MODIFIER_ABJUDICATOR,
