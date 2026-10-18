@@ -317,6 +317,8 @@ int Unit::DealDamage(Card* source, int damage) {
 		//Otherwise deal damage
 		else {
 			hp -= damageEvent->damage;
+			if (hp <= 0)
+				Destroy(source);
 			game->QueueEvent(damageEvent);
 		}
 
