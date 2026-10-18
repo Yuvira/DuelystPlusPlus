@@ -119,9 +119,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="cardregistry.cpp" />
     <ClCompile Include="cardviewer.cpp" />
     <ClCompile Include="collections.cpp" />
     <ClCompile Include="effect.cpp" />
+    <ClCompile Include="effectregistry.cpp" />
     <ClCompile Include="eventmanager.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="main.cpp" />
@@ -129,6 +131,7 @@
     <ClCompile Include="player.cpp" />
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="spell.cpp" />
+    <ClCompile Include="spellregistry.cpp" />
     <ClCompile Include="sprite.cpp" />
     <ClCompile Include="tile.cpp" />
     <ClCompile Include="unit.cpp" />

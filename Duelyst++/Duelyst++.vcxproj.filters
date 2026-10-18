@@ -57,6 +57,15 @@
     <ClCompile Include="modifiers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="effectregistry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="spellregistry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cardregistry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="renderer.h">

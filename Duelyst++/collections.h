@@ -14,8 +14,6 @@ class Effect;
 
 //Collections class
 class Collections {
-
-//Methods
 public:
 
 	//Constructors
@@ -34,8 +32,12 @@ public:
 	int GetCardCount();
 	int CountCardsWhere(bool (*Predicate)(Card*));
 
-//Properties
 private:
+
+	//Registers
+	void RegisterEffects();
+	void RegisterSpells();
+	void RegisterCards();
 
 	//Object containers
 	std::unordered_map<eEffect, Effect> effects;
