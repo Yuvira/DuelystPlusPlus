@@ -3,14 +3,17 @@
 #include "cardviewer.h"
 #include "collections.h"
 #include "card.h"
+#include "game.h"
+#include "player.h"
 #include "renderer.h"
 
 #pragma region Constructor
 
 //Game constructor
-CardViewer::CardViewer(Collections* collections, bool* modeSwitch) {
+CardViewer::CardViewer(Game* game, Collections* collections, bool* modeSwitch) {
 
 	//Collections reference
+	this->game = game;
 	this->collections = collections;
 	this->modeSwitch = modeSwitch;
 
@@ -91,10 +94,25 @@ void CardViewer::Input() {
 	int asciiVal = _getch();
 
 	//Move pointer
-	if (asciiVal == 119 || asciiVal == 87) { MoveCursor(0, -1); }     //W
-	else if (asciiVal == 97 || asciiVal == 65) { MoveCursor(-1, 0); } //A
-	else if (asciiVal == 115 || asciiVal == 83) { MoveCursor(0, 1); } //S
-	else if (asciiVal == 100 || asciiVal == 68) { MoveCursor(1, 0); } //D
+	if (asciiVal == 119 || asciiVal == 87) { MoveCursor(0, -1); }       //W
+	else if (asciiVal == 97 || asciiVal == 65) { MoveCursor(-1, 0); }   //A
+	else if (asciiVal == 115 || asciiVal == 83) { MoveCursor(0, 1); }   //S
+	else if (asciiVal == 100 || asciiVal == 68) { MoveCursor(1, 0); }   //D
+
+	//Add current card to decks
+	else if (asciiVal == 32) {                                          //Space
+		int i = (pos.y * 9) + pos.x + (page * 54);
+		if (i < collections->GetCards().size()) {
+			game->GetTurnPlayer()->AddNewToDeck(collections->GetCards()[i]->original);
+			game->GetNonTurnPlayer()->AddNewToDeck(collections->GetCards()[i]->original);
+		}
+	}
+
+	//Re-init game
+	else if (asciiVal == 10 || asciiVal == 13) {                        //Enter
+		game->GetTurnPlayer()->ReInit();
+		game->GetNonTurnPlayer()->ReInit();
+	}
 
 	//Switch mode
 	else if (asciiVal == 80 || asciiVal == 112) { *modeSwitch = true; } //P

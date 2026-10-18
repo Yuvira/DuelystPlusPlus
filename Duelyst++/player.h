@@ -22,6 +22,7 @@ public:
 	//Setup
 	void Preset(Collections* collections, Game* game);
 	void Init(int mana);
+	void ReInit();
 
 	//Rendering
 	void UpdateMana(eColor color);
@@ -31,6 +32,7 @@ public:
 	void Shuffle();
 	void Draw();
 	void AddNewToHand(Card* original);
+	void AddNewToDeck(Card* original);
 	void Replace(int idx);
 	void ModifyReplaceCount(int delta);
 	bool RemoveFromDeck(Card* card);

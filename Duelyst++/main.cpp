@@ -20,8 +20,8 @@ int main() {
 	Renderer renderer;
 	Collections collections;
 	bool doGame = false;
-	CardViewer cardViewer = CardViewer(&collections, &doGame);
 	Game game = Game(&collections, &doGame);
+	CardViewer cardViewer = CardViewer(&game, &collections, &doGame);
 
 	//Loop
 	while (true) {

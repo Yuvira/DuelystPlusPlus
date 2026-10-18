@@ -29,19 +29,14 @@ Player::~Player() {}
 void Player::Preset(Collections* collections, Game* game) {
 	this->game = game;
 	deck.push_back(new Unit(*(collections->FindCard(CARD_ARGEON_HIGHMAYNE)->GetUnit())));
-	for (int i = 0; i < 5; ++i) { deck.push_back(new Unit(*(collections->FindCard(CARD_ASTRAL_CRUSADER)->GetUnit()))); }
-	for (int i = 0; i < 5; ++i) { deck.push_back(new Unit(*(collections->FindCard(CARD_CRIMSON_OCULUS)->GetUnit()))); }
-	for (int i = 0; i < 5; ++i) { deck.push_back(new Unit(*(collections->FindCard(CARD_FIRST_SWORD_OF_AKRANE)->GetUnit()))); }
-	for (int i = 0; i < 5; ++i) { deck.push_back(new Unit(*(collections->FindCard(CARD_LADY_LOCKE)->GetUnit()))); }
-	for (int i = 0; i < 5; ++i) { deck.push_back(new Unit(*(collections->FindCard(CARD_EPHEMERAL_SHROUD)->GetUnit()))); }
-	//for (int i = 0; i < 5; ++i) { deck.push_back(new Spell(*(collections->FindCard(CARD_DARK_SEED)->GetSpell()))); }
-	//for (int i = 0; i < 5; ++i) { deck.push_back(new Spell(*(collections->FindCard(CARD_BREATH_OF_THE_UNBORN)->GetSpell()))); }
 	for (int i = 0; i < deck.size(); ++i)
 		this->game->SetContext(deck[i], this);
 }
 
 //Initialize deck/hand
 void Player::Init(int mana) {
+
+	//Init values and UI
 	this->mana = mana;
 	manaMax = mana;
 	replaces = maxReplaces;
@@ -49,10 +44,36 @@ void Player::Init(int mana) {
 		uiCrystal[i].buffer[0].Char.AsciiChar = '';
 		uiCrystal[i].SetColor(COLOR_GRAY);
 	}
+
+	//Shuffle and draw 5
 	Shuffle();
-	for (int i = 0; i < 5; ++i)
-		hand.push_back(deck[i]);
-	deck.erase(deck.begin(), deck.begin() + 5);
+	if (deck.size() < 5) {
+		hand = deck;
+		deck.clear();
+	}
+	else {
+		for (int i = 0; i < 5; ++i)
+			hand.push_back(deck[i]);
+		deck.erase(deck.begin(), deck.begin() + 5);
+	}
+
+}
+
+//Shuffle hand into deck and re-draw starting hand
+void Player::ReInit() {
+	for (Card* card : hand)
+		deck.push_back(card);
+	hand.clear();
+	Shuffle();
+	if (deck.size() < 5) {
+		hand = deck;
+		deck.clear();
+	}
+	else {
+		for (int i = 0; i < 5; ++i)
+			hand.push_back(deck[i]);
+		deck.erase(deck.begin(), deck.begin() + 5);
+	}
 }
 
 #pragma endregion
@@ -143,6 +164,19 @@ void Player::AddNewToHand(Card* original) {
 	else
 		game->Overflow(newCard);
 	game->QueueEvent(new OnAddToHandEvent(game->GetTurnCount(), newCard));
+}
+
+//Add card to deck
+//No event call because this is only being used by CardViewer for now, update this when it becomes relevant to gameplay
+void Player::AddNewToDeck(Card* original) {
+	Card* newCard = nullptr;
+	if (original->IsUnit())
+		newCard = new Unit(*(original->GetUnit()));
+	else if (original->IsSpell())
+		newCard = new Spell(*(original->GetSpell()));
+	game->SetContext(newCard, this);
+	deck.push_back(newCard);
+	deck.back()->UpdateAuras();
 }
 
 //Replace card
