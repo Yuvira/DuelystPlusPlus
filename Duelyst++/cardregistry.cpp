@@ -67,6 +67,7 @@ void Collections::RegisterCards() {
 	unitList.push_back(Unit(CARD_GROVE_LION, FACTION_NEUTRAL, TRIBE_NONE, 6, 5, 5, "grovelion", "Grove Lion", FindEffect(SKILL_GROVE_LION)));
 	unitList.push_back(Unit(CARD_HAILSTONE_GOLEM, FACTION_NEUTRAL, TRIBE_GOLEM, 4, 4, 6, "hailstonegolem", "Hailstone Golem"));
 	unitList.push_back(Unit(CARD_HEALING_MYSTIC, FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 3, "healingmystic", "Healing Mystic", FindEffect(SKILL_HEALING_MYSTIC)));
+	unitList.push_back(Unit(CARD_HOLLOW_GROVEKEEPER, FACTION_NEUTRAL, TRIBE_NONE, 5, 3, 4, "hollowgrovekeeper", "Hollow Grovekeper", FindEffect(SKILL_HOLLOW_GROVEKEEPER)));
 	unitList.push_back(Unit(CARD_IRONCLAD, FACTION_NEUTRAL, TRIBE_NONE, 5, 4, 3, "ironclad", "Ironclad", FindEffect(SKILL_IRONCLAD)));
 	unitList.push_back(Unit(CARD_JAX_TRUESIGHT, FACTION_NEUTRAL, TRIBE_NONE, 6, 1, 1, "jaxtruesight", "Jax Truesight", FindEffect(SKILL_JAX_TRUESIGHT)));
 	unitList.push_back(Unit(CARD_JAXI, FACTION_NEUTRAL, TRIBE_NONE, 2, 1, 1, "jaxi", "Jaxi", FindEffect(SKILL_JAXI)));
@@ -83,6 +84,7 @@ void Collections::RegisterCards() {
 	unitList.push_back(Unit(CARD_MOGWAI, FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 3, "mogwai", "Mogwai", FindEffect(SKILL_MOGWAI)));
 	unitList.push_back(Unit(CARD_NECROSEER, FACTION_NEUTRAL, TRIBE_NONE, 5, 5, 4, "necroseer", "Necroseer", FindEffect(SKILL_NECROSEER)));
 	unitList.push_back(Unit(CARD_NIGHT_WATCHER, FACTION_NEUTRAL, TRIBE_NONE, 4, 2, 4, "nightwatcher", "Night Watcher", FindEffect(SKILL_NIGHT_WATCHER)));
+	unitList.push_back(Unit(CARD_OWLBEAST_SAGE, FACTION_NEUTRAL, TRIBE_ARCANYST, 4, 4, 4, "owlbeastsage", "Owlbeast Sage", FindEffect(SKILL_OWLBEAST_SAGE)));
 	unitList.push_back(Unit(CARD_PIERCING_MANTIS, FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 2, "piercingmantis", "Piercing Mantis", FindEffect(SKILL_FRENZY)));
 	unitList.push_back(Unit(CARD_PLANAR_SCOUT, FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "planarscout", "Planar Scout", FindEffect(SKILL_AIRDROP)));
 	unitList.push_back(Unit(CARD_SABERSPINE_TIGER, FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "saberspinetiger", "Saberspine Tiger", FindEffect(SKILL_RUSH)));

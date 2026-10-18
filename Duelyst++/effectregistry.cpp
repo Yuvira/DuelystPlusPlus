@@ -485,6 +485,23 @@ void Collections::RegisterEffects() {
 		}
 	});
 
+	//Hollow Grovekeeper
+	effects[SKILL_HOLLOW_GROVEKEEPER] = Effect(SKILL_HOLLOW_GROVEKEEPER, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Destroy ANY nearby minion with Provoke or Frenzy. If you do, this minion gains Provoke and Frenzy");
+	effects[SKILL_HOLLOW_GROVEKEEPER].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
+		ctx.game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, [](BoardTile* tile) {
+			return tile->HasUnit() && !tile->unit->IsGeneral() && (tile->unit->HasKeywords(KEYWORD_PROVOKE) || tile->unit->HasKeywords(KEYWORD_FRENZY)); }), ev.tile);
+		if (ctx.game->HasSelectable()) {
+			ctx.game->callback = EffectCallback(ctx, ev.tile);
+			ctx.game->callback.Callback = [](EffectContext context, BoardTile* source, BoardTile* target) {
+				if (target->HasUnit()) {
+					target->unit->Destroy(context.card);
+					context.card->AddEffect(MODIFIER_HOLLOW_GROVEKEEPER, context.card);
+				}
+			};
+		}
+	});
+	effects[MODIFIER_HOLLOW_GROVEKEEPER] = Effect(MODIFIER_HOLLOW_GROVEKEEPER, KEYWORD_PROVOKE | KEYWORD_FRENZY, "Hollow Grovekeeper|{Provoke}, {Frenzy}");
+
 	//Ironclad
 	effects[SKILL_IRONCLAD] = Effect(SKILL_IRONCLAD, KEYWORD_DYING_WISH, "{Dying Wish}: Dispel all enemy minions");
 	effects[SKILL_IRONCLAD].RegisterPostTrigger<OnDeathEvent>(
@@ -637,5 +654,17 @@ void Collections::RegisterEffects() {
 	effects[SKILL_NIGHT_WATCHER].RegisterPostTrigger<OnSummonEvent>(
 		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsOnBoard() && ev.unit->HasKeywords(KEYWORD_RUSH); },
 		[](EffectContext ctx, OnSummonEvent& ev) { ev.unit->Exhaust(); });
+
+	//Owlbeast Sage
+	effects[SKILL_OWLBEAST_SAGE] = Effect(SKILL_OWLBEAST_SAGE, KEYWORD_NONE, "Whenever you cast a spell, your Arcanyst minions gain +2 Health");
+	effects[SKILL_OWLBEAST_SAGE].RegisterPostTrigger<OnCastEvent>(
+		[](EffectContext ctx, OnCastEvent& ev) { return ctx.IsOnBoard() && ev.card->IsSpell() && ctx.SharesOwner(ev.card); },
+		[](EffectContext ctx, OnCastEvent& ev) {
+			for (Unit* unit : ctx.game->GetUnits())
+				if (ctx.SharesOwner(ctx.card) && !unit->IsGeneral() && unit->tribe == TRIBE_ARCANYST)
+					unit->AddEffect(MODIFIER_OWLBEAST_SAGE, ctx.card);
+	});
+	effects[MODIFIER_OWLBEAST_SAGE] = Effect(MODIFIER_OWLBEAST_SAGE, KEYWORD_NONE, "Owlbeast Sage");
+	effects[MODIFIER_OWLBEAST_SAGE].AddModifier(STAT_HP, MODTYPE_BUFF, 2);
 
 }
