@@ -19,6 +19,7 @@ class Effect;
 
 //Self reference container for passing to lambdas
 struct EffectContext {
+	EffectContext() : EffectContext(nullptr, nullptr, nullptr) {}
 	EffectContext(Effect* effect, Card* card, Game* game) {
 		this->effect = effect;
 		this->card = card;

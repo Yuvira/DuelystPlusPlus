@@ -9,12 +9,19 @@
 #pragma region Helper Constructors
 
 //Callback constructor
-EffectCallback::EffectCallback() : EffectCallback(EffectContext(nullptr, nullptr, nullptr), nullptr) {}
-EffectCallback::EffectCallback(EffectContext context, BoardTile* source) : context(context) {
+EffectCallback::EffectCallback() : EffectCallback(EffectContext(nullptr, nullptr, nullptr), nullptr, nullptr) {}
+EffectCallback::EffectCallback(EffectContext ctx, BoardTile* source, void (*Callback)(EffectContext ctx, BoardTile* source, BoardTile* target)) {
+	this->context = ctx;
 	this->source = source;
-	Callback = nullptr;
+	this->Callback = Callback;
 }
 EffectCallback::~EffectCallback() {}
+
+//Execute effect callback
+void EffectCallback::Execute(BoardTile* target) {
+	if (Callback)
+		Callback(context, source, target);
+}
 
 //Path co-ordinate constructor
 PathCoord::PathCoord() : PathCoord(Coord(), 0, 0) {}
@@ -119,7 +126,7 @@ void Game::RenderGame(Renderer& renderer) {
 		units[i]->Render(renderer);
 
 	//Render active card while selecting opening gambit targets
-	if (activeCard != nullptr && activeCard->GetUnit() != nullptr && mode == MODE_SELECT && callback.Callback)
+	if (activeCard != nullptr && activeCard->GetUnit() != nullptr && mode == MODE_SELECT && effectCallback.Callback)
 		activeCard->GetUnit()->Render(renderer);
 
 	//Move mode indicators
@@ -346,7 +353,7 @@ void Game::Input() {
 
 		//Use card at selection
 		else if (asciiVal == 32) {                                        //Space
-			if (callback.Callback)
+			if (effectCallback.Callback)
 				UseEffect();
 			else
 				UseCard();
@@ -585,9 +592,9 @@ void Game::UseEffect() {
 	mode = MODE_NONE;
 
 	//Execute callback
-	if (callback.Callback) {
-		callback.Execute(tile);
-		callback = EffectCallback();
+	if (effectCallback.Callback) {
+		effectCallback.Execute(tile);
+		effectCallback = EffectCallback();
 	}
 
 	//Trigger cast event for active card
@@ -1250,8 +1257,12 @@ bool Game::CanMove(int x, int y) {
 	return false;
 }
 
-//Check if any tiles are selectable
-bool Game::HasSelectable() { return selectable.size() > 0; }
+//Generate effect callback if targets available
+void Game::GenerateCallback(EffectContext ctx, BoardTile* source, void (*Callback)(EffectContext ctx, BoardTile* source, BoardTile* target)) {
+	if (selectable.size() == 0)
+		return;
+	effectCallback = EffectCallback(EffectContext(ctx.effect, ctx.card, ctx.game), source, Callback);
+}
 
 //Check if any cards matching predicate were cast this turn
 bool Game::AnyCastThisTurn(bool (*Predicate)(Card*)) {

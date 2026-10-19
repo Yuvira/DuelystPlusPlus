@@ -174,13 +174,11 @@ void Collections::RegisterEffects() {
 	effects[SKILL_BLOODTEAR_ALCHEMIST].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
 		ctx.game->HighlightSelectable(TargetMode(TARGET_MODE_ALL, [](BoardTile* tile) {
 			return tile->HasUnit() && tile->unit->IsEnemy(); }));
-		if (ctx.game->HasSelectable()) {
-			ctx.game->callback = EffectCallback(ctx, ev.tile);
-			ctx.game->callback.Callback = [](EffectContext ctx, BoardTile* source, BoardTile* target) {
+		ctx.game->GenerateCallback(ctx, ev.tile,
+			[](EffectContext ctx, BoardTile* source, BoardTile* target) {
 				if (target->HasUnit())
 					target->unit->DealDamage(ctx.card, 1);
-			};
-		}
+		});
 	});
 
 	//Bluetip Scorpion
@@ -252,13 +250,11 @@ void Collections::RegisterEffects() {
 	effects[SKILL_CROSSBONES].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
 		ctx.game->HighlightSelectable(TargetMode(TARGET_MODE_ALL, [](BoardTile* tile) {
 			return tile->HasUnit() && tile->unit->IsEnemy() && !tile->unit->IsGeneral() && tile->unit->HasKeywords(KEYWORD_RANGED); }));
-		if (ctx.game->HasSelectable()) {
-			ctx.game->callback = EffectCallback(ctx, ev.tile);
-			ctx.game->callback.Callback = [](EffectContext ctx, BoardTile* source, BoardTile* target) {
+		ctx.game->GenerateCallback(ctx, ev.tile,
+			[](EffectContext ctx, BoardTile* source, BoardTile* target) {
 				if (target->HasUnit())
 					target->unit->Destroy(ctx.card);
-			};
-		}
+		});
 	});
 
 	//Dancing Blades
@@ -357,14 +353,12 @@ void Collections::RegisterEffects() {
 	effects[SKILL_EPHEMERAL_SHROUD] = Effect(SKILL_EPHEMERAL_SHROUD, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Dispel 1 nearby space");
 	effects[SKILL_EPHEMERAL_SHROUD].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
 		ctx.game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, nullptr), ev.tile);
-		if (ctx.game->HasSelectable()) {
-			ctx.game->callback = EffectCallback(ctx, ev.tile);
-			ctx.game->callback.Callback = [](EffectContext context, BoardTile* source, BoardTile* target) {
+		ctx.game->GenerateCallback(ctx, ev.tile,
+			[](EffectContext ctx, BoardTile* source, BoardTile* target) {
 				target->SetFeature(TILE_NONE);
 				if (target->HasUnit())
 					target->unit->Dispel();
-			};
-		}
+		});
 	});
 
 	//E'Xun
@@ -419,14 +413,12 @@ void Collections::RegisterEffects() {
 	effects[SKILL_GHOST_LYNX].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
 		ctx.game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, [](BoardTile* tile) {
 			return tile->HasUnit() && !tile->unit->IsGeneral(); }), ev.tile);
-		if (ctx.game->HasSelectable()) {
-			ctx.game->callback = EffectCallback(ctx, ev.tile);
-			ctx.game->callback.Callback = [](EffectContext context, BoardTile* source, BoardTile* target) {
+		ctx.game->GenerateCallback(ctx, ev.tile,
+			[](EffectContext ctx, BoardTile* source, BoardTile* target) {
 				if (target->HasUnit())
-					if (BoardTile* tile = context.GetMap()->GetRandomEmpty(source, target))
+					if (BoardTile* tile = ctx.GetMap()->GetRandomEmpty(source, target))
 						target->unit->MoveToTile(tile, true);
-			};
-		}
+		});
 	});
 
 	//Golden Justicar
@@ -476,13 +468,11 @@ void Collections::RegisterEffects() {
 	effects[SKILL_HEALING_MYSTIC] = Effect(SKILL_HEALING_MYSTIC, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Restore 2 Health to anything");
 	effects[SKILL_HEALING_MYSTIC].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
 		ctx.game->HighlightSelectable(TargetMode(TARGET_MODE_ALL, [](BoardTile* tile) { return tile->HasUnit(); }));
-		if (ctx.game->HasSelectable()) {
-			ctx.game->callback = EffectCallback(ctx, ev.tile);
-			ctx.game->callback.Callback = [](EffectContext context, BoardTile* source, BoardTile* target) {
+		ctx.game->GenerateCallback(ctx, ev.tile,
+			[](EffectContext ctx, BoardTile* source, BoardTile* target) {
 				if (target->HasUnit())
-					target->unit->Heal(context.card, 2);
-			};
-		}
+					target->unit->Heal(ctx.card, 2);
+		});
 	});
 
 	//Hollow Grovekeeper
@@ -490,15 +480,13 @@ void Collections::RegisterEffects() {
 	effects[SKILL_HOLLOW_GROVEKEEPER].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
 		ctx.game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, [](BoardTile* tile) {
 			return tile->HasUnit() && !tile->unit->IsGeneral() && (tile->unit->HasKeywords(KEYWORD_PROVOKE) || tile->unit->HasKeywords(KEYWORD_FRENZY)); }), ev.tile);
-		if (ctx.game->HasSelectable()) {
-			ctx.game->callback = EffectCallback(ctx, ev.tile);
-			ctx.game->callback.Callback = [](EffectContext context, BoardTile* source, BoardTile* target) {
+		ctx.game->GenerateCallback(ctx, ev.tile,
+			[](EffectContext ctx, BoardTile* source, BoardTile* target) {
 				if (target->HasUnit()) {
-					target->unit->Destroy(context.card);
-					context.card->AddEffect(MODIFIER_HOLLOW_GROVEKEEPER, context.card);
+					target->unit->Destroy(ctx.card);
+					ctx.card->AddEffect(MODIFIER_HOLLOW_GROVEKEEPER, ctx.card);
 				}
-			};
-		}
+		});
 	});
 	effects[MODIFIER_HOLLOW_GROVEKEEPER] = Effect(MODIFIER_HOLLOW_GROVEKEEPER, KEYWORD_PROVOKE | KEYWORD_FRENZY, "Hollow Grovekeeper|{Provoke}, {Frenzy}");
 
@@ -534,9 +522,8 @@ void Collections::RegisterEffects() {
 	effects[SKILL_KEEPER_OF_THE_VALE].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
 		ctx.game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, [](BoardTile* tile) {
 			return !tile->HasUnit(); }), ev.tile);
-		if (ctx.game->HasSelectable()) {
-			ctx.game->callback = EffectCallback(ctx, ev.tile);
-			ctx.game->callback.Callback = [](EffectContext ctx, BoardTile* source, BoardTile* target) {
+		ctx.game->GenerateCallback(ctx, ev.tile,
+			[](EffectContext ctx, BoardTile* source, BoardTile* target) {
 				if (!target->HasUnit()) {
 					std::vector<Card*> valid;
 					for (Card* destroyed : ctx.game->GetDestroyedUnits())
@@ -545,8 +532,7 @@ void Collections::RegisterEffects() {
 					if (valid.size() > 0)
 						ctx.game->SummonToken(valid[rand() % valid.size()]->cardId, target, ctx.GetOwner());
 				}
-			};
-		}
+		});
 	});
 
 	//Khymera
@@ -609,13 +595,11 @@ void Collections::RegisterEffects() {
 	effects[SKILL_MAW].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
 		ctx.game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, [](BoardTile* tile) {
 			return tile->HasUnit() && tile->unit->IsEnemy() && !tile->unit->IsGeneral(); }), ev.tile);
-		if (ctx.game->HasSelectable()) {
-			ctx.game->callback = EffectCallback(ctx, ev.tile);
-			ctx.game->callback.Callback = [](EffectContext ctx, BoardTile* source, BoardTile* target) {
+		ctx.game->GenerateCallback(ctx, ev.tile,
+			[](EffectContext ctx, BoardTile* source, BoardTile* target) {
 				if (target->HasUnit())
 					target->unit->DealDamage(ctx.card, 2);
-			};
-		}
+		});
 	});
 
 	//Mindwarper
@@ -681,13 +665,11 @@ void Collections::RegisterEffects() {
 	effects[SKILL_PRIMUS_FIST].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
 		ctx.game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, [](BoardTile* tile) {
 			return tile->HasUnit() && tile->unit->IsAlly() && !tile->unit->IsGeneral(); }), ev.tile);
-		if (ctx.game->HasSelectable()) {
-			ctx.game->callback = EffectCallback(ctx, ev.tile);
-			ctx.game->callback.Callback = [](EffectContext context, BoardTile* source, BoardTile* target) {
+		ctx.game->GenerateCallback(ctx, ev.tile,
+			[](EffectContext ctx, BoardTile* source, BoardTile* target) {
 				if (target->HasUnit())
-					target->unit->AddEffect(MODIFIER_PRIMUS_FIST, context.card);
-			};
-		}
+					target->unit->AddEffect(MODIFIER_PRIMUS_FIST, ctx.card);
+		});
 	});
 	effects[MODIFIER_PRIMUS_FIST] = Effect(MODIFIER_PRIMUS_FIST, KEYWORD_NONE, "Primus Fist");
 	effects[MODIFIER_PRIMUS_FIST].RegisterPostTrigger<OnTurnEndEvent>(

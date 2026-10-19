@@ -33,13 +33,12 @@ enum eMode {
 class EffectCallback {
 public:
 	EffectCallback();
-	EffectCallback(EffectContext context, BoardTile* source);
+	EffectCallback(EffectContext ctx, BoardTile* source, void (*Callback)(EffectContext ctx, BoardTile* source, BoardTile* target));
 	~EffectCallback();
-	void Execute() { if (Callback) Callback(context, source, nullptr); }
-	void Execute(BoardTile* target) { if (Callback) Callback(context, source, target); }
+	void Execute(BoardTile* target);
 	EffectContext context;
 	BoardTile* source;
-	void (*Callback)(EffectContext, BoardTile* source, BoardTile* target);
+	void (*Callback)(EffectContext ctx, BoardTile* source, BoardTile* target);
 };
 
 //Pathing coords
@@ -139,7 +138,7 @@ public:
 	//Utils
 	void SetContext(Card* card, Player* player);
 	bool CanMove(int x, int y);
-	bool HasSelectable();
+	void GenerateCallback(EffectContext ctx, BoardTile* source, void (*Callback)(EffectContext ctx, BoardTile* source, BoardTile* target));
 	bool AnyCastThisTurn(bool (*Predicate)(Card*));
 	std::string GetPlayerString(Player* player);
 	std::string GetCardString(Card* card);
@@ -151,7 +150,6 @@ public:
 	Player players[2];
 	Map map;
 	Tile hand[7];
-	EffectCallback callback;
 
 //Properties
 private:
@@ -171,6 +169,7 @@ private:
 	//Gameplay objects
 	std::vector<Event*> eventStack;
 	std::vector<Effect*> auras;
+	EffectCallback effectCallback;
 
 	//Selection objects
 	std::vector<BoardTile*> highlighted;
