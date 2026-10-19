@@ -85,8 +85,10 @@ void Collections::RegisterCards() {
 	unitList.push_back(Unit(CARD_NECROSEER, FACTION_NEUTRAL, TRIBE_NONE, 5, 5, 4, "necroseer", "Necroseer", FindEffect(SKILL_NECROSEER)));
 	unitList.push_back(Unit(CARD_NIGHT_WATCHER, FACTION_NEUTRAL, TRIBE_NONE, 4, 2, 4, "nightwatcher", "Night Watcher", FindEffect(SKILL_NIGHT_WATCHER)));
 	unitList.push_back(Unit(CARD_OWLBEAST_SAGE, FACTION_NEUTRAL, TRIBE_ARCANYST, 4, 4, 4, "owlbeastsage", "Owlbeast Sage", FindEffect(SKILL_OWLBEAST_SAGE)));
+	unitList.push_back(Unit(CARD_PADDO, FACTION_NEUTRAL, TRIBE_NONE, 7, 12, 6, "paddo", "Paddo", FindEffect(SKILL_PADDO)));
 	unitList.push_back(Unit(CARD_PIERCING_MANTIS, FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 2, "piercingmantis", "Piercing Mantis", FindEffect(SKILL_FRENZY)));
 	unitList.push_back(Unit(CARD_PLANAR_SCOUT, FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "planarscout", "Planar Scout", FindEffect(SKILL_AIRDROP)));
+	unitList.push_back(Unit(CARD_PRIMUS_FIST, FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 3, "primusfist", "Primus Fist", FindEffect(SKILL_PRIMUS_FIST)));
 	unitList.push_back(Unit(CARD_SABERSPINE_TIGER, FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "saberspinetiger", "Saberspine Tiger", FindEffect(SKILL_RUSH)));
 	unitList.push_back(Unit(CARD_SAPPHIRE_SEER, FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 2, "sapphireseer", "Sapphire Seer", FindEffect(SKILL_FORCEFIELD)));
 

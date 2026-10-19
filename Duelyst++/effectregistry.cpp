@@ -667,4 +667,32 @@ void Collections::RegisterEffects() {
 	effects[MODIFIER_OWLBEAST_SAGE] = Effect(MODIFIER_OWLBEAST_SAGE, KEYWORD_NONE, "Owlbeast Sage");
 	effects[MODIFIER_OWLBEAST_SAGE].AddModifier(STAT_HP, MODTYPE_BUFF, 2);
 
+	//Paddo
+	effects[SKILL_PADDO] = Effect(SKILL_PADDO, KEYWORD_AIRDROP | KEYWORD_OPENING_GAMBIT, "{Airdrop}|{Opening Gambit}: Push ALL nearby minions and Generals to random spaces");
+	effects[SKILL_PADDO].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
+		for (BoardTile* tile : ctx.GetMap()->GetAllNear(ev.tile))
+			if (tile->HasUnit())
+				if (BoardTile* target = ctx.GetMap()->GetRandomEmpty(ev.tile))
+					tile->unit->MoveToTile(target, true);
+	});
+
+	//Primus Fist
+	effects[SKILL_PRIMUS_FIST] = Effect(SKILL_PRIMUS_FIST, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Give a nearby friendly minion +2 Attack this turn");
+	effects[SKILL_PRIMUS_FIST].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
+		ctx.game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, [](BoardTile* tile) {
+			return tile->HasUnit() && tile->unit->IsAlly() && !tile->unit->IsGeneral(); }), ev.tile);
+		if (ctx.game->HasSelectable()) {
+			ctx.game->callback = EffectCallback(ctx, ev.tile);
+			ctx.game->callback.Callback = [](EffectContext context, BoardTile* source, BoardTile* target) {
+				if (target->HasUnit())
+					target->unit->AddEffect(MODIFIER_PRIMUS_FIST, context.card);
+			};
+		}
+	});
+	effects[MODIFIER_PRIMUS_FIST] = Effect(MODIFIER_PRIMUS_FIST, KEYWORD_NONE, "Primus Fist");
+	effects[MODIFIER_PRIMUS_FIST].RegisterPostTrigger<OnTurnEndEvent>(
+		nullptr,
+		[](EffectContext ctx, OnTurnEndEvent& ev) { ctx.card->RemoveEffect(ctx.effect); });
+	effects[MODIFIER_PRIMUS_FIST].AddModifier(STAT_ATK, MODTYPE_BUFF, 2);
+
 }
