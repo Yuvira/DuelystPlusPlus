@@ -26,11 +26,13 @@ Spell::Spell(eCard cardId, eFaction faction, int cost, std::string path, std::st
 		sprite.Resize(5, 5);
 	else
 		sprite.CreateFromFile("resources/spells/" + path + ".txt");
-	GenerateDetails();
 	game = nullptr;
 	owner = nullptr;
 	if (effect != nullptr && effect->GetID() != EFFECT_NONE)
 		AddEffect(*effect, this);
+	else
+		UpdateModifiers();
+	GenerateDetails();
 }
 Spell::~Spell() {}
 

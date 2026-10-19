@@ -45,13 +45,14 @@ Unit::Unit(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, int 
 		sprite.Resize(5, 5);
 	else
 		sprite.CreateFromFile("resources/minions/" + path + ".txt");
-	UpdateStatSprites();
-	GenerateDetails();
 	curTile = nullptr;
 	game = nullptr;
 	owner = nullptr;
 	if (effect != nullptr && effect->GetID() != EFFECT_NONE)
 		AddEffect(*effect, this);
+	else
+		UpdateModifiers();
+	GenerateDetails();
 }
 Unit::~Unit() {}
 
