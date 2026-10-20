@@ -89,10 +89,15 @@ void Collections::RegisterCards() {
 	unitList.push_back(Unit(CARD_PIERCING_MANTIS, FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 2, "piercingmantis", "Piercing Mantis", FindEffect(SKILL_FRENZY)));
 	unitList.push_back(Unit(CARD_PLANAR_SCOUT, FACTION_NEUTRAL, TRIBE_NONE, 1, 2, 1, "planarscout", "Planar Scout", FindEffect(SKILL_AIRDROP)));
 	unitList.push_back(Unit(CARD_PRIMUS_FIST, FACTION_NEUTRAL, TRIBE_NONE, 2, 2, 3, "primusfist", "Primus Fist", FindEffect(SKILL_PRIMUS_FIST)));
+	unitList.push_back(Unit(CARD_PRIMUS_SHIELDMASTER, FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 6, "primusshieldmaster", "Primus Shieldmaster", FindEffect(SKILL_PROVOKE)));
+	unitList.push_back(Unit(CARD_PRISMATIC_ILLUSIONIST, FACTION_NEUTRAL, TRIBE_ARCANYST, 3, 2, 3, "prismaticillusionist", "Prismatic Illusionist", FindEffect(SKILL_PRISMATIC_ILLUSIONIST)));
+	unitList.push_back(Unit(CARD_PURGATOS_THE_REALMKEEPER, FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 5, "purgatostherealmkeeper", "Purgatos, the Realmkeeper", FindEffect(SKILL_PURGATOS_THE_REALMKEEPER)));
+	unitList.push_back(Unit(CARD_PUTRID_DREADFLAYER, FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 4, "putriddreadflayer", "Putrid Dreadflayer", FindEffect(SKILL_FLYING)));
 	unitList.push_back(Unit(CARD_SABERSPINE_TIGER, FACTION_NEUTRAL, TRIBE_NONE, 4, 3, 2, "saberspinetiger", "Saberspine Tiger", FindEffect(SKILL_RUSH)));
 	unitList.push_back(Unit(CARD_SAPPHIRE_SEER, FACTION_NEUTRAL, TRIBE_NONE, 3, 2, 2, "sapphireseer", "Sapphire Seer", FindEffect(SKILL_FORCEFIELD)));
 
 	//Token Minions
+	unitList.push_back(Unit(CARD_ILLUSION, FACTION_NEUTRAL, TRIBE_ARCANYST, 1, 2, 1, "illusion", "Illusion", true));
 	unitList.push_back(Unit(CARD_MINI_JAX, FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 1, "minijax", "Mini-Jax", true, FindEffect(SKILL_RANGED)));
 	unitList.push_back(Unit(CARD_SPELLSPARK, FACTION_NEUTRAL, TRIBE_NONE, 1, 1, 1, "spellspark", "Spellspark", true, FindEffect(SKILL_RUSH)));
 	unitList.push_back(Unit(CARD_TOMBSTONE, FACTION_NEUTRAL, TRIBE_NONE, 3, 0, 10, "tombstone", "Tombstone", true, FindEffect(SKILL_PROVOKE)));

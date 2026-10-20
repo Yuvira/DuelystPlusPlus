@@ -37,6 +37,7 @@ Collections::Collections() {
 	cards[CARD_FIRESTARTER]->effects[0]->SetToken(cards[CARD_SPELLSPARK]);
 	cards[CARD_JAX_TRUESIGHT]->effects[0]->SetToken(cards[CARD_MINI_JAX]);
 	cards[CARD_JAXI]->effects[0]->SetToken(cards[CARD_MINI_JAX]);
+	cards[CARD_PRISMATIC_ILLUSIONIST]->effects[0]->SetToken(cards[CARD_ILLUSION]);
 
 }
 Collections::~Collections() {}

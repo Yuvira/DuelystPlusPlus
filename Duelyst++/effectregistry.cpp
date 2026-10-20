@@ -677,4 +677,25 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnTurnEndEvent& ev) { ctx.card->RemoveEffect(ctx.effect); });
 	effects[MODIFIER_PRIMUS_FIST].AddModifier(STAT_ATK, MODTYPE_BUFF, 2);
 
+	//Prismatic Illusionist
+	effects[SKILL_PRISMATIC_ILLUSIONIST] = Effect(SKILL_PRISMATIC_ILLUSIONIST, KEYWORD_NONE, "Whenever you cast a spell, summon a 2/1 Illusion on a random nearby space");
+	effects[SKILL_PRISMATIC_ILLUSIONIST].RegisterPostTrigger<OnCastEvent>(
+		[](EffectContext ctx, OnCastEvent& ev) { return ctx.IsOnBoard() && ev.card->IsSpell() && ctx.SharesOwner(ev.card); },
+		[](EffectContext ctx, OnCastEvent& ev) {
+			if (BoardTile* tile = ctx.GetMap()->GetRandomEmptyNear(ctx.GetUnit()->curTile))
+				ctx.game->SummonToken(CARD_ILLUSION, tile, ctx.GetOwner());
+	});
+
+	//Purgatos, the Realmkeeper
+	effects[SKILL_PURGATOS_THE_REALMKEEPER] = Effect(SKILL_PURGATOS_THE_REALMKEEPER, KEYWORD_NONE, "Whenever this minion deals damage, either deal 3 damage to the enemy General OR restore 3 Health to your General");
+	effects[SKILL_PURGATOS_THE_REALMKEEPER].RegisterPostTrigger<OnDamageEvent>(
+		[](EffectContext ctx, OnDamageEvent& ev) { return ctx.IsCardOnBoard(ev.source); },
+		[](EffectContext ctx, OnDamageEvent& ev) {
+			int target = rand() % 2;
+			if (target == 0)
+				ctx.GetAllyGeneral()->Heal(nullptr, 3);
+			else
+				ctx.GetEnemyGeneral()->DealDamage(nullptr, 3);
+	});
+
 }
