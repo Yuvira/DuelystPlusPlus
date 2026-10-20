@@ -39,7 +39,7 @@ void EventManager::NotifyPreEvent(Game* game, Event* event) {
 
 	//Auras
 	for (Effect* a : game->GetAuras())
-		a->TriggerPreEvent(EffectContext(a, a->GetRef(), game), event);
+		a->TriggerPreEvent(EffectContext(a, a->GetSourceCard(), game), event);
 
 }
 
@@ -71,7 +71,7 @@ void EventManager::TriggerPostEvent(Game* game, Event* event) {
 
 	//Auras
 	for (Effect* a : game->GetAuras())
-		a->TriggerPostEvent(EffectContext(a, a->GetRef(), game), event);
+		a->TriggerPostEvent(EffectContext(a, a->GetSourceCard(), game), event);
 
 	//Push to event history
 	eventLog.push_back(event->Clone());

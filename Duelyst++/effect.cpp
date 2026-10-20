@@ -11,8 +11,8 @@ Effect::Effect(eEffect effectId, int keywords, std::string description) {
 	this->keywords = keywords;
 	this->description = description;
 	token = nullptr;
-	refCard = nullptr;
-	source = nullptr;
+	sourceCard = nullptr;
+	sourceEffect = nullptr;
 	AuraPredicate = nullptr;
 }
 Effect::~Effect() {}
@@ -42,12 +42,12 @@ void Effect::UpdateModifier(eStat stat, int value) {
 
 //Getters & Setters
 Card* Effect::GetToken() { return token; }
-Card* Effect::GetRef() { return refCard; };
-Effect* Effect::GetSource() { return source; };
+Card* Effect::GetSourceCard() { return sourceCard; };
+Effect* Effect::GetSourceEffect() { return sourceEffect; };
 void Effect::SetToken(Card* token) { this->token = token; }
-void Effect::SetSources(Effect* source, Card* refCard) {
-	this->source = source;
-	this->refCard = refCard;
+void Effect::SetSources(Card* card, Effect* effect) {
+	this->sourceCard = card;
+	this->sourceEffect = effect;
 }
 
 //Readonly getters
@@ -65,8 +65,8 @@ bool EffectContext::SharesOwner(Card* compare) { return card->owner == compare->
 bool EffectContext::IsOwnedBy(Player* compare) { return card->owner == compare; }
 bool EffectContext::IsAllied(Card* compare) { return card != compare && card->owner == compare->owner; }
 bool EffectContext::IsOwnerTurn() { return game->GetTurnPlayer() == card->owner; }
-bool EffectContext::CardIsAuraSource() { return card == effect->GetRef(); }
-bool EffectContext::CardSharesAuraOwner() { return card->owner == effect->GetRef()->owner; }
+bool EffectContext::CardIsAuraSource() { return card == effect->GetSourceCard(); }
+bool EffectContext::CardSharesAuraOwner() { return card->owner == effect->GetSourceCard()->owner; }
 Player* EffectContext::GetOwner() { return card->owner; }
 Player* EffectContext::GetOpponent() { return card->owner->opponent; }
 Unit* EffectContext::GetUnit() { return card->GetUnit(); }

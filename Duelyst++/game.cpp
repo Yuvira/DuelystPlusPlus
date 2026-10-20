@@ -233,7 +233,7 @@ void Game::RenderDebug(Renderer& renderer) {
 		//Aura data
 		lines.push_back("{Auras}");
 		for (Effect* aura : auras)
-			lines.push_back(aura->GetRef()->name);
+			lines.push_back(aura->GetSourceCard()->name);
 		debugAuras.CreateFromTextBlock(lines);
 		renderer.Render(debugAuras, 215, 1);
 
@@ -470,19 +470,19 @@ void Game::ProcessEventStack() {
 #pragma region Effects
 
 //Add effect to list
-void Game::ApplyAura(eEffect effectId, Effect* source, Card* refCard) {
-	ApplyAura(*collections->FindEffect(effectId), source, refCard); }
-void Game::ApplyAura(Effect effect, Effect* source, Card* refCard) {
+void Game::ApplyAura(eEffect effectId, Card* sourceCard, Effect* sourceEffect) {
+	ApplyAura(*collections->FindEffect(effectId), sourceCard, sourceEffect); }
+void Game::ApplyAura(Effect effect, Card* sourceCard, Effect* sourceEffect) {
 
 	//Ignore if source is already applying this aura
-	if (source != nullptr)
+	if (sourceEffect != nullptr)
 		for (int i = 0; i < auras.size(); ++i)
-			if (auras[i]->GetID() == effect.GetID() && auras[i]->GetSource() == source)
+			if (auras[i]->GetID() == effect.GetID() && auras[i]->GetSourceEffect() == sourceEffect)
 				return;
 
 	//Add aura to list
 	auras.push_back(new Effect(effect));
-	auras.back()->SetSources(source, refCard);
+	auras.back()->SetSources(sourceCard, sourceEffect);
 
 	//Update cards
 	for (Unit* unit : units)
@@ -505,10 +505,10 @@ void Game::RemoveAura(Effect* effect) {
 }
 
 //Remove all auras from a given source
-void Game::RemoveAurasFromSource(Effect* source) {
+void Game::RemoveAurasFromSource(Effect* sourceEffect) {
 	std::vector<int> indices;
 	for (int i = 0; i < auras.size(); ++i)
-		if (auras[i]->GetSource() == source)
+		if (auras[i]->GetSourceEffect() == sourceEffect)
 			indices.push_back(i);
 	RemoveAurasAt(indices);
 }

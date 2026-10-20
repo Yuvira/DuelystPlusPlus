@@ -78,10 +78,10 @@ public:
 	void ProcessEventStack();
 
 	//Aura effects
-	void ApplyAura(eEffect effectId, Effect* source, Card* refCard);
-	void ApplyAura(Effect effect, Effect* source, Card* refCard);
+	void ApplyAura(eEffect effectId, Card* sourceCard, Effect* sourceEffect);
+	void ApplyAura(Effect effect, Card* sourceCard, Effect* sourceEffect);
 	void RemoveAura(Effect* effect);
-	void RemoveAurasFromSource(Effect* source);
+	void RemoveAurasFromSource(Effect* sourceEffect);
 	void RemoveAurasAt(std::vector<int> indices);
 	bool IsTrackingAura(Effect* aura);
 

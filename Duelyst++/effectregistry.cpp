@@ -56,7 +56,7 @@ void Collections::RegisterEffects() {
 	//Archon Spellbinder
 	effects[SKILL_ARCHON_SPELLBINDER] = Effect(SKILL_ARCHON_SPELLBINDER, KEYWORD_NONE, "Your opponent's non-Bloodborn spells cost 1 more to cast");
 	effects[SKILL_ARCHON_SPELLBINDER].RegisterSelfTrigger<OnAddThisEvent>([](EffectContext ctx, OnAddThisEvent& ev) {
-		ctx.game->ApplyAura(AURA_ARCHON_SPELLBINDER, ctx.effect, ctx.card); });
+		ctx.game->ApplyAura(AURA_ARCHON_SPELLBINDER, ctx.card, ctx.effect); });
 	effects[SKILL_ARCHON_SPELLBINDER].RegisterSelfTrigger<OnRemoveThisEvent>([](EffectContext ctx, OnRemoveThisEvent& ev) {
 		ctx.game->RemoveAurasFromSource(ctx.effect); });
 	effects[AURA_ARCHON_SPELLBINDER] = Effect(AURA_ARCHON_SPELLBINDER, KEYWORD_NONE, "Archon Spellbinder");
@@ -67,7 +67,7 @@ void Collections::RegisterEffects() {
 	//Arrow Whistler
 	effects[SKILL_ARROW_WHISTLER] = Effect(SKILL_ARROW_WHISTLER, KEYWORD_RANGED, "{Ranged}|Your other minions with {Ranged} have +1 Attack");
 	effects[SKILL_ARROW_WHISTLER].RegisterSelfTrigger<OnAddThisEvent>([](EffectContext ctx, OnAddThisEvent& ev) {
-		ctx.game->ApplyAura(AURA_ARROW_WHISTLER, ctx.effect, ctx.card); });
+		ctx.game->ApplyAura(AURA_ARROW_WHISTLER, ctx.card, ctx.effect); });
 	effects[SKILL_ARROW_WHISTLER].RegisterSelfTrigger<OnRemoveThisEvent>([](EffectContext ctx, OnRemoveThisEvent& ev) {
 		ctx.game->RemoveAurasFromSource(ctx.effect); });
 	effects[AURA_ARROW_WHISTLER] = Effect(AURA_ARROW_WHISTLER, KEYWORD_NONE, "Arrow Whistler");
@@ -385,7 +385,7 @@ void Collections::RegisterEffects() {
 	//First Sword of Akrane
 	effects[SKILL_FIRST_SWORD_OF_AKRANE] = Effect(SKILL_FIRST_SWORD_OF_AKRANE, KEYWORD_NONE, "Your other minions have +1 Attack");
 	effects[SKILL_FIRST_SWORD_OF_AKRANE].RegisterSelfTrigger<OnAddThisEvent>([](EffectContext ctx, OnAddThisEvent& ev) {
-		ctx.game->ApplyAura(AURA_FIRST_SWORD_OF_AKRANE, ctx.effect, ctx.card); });
+		ctx.game->ApplyAura(AURA_FIRST_SWORD_OF_AKRANE, ctx.card, ctx.effect); });
 	effects[SKILL_FIRST_SWORD_OF_AKRANE].RegisterSelfTrigger<OnRemoveThisEvent>([](EffectContext ctx, OnRemoveThisEvent& ev) {
 		ctx.game->RemoveAurasFromSource(ctx.effect); });
 	effects[AURA_FIRST_SWORD_OF_AKRANE] = Effect(AURA_FIRST_SWORD_OF_AKRANE, KEYWORD_NONE, "First Sword of Akrane");
@@ -424,7 +424,7 @@ void Collections::RegisterEffects() {
 	//Golden Justicar
 	effects[SKILL_GOLDEN_JUSTICAR] = Effect(SKILL_GOLDEN_JUSTICAR, KEYWORD_PROVOKE, "{Provoke}|Your other minions with {Provoke} can move two additional spaces");
 	effects[SKILL_GOLDEN_JUSTICAR].RegisterSelfTrigger<OnAddThisEvent>([](EffectContext ctx, OnAddThisEvent& ev) {
-		ctx.game->ApplyAura(AURA_GOLDEN_JUSTICAR, ctx.effect, ctx.card); });
+		ctx.game->ApplyAura(AURA_GOLDEN_JUSTICAR, ctx.card, ctx.effect); });
 	effects[SKILL_GOLDEN_JUSTICAR].RegisterSelfTrigger<OnRemoveThisEvent>([](EffectContext ctx, OnRemoveThisEvent& ev) {
 		ctx.game->RemoveAurasFromSource(ctx.effect); });
 	effects[AURA_GOLDEN_JUSTICAR] = Effect(AURA_GOLDEN_JUSTICAR, KEYWORD_NONE, "Golden Justicar");
@@ -435,7 +435,7 @@ void Collections::RegisterEffects() {
 	//Golem Metallurgist
 	effects[SKILL_GOLEM_METALLURGIST] = Effect(SKILL_GOLEM_METALLURGIST, KEYWORD_NONE, "The first Golem you summon each turn costs 1 less");
 	effects[SKILL_GOLEM_METALLURGIST].RegisterSelfTrigger<OnAddThisEvent>([](EffectContext ctx, OnAddThisEvent& ev) {
-			ctx.game->ApplyAura(AURA_GOLEM_METALLURGIST, ctx.effect, ctx.card); });
+			ctx.game->ApplyAura(AURA_GOLEM_METALLURGIST, ctx.card, ctx.effect); });
 	effects[SKILL_GOLEM_METALLURGIST].RegisterSelfTrigger<OnRemoveThisEvent>([](EffectContext ctx, OnRemoveThisEvent& ev) {
 		ctx.game->RemoveAurasFromSource(ctx.effect); });
 	effects[AURA_GOLEM_METALLURGIST] = Effect(AURA_GOLEM_METALLURGIST, KEYWORD_NONE, "Golem Metallurgist");
@@ -447,7 +447,7 @@ void Collections::RegisterEffects() {
 	//Golem Vanquisher
 	effects[SKILL_GOLEM_VANQUISHER] = Effect(SKILL_GOLEM_VANQUISHER, KEYWORD_PROVOKE, "{Provoke}|Your other Golem minions have {Provoke}");
 	effects[SKILL_GOLEM_VANQUISHER].RegisterSelfTrigger<OnAddThisEvent>([](EffectContext ctx, OnAddThisEvent& ev) {
-		ctx.game->ApplyAura(AURA_GOLEM_VANQUISHER, ctx.effect, ctx.card); });
+		ctx.game->ApplyAura(AURA_GOLEM_VANQUISHER, ctx.card, ctx.effect); });
 	effects[SKILL_GOLEM_VANQUISHER].RegisterSelfTrigger<OnRemoveThisEvent>([](EffectContext ctx, OnRemoveThisEvent& ev) {
 		ctx.game->RemoveAurasFromSource(ctx.effect); });
 	effects[AURA_GOLEM_VANQUISHER] = Effect(AURA_GOLEM_VANQUISHER, KEYWORD_PROVOKE, "Golem Vanquisher|{Provoke}");
@@ -457,12 +457,12 @@ void Collections::RegisterEffects() {
 	//Grove Lion
 	effects[SKILL_GROVE_LION] = Effect(SKILL_GROVE_LION, KEYWORD_NONE, "While this minion is on the battlefield, your General has {Forcefield}");
 	effects[SKILL_GROVE_LION].RegisterSelfTrigger<OnAddThisEvent>([](EffectContext ctx, OnAddThisEvent& ev) {
-		ctx.game->ApplyAura(AURA_GROVE_LION, ctx.effect, ctx.card); });
+		ctx.game->ApplyAura(AURA_GROVE_LION, ctx.card, ctx.effect); });
 	effects[SKILL_GROVE_LION].RegisterSelfTrigger<OnRemoveThisEvent>([](EffectContext ctx, OnRemoveThisEvent& ev) {
 		ctx.game->RemoveAurasFromSource(ctx.effect); });
 	effects[AURA_GROVE_LION] = Effect(AURA_GROVE_LION, KEYWORD_FORCEFIELD, "Grove Lion|{Forcefield}");
 	effects[AURA_GROVE_LION].SetAuraPredicate([](EffectContext ctx) {
-		return ctx.IsOnBoard() && ctx.card == ctx.effect->GetRef()->owner->general; });
+		return ctx.IsOnBoard() && ctx.card == ctx.effect->GetSourceCard()->owner->general; });
 
 	//Healing Mystic
 	effects[SKILL_HEALING_MYSTIC] = Effect(SKILL_HEALING_MYSTIC, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Restore 2 Health to anything");
@@ -547,7 +547,7 @@ void Collections::RegisterEffects() {
 	//Lady Locke
 	effects[SKILL_LADY_LOCKE] = Effect(SKILL_LADY_LOCKE, KEYWORD_OPENING_GAMBIT | KEYWORD_PROVOKE, "{Provoke}|{Opening Gambit}: Other minions you summon this turn gain +1/+1 and gain {Provoke}");
 	effects[SKILL_LADY_LOCKE].RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
-		ctx.game->ApplyAura(AURA_LADY_LOCKE, ctx.effect, ctx.card); });
+		ctx.game->ApplyAura(AURA_LADY_LOCKE, ctx.card, ctx.effect); });
 	effects[AURA_LADY_LOCKE] = Effect(AURA_LADY_LOCKE, KEYWORD_NONE, "Lady Locke|Minions you summon this turn gain +1/+1 and gain {Provoke}");
 	effects[AURA_LADY_LOCKE].RegisterPostTrigger<OnSummonEvent>(
 		[](EffectContext ctx, OnSummonEvent& ev) { return ctx.IsAllied(ev.unit) && !ev.unit->IsGeneral(); },
@@ -581,7 +581,7 @@ void Collections::RegisterEffects() {
 	//Manaforger
 	effects[SKILL_MANAFORGER] = Effect(SKILL_MANAFORGER, KEYWORD_NONE, "The first non-Bloodborn spell you cast each turn costs 1 less");
 	effects[SKILL_MANAFORGER].RegisterSelfTrigger<OnAddThisEvent>([](EffectContext ctx, OnAddThisEvent& ev) {
-			ctx.game->ApplyAura(AURA_MANAFORGER, ctx.effect, ctx.card); });
+			ctx.game->ApplyAura(AURA_MANAFORGER, ctx.card, ctx.effect); });
 	effects[SKILL_MANAFORGER].RegisterSelfTrigger<OnRemoveThisEvent>([](EffectContext ctx, OnRemoveThisEvent& ev) {
 		ctx.game->RemoveAurasFromSource(ctx.effect); });
 	effects[AURA_MANAFORGER] = Effect(AURA_MANAFORGER, KEYWORD_NONE, "Manaforger");

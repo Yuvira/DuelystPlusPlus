@@ -19,12 +19,16 @@ class Effect;
 
 //Self reference container for passing to lambdas
 struct EffectContext {
+
+	//Constructor
 	EffectContext() : EffectContext(nullptr, nullptr, nullptr) {}
 	EffectContext(Effect* effect, Card* card, Game* game) {
 		this->effect = effect;
 		this->card = card;
 		this->game = game;
 	}
+
+	//Helpers
 	bool IsOnBoard();
 	bool BothOnBoard(Card* compare);
 	bool IsCard(Card* compare);
@@ -42,9 +46,12 @@ struct EffectContext {
 	Unit* GetEnemyGeneral();
 	BoardTile* GetTile();
 	Map* GetMap();
+
+	//Properties
 	Effect* effect;
 	Card* card;
 	Game* game;
+
 };
 
 //Event trigger
@@ -115,10 +122,10 @@ public:
 
 	//Getters & Setters
 	Card* GetToken();
-	Card* GetRef();
-	Effect* GetSource();
+	Card* GetSourceCard();
+	Effect* GetSourceEffect();
 	void SetToken(Card* token);
-	void SetSources(Effect* source, Card* refCard);
+	void SetSources(Card* card, Effect* effect);
 	void HideModifiers() { modifiers.HideValues(); }
 
 	//Readonly getters
@@ -126,9 +133,6 @@ public:
 	const std::string& GetDescription() const;
 	const int& GetKeywords() const;
 	const ModifierGroup& GetModifiers() const;
-
-	//Utils
-	bool IsContinuous() { return source != nullptr; }
 
 private:
 
@@ -138,8 +142,8 @@ private:
 	int keywords;
 	ModifierGroup modifiers;
 	Card* token;
-	Card* refCard;
-	Effect* source;
+	Card* sourceCard;
+	Effect* sourceEffect;
 	bool (*AuraPredicate)(EffectContext ctx);
 	std::vector<EventTrigger> preTriggers;
 	std::vector<EventTrigger> postTriggers;

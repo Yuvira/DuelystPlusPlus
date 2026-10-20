@@ -147,9 +147,9 @@ void Card::AddEffect(eEffect effectId, Card* refCard) {
 	if (game != nullptr)
 		AddEffect(*game->collections->FindEffect(effectId), refCard);
 }
-void Card::AddEffect(Effect effect, Card* refCard) {
+void Card::AddEffect(Effect effect, Card* sourceCard) {
 	effects.push_back(new Effect(effect));
-	effects.back()->SetSources(nullptr, refCard);
+	effects.back()->SetSources(sourceCard, nullptr);
 	if (IsOnBoard()) {
 		OnAddThisEvent addEvent = OnAddThisEvent();
 		effects.back()->TriggerSelfEvent(EffectContext(effects.back(), this, game), &addEvent);
@@ -216,7 +216,7 @@ void Card::UpdateAuras() {
 
 		//Add auras that match predicate
 		for (Effect* aura : game->GetAuras()) {
-			if (!HasAuraFromSource(aura->GetSource()) && aura->MatchesAuraPredicate(game, this)) {
+			if (!HasAuraFromSource(aura->GetSourceEffect()) && aura->MatchesAuraPredicate(game, this)) {
 				auras.push_back(aura);
 				if (IsOnBoard()) {
 					OnAddThisEvent addEvent = OnAddThisEvent();
@@ -235,9 +235,9 @@ void Card::UpdateAuras() {
 }
 
 //Card is tracking an aura from a given source
-bool Card::HasAuraFromSource(Effect* source) {
+bool Card::HasAuraFromSource(Effect* sourceEffect) {
 	for (Effect* aura : auras)
-		if (aura->GetSource() == source)
+		if (aura->GetSourceEffect() == sourceEffect)
 			return true;
 	return false;
 }
