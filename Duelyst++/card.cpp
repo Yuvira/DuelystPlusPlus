@@ -143,9 +143,9 @@ int Card::GetStat(eStat stat, int base) {
 #pragma region Card Effects
 
 //Add effect to list
-void Card::AddEffect(eEffect effectId, Card* refCard) {
+void Card::AddEffect(eEffect effectId, Card* sourceCard) {
 	if (game != nullptr)
-		AddEffect(*game->collections->FindEffect(effectId), refCard);
+		AddEffect(*game->collections->FindEffect(effectId), sourceCard);
 }
 void Card::AddEffect(Effect effect, Card* sourceCard) {
 	effects.push_back(new Effect(effect));
