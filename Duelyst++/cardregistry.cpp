@@ -511,6 +511,13 @@ void Collections::RegisterCards() {
 		3, 2, 4, SKILL_MIRKBLOOD_DEVOURER
 	);
 
+	//Moebius
+	cardDefinitions.try_emplace(
+		CARD_MOEBIUS, CARD_MOEBIUS, RARITY_EPIC, FACTION_NEUTRAL, TRIBE_ARCANYST,
+		"moebius", "Moebius",
+		4, 3, 5, SKILL_MOEBIUS
+	);
+
 	//Mogwai
 	cardDefinitions.try_emplace(
 		CARD_MOGWAI, CARD_MOGWAI, RARITY_EPIC, FACTION_NEUTRAL, TRIBE_NONE,

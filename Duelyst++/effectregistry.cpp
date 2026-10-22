@@ -626,6 +626,23 @@ void Collections::RegisterEffects() {
 	effectDefinitions.try_emplace(MODIFIER_MIRKBLOOD_DEVOURER, MODIFIER_MIRKBLOOD_DEVOURER, KEYWORD_NONE, "Mirkblood Devourer");
 	effectDefinitions.at(MODIFIER_MIRKBLOOD_DEVOURER).AddModifier(STAT_ATK, MODTYPE_BUFF, 1).AddModifier(STAT_HP, MODTYPE_BUFF, 1);
 
+	//Moebius
+	effectDefinitions.try_emplace(SKILL_MOEBIUS, SKILL_MOEBIUS, KEYWORD_NONE, "At the start of your turn, fully heal this minion and switch its Attack and Health");
+	effectDefinitions.at(SKILL_MOEBIUS).RegisterPostTrigger<OnTurnStartEvent>(
+		[](EffectContext ctx, OnTurnStartEvent& ev) { return ctx.IsOnBoard() && ctx.IsOwnedBy(ev.player); },
+		[](EffectContext ctx, OnTurnStartEvent& ev) {
+			int atk = ctx.card->GetStat(STAT_ATK, ctx.card->GetUnit()->baseAtk, false);
+			int hp = ctx.card->GetStat(STAT_HP, ctx.card->GetUnit()->baseHpMax, false);
+			if (Effect* effect = ctx.card->AddEffect(MODIFIER_MOEBIUS, ctx.card)) {
+				effect->UpdateModifier(STAT_ATK, hp);
+				effect->UpdateModifier(STAT_HP, atk);
+			}
+			ctx.card->UpdateModifiers();
+			ctx.card->GetUnit()->hp = ctx.card->GetUnit()->hpMax;
+	});
+	effectDefinitions.try_emplace(MODIFIER_MOEBIUS, MODIFIER_MOEBIUS, KEYWORD_NONE, "Moebius");
+	effectDefinitions.at(MODIFIER_MOEBIUS).AddModifier(STAT_ATK, MODTYPE_OVERRIDE, 3).AddModifier(STAT_HP, MODTYPE_OVERRIDE, 5);
+
 	//Mogwai
 	effectDefinitions.try_emplace(SKILL_MOGWAI, SKILL_MOGWAI, KEYWORD_NONE, "After this moves, draw a card");
 	effectDefinitions.at(SKILL_MOGWAI).RegisterPostTrigger<OnMoveEvent>(
