@@ -156,13 +156,13 @@ int Card::GetStat(eStat stat, int base, bool withAuras) {
 
 #pragma region Card Effects
 
-//Add effect to list
-void Card::AddEffect(eEffect effectId, Card* sourceCard) {
+//Add effect to list, returns pointer to added effect instance
+Effect* Card::AddEffect(eEffect effectId, Card* sourceCard) {
 	if (effectId == EFFECT_NONE || game == nullptr)
-		return;
+		return nullptr;
 	Effect* newEffect = game->collections->GetNewEffectInstance(effectId);
 	if (newEffect == nullptr)
-		return;
+		return nullptr;
 	effects.push_back(newEffect);
 	newEffect->SetSources(sourceCard, nullptr);
 	if (IsOnBoard()) {
@@ -171,6 +171,7 @@ void Card::AddEffect(eEffect effectId, Card* sourceCard) {
 	}
 	UpdateModifiers();
 	UpdateAuras();
+	return newEffect;
 }
 
 //Remove effect from list

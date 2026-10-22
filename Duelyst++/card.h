@@ -56,7 +56,7 @@ public:
 	int GetStat(eStat stat, int base, bool withAuras);
 
 	//Effects
-	void AddEffect(eEffect effectId, Card* sourceCard);
+	Effect* AddEffect(eEffect effectId, Card* sourceCard);
 	void RemoveEffect(Effect* effect);
 	void RemoveEffectAt(std::vector<int> indices);
 	void UpdateAuras();
