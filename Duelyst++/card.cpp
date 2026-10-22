@@ -160,11 +160,10 @@ int Card::GetStat(eStat stat, int base, bool withAuras) {
 Effect* Card::AddEffect(eEffect effectId, Card* sourceCard) {
 	if (effectId == EFFECT_NONE || game == nullptr)
 		return nullptr;
-	Effect* newEffect = game->collections->GetNewEffectInstance(effectId);
+	Effect* newEffect = game->collections->GetNewEffectInstance(effectId, sourceCard, nullptr);
 	if (newEffect == nullptr)
 		return nullptr;
 	effects.push_back(newEffect);
-	newEffect->SetSources(sourceCard, nullptr);
 	if (IsOnBoard()) {
 		OnAddThisEvent addEvent = OnAddThisEvent();
 		newEffect->TriggerSelfEvent(EffectContext(newEffect, this, game), &addEvent);

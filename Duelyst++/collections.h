@@ -24,7 +24,7 @@ public:
 	~Collections();
 
 	//Instance generators
-	Effect* GetNewEffectInstance(eEffect effectId);
+	Effect* GetNewEffectInstance(eEffect effectId, Card* sourceCard, Effect* sourceEffect);
 	Card* GetNewCardInstance(eCard cardId, Game* game, Player* player);
 	Unit* GetNewUnitInstance(eCard cardId, Game* game, Player* player);
 

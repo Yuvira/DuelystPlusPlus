@@ -93,7 +93,7 @@ class Effect {
 public:
 
 	//Constructors
-	Effect(const EffectDefinition& definition);
+	Effect(const EffectDefinition& definition, Card* sourceCard, Effect* sourceEffect);
 	~Effect();
 
 	//Trigger dispatch
@@ -110,10 +110,6 @@ public:
 	Card* GetSourceCard() { return sourceCard; };
 	Effect* GetSourceEffect() { return sourceEffect; };
 	void SetToken(eCard token) { this->token = token; }
-	void SetSources(Card* card, Effect* effect) {
-		this->sourceCard = card;
-		this->sourceEffect = effect;
-	}
 
 	//Readonly getters
 	const eEffect& ReadID() const { return effectId; }

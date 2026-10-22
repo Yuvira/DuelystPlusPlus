@@ -471,7 +471,7 @@ void Game::ApplyAura(eEffect effectId, Card* sourceCard, Effect* sourceEffect) {
 	//Get effect instance
 	if (effectId == EFFECT_NONE)
 		return;
-	Effect* newAura = collections->GetNewEffectInstance(effectId);
+	Effect* newAura = collections->GetNewEffectInstance(effectId, sourceCard, sourceEffect);
 	if (newAura == nullptr)
 		return;
 
@@ -483,7 +483,6 @@ void Game::ApplyAura(eEffect effectId, Card* sourceCard, Effect* sourceEffect) {
 
 	//Add aura to list
 	auras.push_back(newAura);
-	newAura->SetSources(sourceCard, sourceEffect);
 
 	//Update cards
 	for (Unit* unit : units)

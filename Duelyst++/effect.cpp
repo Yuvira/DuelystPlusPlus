@@ -6,14 +6,14 @@
 #include "tile.h"
 
 //Effect constructor
-Effect::Effect(const EffectDefinition& definition) {
+Effect::Effect(const EffectDefinition& definition, Card* sourceCard, Effect* sourceEffect) {
 	this->effectId = definition.effectId;
 	this->description = definition.description;
 	this->keywords = definition.keywords;
 	this->modifiers = definition.modifiers;
 	this->token = definition.token;
-	sourceCard = nullptr;
-	sourceEffect = nullptr;
+	this->sourceCard = sourceCard;
+	this->sourceEffect = sourceEffect;
 	AuraPredicate = definition.AuraPredicate;
 	preTriggers = definition.preTriggers;
 	postTriggers = definition.postTriggers;
