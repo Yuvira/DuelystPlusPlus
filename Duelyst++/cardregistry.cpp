@@ -623,6 +623,13 @@ void Collections::RegisterCards() {
 		7, 7, 7, SKILL_RED_SYNJA
 	);
 
+	//Repulsor Beast
+	cardDefinitions.try_emplace(
+		CARD_REPULSOR_BEAST, CARD_REPULSOR_BEAST, RARITY_NONE, FACTION_NEUTRAL, TRIBE_NONE,
+		"repulsorbeast", "Repulsor Beast",
+		3, 2, 2, SKILL_REPULSOR_BEAST
+	);
+
 	//Rock Pulverizer
 	cardDefinitions.try_emplace(
 		CARD_ROCK_PULVERIZER, CARD_ROCK_PULVERIZER, RARITY_NONE, FACTION_NEUTRAL, TRIBE_NONE,

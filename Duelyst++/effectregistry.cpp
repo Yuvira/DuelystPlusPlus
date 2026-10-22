@@ -762,6 +762,24 @@ void Collections::RegisterEffects() {
 				valid[rand() % valid.size()]->DealDamage(ctx.card, 7);
 	});
 
+	//Repulsor Beast
+	effectDefinitions.try_emplace(SKILL_REPULSOR_BEAST, SKILL_REPULSOR_BEAST, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Push a nearby enemy minion to any space");
+	effectDefinitions.at(SKILL_REPULSOR_BEAST).RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
+		std::vector<BoardTile*> valid;
+		for (Unit* unit : ctx.GetMap()->GetUnitsNear(ev.tile))
+			if (!ctx.SharesOwner(unit) && !unit->IsGeneral())
+				valid.push_back(unit->curTile);
+		ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
+			[](EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets) {
+				std::vector<BoardTile*> valid = ctx.GetMap()->GetAllEmpty(source);
+				ctx.game->HighlightTargetsForCallback(valid, ctx, source,
+					[](EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets) {
+						if (targets.size() > 1 && targets[0]->HasUnit() && !targets[1]->HasUnit())
+							targets[0]->unit->MoveToTile(targets[1], true);
+				});
+		});
+	});
+
 	//Ruby Rifter
 	effectDefinitions.try_emplace(SKILL_RUBY_RIFTER, SKILL_RUBY_RIFTER, KEYWORD_NONE, "Whenever your General takes damage, draw a card and give this minion +2 Attack");
 	effectDefinitions.at(SKILL_RUBY_RIFTER).RegisterPostTrigger<OnDamageEvent>(
