@@ -45,6 +45,7 @@ struct EffectDefinition {
 	}
 	void HideModifiers() { modifiers.HideValues(); }
 	void SetToken(eCard token) { this->token = token; }
+	void SetRemovable(bool removable) { this->isRemovable = removable; }
 	void SetAuraPredicate(bool (*Predicate)(EffectContext ctx)) { AuraPredicate = Predicate; }
 
 	//Properties
@@ -53,6 +54,7 @@ struct EffectDefinition {
 	int keywords;
 	ModifierGroup modifiers;
 	eCard token;
+	bool isRemovable;
 	bool (*AuraPredicate)(EffectContext ctx);
 	std::vector<EventTrigger> preTriggers;
 	std::vector<EventTrigger> postTriggers;

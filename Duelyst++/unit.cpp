@@ -257,8 +257,10 @@ void Unit::Dispel() {
 
 	//Remove effects
 	for (int i = 0; i < effects.size(); ++i) {
-		RemoveEffect(effects[i]);
-		--i;
+		if (effects[i]->ReadIsRemovable()) {
+			RemoveEffect(effects[i]);
+			--i;
+		}
 	}
 
 	//Add dispelled effect

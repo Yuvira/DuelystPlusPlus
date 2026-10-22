@@ -117,6 +117,7 @@ public:
 	const int& ReadKeywords() const { return keywords; }
 	const eCard& ReadToken() const { return token; }
 	const ModifierGroup& ReadModifiers() const { return modifiers; }
+	const bool& ReadIsRemovable() const { return isRemovable; }
 
 private:
 
@@ -126,6 +127,7 @@ private:
 	int keywords;
 	ModifierGroup modifiers;
 	eCard token;
+	bool isRemovable;
 	Card* sourceCard;
 	Effect* sourceEffect;
 	bool (*AuraPredicate)(EffectContext ctx);

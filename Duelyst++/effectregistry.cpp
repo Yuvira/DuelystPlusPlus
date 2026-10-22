@@ -642,6 +642,7 @@ void Collections::RegisterEffects() {
 	});
 	effectDefinitions.try_emplace(MODIFIER_MOEBIUS, MODIFIER_MOEBIUS, KEYWORD_NONE, "Moebius");
 	effectDefinitions.at(MODIFIER_MOEBIUS).AddModifier(STAT_ATK, MODTYPE_OVERRIDE, 3).AddModifier(STAT_HP, MODTYPE_OVERRIDE, 5);
+	effectDefinitions.at(MODIFIER_MOEBIUS).SetRemovable(false);
 
 	//Mogwai
 	effectDefinitions.try_emplace(SKILL_MOGWAI, SKILL_MOGWAI, KEYWORD_NONE, "After this moves, draw a card");

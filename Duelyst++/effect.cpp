@@ -12,6 +12,7 @@ Effect::Effect(const EffectDefinition& definition, Card* sourceCard, Effect* sou
 	this->keywords = definition.keywords;
 	this->modifiers = definition.modifiers;
 	this->token = definition.token;
+	this->isRemovable = definition.isRemovable;
 	this->sourceCard = sourceCard;
 	this->sourceEffect = sourceEffect;
 	AuraPredicate = definition.AuraPredicate;
