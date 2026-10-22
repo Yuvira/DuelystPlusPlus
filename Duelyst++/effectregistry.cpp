@@ -533,20 +533,29 @@ void Collections::RegisterEffects() {
 	//Keeper of the Vale
 	effectDefinitions.try_emplace(SKILL_KEEPER_OF_THE_VALE, SKILL_KEEPER_OF_THE_VALE, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Summon a random non-token friendly minion destroyed this game nearby");
 	effectDefinitions.at(SKILL_KEEPER_OF_THE_VALE).RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
-		std::vector<BoardTile*> valid;
-		for (BoardTile* tile : ctx.GetMap()->GetEmptyNear(ev.tile))
-			valid.push_back(tile);
-		ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
-			[](EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets) {
-				if (targets.size() > 0 && !targets[0]->HasUnit()) {
-					std::vector<Card*> valid;
-					for (Unit* destroyed : ctx.game->GetDestroyedUnits())
-						if (!destroyed->isToken && ctx.SharesOwner(destroyed))
-							valid.push_back(destroyed);
-					if (valid.size() > 0)
-						ctx.game->SummonToken(valid[rand() % valid.size()]->cardId, targets[0], ctx.GetOwner());
-				}
-		});
+		bool hasTargets = false;
+		for (Unit* destroyed : ctx.game->GetDestroyedUnits()) {
+			if (!destroyed->isToken && ctx.SharesOwner(destroyed)) {
+				hasTargets = true;
+				break;
+			}
+		}
+		if (hasTargets) {
+			std::vector<BoardTile*> valid;
+			for (BoardTile* tile : ctx.GetMap()->GetEmptyNear(ev.tile))
+				valid.push_back(tile);
+			ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
+				[](EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets) {
+					if (targets.size() > 0 && !targets[0]->HasUnit()) {
+						std::vector<Card*> valid;
+						for (Unit* destroyed : ctx.game->GetDestroyedUnits())
+							if (!destroyed->isToken && ctx.SharesOwner(destroyed))
+								valid.push_back(destroyed);
+						if (valid.size() > 0)
+							ctx.game->SummonToken(valid[rand() % valid.size()]->cardId, targets[0], ctx.GetOwner());
+					}
+			});
+		}
 	});
 
 	//Khymera
