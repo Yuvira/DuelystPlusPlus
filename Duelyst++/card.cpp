@@ -1,13 +1,12 @@
 //Include
+#include "carddefinition.h"
 #include "card.h"
-#include "game.h"
 #include "collections.h"
 #include "effect.h"
 #include "event.h"
+#include "game.h"
+#include "renderer.h"
 #include "utils.h"
-
-//Constants
-const int MAX_DESCRIPTION_WIDTH = 42;
 
 #pragma region Helper Constructors
 
@@ -24,17 +23,20 @@ TargetMode::~TargetMode() {}
 #pragma region Card Constructor
 
 //Card constructor
-Card::Card() {
-	cardId = CARD_NONE;
-	faction = FACTION_NEUTRAL;
-	isToken = false;
-	baseCost = 0;
-	cost = 0;
-	game = nullptr;
-	owner = nullptr;
-	original = this;
-	name = "???";
-	divider.CreateFromString("컴TOKEN컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴");
+Card::Card(const CardDefinition& definition, Game* game, Player* owner) {
+	cardId = definition.cardId;
+	rarity = definition.rarity;
+	faction = definition.faction;
+	name = definition.name;
+	baseCost = definition.cost;
+	cost = definition.cost;
+	this->game = game;
+	this->owner = owner;
+	if (definition.effect != EFFECT_NONE && game != nullptr)
+		AddEffect(definition.effect, this);
+	isToken = definition.isToken;
+	sprite = definition.sprite;
+	detailNameSprite = definition.detailNameSprite;
 }
 Card::~Card() {}
 
@@ -42,25 +44,34 @@ Card::~Card() {}
 
 #pragma region Rendering
 
+//Draw sidebar details
+void Card::DrawDetails(Renderer& renderer, int& y) {
+	if (game == nullptr)
+		return;
+	sprite.SetColor(COLOR_LTWHITE);
+	UpdateDetails();
+	game->collections->RenderCardDetails(renderer, 66, y, this);
+}
+
 //Update effect details
 void Card::UpdateDetails() {
 
-	//Line list
-	std::vector<std::string> lines;
+	//Clear
+	details.clear();
 
 	//Loop effects
 	for (int i = 0; i < effects.size(); ++i) {
 
 		//Add newline if this isn't the first effect in the list
-		if (lines.size() > 0)
-			lines.push_back("");
+		if (details.size() > 0)
+			details.push_back("");
 
 		//Get index of header and add description text
-		int headerIdx = lines.size();
-		Utils::WrapText(effects[i]->GetDescription(), lines, MAX_DESCRIPTION_WIDTH);
+		int headerIdx = details.size();
+		Utils::WrapText(effects[i]->ReadDescription(), details, Utils::MAX_DESCRIPTION_WIDTH);
 
 		//Add buffs line if applicable
-		effects[i]->GetModifiers().WriteValues(lines);
+		effects[i]->ReadModifiers().WriteValues(details);
 
 	}
 
@@ -68,20 +79,17 @@ void Card::UpdateDetails() {
 	for (int i = 0; i < auras.size(); ++i) {
 
 		//Add newline if this isn't the first effect in the list
-		if (lines.size() > 0)
-			lines.push_back("");
+		if (details.size() > 0)
+			details.push_back("");
 
 		//Get index of header and add description text
-		int headerIdx = lines.size();
-		Utils::WrapText(auras[i]->GetDescription(), lines, MAX_DESCRIPTION_WIDTH);
+		int headerIdx = details.size();
+		Utils::WrapText(auras[i]->ReadDescription(), details, Utils::MAX_DESCRIPTION_WIDTH);
 
 		//Add buffs line if applicable
-		auras[i]->GetModifiers().WriteValues(lines);
+		auras[i]->ReadModifiers().WriteValues(details);
 
 	}
-
-	//Generate
-	details.CreateFromTextBlock(lines);
 
 }
 
@@ -95,14 +103,14 @@ int Card::GetStat(eStat stat, int base) {
 	//If any fixers exist, apply them and ignore everything else
 	bool fixed = false;
 	for (Effect* effect : effects) {
-		if (effect->GetModifiers().ReadModifier(stat).type == MODTYPE_FIXED) {
-			base = effect->GetModifiers().ReadModifier(stat).value;
+		if (effect->ReadModifiers().ReadModifier(stat).type == MODTYPE_FIXED) {
+			base = effect->ReadModifiers().ReadModifier(stat).value;
 			fixed = true;
 		}
 	}
 	for (Effect* aura : auras) {
-		if (aura->GetModifiers().ReadModifier(stat).type == MODTYPE_FIXED) {
-			base = aura->GetModifiers().ReadModifier(stat).value;
+		if (aura->ReadModifiers().ReadModifier(stat).type == MODTYPE_FIXED) {
+			base = aura->ReadModifiers().ReadModifier(stat).value;
 			fixed = true;
 		}
 	}
@@ -111,27 +119,27 @@ int Card::GetStat(eStat stat, int base) {
 
 	//Apply any rebases
 	for (Effect* effect : effects)
-		if (effect->GetModifiers().ReadModifier(stat).type == MODTYPE_REBASE)
-			base = effect->GetModifiers().ReadModifier(stat).value;
+		if (effect->ReadModifiers().ReadModifier(stat).type == MODTYPE_REBASE)
+			base = effect->ReadModifiers().ReadModifier(stat).value;
 	for (Effect* aura : auras)
-		if (aura->GetModifiers().ReadModifier(stat).type == MODTYPE_REBASE)
-			base = aura->GetModifiers().ReadModifier(stat).value;
+		if (aura->ReadModifiers().ReadModifier(stat).type == MODTYPE_REBASE)
+			base = aura->ReadModifiers().ReadModifier(stat).value;
 
 	//Apply buffs and overrides in order
 	for (Effect* effect : effects) {
-		if (effect->GetModifiers().ReadModifier(stat).type == MODTYPE_BUFF)
-			base += effect->GetModifiers().ReadModifier(stat).value;
-		if (effect->GetModifiers().ReadModifier(stat).type == MODTYPE_OVERRIDE)
-			base = effect->GetModifiers().ReadModifier(stat).value;
+		if (effect->ReadModifiers().ReadModifier(stat).type == MODTYPE_BUFF)
+			base += effect->ReadModifiers().ReadModifier(stat).value;
+		if (effect->ReadModifiers().ReadModifier(stat).type == MODTYPE_OVERRIDE)
+			base = effect->ReadModifiers().ReadModifier(stat).value;
 	}
 
 	//Auras apply overrides first
 	for (Effect* aura : auras)
-		if (aura->GetModifiers().ReadModifier(stat).type == MODTYPE_OVERRIDE)
-			base = aura->GetModifiers().ReadModifier(stat).value;
+		if (aura->ReadModifiers().ReadModifier(stat).type == MODTYPE_OVERRIDE)
+			base = aura->ReadModifiers().ReadModifier(stat).value;
 	for (Effect* aura : auras)
-		if (aura->GetModifiers().ReadModifier(stat).type == MODTYPE_BUFF)
-			base += aura->GetModifiers().ReadModifier(stat).value;
+		if (aura->ReadModifiers().ReadModifier(stat).type == MODTYPE_BUFF)
+			base += aura->ReadModifiers().ReadModifier(stat).value;
 
 	//Return modified value
 	return max(base, 0);
@@ -144,15 +152,16 @@ int Card::GetStat(eStat stat, int base) {
 
 //Add effect to list
 void Card::AddEffect(eEffect effectId, Card* sourceCard) {
-	if (game != nullptr)
-		AddEffect(*game->collections->FindEffect(effectId), sourceCard);
-}
-void Card::AddEffect(Effect effect, Card* sourceCard) {
-	effects.push_back(new Effect(effect));
-	effects.back()->SetSources(sourceCard, nullptr);
+	if (effectId == EFFECT_NONE || game == nullptr)
+		return;
+	Effect* newEffect = game->collections->GetNewEffectInstance(effectId);
+	if (newEffect == nullptr)
+		return;
+	effects.push_back(newEffect);
+	newEffect->SetSources(sourceCard, nullptr);
 	if (IsOnBoard()) {
 		OnAddThisEvent addEvent = OnAddThisEvent();
-		effects.back()->TriggerSelfEvent(EffectContext(effects.back(), this, game), &addEvent);
+		newEffect->TriggerSelfEvent(EffectContext(newEffect, this, game), &addEvent);
 	}
 	UpdateModifiers();
 	UpdateAuras();
@@ -246,10 +255,19 @@ bool Card::HasAuraFromSource(Effect* sourceEffect) {
 
 #pragma region Getters
 
-//Getters
+//Get iterable effect list
 std::vector<Effect*> Card::GetEffects() {
 	std::vector<Effect*> effectIterator = effects;
 	return effectIterator;
+}
+
+//Get list of unique tokens included on effects
+std::vector<eCard> Card::GetTokens() {
+	std::vector<eCard> tokenList;
+	for (Effect* effect : effects)
+		if (effect->ReadToken() != CARD_NONE && std::find(tokenList.begin(), tokenList.end(), effect->ReadToken()) == tokenList.end())
+			tokenList.push_back(effect->ReadToken());
+	return tokenList;
 }
 
 #pragma endregion

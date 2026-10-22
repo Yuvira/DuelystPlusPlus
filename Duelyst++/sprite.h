@@ -30,13 +30,17 @@ class Sprite {
 public:
 	Sprite();
 	Sprite(int width, int height);
+	Sprite(std::string string);
 	~Sprite();
 	void Clear();
 	void Resize(int newWidth, int newHeight);
 	void SetColor(eColor color);
+	void SetColor(eColor color, int start, int stop);
 	void CreateFromFile(std::string filename);
 	void CreateFromString(const std::string& str);
+	void CreateFromString(const std::string& str, eColor color);
 	void CreateFromTextBlock(const std::vector<std::string>& lines);
+	int GetSize() { return width * height; }
 	int width, height;
 	COORD pos;
 	std::vector<CHAR_INFO> buffer;

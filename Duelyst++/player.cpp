@@ -28,9 +28,7 @@ Player::~Player() {}
 //Preset deck
 void Player::Preset(Collections* collections, Game* game) {
 	this->game = game;
-	deck.push_back(new Unit(*(collections->FindCard(CARD_ARGEON_HIGHMAYNE)->GetUnit())));
-	for (int i = 0; i < deck.size(); ++i)
-		this->game->SetContext(deck[i], this);
+	deck.push_back(collections->GetNewCardInstance(CARD_ARGEON_HIGHMAYNE, game, this));
 }
 
 //Initialize deck/hand
@@ -150,13 +148,12 @@ void Player::Draw() {
 }
 
 //Add card to hand
-void Player::AddNewToHand(Card* original) {
-	Card* newCard = nullptr;
-	if (original->IsUnit())
-		newCard = new Unit(*(original->GetUnit()));
-	else if (original->IsSpell())
-		newCard = new Spell(*(original->GetSpell()));
-	game->SetContext(newCard, this);
+void Player::AddNewToHand(eCard cardId) {
+	if (cardId == CARD_NONE || game == nullptr)
+		return;
+	Card* newCard = game->collections->GetNewCardInstance(cardId, game, this);
+	if (newCard == nullptr)
+		return;
 	if (hand.size() < 6) {
 		hand.push_back(newCard);
 		hand.back()->UpdateAuras();
@@ -168,13 +165,12 @@ void Player::AddNewToHand(Card* original) {
 
 //Add card to deck
 //No event call because this is only being used by CardViewer for now, update this when it becomes relevant to gameplay
-void Player::AddNewToDeck(Card* original) {
-	Card* newCard = nullptr;
-	if (original->IsUnit())
-		newCard = new Unit(*(original->GetUnit()));
-	else if (original->IsSpell())
-		newCard = new Spell(*(original->GetSpell()));
-	game->SetContext(newCard, this);
+void Player::AddNewToDeck(eCard cardId) {
+	if (cardId == CARD_NONE || game == nullptr)
+		return;
+	Card* newCard = game->collections->GetNewCardInstance(cardId, game, this);
+	if (newCard == nullptr)
+		return;
 	deck.push_back(newCard);
 	deck.back()->UpdateAuras();
 }

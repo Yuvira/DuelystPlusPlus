@@ -15,6 +15,11 @@ Sprite::Sprite(int width, int height) {
 	for (int i = 0; i < (width * height); ++i) { buffer.push_back(CHAR_INFO()); }
 	Clear();
 }
+Sprite::Sprite(std::string string) {
+	pos.X = 0;
+	pos.Y = 0;
+	CreateFromString(string);
+}
 Sprite::~Sprite() { }
 
 #pragma endregion
@@ -39,9 +44,10 @@ void Sprite::Resize(int newWidth, int newHeight) {
 	Clear();
 }
 
-//Set color
-void Sprite::SetColor(eColor color) {
-	for (int i = 0; i < buffer.size(); ++i)
+//Set color with optional range
+void Sprite::SetColor(eColor color) { SetColor(color, 0, buffer.size()); }
+void Sprite::SetColor(eColor color, int start, int stop) {
+	for (int i = start; i < min(stop, buffer.size()); ++i)
 		buffer[i].Attributes = color;
 }
 
@@ -72,14 +78,15 @@ void Sprite::CreateFromFile(std::string filename) {
 }
 
 //Generate text sprite from string
-void Sprite::CreateFromString(const std::string& str) {
+void Sprite::CreateFromString(const std::string& str) { CreateFromString(str, COLOR_LTWHITE); }
+void Sprite::CreateFromString(const std::string& str, eColor color) {
 	width = str.length();
 	height = 1;
 	buffer.clear();
 	for (int i = 0; i < str.length(); ++i) {
 		buffer.push_back(CHAR_INFO());
 		buffer[i].Char.AsciiChar = str[i];
-		buffer[i].Attributes = COLOR_LTWHITE;
+		buffer[i].Attributes = color;
 	}
 }
 

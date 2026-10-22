@@ -1,39 +1,27 @@
 //Include
-#include <algorithm>
 #include "card.h"
-#include "game.h"
-#include "tile.h"
-#include "player.h"
+#include "carddefinition.h"
 #include "effect.h"
 #include "event.h"
+#include "game.h"
+#include "player.h"
 #include "renderer.h"
+#include "tile.h"
+#include "utils.h"
 
 #pragma region Constructors / Initialization
 
 //Unit constructors
-Unit::Unit()
-	: Unit(CARD_NONE, FACTION_NEUTRAL, TRIBE_NONE, 0, 0, 0, "", "???", false, nullptr) {}
-Unit::Unit(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name)
-	: Unit(cardId, faction, tribe, cost, atk, hp, path, name, false, nullptr) {}
-Unit::Unit(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name, bool isToken)
-	: Unit(cardId, faction, tribe, cost, atk, hp, path, name, isToken, nullptr) {}
-Unit::Unit(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name, Effect* effect)
-	: Unit(cardId, faction, tribe, cost, atk, hp, path, name, false, effect) {}
-Unit::Unit(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name, bool isToken, Effect* effect) {
-	this->cardId = cardId;
-	this->faction = faction;
-	this->tribe = tribe;
-	baseCost = cost;
-	this->cost = cost;
-	baseAtk = atk;
-	this->atk = atk;
-	this->hp = hp;
-	baseHpMax = hp;
-	hpMax = hp;
+Unit::Unit(const CardDefinition& definition, Game* game, Player* owner) : Card(definition, game, owner) {
+	tribe = definition.tribe;
+	baseAtk = definition.atk;
+	atk = definition.atk;
+	baseHpMax = definition.hp;
+	hpMax = definition.hp;
+	hp = definition.hp;
 	baseMoveRange = 2;
 	moveRange = 2;
-	this->isToken = isToken;
-	this->name = name;
+	keywords = KEYWORD_NONE;
 	destroyed = false;
 	isDead = false;
 	hasMoved = false;
@@ -41,139 +29,42 @@ Unit::Unit(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, int 
 	hasCelerityMoved = true;
 	hasCelerityAttacked = true;
 	forcefieldBroken = false;
-	if (path == "")
-		sprite.Resize(5, 5);
-	else
-		sprite.CreateFromFile("resources/minions/" + path + ".txt");
 	curTile = nullptr;
-	game = nullptr;
-	owner = nullptr;
-	if (effect != nullptr && effect->GetID() != EFFECT_NONE)
-		AddEffect(*effect, this);
-	else
-		UpdateModifiers();
-	GenerateDetails();
+	UpdateModifiers();
 }
 Unit::~Unit() {}
-
-//Generate sidebar details
-void Unit::GenerateDetails() {
-	std::string str;
-	str.resize(name.size());
-	std::transform(name.begin(), name.end(), str.begin(), ::toupper);
-	switch (tribe) {
-	case TRIBE_NONE:
-		str += " - MINION";
-		break;
-	case TRIBE_GENERAL:
-		str += " - GENERAL";
-		break;
-	case TRIBE_ARCANYST:
-		str += " - ARCANYST";
-		break;
-	case TRIBE_PET:
-		str += " - PET";
-		break;
-	case TRIBE_GOLEM:
-		str += " - GOLEM";
-		break;
-	case TRIBE_MECH:
-		str += " - MECH";
-		break;
-	case TRIBE_DERVISH:
-		str += " - DERVISH";
-		break;
-	case TRIBE_VESPYR:
-		str += " - VESPYR";
-		break;
-	case TRIBE_STRUCTURE:
-		str += " - STRUCTURE";
-		break;
-	case TRIBE_WARMASTER:
-		str += " - WARMASTER";
-		break;
-	}
-	header[0].CreateFromString(str);
-	for (int i = name.size(); i < header[0].buffer.size(); ++i)
-		header[0].buffer[i].Attributes = COLOR_GRAY;
-	UpdateDetailStats();
-}
 
 #pragma endregion
 
 #pragma region Rendering
 
-//Render sprites
-void Unit::Render(Renderer& renderer) {
+//Render unit on board
+void Unit::RenderOnBoard(Renderer& renderer) {
+
+	//Draw sprite
 	hasAttacked ? sprite.SetColor(COLOR_GRAY) : sprite.SetColor(COLOR_LTWHITE);
 	renderer.Render(sprite);
+
+	//Update and draw ATK/HP sprites
+	hpSprite.pos.X += hpSprite.GetSize() - std::to_string(hp).size();
+	atkSprite.CreateFromString(std::to_string(atk), COLOR_GREEN);
+	hpSprite.CreateFromString(std::to_string(hp), COLOR_RED);
 	renderer.Render(atkSprite);
 	renderer.Render(hpSprite);
+
+	//Draw forcefield if applicable
 	if (HasKeywords(KEYWORD_FORCEFIELD) && !forcefieldBroken && game != nullptr)
 		game->DrawForcefield(sprite.pos.X, sprite.pos.Y, renderer);
+
 }
 
-//Draw card data
+//Update stat line and draw details
 void Unit::DrawDetails(Renderer& renderer, int& y) {
-	sprite.SetColor(COLOR_LTWHITE);
-	renderer.Render(sprite, 66, y);
-	renderer.Render(header[0], 72, y); ++y;
-	UpdateDetailStats();
-	renderer.Render(header[1], 72, y); y += 2;
-	UpdateDetails();
-	renderer.Render(details, 72, y); y += details.height + 1;
-	bool tokens = false;
-	for (int i = 0; i < effects.size(); ++i) {
-		if (effects[i]->GetToken() != nullptr) {
-			if (!tokens) {
-				if (y < 7)
-					y = 7;
-				renderer.Render(divider, 66, y);
-				tokens = true;
-			}
-			y += 2;
-			effects[i]->GetToken()->DrawDetails(renderer, y);
-		}
-	}
-}
-
-//Update HP & ATK sprites
-void Unit::UpdateStatSprites() {
-	std::string str = std::to_string(atk);
-	atkSprite.Resize(str.length(), 1);
-	for (int i = 0; i < str.length(); ++i)
-		atkSprite.buffer[i].Char.AsciiChar = str[i];
-	atkSprite.SetColor(COLOR_GREEN);
-	int width = hpSprite.buffer.size();
-	str = std::to_string(hp);
-	hpSprite.Resize(str.length(), 1);
-	for (int i = 0; i < str.length(); ++i)
-		hpSprite.buffer[i].Char.AsciiChar = str[i];
-	hpSprite.SetColor(COLOR_RED);
-	hpSprite.pos.X += width - str.length();
-}
-
-//Update card stats
-void Unit::UpdateDetailStats() {
-	eColor color = COLOR_LTBLUE;
-	std::string str = "";
-	if (tribe != TRIBE_GENERAL)
-		str = "COST:" + std::to_string(cost) + " ATK:" + std::to_string(atk) + " HP:" + std::to_string(hp);
-	else {
-		str = "ATK:" + std::to_string(atk) + " HP:" + std::to_string(hp);
-		color = COLOR_GREEN;
-	}
-	header[1].CreateFromString(str);
-	for (int i = 0; i < header[1].buffer.size(); ++i) {
-		if (str[i] != ':' && str[i] != ' ')
-			header[1].buffer[i].Attributes = color;
-		if (str[i] == ' ') {
-			if (color == COLOR_LTBLUE)
-				color = COLOR_GREEN;
-			else
-				color = COLOR_RED;
-		}
-	}
+	if (tribe == TRIBE_GENERAL)
+		Utils::GenerateStatSprite(detailStatSprite, atk, hp);
+	else
+		Utils::GenerateStatSprite(detailStatSprite, cost, atk, hp);
+	Card::DrawDetails(renderer, y);
 }
 
 #pragma endregion
@@ -199,9 +90,9 @@ void Unit::UpdateModifiers() {
 	hp = hpMax + hpDelta;
 	keywords = KEYWORD_NONE;
 	for (Effect* effect : effects)
-		keywords |= effect->GetKeywords();
+		keywords |= effect->ReadKeywords();
 	for (Effect* aura : auras)
-		keywords |= aura->GetKeywords();
+		keywords |= aura->ReadKeywords();
 }
 
 #pragma endregion

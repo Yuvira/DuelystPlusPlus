@@ -10,6 +10,7 @@ class Collections;
 class Renderer;
 class Card;
 class Unit;
+enum eCard;
 
 //Player class
 class Player {
@@ -31,8 +32,8 @@ public:
 	//Actions
 	void Shuffle();
 	void Draw();
-	void AddNewToHand(Card* original);
-	void AddNewToDeck(Card* original);
+	void AddNewToHand(eCard cardId);
+	void AddNewToDeck(eCard cardId);
 	void Replace(int idx);
 	void ModifyReplaceCount(int delta);
 	bool RemoveFromDeck(Card* card);

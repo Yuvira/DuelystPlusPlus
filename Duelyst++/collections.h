@@ -2,15 +2,18 @@
 
 //Include
 #include <unordered_map>
-#include <vector>
 #include "cardids.h"
 #include "effectids.h"
+#include "sprite.h";
 
 //Define
+class CardDefinition;
 class Card;
-class Unit;
-class Spell;
 class Effect;
+class EffectDefinition;
+class Renderer;
+class Spell;
+class Unit;
 
 //Collections class
 class Collections {
@@ -20,17 +23,28 @@ public:
 	Collections();
 	~Collections();
 
-	//Search functions
-	Effect* FindEffect(eEffect effect);
-	Card* FindCard(eCard card);
-	Unit* GetRandomTokenMinion();
+	//Instance generators
+	Effect* GetNewEffectInstance(eEffect effectId);
+	Card* GetNewCardInstance(eCard cardId, Game* game, Player* player);
+	Unit* GetNewUnitInstance(eCard cardId, Game* game, Player* player);
 
-	//Getters
-	const std::vector<Card*>& GetCards() const;
+	//Rendering
+	void RenderCardSprite(Renderer& renderer, int x, int y, int cardIdx);
+	void RenderCardSprite(Renderer& renderer, int x, int y, eCard cardId);
+	void RenderCardDetails(Renderer& renderer, int x, int& y, int cardIdx);
+	void RenderCardDetails(Renderer& renderer, int x, int& y, eCard cardId);
+	void RenderCardDetails(Renderer& renderer, int x, int& y, Card* card);
 
 	//Utils
-	int GetCardCount();
-	int CountCardsWhere(bool (*Predicate)(Card*));
+	eCard GetRandomTokenMinionID();
+	int GetCardCount() { return cardIds.size(); }
+	int CountCardsWhere(bool (*Predicate)(const CardDefinition& def));
+	eCard GetCardIDAtIndex(int idx) {
+		if (idx < 0 || idx >= cardIds.size())
+			return CARD_NONE;
+		return cardIds[idx];
+	}
+
 
 private:
 
@@ -39,13 +53,16 @@ private:
 	void RegisterSpells();
 	void RegisterCards();
 
-	//Object containers
-	std::unordered_map<eEffect, Effect> effects;
-	std::vector<Unit> unitList;
-	std::vector<Spell> spellList;
+	//Definition maps
+	std::unordered_map<eCard, CardDefinition> cardDefinitions;
+	std::unordered_map<eEffect, EffectDefinition> effectDefinitions;
 
-	//Reference lists
-	std::unordered_map<eCard, Card*> cards;
-	std::vector<Card*> cardList;
+	//ID list
+	std::vector<eCard> cardIds;
+
+	//Rendering sprites
+	inline static const Sprite tileDividerSprite{ "컴TILE컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�" };
+	inline static const Sprite tokenDividerSprite{ "컴TOKEN컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴" };
+	inline static Sprite descriptionSprite;
 
 };

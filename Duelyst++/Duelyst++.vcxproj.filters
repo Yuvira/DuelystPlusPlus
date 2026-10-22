@@ -110,6 +110,12 @@
     <ClInclude Include="modifiers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="carddefinition.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="effectdefinition.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="player.h">

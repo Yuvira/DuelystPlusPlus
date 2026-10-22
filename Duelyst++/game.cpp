@@ -123,11 +123,11 @@ void Game::RenderGame(Renderer& renderer) {
 
 	//Units
 	for (int i = 0; i < units.size(); ++i)
-		units[i]->Render(renderer);
+		units[i]->RenderOnBoard(renderer);
 
 	//Render active card while selecting opening gambit targets
 	if (activeCard != nullptr && activeCard->GetUnit() != nullptr && mode == MODE_SELECT && effectCallback.Callback)
-		activeCard->GetUnit()->Render(renderer);
+		activeCard->GetUnit()->RenderOnBoard(renderer);
 
 	//Move mode indicators
 	if (mode == MODE_MOVE) {
@@ -402,8 +402,6 @@ void Game::Update() {
 			units.erase(units.begin() + i);
 			--i;
 		}
-		else
-			units[i]->UpdateStatSprites();
 	}
 
 	//Update mana bars
@@ -471,18 +469,23 @@ void Game::ProcessEventStack() {
 
 //Add effect to list
 void Game::ApplyAura(eEffect effectId, Card* sourceCard, Effect* sourceEffect) {
-	ApplyAura(*collections->FindEffect(effectId), sourceCard, sourceEffect); }
-void Game::ApplyAura(Effect effect, Card* sourceCard, Effect* sourceEffect) {
+
+	//Get effect instance
+	if (effectId == EFFECT_NONE)
+		return;
+	Effect* newAura = collections->GetNewEffectInstance(effectId);
+	if (newAura == nullptr)
+		return;
 
 	//Ignore if source is already applying this aura
 	if (sourceEffect != nullptr)
 		for (int i = 0; i < auras.size(); ++i)
-			if (auras[i]->GetID() == effect.GetID() && auras[i]->GetSourceEffect() == sourceEffect)
+			if (auras[i]->ReadID() == newAura->ReadID() && auras[i]->GetSourceEffect() == sourceEffect)
 				return;
 
 	//Add aura to list
-	auras.push_back(new Effect(effect));
-	auras.back()->SetSources(sourceCard, sourceEffect);
+	auras.push_back(newAura);
+	newAura->SetSources(sourceCard, sourceEffect);
 
 	//Update cards
 	for (Unit* unit : units)
@@ -614,7 +617,7 @@ void Game::PostCast() {
 	ProcessEventStack();
 
 	//Track card cast this turn
-	castThisTurn.push_back(activeCard->original);
+	castThisTurn.push_back(activeCard);
 
 	//Trigger resolve event on card
 	for (Effect* effect : activeCard->GetEffects()) {
@@ -760,12 +763,12 @@ void Game::Summon(Card* card, int x, int y, bool actionBar) {
 
 //Summon token at tile
 void Game::SummonToken(eCard cardId, BoardTile* tile, Player* owner) {
-	Card* card = collections->FindCard(cardId);
-	if (card->IsUnit()) {
-		Unit* token = new Unit(*(card->GetUnit()));
-		SetContext(token, owner);
-		Summon(token, tile, false);
-	}
+	if (cardId == CARD_NONE)
+		return;
+	Unit* token = collections->GetNewUnitInstance(cardId, this, owner);
+	if (token == nullptr)
+		return;
+	Summon(token, tile, false);
 }
 
 //Send card that can't be added to hand to graveyard instead
@@ -1237,14 +1240,6 @@ BoardTile* Game::GetTileInFront(BoardTile* tile, Player* player) {
 #pragma endregion
 
 #pragma region Utils
-
-//Set game context for new token cards
-void Game::SetContext(Card* card, Player* player) {
-	card->game = this;
-	card->owner = player;
-	for (int i = 0; i < card->effects.size(); ++i)
-		card->effects[i] = new Effect(*card->effects[i]);
-}
 
 //Check if tiles is moveable
 bool Game::CanMove(int x, int y) {

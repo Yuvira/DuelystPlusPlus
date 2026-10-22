@@ -1,13 +1,57 @@
 #pragma once
 
 //Include
-#include <string>
-#include <vector>
+#include <algorithm>
+#include "sprite.h"
 
 //Namespace
 namespace Utils {
 
+#pragma region Internals
+
+	//Local only
+	namespace {
+
+		//GenerateStatSprite() helpers
+		inline void AddStatToString(std::string& string, std::string& stat, int& index) {
+			if (stat.size() > 0) {
+				if (string.size() > 0) {
+					index = string.size() + 1;
+					string += " ";
+				}
+				string += stat;
+			}
+		}
+		inline void ApplyStatSpriteColor(Sprite& sprite, eColor color, int start, int statLength, int textLength) {
+			if (textLength == 0)
+				return;
+			sprite.SetColor(color, start, start + statLength);
+			sprite.SetColor(color, start + statLength + 1, start + textLength + 1 + (textLength - (statLength + 1)));
+		}
+		inline void GenerateStatSprite(Sprite& sprite, std::string cost, std::string atk, std::string hp) {
+			std::string string = cost;
+			int costIdx = 0, atkIdx = 0, hpIdx = 0;
+			AddStatToString(string, atk, atkIdx);
+			AddStatToString(string, hp, hpIdx);
+			sprite.CreateFromString(string);
+			ApplyStatSpriteColor(sprite, COLOR_LTBLUE, costIdx, 4, cost.size());
+			ApplyStatSpriteColor(sprite, COLOR_GREEN, atkIdx, 3, atk.size());
+			ApplyStatSpriteColor(sprite, COLOR_RED, hpIdx, 2, hp.size());
+		}
+
+	}
+
+#pragma endregion
+
 #pragma region String Utils
+
+	//To uppercase
+	inline std::string ToUpper(std::string string) {
+		std::string upper;
+		upper.resize(string.size());
+		std::transform(string.begin(), string.end(), upper.begin(), ::toupper);
+		return upper;
+	}
 
 	//Get value with +/- indicator converted to string
 	inline std::string ValueString(int value) { return (value > 0 ? "+" : "-") + std::to_string(abs(value)); }
@@ -21,9 +65,10 @@ namespace Utils {
 		return width;
 	}
 
-#pragma endregion
-
 #pragma region Text Wrapper
+
+	//Description width
+	inline constexpr int MAX_DESCRIPTION_WIDTH = 42;
 
 	//Wrap text into string vector around given width
 	inline void WrapText(std::string in, std::vector<std::string>& out, int width) {
@@ -110,6 +155,17 @@ namespace Utils {
 			out.push_back(line + ' ' + word);
 
 	}
+
+#pragma endregion
+
+#pragma endregion
+
+#pragma region Sprite Utils
+
+	//Get sprite for stat line
+	inline void GenerateStatSprite(Sprite& sprite, int cost) { GenerateStatSprite(sprite, "COST:" + std::to_string(cost), "", ""); }
+	inline void GenerateStatSprite(Sprite& sprite, int atk, int hp) { GenerateStatSprite(sprite, "", "ATK:" + std::to_string(atk), "HP:" + std::to_string(hp)); }
+	inline void GenerateStatSprite(Sprite& sprite, int cost, int atk, int hp) { GenerateStatSprite(sprite, "COST:" + std::to_string(cost), "ATK:" + std::to_string(atk), "HP:" + std::to_string(hp)); }
 
 #pragma endregion
 

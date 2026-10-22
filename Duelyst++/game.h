@@ -136,7 +136,6 @@ public:
 	BoardTile* GetTileInFront(BoardTile* tile, Player* player);
 
 	//Utils
-	void SetContext(Card* card, Player* player);
 	bool CanMove(int x, int y);
 	void GenerateCallback(EffectContext ctx, BoardTile* source, void (*Callback)(EffectContext ctx, BoardTile* source, BoardTile* target));
 	bool AnyCastThisTurn(bool (*Predicate)(Card*));

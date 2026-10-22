@@ -139,10 +139,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="card.h" />
+    <ClInclude Include="carddefinition.h" />
     <ClInclude Include="cardids.h" />
     <ClInclude Include="cardviewer.h" />
     <ClInclude Include="collections.h" />
     <ClInclude Include="effect.h" />
+    <ClInclude Include="effectdefinition.h" />
     <ClInclude Include="effectids.h" />
     <ClInclude Include="event.h" />
     <ClInclude Include="eventmanager.h" />

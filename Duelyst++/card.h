@@ -7,13 +7,14 @@
 #include "modifiers.h"
 
 //Definitions
-class Renderer;
-class Game;
 class BoardTile;
+class CardDefinition;
 class Effect;
+class Game;
 class Player;
-class Unit;
+class Renderer;
 class Spell;
+class Unit;
 struct Event;
 
 #pragma region Targeting Helpers
@@ -42,13 +43,13 @@ struct TargetMode {
 class Card {
 public:
 
-	//Constructors
-	Card();
+	//Constructor
+	Card(const CardDefinition& definition, Game* game, Player* owner);
 	~Card();
 
-	//Detail rendering
+	//Rendering
+	virtual void DrawDetails(Renderer& renderer, int& y);
 	void UpdateDetails();
-	virtual void DrawDetails(Renderer& renderer, int& y) {}
 
 	//Stats
 	virtual void UpdateModifiers() {}
@@ -56,7 +57,6 @@ public:
 
 	//Effects
 	void AddEffect(eEffect effectId, Card* sourceCard);
-	void AddEffect(Effect effect, Card* sourceCard);
 	void RemoveEffect(Effect* effect);
 	void RemoveEffectAt(std::vector<int> indices);
 	void UpdateAuras();
@@ -64,6 +64,14 @@ public:
 
 	//Getters
 	std::vector<Effect*> GetEffects();
+	std::vector<eCard> GetTokens();
+
+	//Readonly getters
+	const eCard& ReadID() const { return cardId; }
+	const Sprite& ReadSprite() const { return sprite; }
+	const Sprite& ReadDetailNameSprite() const { return detailNameSprite; }
+	const Sprite& ReadDetailStatSprite() const { return detailStatSprite; }
+	const std::vector<std::string>& ReadDetails() const { return details; }
 
 	//Utils
 	virtual TargetMode GetTargetMode() { return TargetMode(); }
@@ -80,20 +88,20 @@ public:
 
 	//Properties
 	eCard cardId;
+	eRarity rarity;
 	eFaction faction;
-	bool isToken;
+	std::string name;
 	int baseCost;
 	int cost;
 	Game* game;
 	Player* owner;
-	Card* original;
-	std::string name;
 	std::vector<Effect*> effects;
 	std::vector<Effect*> auras;
+	bool isToken;
 	Sprite sprite;
-	Sprite header[2];
-	Sprite details;
-	Sprite divider;
+	Sprite detailNameSprite;
+	Sprite detailStatSprite;
+	std::vector<std::string> details;
 
 };
 
@@ -101,20 +109,13 @@ public:
 class Unit : public Card {
 public:
 
-	//Constructors / Initialization
-	Unit();
-	Unit(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name);
-	Unit(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name, bool isToken);
-	Unit(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name, Effect* effect);
-	Unit(eCard cardId, eFaction faction, eTribe tribe, int cost, int atk, int hp, std::string path, std::string name, bool isToken, Effect* effect);
+	//Constructor
+	Unit(const CardDefinition& definition, Game* game, Player* owner);
 	~Unit();
-	void GenerateDetails();
 
 	//Rendering
-	void Render(Renderer& renderer);
+	void RenderOnBoard(Renderer& renderer);
 	void DrawDetails(Renderer& renderer, int& y);
-	void UpdateStatSprites();
-	void UpdateDetailStats();
 
 	//Updates
 	void Update(bool& shouldLoop);
@@ -151,9 +152,9 @@ public:
 	eTribe tribe;
 	int baseAtk;
 	int atk;
-	int hp;
 	int baseHpMax;
 	int hpMax;
+	int hp;
 	int baseMoveRange;
 	int moveRange;
 	int keywords;
@@ -176,18 +177,12 @@ class Spell : public Card {
 //Methods
 public:
 
-	//Constructors / Initialization
-	Spell();
-	Spell(eCard cardId, eFaction faction, int cost, std::string path, std::string name);
-	Spell(eCard cardId, eFaction faction, int cost, std::string path, std::string name, bool isToken);
-	Spell(eCard cardId, eFaction faction, int cost, std::string path, std::string name, Effect* effect);
-	Spell(eCard cardId, eFaction faction, int cost, std::string path, std::string name, bool isToken, Effect* effect);
+	//Constructor
+	Spell(const CardDefinition& definition, Game* game, Player* owner);
 	~Spell();
-	void GenerateDetails();
 
 	//Rendering
 	void DrawDetails(Renderer& renderer, int& y);
-	void UpdateDetailStats();
 
 	//Updates
 	void UpdateModifiers();

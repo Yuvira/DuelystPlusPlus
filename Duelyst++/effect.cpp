@@ -1,19 +1,23 @@
 //Include
-#include "effect.h"
-#include "game.h"
 #include "card.h"
+#include "effect.h"
+#include "effectdefinition.h"
+#include "game.h"
 #include "tile.h"
 
-//Effect constructors
-Effect::Effect() : Effect(EFFECT_NONE, KEYWORD_NONE, "") {}
-Effect::Effect(eEffect effectId, int keywords, std::string description) {
-	this->effectId = effectId;
-	this->keywords = keywords;
-	this->description = description;
-	token = nullptr;
+//Effect constructor
+Effect::Effect(const EffectDefinition& definition) {
+	this->effectId = definition.effectId;
+	this->description = definition.description;
+	this->keywords = definition.keywords;
+	this->modifiers = definition.modifiers;
+	this->token = definition.token;
 	sourceCard = nullptr;
 	sourceEffect = nullptr;
-	AuraPredicate = nullptr;
+	AuraPredicate = definition.AuraPredicate;
+	preTriggers = definition.preTriggers;
+	postTriggers = definition.postTriggers;
+	selfTriggers = definition.selfTriggers;
 }
 Effect::~Effect() {}
 
@@ -30,33 +34,12 @@ void Effect::TriggerPostEvent(EffectContext ctx, Event* ev) { DispatchTrigger(po
 void Effect::TriggerSelfEvent(EffectContext ctx, Event* ev) { DispatchTrigger(selfTriggers, ctx, ev); }
 
 //Modifier updates
-Effect& Effect::AddModifier(eStat stat, eModifier type, int value) {
-	if (!modifiers.AddModifier(stat, type, value))
-		description = "AddModifier Error";
-	return *this;
-}
 void Effect::UpdateModifier(eStat stat, int value) {
 	if (!modifiers.UpdateModifier(stat, value))
 		description = "UpdateModifier Error";
 }
 
-//Getters & Setters
-Card* Effect::GetToken() { return token; }
-Card* Effect::GetSourceCard() { return sourceCard; };
-Effect* Effect::GetSourceEffect() { return sourceEffect; };
-void Effect::SetToken(Card* token) { this->token = token; }
-void Effect::SetSources(Card* card, Effect* effect) {
-	this->sourceCard = card;
-	this->sourceEffect = effect;
-}
-
-//Readonly getters
-const eEffect& Effect::GetID() const { return effectId; }
-const std::string& Effect::GetDescription() const { return description; }
-const int& Effect::GetKeywords() const { return keywords; }
-const ModifierGroup& Effect::GetModifiers() const { return modifiers; }
-
-//Utilities
+//EffectContext Utilities
 bool EffectContext::IsOnBoard() { return card->IsOnBoard(); }
 bool EffectContext::BothOnBoard(Card* compare) { return card->IsOnBoard() && compare->IsOnBoard(); }
 bool EffectContext::IsCard(Card* compare) { return card == compare; }

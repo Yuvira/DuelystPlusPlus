@@ -1,8 +1,9 @@
 //Include
 #include <conio.h>
+#include "card.h"
+#include "carddefinition.h"
 #include "cardviewer.h"
 #include "collections.h"
-#include "card.h"
 #include "game.h"
 #include "player.h"
 #include "renderer.h"
@@ -54,13 +55,13 @@ void CardViewer::RenderCollection(Renderer& renderer) {
 			renderer.Render(tiles[i][j].border);
 
 	//Cards
-	for (int a = page * 54; a < min((page + 1) * 54, collections->GetCards().size()); ++a)
-		renderer.Render(collections->GetCards()[a]->sprite, (((a - (page * 54)) % 9) * 7) + 2, (((a - (page * 54)) / 9) * 7) + 7);
+	for (int a = page * 54; a < min((page + 1) * 54, collections->GetCardCount()); ++a)
+		collections->RenderCardSprite(renderer, (((a - (page * 54)) % 9) * 7) + 2, (((a - (page * 54)) / 9) * 7) + 7, a);
 
 	//Card counts
-	count[0].CreateFromString("Generals  : " + std::to_string(collections->CountCardsWhere([](Card* card) { return card->IsGeneral(); })));
-	count[1].CreateFromString("Minions   : " + std::to_string(collections->CountCardsWhere([](Card* card) { return card->IsUnit() && !card->IsGeneral(); })));
-	count[2].CreateFromString("Spells    : " + std::to_string(collections->CountCardsWhere([](Card* card) { return card->IsSpell(); })));
+	count[0].CreateFromString("Generals  : " + std::to_string(collections->CountCardsWhere([](const CardDefinition& def) { return def.tribe == TRIBE_GENERAL; })));
+	count[1].CreateFromString("Minions   : " + std::to_string(collections->CountCardsWhere([](const CardDefinition& def) { return def.type == CARDTYPE_UNIT && def.tribe != TRIBE_GENERAL; })));
+	count[2].CreateFromString("Spells    : " + std::to_string(collections->CountCardsWhere([](const CardDefinition& def) { return def.type == CARDTYPE_SPELL; })));
 	count[3].CreateFromString("Artifacts : 0");
 	count[4].CreateFromString("TOTAL : " + std::to_string(collections->GetCardCount()));
 	for (int i = 0; i < 4; ++i)
@@ -79,8 +80,8 @@ void CardViewer::RenderCollection(Renderer& renderer) {
 void CardViewer::RenderSidebar(Renderer& renderer) {
 	int y = 1;
 	int i = (pos.y * 9) + pos.x + (page * 54);
-	if (i < collections->GetCards().size())
-		collections->GetCards()[i]->DrawDetails(renderer, y);
+	if (i < collections->GetCardCount())
+		collections->RenderCardDetails(renderer, 66, y, i);
 }
 
 #pragma endregion
@@ -102,9 +103,9 @@ void CardViewer::Input() {
 	//Add current card to decks
 	else if (asciiVal == 32) {                                          //Space
 		int i = (pos.y * 9) + pos.x + (page * 54);
-		if (i < collections->GetCards().size()) {
-			game->GetTurnPlayer()->AddNewToDeck(collections->GetCards()[i]->original);
-			game->GetNonTurnPlayer()->AddNewToDeck(collections->GetCards()[i]->original);
+		if (i < collections->GetCardCount()) {
+			game->GetTurnPlayer()->AddNewToDeck(collections->GetCardIDAtIndex(i));
+			game->GetNonTurnPlayer()->AddNewToDeck(collections->GetCardIDAtIndex(i));
 		}
 	}
 

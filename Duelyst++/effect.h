@@ -8,12 +8,14 @@
 #include "modifiers.h"
 
 //Definitions
-class Game;
+class Card;
 class BoardTile;
+class Effect;
+class EffectDefinition;
+class Game;
 class Map;
 class Player;
-class Card;
-class Effect;
+enum eCard;
 
 #pragma region Helper Structs
 
@@ -91,20 +93,8 @@ class Effect {
 public:
 
 	//Constructors
-	Effect();
-	Effect(eEffect effectId, int keywords, std::string description);
+	Effect(const EffectDefinition& definition);
 	~Effect();
-
-	//Trigger registration
-	template <typename T>
-	void RegisterPreTrigger(bool (*Predicate)(EffectContext ctx, T& ev), void (*Trigger)(EffectContext ctx, T& ev)) {
-		preTriggers.emplace_back(Predicate, Trigger); }
-	template <typename T>
-	void RegisterPostTrigger(bool (*Predicate)(EffectContext ctx, T& ev), void (*Trigger)(EffectContext ctx, T& ev)) {
-		postTriggers.emplace_back(Predicate, Trigger); }
-	template <typename T>
-	void RegisterSelfTrigger(void (*Trigger)(EffectContext ctx, T& ev)) {
-		selfTriggers.emplace_back(static_cast<bool (*)(EffectContext ctx, T& ev)>(nullptr), Trigger); }
 
 	//Trigger dispatch
 	static void DispatchTrigger(const std::vector<EventTrigger>& triggers, EffectContext ctx, Event* ev);
@@ -112,27 +102,25 @@ public:
 	void TriggerPostEvent(EffectContext ctx, Event* ev);
 	void TriggerSelfEvent(EffectContext ctx, Event* ev);
 
-	//Modifier updates
-	Effect& AddModifier(eStat stat, eModifier type, int value);
+	//Utils
 	void UpdateModifier(eStat stat, int value);
-
-	//Aura predicate
-	void SetAuraPredicate(bool (*Predicate)(EffectContext ctx)) { AuraPredicate = Predicate; }
 	bool MatchesAuraPredicate(Game* game, Card* card) { return AuraPredicate && AuraPredicate(EffectContext(this, card, game)); }
 
 	//Getters & Setters
-	Card* GetToken();
-	Card* GetSourceCard();
-	Effect* GetSourceEffect();
-	void SetToken(Card* token);
-	void SetSources(Card* card, Effect* effect);
-	void HideModifiers() { modifiers.HideValues(); }
+	Card* GetSourceCard() { return sourceCard; };
+	Effect* GetSourceEffect() { return sourceEffect; };
+	void SetToken(eCard token) { this->token = token; }
+	void SetSources(Card* card, Effect* effect) {
+		this->sourceCard = card;
+		this->sourceEffect = effect;
+	}
 
 	//Readonly getters
-	const eEffect& GetID() const;
-	const std::string& GetDescription() const;
-	const int& GetKeywords() const;
-	const ModifierGroup& GetModifiers() const;
+	const eEffect& ReadID() const { return effectId; }
+	const std::string& ReadDescription() const { return description; }
+	const int& ReadKeywords() const { return keywords; }
+	const eCard& ReadToken() const { return token; }
+	const ModifierGroup& ReadModifiers() const { return modifiers; }
 
 private:
 
@@ -141,7 +129,7 @@ private:
 	std::string description;
 	int keywords;
 	ModifierGroup modifiers;
-	Card* token;
+	eCard token;
 	Card* sourceCard;
 	Effect* sourceEffect;
 	bool (*AuraPredicate)(EffectContext ctx);
