@@ -679,6 +679,20 @@ void Collections::RegisterCards() {
 		6, 7, 4, SKILL_FRENZY
 	);
 
+	//Shiro Puppydragon
+	cardDefinitions.try_emplace(
+		CARD_SHIRO_PUPPYDRAGON, CARD_SHIRO_PUPPYDRAGON, RARITY_COMMON, FACTION_NEUTRAL, TRIBE_NONE,
+		"shiropuppydragon", "Shiro Puppydragon",
+		2, 1, 4, SKILL_SHIRO_PUPPYDRAGON
+	);
+
+	//Silvertongue Corsair
+	cardDefinitions.try_emplace(
+		CARD_SILVERTONGUE_CORSAIR, CARD_SILVERTONGUE_CORSAIR, RARITY_RARE, FACTION_NEUTRAL, TRIBE_NONE,
+		"silvertonguecorsair", "Silvertongue Corsair",
+		3, 3, 3, SKILL_SILVERTONGUE_CORSAIR
+	);
+
 #pragma endregion
 
 #pragma region Tokens

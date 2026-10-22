@@ -925,4 +925,25 @@ void Collections::RegisterEffects() {
 				ctx.game->SummonToken(ctx.card->ReadID(), tile, ctx.GetOwner());
 	});
 
+	//Shiro Puppydragon
+	effectDefinitions.try_emplace(SKILL_SHIRO_PUPPYDRAGON, SKILL_SHIRO_PUPPYDRAGON, KEYWORD_NONE, "At the end of your turn, give each nearby friendly minion +1 Attack");
+	effectDefinitions.at(SKILL_SHIRO_PUPPYDRAGON).RegisterPostTrigger<OnTurnEndEvent>(
+		[](EffectContext ctx, OnTurnEndEvent& ev) {
+			return ctx.IsOnBoard() && ctx.IsOwnedBy(ev.player); },
+		[](EffectContext ctx, OnTurnEndEvent& ev) {
+			for (Unit* unit : ctx.GetMap()->GetUnitsNear(ctx.GetTile()))
+				if (ctx.SharesOwner(unit) && !unit->IsGeneral())
+					unit->AddEffect(MODIFIER_SHIRO_PUPPYDRAGON, ctx.card);
+	});
+	effectDefinitions.try_emplace(MODIFIER_SHIRO_PUPPYDRAGON, MODIFIER_SHIRO_PUPPYDRAGON, KEYWORD_NONE, "Shiro Puppydragon");
+	effectDefinitions.at(MODIFIER_SHIRO_PUPPYDRAGON).AddModifier(STAT_ATK, MODTYPE_BUFF, 1);
+
+	//Silvertongue Corsair
+	effectDefinitions.try_emplace(SKILL_SILVERTONGUE_CORSAIR, SKILL_SILVERTONGUE_CORSAIR, KEYWORD_NONE, "Takes no damage from Generals");
+	effectDefinitions.at(SKILL_SILVERTONGUE_CORSAIR).RegisterPreTrigger<OnDamageEvent>(
+		[](EffectContext ctx, OnDamageEvent& ev) {
+			return ctx.IsCardOnBoard(ev.target) && ev.source->IsUnit() && ev.source->GetUnit()->IsGeneral(); },
+		[](EffectContext ctx, OnDamageEvent& ev) {
+			ev.damage = 0; });
+
 }
