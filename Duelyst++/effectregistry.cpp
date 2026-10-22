@@ -173,9 +173,11 @@ void Collections::RegisterEffects() {
 	//Bloodtear Alchemist
 	effectDefinitions.try_emplace(SKILL_BLOODTEAR_ALCHEMIST, SKILL_BLOODTEAR_ALCHEMIST, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Deal 1 damage to an enemy");
 	effectDefinitions.at(SKILL_BLOODTEAR_ALCHEMIST).RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
-		ctx.game->HighlightSelectable(TargetMode(TARGET_MODE_ALL, [](BoardTile* tile) {
-			return tile->HasUnit() && tile->unit->IsEnemy(); }));
-		ctx.game->GenerateCallback(ctx, ev.tile,
+		std::vector<BoardTile*> valid;
+		for (Unit* target : ctx.game->GetUnits())
+			if (!ctx.SharesOwner(target))
+				valid.push_back(target->curTile);
+		ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
 			[](EffectContext ctx, BoardTile* source, BoardTile* target) {
 				if (target->HasUnit())
 					target->unit->DealDamage(ctx.card, 1);
@@ -249,9 +251,11 @@ void Collections::RegisterEffects() {
 	//Crossbones
 	effectDefinitions.try_emplace(SKILL_CROSSBONES, SKILL_CROSSBONES, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Destroy an enemy minion with Ranged");
 	effectDefinitions.at(SKILL_CROSSBONES).RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
-		ctx.game->HighlightSelectable(TargetMode(TARGET_MODE_ALL, [](BoardTile* tile) {
-			return tile->HasUnit() && tile->unit->IsEnemy() && !tile->unit->IsGeneral() && tile->unit->HasKeywords(KEYWORD_RANGED); }));
-		ctx.game->GenerateCallback(ctx, ev.tile,
+		std::vector<BoardTile*> valid;
+		for (Unit* target : ctx.game->GetUnits())
+			if (!ctx.SharesOwner(target) && !target->IsGeneral() && target->HasKeywords(KEYWORD_RANGED))
+				valid.push_back(target->curTile);
+		ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
 			[](EffectContext ctx, BoardTile* source, BoardTile* target) {
 				if (target->HasUnit())
 					target->unit->Destroy(ctx.card);
@@ -354,8 +358,8 @@ void Collections::RegisterEffects() {
 	//Ephemeral Shroud
 	effectDefinitions.try_emplace(SKILL_EPHEMERAL_SHROUD, SKILL_EPHEMERAL_SHROUD, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Dispel 1 nearby space");
 	effectDefinitions.at(SKILL_EPHEMERAL_SHROUD).RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
-		ctx.game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, nullptr), ev.tile);
-		ctx.game->GenerateCallback(ctx, ev.tile,
+		std::vector<BoardTile*> valid = ctx.game->map.GetAllNear(ev.tile);
+		ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
 			[](EffectContext ctx, BoardTile* source, BoardTile* target) {
 				target->SetFeature(TILE_NONE);
 				if (target->HasUnit())
@@ -414,9 +418,11 @@ void Collections::RegisterEffects() {
 	//Ghost Lynx
 	effectDefinitions.try_emplace(SKILL_GHOST_LYNX, SKILL_GHOST_LYNX, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Teleport a nearby minion to a random space");
 	effectDefinitions.at(SKILL_GHOST_LYNX).RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
-		ctx.game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, [](BoardTile* tile) {
-			return tile->HasUnit() && !tile->unit->IsGeneral(); }), ev.tile);
-		ctx.game->GenerateCallback(ctx, ev.tile,
+		std::vector<BoardTile*> valid;
+		for (BoardTile* target : ctx.game->map.GetAllNear(ev.tile))
+			if (target->HasUnit() && !target->unit->IsGeneral())
+				valid.push_back(target);
+		ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
 			[](EffectContext ctx, BoardTile* source, BoardTile* target) {
 				if (target->HasUnit())
 					if (BoardTile* tile = ctx.GetMap()->GetRandomEmpty(source, target))
@@ -470,8 +476,10 @@ void Collections::RegisterEffects() {
 	//Healing Mystic
 	effectDefinitions.try_emplace(SKILL_HEALING_MYSTIC, SKILL_HEALING_MYSTIC, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Restore 2 Health to anything");
 	effectDefinitions.at(SKILL_HEALING_MYSTIC).RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
-		ctx.game->HighlightSelectable(TargetMode(TARGET_MODE_ALL, [](BoardTile* tile) { return tile->HasUnit(); }));
-		ctx.game->GenerateCallback(ctx, ev.tile,
+		std::vector<BoardTile*> valid;
+		for (Unit* target : ctx.game->GetUnits())
+			valid.push_back(target->curTile);
+		ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
 			[](EffectContext ctx, BoardTile* source, BoardTile* target) {
 				if (target->HasUnit())
 					target->unit->Heal(ctx.card, 2);
@@ -481,9 +489,11 @@ void Collections::RegisterEffects() {
 	//Hollow Grovekeeper
 	effectDefinitions.try_emplace(SKILL_HOLLOW_GROVEKEEPER, SKILL_HOLLOW_GROVEKEEPER, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Destroy ANY nearby minion with Provoke or Frenzy. If you do, this minion gains Provoke and Frenzy");
 	effectDefinitions.at(SKILL_HOLLOW_GROVEKEEPER).RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
-		ctx.game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, [](BoardTile* tile) {
-			return tile->HasUnit() && !tile->unit->IsGeneral() && (tile->unit->HasKeywords(KEYWORD_PROVOKE) || tile->unit->HasKeywords(KEYWORD_FRENZY)); }), ev.tile);
-		ctx.game->GenerateCallback(ctx, ev.tile,
+		std::vector<BoardTile*> valid;
+		for (BoardTile* target : ctx.game->map.GetAllNear(ev.tile))
+			if (target->HasUnit() && !target->unit->IsGeneral() && (target->unit->HasKeywords(KEYWORD_PROVOKE) || target->unit->HasKeywords(KEYWORD_FRENZY)))
+				valid.push_back(target);
+		ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
 			[](EffectContext ctx, BoardTile* source, BoardTile* target) {
 				if (target->HasUnit()) {
 					target->unit->Destroy(ctx.card);
@@ -525,14 +535,16 @@ void Collections::RegisterEffects() {
 	//Keeper of the Vale
 	effectDefinitions.try_emplace(SKILL_KEEPER_OF_THE_VALE, SKILL_KEEPER_OF_THE_VALE, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Summon a random non-token friendly minion destroyed this game nearby");
 	effectDefinitions.at(SKILL_KEEPER_OF_THE_VALE).RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
-		ctx.game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, [](BoardTile* tile) {
-			return !tile->HasUnit(); }), ev.tile);
-		ctx.game->GenerateCallback(ctx, ev.tile,
+		std::vector<BoardTile*> valid;
+		for (BoardTile* target : ctx.game->map.GetAllNear(ev.tile))
+			if (!target->HasUnit())
+				valid.push_back(target);
+		ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
 			[](EffectContext ctx, BoardTile* source, BoardTile* target) {
 				if (!target->HasUnit()) {
 					std::vector<Card*> valid;
-					for (Card* destroyed : ctx.game->GetDestroyedUnits())
-						if (!destroyed->isToken && destroyed->IsUnit() && ctx.SharesOwner(destroyed))
+					for (Unit* destroyed : ctx.game->GetDestroyedUnits())
+						if (!destroyed->isToken && ctx.SharesOwner(destroyed))
 							valid.push_back(destroyed);
 					if (valid.size() > 0)
 						ctx.game->SummonToken(valid[rand() % valid.size()]->cardId, target, ctx.GetOwner());
@@ -598,9 +610,11 @@ void Collections::RegisterEffects() {
 	//Maw
 	effectDefinitions.try_emplace(SKILL_MAW, SKILL_MAW, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Deal 2 damage to a nearby enemy minion");
 	effectDefinitions.at(SKILL_MAW).RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
-		ctx.game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, [](BoardTile* tile) {
-			return tile->HasUnit() && tile->unit->IsEnemy() && !tile->unit->IsGeneral(); }), ev.tile);
-		ctx.game->GenerateCallback(ctx, ev.tile,
+		std::vector<BoardTile*> valid;
+		for (BoardTile* target : ctx.game->map.GetAllNear(ev.tile))
+			if (target->HasUnit() && !target->unit->IsGeneral() && !ctx.SharesOwner(target->unit))
+				valid.push_back(target);
+		ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
 			[](EffectContext ctx, BoardTile* source, BoardTile* target) {
 				if (target->HasUnit())
 					target->unit->DealDamage(ctx.card, 2);
@@ -686,9 +700,11 @@ void Collections::RegisterEffects() {
 	//Primus Fist
 	effectDefinitions.try_emplace(SKILL_PRIMUS_FIST, SKILL_PRIMUS_FIST, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Give a nearby friendly minion +2 Attack this turn");
 	effectDefinitions.at(SKILL_PRIMUS_FIST).RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
-		ctx.game->HighlightSelectable(TargetMode(TARGET_MODE_NEAR_TILE, [](BoardTile* tile) {
-			return tile->HasUnit() && tile->unit->IsAlly() && !tile->unit->IsGeneral(); }), ev.tile);
-		ctx.game->GenerateCallback(ctx, ev.tile,
+		std::vector<BoardTile*> valid;
+		for (BoardTile* target : ctx.game->map.GetAllNear(ev.tile))
+			if (target->HasUnit() && ctx.SharesOwner(target->unit) && !target->unit->IsGeneral())
+				valid.push_back(target);
+		ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
 			[](EffectContext ctx, BoardTile* source, BoardTile* target) {
 				if (target->HasUnit())
 					target->unit->AddEffect(MODIFIER_PRIMUS_FIST, ctx.card);

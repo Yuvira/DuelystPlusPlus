@@ -972,6 +972,16 @@ void Game::HighlightSelectable(TargetMode targetMode, BoardTile* tile) {
 
 }
 
+//Highlight targets and generate callback
+void Game::HighlightTargetsForCallback(std::vector<BoardTile*>& targets, EffectContext ctx, BoardTile* source, void (*Callback)(EffectContext ctx, BoardTile* source, BoardTile* target)) {
+	if (targets.size() == 0)
+		return;
+	selectable = targets;
+	selectionIdx = 0;
+	mode = MODE_SELECT;
+	effectCallback = EffectCallback(EffectContext(ctx.effect, ctx.card, ctx.game), source, Callback);
+}
+
 #pragma endregion
 
 #pragma region Pathfinding
@@ -1244,13 +1254,6 @@ bool Game::CanMove(int x, int y) {
 			return true;
 	}
 	return false;
-}
-
-//Generate effect callback if targets available
-void Game::GenerateCallback(EffectContext ctx, BoardTile* source, void (*Callback)(EffectContext ctx, BoardTile* source, BoardTile* target)) {
-	if (selectable.size() == 0)
-		return;
-	effectCallback = EffectCallback(EffectContext(ctx.effect, ctx.card, ctx.game), source, Callback);
 }
 
 //Check if any cards matching predicate were cast this turn

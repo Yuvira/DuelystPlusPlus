@@ -108,6 +108,7 @@ public:
 	void SearchMoveable(int x, int y, int range);
 	void HighlightSelectable(TargetMode targetMode);
 	void HighlightSelectable(TargetMode targetMode, BoardTile* tile);
+	void HighlightTargetsForCallback(std::vector<BoardTile*>& targets, EffectContext ctx, BoardTile* source, void (*Callback)(EffectContext ctx, BoardTile* source, BoardTile* target));
 
 	//Pathfinding
 	void CreatePath();
@@ -134,7 +135,6 @@ public:
 
 	//Utils
 	bool CanMove(int x, int y);
-	void GenerateCallback(EffectContext ctx, BoardTile* source, void (*Callback)(EffectContext ctx, BoardTile* source, BoardTile* target));
 	bool AnyCastThisTurn(bool (*Predicate)(Card*));
 	std::string GetPlayerString(Player* player);
 	std::string GetCardString(Card* card);
