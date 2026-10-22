@@ -33,12 +33,12 @@ enum eMode {
 class EffectCallback {
 public:
 	EffectCallback();
-	EffectCallback(EffectContext ctx, BoardTile* source, void (*Callback)(EffectContext ctx, BoardTile* source, BoardTile* target));
+	EffectCallback(EffectContext ctx, BoardTile* source, void (*Callback)(EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets));
 	~EffectCallback();
-	void Execute(BoardTile* target);
+	void Execute(std::vector<BoardTile*>& targets);
 	EffectContext context;
 	BoardTile* source;
-	void (*Callback)(EffectContext ctx, BoardTile* source, BoardTile* target);
+	void (*Callback)(EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets);
 };
 
 //Pathing coords
@@ -108,7 +108,7 @@ public:
 	void SearchMoveable(int x, int y, int range);
 	void HighlightSelectable(TargetMode targetMode);
 	void HighlightSelectable(TargetMode targetMode, BoardTile* tile);
-	void HighlightTargetsForCallback(std::vector<BoardTile*>& targets, EffectContext ctx, BoardTile* source, void (*Callback)(EffectContext ctx, BoardTile* source, BoardTile* target));
+	void HighlightTargetsForCallback(std::vector<BoardTile*>& targets, EffectContext ctx, BoardTile* source, void (*Callback)(EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets));
 
 	//Pathfinding
 	void CreatePath();
@@ -154,6 +154,8 @@ private:
 	std::vector<Event*> eventStack;
 	std::vector<Effect*> auras;
 	EffectCallback effectCallback;
+	EffectCallback nextEffectCallback;
+	std::vector<BoardTile*> callbackTargets;
 	bool* modeSwitch;
 
 	//Turn tracking

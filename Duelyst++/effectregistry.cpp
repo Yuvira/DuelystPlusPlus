@@ -178,9 +178,9 @@ void Collections::RegisterEffects() {
 			if (!ctx.SharesOwner(target))
 				valid.push_back(target->curTile);
 		ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
-			[](EffectContext ctx, BoardTile* source, BoardTile* target) {
-				if (target->HasUnit())
-					target->unit->DealDamage(ctx.card, 1);
+			[](EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets) {
+				if (targets.size() > 0 && targets[0]->HasUnit())
+					targets[0]->unit->DealDamage(ctx.card, 1);
 		});
 	});
 
@@ -256,9 +256,9 @@ void Collections::RegisterEffects() {
 			if (!ctx.SharesOwner(target) && !target->IsGeneral() && target->HasKeywords(KEYWORD_RANGED))
 				valid.push_back(target->curTile);
 		ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
-			[](EffectContext ctx, BoardTile* source, BoardTile* target) {
-				if (target->HasUnit())
-					target->unit->Destroy(ctx.card);
+			[](EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets) {
+				if (targets.size() > 0 && targets[0]->HasUnit())
+					targets[0]->unit->Destroy(ctx.card);
 		});
 	});
 
@@ -360,10 +360,12 @@ void Collections::RegisterEffects() {
 	effectDefinitions.at(SKILL_EPHEMERAL_SHROUD).RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
 		std::vector<BoardTile*> valid = ctx.GetMap()->GetAllNear(ev.tile);
 		ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
-			[](EffectContext ctx, BoardTile* source, BoardTile* target) {
-				target->SetFeature(TILE_NONE);
-				if (target->HasUnit())
-					target->unit->Dispel();
+			[](EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets) {
+				if (targets.size() > 0) {
+					targets[0]->SetFeature(TILE_NONE);
+					if (targets[0]->HasUnit())
+						targets[0]->unit->Dispel();
+				}
 		});
 	});
 
@@ -422,10 +424,10 @@ void Collections::RegisterEffects() {
 			if (!unit->IsGeneral())
 				valid.push_back(unit->curTile);
 		ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
-			[](EffectContext ctx, BoardTile* source, BoardTile* target) {
-				if (target->HasUnit())
-					if (BoardTile* tile = ctx.GetMap()->GetRandomEmpty(source, target))
-						target->unit->MoveToTile(tile, true);
+			[](EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets) {
+				if (targets.size() > 0 && targets[0]->HasUnit())
+					if (BoardTile* tile = ctx.GetMap()->GetRandomEmpty(source))
+						targets[0]->unit->MoveToTile(tile, true);
 		});
 	});
 
@@ -479,9 +481,9 @@ void Collections::RegisterEffects() {
 		for (Unit* target : ctx.game->GetUnits())
 			valid.push_back(target->curTile);
 		ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
-			[](EffectContext ctx, BoardTile* source, BoardTile* target) {
-				if (target->HasUnit())
-					target->unit->Heal(ctx.card, 2);
+			[](EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets) {
+				if (targets.size() > 0 && targets[0]->HasUnit())
+					targets[0]->unit->Heal(ctx.card, 2);
 		});
 	});
 
@@ -493,9 +495,9 @@ void Collections::RegisterEffects() {
 			if (!unit->IsGeneral() && (unit->HasKeywords(KEYWORD_PROVOKE) || unit->HasKeywords(KEYWORD_FRENZY)))
 				valid.push_back(unit->curTile);
 		ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
-			[](EffectContext ctx, BoardTile* source, BoardTile* target) {
-				if (target->HasUnit()) {
-					target->unit->Destroy(ctx.card);
+			[](EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets) {
+				if (targets.size() > 0 && targets[0]->HasUnit()) {
+					targets[0]->unit->Destroy(ctx.card);
 					ctx.card->AddEffect(MODIFIER_HOLLOW_GROVEKEEPER, ctx.card);
 				}
 		});
@@ -538,14 +540,14 @@ void Collections::RegisterEffects() {
 		for (BoardTile* tile : ctx.GetMap()->GetEmptyNear(ev.tile))
 			valid.push_back(tile);
 		ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
-			[](EffectContext ctx, BoardTile* source, BoardTile* target) {
-				if (!target->HasUnit()) {
+			[](EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets) {
+				if (targets.size() > 0 && !targets[0]->HasUnit()) {
 					std::vector<Card*> valid;
 					for (Unit* destroyed : ctx.game->GetDestroyedUnits())
 						if (!destroyed->isToken && ctx.SharesOwner(destroyed))
 							valid.push_back(destroyed);
 					if (valid.size() > 0)
-						ctx.game->SummonToken(valid[rand() % valid.size()]->cardId, target, ctx.GetOwner());
+						ctx.game->SummonToken(valid[rand() % valid.size()]->cardId, targets[0], ctx.GetOwner());
 				}
 		});
 	});
@@ -576,11 +578,8 @@ void Collections::RegisterEffects() {
 	//Lightbender
 	effectDefinitions.try_emplace(SKILL_LIGHTBENDER, SKILL_LIGHTBENDER, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Dispel ALL spaces around it");
 	effectDefinitions.at(SKILL_LIGHTBENDER).RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
-		for (BoardTile* tile : ctx.GetMap()->GetAllNear(ev.tile)) {
-			tile->SetFeature(TILE_NONE);
-			if (tile->HasUnit())
-				tile->unit->Dispel();
-		}
+		for (BoardTile* tile : ctx.GetMap()->GetAllNear(ev.tile))
+			tile->Dispel();
 	});
 
 	//Lux Ignis
@@ -613,9 +612,9 @@ void Collections::RegisterEffects() {
 			if (!ctx.SharesOwner(unit) && !unit->IsGeneral())
 				valid.push_back(unit->curTile);
 		ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
-			[](EffectContext ctx, BoardTile* source, BoardTile* target) {
-				if (target->HasUnit())
-					target->unit->DealDamage(ctx.card, 2);
+			[](EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets) {
+				if (targets.size() > 0 && targets[0]->HasUnit())
+					targets[0]->unit->DealDamage(ctx.card, 2);
 		});
 	});
 
@@ -702,9 +701,9 @@ void Collections::RegisterEffects() {
 			if (ctx.SharesOwner(unit) && !unit->IsGeneral())
 				valid.push_back(unit->curTile);
 		ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
-			[](EffectContext ctx, BoardTile* source, BoardTile* target) {
-				if (target->HasUnit())
-					target->unit->AddEffect(MODIFIER_PRIMUS_FIST, ctx.card);
+			[](EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets) {
+				if (targets.size() > 0 && targets[0]->HasUnit())
+					targets[0]->unit->AddEffect(MODIFIER_PRIMUS_FIST, ctx.card);
 		});
 	});
 	effectDefinitions.try_emplace(MODIFIER_PRIMUS_FIST, MODIFIER_PRIMUS_FIST, KEYWORD_NONE, "Primus Fist");

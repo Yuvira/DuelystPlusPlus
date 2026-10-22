@@ -10,7 +10,7 @@
 
 //Callback constructor
 EffectCallback::EffectCallback() : EffectCallback(EffectContext(nullptr, nullptr, nullptr), nullptr, nullptr) {}
-EffectCallback::EffectCallback(EffectContext ctx, BoardTile* source, void (*Callback)(EffectContext ctx, BoardTile* source, BoardTile* target)) {
+EffectCallback::EffectCallback(EffectContext ctx, BoardTile* source, void (*Callback)(EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets)) {
 	this->context = ctx;
 	this->source = source;
 	this->Callback = Callback;
@@ -18,9 +18,9 @@ EffectCallback::EffectCallback(EffectContext ctx, BoardTile* source, void (*Call
 EffectCallback::~EffectCallback() {}
 
 //Execute effect callback
-void EffectCallback::Execute(BoardTile* target) {
+void EffectCallback::Execute(std::vector<BoardTile*>& targets) {
 	if (Callback)
-		Callback(context, source, target);
+		Callback(context, source, targets);
 }
 
 //Path co-ordinate constructor
@@ -592,8 +592,16 @@ void Game::UseEffect() {
 
 	//Execute callback
 	if (effectCallback.Callback) {
-		effectCallback.Execute(tile);
-		effectCallback = EffectCallback();
+		callbackTargets.push_back(tile);
+		effectCallback.Execute(callbackTargets);
+		if (nextEffectCallback.Callback) {
+			effectCallback = nextEffectCallback;
+			nextEffectCallback = EffectCallback();
+		}
+		else {
+			effectCallback = EffectCallback();
+			callbackTargets.clear();
+		}
 	}
 
 	//Trigger cast event for active card
@@ -973,13 +981,16 @@ void Game::HighlightSelectable(TargetMode targetMode, BoardTile* tile) {
 }
 
 //Highlight targets and generate callback
-void Game::HighlightTargetsForCallback(std::vector<BoardTile*>& targets, EffectContext ctx, BoardTile* source, void (*Callback)(EffectContext ctx, BoardTile* source, BoardTile* target)) {
+void Game::HighlightTargetsForCallback(std::vector<BoardTile*>& targets, EffectContext ctx, BoardTile* source, void (*Callback)(EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets)) {
 	if (targets.size() == 0)
 		return;
 	selectable = targets;
 	selectionIdx = 0;
 	mode = MODE_SELECT;
-	effectCallback = EffectCallback(EffectContext(ctx.effect, ctx.card, ctx.game), source, Callback);
+	if (effectCallback.Callback)
+		nextEffectCallback = EffectCallback(EffectContext(ctx.effect, ctx.card, ctx.game), source, Callback);
+	else
+		effectCallback = EffectCallback(EffectContext(ctx.effect, ctx.card, ctx.game), source, Callback);
 }
 
 #pragma endregion
