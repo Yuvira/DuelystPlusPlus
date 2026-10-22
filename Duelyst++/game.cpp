@@ -726,8 +726,7 @@ void Game::ChangeTurn(bool newTurn) {
 
 	//Change turn
 	turn = newTurn;
-	if (!turn)
-		++turnCount;
+	++turnCount;
 
 	//Refresh mana
 	if (turnCount > 2 && players[turn].manaMax < 9)
