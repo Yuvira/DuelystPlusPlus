@@ -34,7 +34,7 @@ void ModifierGroup::WriteValuesForType(eModifier type, std::vector<std::string>&
 		if (type == MODTYPE_BUFF)
 			out.push_back("{" + Utils::ValueString(atk.value) + "/" + Utils::ValueString(hp.value) + "}");
 		else
-			out.push_back(GetContextStringForType(type) + "stats to {" + Utils::ValueString(atk.value) + "/" + Utils::ValueString(hp.value) + "}");
+			out.push_back(GetContextStringForType(type) + "stats to {" + std::to_string(atk.value) + "/" + std::to_string(hp.value) + "}");
 	}
 	else {
 		WriteValue(STAT_ATK, type, out);
@@ -49,7 +49,7 @@ void ModifierGroup::WriteValue(eStat stat, eModifier type, std::vector<std::stri
 	if (type == MODTYPE_BUFF)
 		out.push_back("{" + Utils::ValueString(ReadModifier(stat).value) + " " + GetNameStringForStat(stat) + "}");
 	else
-		out.push_back(GetContextStringForType(type) + "{" + GetNameStringForStat(stat) + "} to {" + Utils::ValueString(ReadModifier(stat).value) + "}");
+		out.push_back(GetContextStringForType(type) + "{" + GetNameStringForStat(stat) + "} to {" + std::to_string(ReadModifier(stat).value) + "}");
 }
 
 //Get context string from type enum
