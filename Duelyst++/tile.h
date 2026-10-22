@@ -27,6 +27,17 @@ public:
 	int y;
 };
 
+//Helper for getting tiles in range
+struct NearbyRange {
+	NearbyRange(Coord pos, int width, int height) {
+		x0 = max(pos.x - 1, 0);
+		x1 = min(pos.x + 1, width - 1);
+		y0 = max(pos.y - 1, 0);
+		y1 = min(pos.y + 1, height - 1);
+	}
+	int x0, x1, y0, y1;
+};
+
 //Tile class
 class Tile {
 public:
@@ -52,18 +63,38 @@ public:
 
 //Map (tiles container)
 class Map {
+
 public:
+
+	//Constructor
 	Map();
 	~Map();
+
+	//Get from position
 	BoardTile* GetTile(int x, int y);
+
+	//Get all
+	std::vector<BoardTile*> GetAllEmpty(BoardTile* ignore);
 	BoardTile* GetRandomEmpty();
 	BoardTile* GetRandomEmpty(BoardTile* ignore);
-	BoardTile* GetRandomEmpty(BoardTile* ignore1, BoardTile* ignore2);
-	BoardTile* GetRandomEmptyCorner();
-	BoardTile* GetRandomEmptyNear(BoardTile* tile);
+
+	//Get corners
 	std::vector<BoardTile*> GetEmptyCorners();
+	BoardTile* GetRandomEmptyCorner();
+
+	//Get near
 	std::vector<BoardTile*> GetAllNear(BoardTile* tile);
 	std::vector<BoardTile*> GetEmptyNear(BoardTile* tile);
 	std::vector<Unit*> GetUnitsNear(BoardTile* tile);
+	BoardTile* GetRandomEmptyNear(BoardTile* tile);
+
+	//Tile objects
 	BoardTile tiles[9][5];
+
+private:
+
+	//Size properties
+	inline static const int width = 9;
+	inline static const int height = 5;
+
 };
