@@ -1,4 +1,5 @@
 //Include
+#include "card.h"
 #include "tile.h"
 
 #pragma region Coords
@@ -55,6 +56,13 @@ void BoardTile::SetFeature(eFeature newFeature) {
 		sprite.SetColor(COLOR_LTBLUE);
 	}
 
+}
+
+//Remove features and dispel unit
+void BoardTile::Dispel() {
+	SetFeature(TILE_NONE);
+	if (HasUnit())
+		unit->Dispel();
 }
 
 //Check if a tile is adjacent to this one

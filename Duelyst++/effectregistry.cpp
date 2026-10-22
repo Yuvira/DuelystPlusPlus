@@ -361,11 +361,8 @@ void Collections::RegisterEffects() {
 		std::vector<BoardTile*> valid = ctx.GetMap()->GetAllNear(ev.tile);
 		ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
 			[](EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets) {
-				if (targets.size() > 0) {
-					targets[0]->SetFeature(TILE_NONE);
-					if (targets[0]->HasUnit())
-						targets[0]->unit->Dispel();
-				}
+				if (targets.size() > 0)
+					targets[0]->Dispel();
 		});
 	});
 
