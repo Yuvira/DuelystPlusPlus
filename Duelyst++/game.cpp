@@ -179,8 +179,17 @@ void Game::RenderSidebar(Renderer& renderer) {
 
 	//Card in hand
 	else if (mode == MODE_HAND || mode == MODE_SELECT) {
-		if (handIdx < players[turn].hand.size())
+
+		//Show target for current effect
+		if (mode == MODE_SELECT && effectCallback.Callback) {
+			if (selectable[selectionIdx]->unit != nullptr)
+				selectable[selectionIdx]->unit->DrawDetails(renderer, y);
+		}
+
+		//Otherwise show card in hand
+		else if (handIdx < players[turn].hand.size())
 			players[turn].hand[handIdx]->DrawDetails(renderer, y);
+
 	}
 
 }
