@@ -722,4 +722,55 @@ void Collections::RegisterEffects() {
 				ctx.GetEnemyGeneral()->DealDamage(nullptr, 3);
 	});
 
+	//Prophet of the White Palm
+	effectDefinitions.try_emplace(SKILL_PROPHET_OF_THE_WHITE_PALM, SKILL_PROPHET_OF_THE_WHITE_PALM, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Prevent ALL spell damage until your next turn");
+	effectDefinitions.at(SKILL_PROPHET_OF_THE_WHITE_PALM).RegisterSelfTrigger<OnPreCastThisEvent>([](EffectContext ctx, OnPreCastThisEvent& ev) {
+		ctx.game->ApplyAura(AURA_PROPHET_OF_THE_WHITE_PALM, ctx.card, ctx.effect); });
+	effectDefinitions.try_emplace(AURA_PROPHET_OF_THE_WHITE_PALM, AURA_PROPHET_OF_THE_WHITE_PALM, KEYWORD_NONE, "Prophet of the White Palm|Spell damage is prevented until your next turn");
+	effectDefinitions.at(AURA_PROPHET_OF_THE_WHITE_PALM).RegisterPreTrigger<OnDamageEvent>(
+		[](EffectContext ctx, OnDamageEvent& ev) { return ev.source->IsSpell(); },
+		[](EffectContext ctx, OnDamageEvent& ev) { ev.damage = 0; });
+	effectDefinitions.at(AURA_PROPHET_OF_THE_WHITE_PALM).RegisterPostTrigger<OnTurnStartEvent>(
+		[](EffectContext ctx, OnTurnStartEvent& ev) { return ctx.IsOwnedBy(ev.player); },
+		[](EffectContext ctx, OnTurnStartEvent& ev) { ctx.game->RemoveAura(ctx.effect); });
+
+	//Quartermaster Gauj
+	effectDefinitions.try_emplace(SKILL_QUARTERMASTER_GAUJ, SKILL_QUARTERMASTER_GAUJ, KEYWORD_NONE, "Takes no damage from minions or Generals");
+	effectDefinitions.at(SKILL_QUARTERMASTER_GAUJ).RegisterPreTrigger<OnDamageEvent>(
+		[](EffectContext ctx, OnDamageEvent& ev) { return ctx.IsCardOnBoard(ev.target) && ev.source->IsUnit(); },
+		[](EffectContext ctx, OnDamageEvent& ev) { ev.damage = 0; });
+
+	//Red Synja
+	effectDefinitions.try_emplace(SKILL_RED_SYNJA, SKILL_RED_SYNJA, KEYWORD_NONE, "Whenever your General takes damage, deal 7 damage to a random nearby enemy minion");
+	effectDefinitions.at(SKILL_RED_SYNJA).RegisterPostTrigger<OnDamageEvent>(
+		[](EffectContext ctx, OnDamageEvent& ev) { return ctx.IsOnBoard() && ev.target == ctx.GetAllyGeneral(); },
+		[](EffectContext ctx, OnDamageEvent& ev) {
+			std::vector<Unit*> valid;
+			for (BoardTile* tile : ctx.GetMap()->GetAllNear(ctx.GetTile()))
+				if (tile->HasUnit() && !ctx.SharesOwner(tile->unit) && !tile->unit->IsGeneral())
+					valid.push_back(tile->unit);
+			if (valid.size() > 0)
+				valid[rand() % valid.size()]->DealDamage(ctx.card, 7);
+	});
+
+	//Ruby Rifter
+	effectDefinitions.try_emplace(SKILL_RUBY_RIFTER, SKILL_RUBY_RIFTER, KEYWORD_NONE, "Whenever your General takes damage, draw a card and give this minion +2 Attack");
+	effectDefinitions.at(SKILL_RUBY_RIFTER).RegisterPostTrigger<OnDamageEvent>(
+		[](EffectContext ctx, OnDamageEvent& ev) { return ctx.IsOnBoard() && ev.target == ctx.GetAllyGeneral(); },
+		[](EffectContext ctx, OnDamageEvent& ev) {
+			ctx.GetOwner()->Draw();
+			ctx.card->AddEffect(MODIFIER_RUBY_RIFTER, ctx.card);
+	});
+	effectDefinitions.try_emplace(MODIFIER_RUBY_RIFTER, MODIFIER_RUBY_RIFTER, KEYWORD_NONE, "Ruby Rifter");
+	effectDefinitions.at(MODIFIER_RUBY_RIFTER).AddModifier(STAT_ATK, MODTYPE_BUFF, 2);
+
+	//Sarlac the Eternal
+	effectDefinitions.try_emplace(SKILL_SARLAC_THE_ETERNAL, SKILL_SARLAC_THE_ETERNAL, KEYWORD_DYING_WISH, "{Dying Wish}: Re-summon this minion on a random space");
+	effectDefinitions.at(SKILL_SARLAC_THE_ETERNAL).RegisterPostTrigger<OnDeathEvent>(
+		[](EffectContext ctx, OnDeathEvent& ev) { return ctx.IsCard(ev.unit); },
+		[](EffectContext ctx, OnDeathEvent& ev) {
+			if (BoardTile* tile = ctx.GetMap()->GetRandomEmpty())
+				ctx.game->SummonToken(ctx.card->ReadID(), tile, ctx.GetOwner());
+	});
+
 }

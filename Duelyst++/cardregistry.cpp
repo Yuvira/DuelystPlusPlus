@@ -588,7 +588,14 @@ void Collections::RegisterCards() {
 		3, 2, 3, SKILL_PRISMATIC_ILLUSIONIST
 	);
 
-	//Purgato
+	//Prophet of the White Palm
+	cardDefinitions.try_emplace(
+		CARD_PROPHET_OF_THE_WHITE_PALM, CARD_PROPHET_OF_THE_WHITE_PALM, RARITY_RARE, FACTION_NEUTRAL, TRIBE_NONE,
+		"prophetofthewhitepalm", "Prophet of the White Palm",
+		1, 1, 1, SKILL_PROPHET_OF_THE_WHITE_PALM
+	);
+
+	//Purgatos, the Realmkeeper
 	cardDefinitions.try_emplace(
 		CARD_PURGATOS_THE_REALMKEEPER, CARD_PURGATOS_THE_REALMKEEPER, RARITY_EPIC, FACTION_NEUTRAL, TRIBE_NONE,
 		"purgatostherealmkeeper", "Purgatos, the Realmkeeper",
@@ -600,6 +607,41 @@ void Collections::RegisterCards() {
 		CARD_PUTRID_DREADFLAYER, CARD_PUTRID_DREADFLAYER, RARITY_NONE, FACTION_NEUTRAL, TRIBE_NONE,
 		"putriddreadflayer", "Putrid Dreadflayer",
 		3, 2, 4, SKILL_FLYING
+	);
+
+	//Quartermaster Gauj
+	cardDefinitions.try_emplace(
+		CARD_QUARTERMASTER_GAUJ, CARD_QUARTERMASTER_GAUJ, RARITY_LEGENDARY, FACTION_NEUTRAL, TRIBE_NONE,
+		"quartermastergauj", "Quartermaster Gauj",
+		6, 5, 2, SKILL_QUARTERMASTER_GAUJ
+	);
+
+	//Red Synja
+	cardDefinitions.try_emplace(
+		CARD_RED_SYNJA, CARD_RED_SYNJA, RARITY_LEGENDARY, FACTION_NEUTRAL, TRIBE_NONE,
+		"redsynja", "Red Synja",
+		7, 7, 7, SKILL_RED_SYNJA
+	);
+
+	//Rock Pulverizer
+	cardDefinitions.try_emplace(
+		CARD_ROCK_PULVERIZER, CARD_ROCK_PULVERIZER, RARITY_NONE, FACTION_NEUTRAL, TRIBE_NONE,
+		"rockpulverizer", "Rock Pulverizer",
+		2, 1, 4, SKILL_PROVOKE
+	);
+
+	//Rogue Warden
+	cardDefinitions.try_emplace(
+		CARD_ROGUE_WARDEN, CARD_ROGUE_WARDEN, RARITY_COMMON, FACTION_NEUTRAL, TRIBE_NONE,
+		"roguewarden", "Rogue Warden",
+		5, 4, 3, SKILL_RANGED
+	);
+
+	//Ruby Rifter
+	cardDefinitions.try_emplace(
+		CARD_RUBY_RIFTER, CARD_RUBY_RIFTER, RARITY_LEGENDARY, FACTION_NEUTRAL, TRIBE_NONE,
+		"rubyrifter", "Ruby Rifter",
+		6, 4, 6, SKILL_RUBY_RIFTER
 	);
 
 	//Saberspine Tiger
@@ -614,6 +656,20 @@ void Collections::RegisterCards() {
 		CARD_SAPPHIRE_SEER, CARD_SAPPHIRE_SEER, RARITY_COMMON, FACTION_NEUTRAL, TRIBE_NONE,
 		"sapphireseer", "Sapphire Seer",
 		3, 2, 2, SKILL_FORCEFIELD
+	);
+
+	//Sarlac the Eternal
+	cardDefinitions.try_emplace(
+		CARD_SARLAC_THE_ETERNAL, CARD_SARLAC_THE_ETERNAL, RARITY_LEGENDARY, FACTION_NEUTRAL, TRIBE_NONE,
+		"sarlactheeternal", "Sarlac the Eternal",
+		3, 1, 1, SKILL_SARLAC_THE_ETERNAL
+	);
+
+	//Serpenti
+	cardDefinitions.try_emplace(
+		CARD_SERPENTI, CARD_SERPENTI, RARITY_COMMON, FACTION_NEUTRAL, TRIBE_NONE,
+		"serpenti", "Serpenti",
+		6, 7, 4, SKILL_FRENZY
 	);
 
 #pragma endregion
