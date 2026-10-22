@@ -53,7 +53,7 @@ public:
 
 	//Stats
 	virtual void UpdateModifiers() {}
-	int GetStat(eStat stat, int base);
+	int GetStat(eStat stat, int base, bool withAuras);
 
 	//Effects
 	void AddEffect(eEffect effectId, Card* sourceCard);

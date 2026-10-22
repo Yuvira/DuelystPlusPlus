@@ -86,10 +86,10 @@ void Unit::Update(bool& shouldLoop) {
 //Update attack/health/cost when buffs change
 void Unit::UpdateModifiers() {
 	int hpDelta = hp - hpMax;
-	cost = GetStat(STAT_COST, baseCost);
-	atk = GetStat(STAT_ATK, baseAtk);
-	hpMax = GetStat(STAT_HP, baseHpMax);
-	moveRange = GetStat(STAT_MOVE, baseMoveRange);
+	cost = GetStat(STAT_COST, baseCost, true);
+	atk = GetStat(STAT_ATK, baseAtk, true);
+	hpMax = GetStat(STAT_HP, baseHpMax, true);
+	moveRange = GetStat(STAT_MOVE, baseMoveRange, true);
 	hp = hpMax + hpDelta;
 	keywords = KEYWORD_NONE;
 	for (Effect* effect : effects)

@@ -98,7 +98,7 @@ void Card::UpdateDetails() {
 #pragma region Stat Updates
 
 //Get stat with modifiers applied
-int Card::GetStat(eStat stat, int base) {
+int Card::GetStat(eStat stat, int base, bool withAuras) {
 
 	//If any fixers exist, apply them and ignore everything else
 	bool fixed = false;
@@ -108,10 +108,12 @@ int Card::GetStat(eStat stat, int base) {
 			fixed = true;
 		}
 	}
-	for (Effect* aura : auras) {
-		if (aura->ReadModifiers().ReadModifier(stat).type == MODTYPE_FIXED) {
-			base = aura->ReadModifiers().ReadModifier(stat).value;
-			fixed = true;
+	if (withAuras) {
+		for (Effect* aura : auras) {
+			if (aura->ReadModifiers().ReadModifier(stat).type == MODTYPE_FIXED) {
+				base = aura->ReadModifiers().ReadModifier(stat).value;
+				fixed = true;
+			}
 		}
 	}
 	if (fixed)
@@ -121,9 +123,11 @@ int Card::GetStat(eStat stat, int base) {
 	for (Effect* effect : effects)
 		if (effect->ReadModifiers().ReadModifier(stat).type == MODTYPE_REBASE)
 			base = effect->ReadModifiers().ReadModifier(stat).value;
-	for (Effect* aura : auras)
-		if (aura->ReadModifiers().ReadModifier(stat).type == MODTYPE_REBASE)
-			base = aura->ReadModifiers().ReadModifier(stat).value;
+	if (withAuras) {
+		for (Effect* aura : auras)
+			if (aura->ReadModifiers().ReadModifier(stat).type == MODTYPE_REBASE)
+				base = aura->ReadModifiers().ReadModifier(stat).value;
+	}
 
 	//Apply buffs and overrides in order
 	for (Effect* effect : effects) {
@@ -134,12 +138,14 @@ int Card::GetStat(eStat stat, int base) {
 	}
 
 	//Auras apply overrides first
-	for (Effect* aura : auras)
-		if (aura->ReadModifiers().ReadModifier(stat).type == MODTYPE_OVERRIDE)
-			base = aura->ReadModifiers().ReadModifier(stat).value;
-	for (Effect* aura : auras)
-		if (aura->ReadModifiers().ReadModifier(stat).type == MODTYPE_BUFF)
-			base += aura->ReadModifiers().ReadModifier(stat).value;
+	if (withAuras) {
+		for (Effect* aura : auras)
+			if (aura->ReadModifiers().ReadModifier(stat).type == MODTYPE_OVERRIDE)
+				base = aura->ReadModifiers().ReadModifier(stat).value;
+		for (Effect* aura : auras)
+			if (aura->ReadModifiers().ReadModifier(stat).type == MODTYPE_BUFF)
+				base += aura->ReadModifiers().ReadModifier(stat).value;
+	}
 
 	//Return modified value
 	return max(base, 0);

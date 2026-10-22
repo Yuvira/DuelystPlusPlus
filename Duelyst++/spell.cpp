@@ -29,7 +29,7 @@ void Spell::DrawDetails(Renderer& renderer, int& y) {
 #pragma region Updates
 
 //Update cost when buffs change
-void Spell::UpdateModifiers() { cost = GetStat(STAT_COST, baseCost); }
+void Spell::UpdateModifiers() { cost = GetStat(STAT_COST, baseCost, true); }
 
 #pragma endregion
 
