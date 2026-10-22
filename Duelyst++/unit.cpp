@@ -143,9 +143,9 @@ void Unit::Attack(Unit* target, bool counter) {
 
 	//Damage all adjacent units if this has Frenzy and is targeting an adjacent tile
 	if (!counter && HasKeywords(KEYWORD_FRENZY) && curTile->IsNear(target->curTile)) {
-		for (BoardTile* tile : game->map.GetAllNear(curTile))
-			if (tile->unit != nullptr && tile->unit->owner != owner)
-				tile->unit->DealDamage(this, damage);
+		for (Unit* unit : game->map.GetUnitsNear(curTile))
+			if (unit->owner != owner)
+				unit->DealDamage(this, damage);
 	}
 
 	//Otherwise just damage target

@@ -62,5 +62,7 @@ public:
 	BoardTile* GetRandomEmptyNear(BoardTile* tile);
 	std::vector<BoardTile*> GetEmptyCorners();
 	std::vector<BoardTile*> GetAllNear(BoardTile* tile);
+	std::vector<BoardTile*> GetEmptyNear(BoardTile* tile);
+	std::vector<Unit*> GetUnitsNear(BoardTile* tile);
 	BoardTile tiles[9][5];
 };
