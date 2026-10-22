@@ -17,13 +17,11 @@ class Player {
 public:
 
 	//Constructor
-	Player();
+	Player(Game* game, int mana);
 	~Player();
 
 	//Setup
-	void Preset(Collections* collections, Game* game);
-	void Init(int mana);
-	void ReInit();
+	void InitStartingHand();
 
 	//Rendering
 	void UpdateMana(eColor color);
@@ -45,16 +43,16 @@ public:
 	bool HasCardInHand(Card* match);
 
 	//Properties
-	int mana;
 	int manaMax;
-	int replaces;
+	int mana;
 	int maxReplaces;
-	Sprite uiReplace;
-	Sprite uiCrystal[9];
-	Unit* general;
+	int replaces;
 	Game* game;
+	Unit* general;
 	Player* opponent;
 	std::vector<Card*> deck;
 	std::vector<Card*> hand;
+	Sprite uiReplace;
+	Sprite uiCrystal[9];
 
 };

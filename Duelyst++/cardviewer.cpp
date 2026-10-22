@@ -111,8 +111,8 @@ void CardViewer::Input() {
 
 	//Re-init game
 	else if (asciiVal == 10 || asciiVal == 13) {                        //Enter
-		game->GetTurnPlayer()->ReInit();
-		game->GetNonTurnPlayer()->ReInit();
+		game->GetTurnPlayer()->InitStartingHand();
+		game->GetNonTurnPlayer()->InitStartingHand();
 	}
 
 	//Switch mode

@@ -10,55 +10,32 @@
 #pragma region Constructor
 
 //Game constructor
-Player::Player() {
-	mana = 0;
-	manaMax = 0;
-	replaces = 0;
+Player::Player(Game* game, int mana) {
+
+	//Set values
+	manaMax = mana;
+	this->mana = mana;
 	maxReplaces = 1;
-	game = nullptr;
+	replaces = 1;
+	this->game = game;
 	general = nullptr;
 	opponent = nullptr;
-}
-Player::~Player() {}
 
-#pragma endregion
-
-#pragma region Initialization
-
-//Preset deck
-void Player::Preset(Collections* collections, Game* game) {
-	this->game = game;
-	deck.push_back(collections->GetNewCardInstance(CARD_ARGEON_HIGHMAYNE, game, this));
-}
-
-//Initialize deck/hand
-void Player::Init(int mana) {
-
-	//Init values and UI
-	this->mana = mana;
-	manaMax = mana;
-	replaces = maxReplaces;
+	//Init UI
 	for (int i = 0; i < 9; ++i) {
 		uiCrystal[i].buffer[0].Char.AsciiChar = '';
 		uiCrystal[i].SetColor(COLOR_GRAY);
 	}
 
-	//Shuffle and draw 5
-	Shuffle();
-	if (deck.size() < 5) {
-		hand = deck;
-		deck.clear();
-	}
-	else {
-		for (int i = 0; i < 5; ++i)
-			hand.push_back(deck[i]);
-		deck.erase(deck.begin(), deck.begin() + 5);
-	}
-
 }
+Player::~Player() {}
 
-//Shuffle hand into deck and re-draw starting hand
-void Player::ReInit() {
+#pragma endregion
+
+#pragma region Setup
+
+//Shuffle all cards into deck and draw 5
+void Player::InitStartingHand() {
 	for (Card* card : hand)
 		deck.push_back(card);
 	hand.clear();

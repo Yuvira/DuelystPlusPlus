@@ -37,7 +37,7 @@ PathCoord::~PathCoord() {}
 #pragma region Game Constructor
 
 //Game constructor
-Game::Game(Collections* collections, bool* modeSwitch) {
+Game::Game(Collections* collections, bool* modeSwitch) : players{ Player(this, IS_DEBUG ? 9 : 2), Player(this, IS_DEBUG ? 9 : 3) } {
 
 	//Collections reference
 	this->collections = collections;
@@ -59,18 +59,14 @@ Game::Game(Collections* collections, bool* modeSwitch) {
 	for (int i = 0; i < 3; ++i) { light.buffer[i].Char.AsciiChar = c[i + 10]; }
 	light.SetColor(COLOR_LTBLUE);
 
-	//Set opponents
-	players[0].opponent = &players[1];
-	players[1].opponent = &players[0];
-
 	//Initialize players
 	for (int i = 0; i < 2; ++i) {
-		players[i].Preset(collections, this);
-		Summon(players[i].deck[0], i * 8, 2, false);
-		players[i].deck.erase(players[i].deck.begin());
+		Summon(collections->GetNewCardInstance(CARD_ARGEON_HIGHMAYNE, this, &players[i]), i * 8, 2, false);
 		players[i].general = units.back();
-		players[i].Init(IS_DEBUG ? 9 : i + 2);
+		players[i].InitStartingHand();
 	}
+	players[0].opponent = &players[1];
+	players[1].opponent = &players[0];
 
 	//Hand
 	for (int i = 0; i < 7; ++i) {
