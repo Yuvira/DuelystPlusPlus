@@ -21,14 +21,6 @@ CardViewer::CardViewer(Game* game, Collections* collections, bool* modeSwitch) {
 	//Border
 	board.CreateFromFile("resources/border.txt");
 
-	//Tile positions
-	for (int i = 0; i < 9; ++i) {
-		for (int j = 0; j < 6; ++j) {
-			tiles[i][j].border.pos.X = (i * 7) + 1;
-			tiles[i][j].border.pos.Y = (j * 7) + 6;
-		}
-	}
-
 	//Variables
 	pos = Coord(0, 0);
 	page = 0;
@@ -47,12 +39,12 @@ CardViewer::~CardViewer() {}
 void CardViewer::RenderCollection(Renderer& renderer) {
 
 	//Board
-	renderer.Render(board);
+	renderer.Render(board, 0, 0);
 
 	//Tiles
 	for (int i = 0; i < 9; ++i)
 		for (int j = 0; j < 6; ++j)
-			renderer.Render(tiles[i][j].border);
+			renderer.Render(tiles[i][j].border, (i * 7) + 1, (j * 7) + 6);
 
 	//Cards
 	for (int a = page * 54; a < min((page + 1) * 54, collections->GetCardCount()); ++a)

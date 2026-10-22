@@ -3,28 +3,14 @@
 #include "sprite.h"
 #include "utils.h"
 
-#pragma region Constructors
+#pragma region Constructors & Modifiers
 
 //Sprite constructors
-Sprite::Sprite() : Sprite(1, 1) {}
-Sprite::Sprite(int width, int height) {
-	pos.X = 0;
-	pos.Y = 0;
-	this->width = width;
-	this->height = height;
-	for (int i = 0; i < (width * height); ++i) { buffer.push_back(CHAR_INFO()); }
-	Clear();
-}
-Sprite::Sprite(std::string string) {
-	pos.X = 0;
-	pos.Y = 0;
-	CreateFromString(string);
-}
+Sprite::Sprite() { Resize(0, 0); }
+Sprite::Sprite(int width, int height) { Resize(width, height); }
+Sprite::Sprite(char chr) { CreateFromChar(chr); }
+Sprite::Sprite(std::string string) { CreateFromString(string); }
 Sprite::~Sprite() { }
-
-#pragma endregion
-
-#pragma region Modifiers
 
 //Clear sprites
 void Sprite::Clear() {
@@ -38,9 +24,7 @@ void Sprite::Clear() {
 void Sprite::Resize(int newWidth, int newHeight) {
 	width = newWidth;
 	height = newHeight;
-	buffer.clear();
-	for (int i = 0; i < (width * height); ++i)
-		buffer.push_back(CHAR_INFO());
+	buffer.resize(width * height);
 	Clear();
 }
 
@@ -77,14 +61,23 @@ void Sprite::CreateFromFile(std::string filename) {
 	}
 }
 
+//Generate sprite from single character
+void Sprite::CreateFromChar(char chr) { CreateFromChar(chr, COLOR_LTWHITE); }
+void Sprite::CreateFromChar(char chr, eColor color) {
+	width = 1;
+	height = 1;
+	buffer.resize(1);
+	buffer[0].Char.AsciiChar = chr;
+	buffer[0].Attributes = color;
+}
+
 //Generate text sprite from string
 void Sprite::CreateFromString(const std::string& str) { CreateFromString(str, COLOR_LTWHITE); }
 void Sprite::CreateFromString(const std::string& str, eColor color) {
 	width = str.length();
 	height = 1;
-	buffer.clear();
+	buffer.resize(width);
 	for (int i = 0; i < str.length(); ++i) {
-		buffer.push_back(CHAR_INFO());
 		buffer[i].Char.AsciiChar = str[i];
 		buffer[i].Attributes = color;
 	}

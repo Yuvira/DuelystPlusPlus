@@ -22,10 +22,8 @@ Player::Player(Game* game, int mana) {
 	opponent = nullptr;
 
 	//Init UI
-	for (int i = 0; i < 9; ++i) {
-		uiCrystal[i].buffer[0].Char.AsciiChar = '';
-		uiCrystal[i].SetColor(COLOR_GRAY);
-	}
+	for (int i = 0; i < 9; ++i)
+		uiCrystal[i].CreateFromChar('', COLOR_GRAY);
 
 }
 Player::~Player() {}
@@ -72,7 +70,7 @@ void Player::Render(Renderer& renderer, bool left) {
 
 	//Replace
 	if (game->GetTurnPlayer() == this) {
-		uiReplace.buffer[0].Char.AsciiChar = std::to_string(replaces)[0];
+		uiReplace.CreateFromString(std::to_string(replaces), COLOR_LTWHITE);
 		renderer.Render(uiReplace, 4, 44);
 	}
 

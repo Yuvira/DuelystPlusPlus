@@ -27,21 +27,44 @@ enum eColor {
 
 //Sprite class
 class Sprite {
+
 public:
+
+	//Constructors
 	Sprite();
 	Sprite(int width, int height);
+	Sprite(char chr);
 	Sprite(std::string string);
 	~Sprite();
+
+	//Modifiers
 	void Clear();
 	void Resize(int newWidth, int newHeight);
 	void SetColor(eColor color);
 	void SetColor(eColor color, int start, int stop);
+
+	//Generators
 	void CreateFromFile(std::string filename);
+	void CreateFromChar(char chr);
+	void CreateFromChar(char chr, eColor color);
 	void CreateFromString(const std::string& str);
 	void CreateFromString(const std::string& str, eColor color);
 	void CreateFromTextBlock(const std::vector<std::string>& lines);
+
+	//Utils
 	int GetSize() { return width * height; }
+	int GetWidth() { return width; }
+	int GetHeight() { return height; }
+	const CHAR_INFO& ReadBuffer(int idx) const {
+		if (idx < 0 || idx >= buffer.size())
+			return CHAR_INFO();
+		return buffer[idx];
+	}
+
+private:
+
+	//Properties
 	int width, height;
-	COORD pos;
 	std::vector<CHAR_INFO> buffer;
+
 };

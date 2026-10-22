@@ -115,6 +115,7 @@ public:
 
 	//Rendering
 	void RenderOnBoard(Renderer& renderer);
+	void RenderOnBoard(Renderer& renderer, int x, int y);
 	void DrawDetails(Renderer& renderer, int& y);
 
 	//Updates
@@ -123,9 +124,8 @@ public:
 
 	//Actions
 	void InitState();
-	void SetPosition(int x, int y);
+	void SetTile(BoardTile* tile);
 	void MoveToTile(BoardTile* tile, bool byEffect);
-	void MoveToPosition(int x, int y, bool byEffect);
 	void Attack(Unit* target, bool counter);
 	void Exhaust();
 	void Refresh();

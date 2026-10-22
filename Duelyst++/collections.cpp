@@ -99,7 +99,7 @@ void Collections::RenderCardDetails(Renderer& renderer, int x, int& y, eCard car
 	effectDefinitions.at(effectId).modifiers.WriteValues(details);
 	descriptionSprite.CreateFromTextBlock(details);
 	renderer.Render(descriptionSprite, x + 6, y);
-	y += descriptionSprite.height + 1;
+	y += descriptionSprite.GetHeight() + 1;
 
 	//Draw tokens
 	eCard tokenId = effectDefinitions.at(effectId).token;
@@ -125,7 +125,7 @@ void Collections::RenderCardDetails(Renderer& renderer, int x, int& y, Card* car
 	//Draw effects
 	descriptionSprite.CreateFromTextBlock(card->ReadDetails());
 	renderer.Render(descriptionSprite, x + 6, y);
-	y += descriptionSprite.height + 1;
+	y += descriptionSprite.GetHeight() + 1;
 
 	//Draw tokens
 	std::vector<eCard> tokens = card->GetTokens();

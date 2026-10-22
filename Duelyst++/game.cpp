@@ -51,28 +51,21 @@ Game::Game(Collections* collections, bool* modeSwitch) : players{ Player(this, I
 	debugLogSprite.CreateFromString(debugLog.back());
 
 	//Character sprites
-	char c[] = { 'Û', 'Þ', 'Ý', 'Ü', 'ß', 'X', '\\', '/', '³', 'Ä', '®', 'é', '¯' };
-	for (int i = 0; i < 10; ++i) { chars[i].buffer[0].Char.AsciiChar = c[i]; }
+	char c[] = { 'Û', 'Þ', 'Ý', 'Ü', 'ß', 'X', '\\', '/', '³', 'Ä' };
+	for (int i = 0; i < 10; ++i)
+		chars[i].CreateFromChar(c[i]);
 
 	//Turn indicator
-	light.Resize(3, 1);
-	for (int i = 0; i < 3; ++i) { light.buffer[i].Char.AsciiChar = c[i + 10]; }
-	light.SetColor(COLOR_LTBLUE);
+	light.CreateFromString("®é¯", COLOR_LTBLUE);
 
 	//Initialize players
 	for (int i = 0; i < 2; ++i) {
-		Summon(collections->GetNewCardInstance(CARD_ARGEON_HIGHMAYNE, this, &players[i]), i * 8, 2, false);
+		Summon(collections->GetNewCardInstance(CARD_ARGEON_HIGHMAYNE, this, &players[i]), map.GetTile(i * 8, 2), false);
 		players[i].general = units.back();
 		players[i].InitStartingHand();
 	}
 	players[0].opponent = &players[1];
 	players[1].opponent = &players[0];
-
-	//Hand
-	for (int i = 0; i < 7; ++i) {
-		hand[i].border.pos.X = (i * 7) + 1;
-		hand[i].border.pos.Y = 41;
-	}
 
 	//Variables
 	pos = Coord(0, 0);
@@ -104,7 +97,7 @@ Game::~Game() {}
 void Game::RenderGame(Renderer& renderer) {
 
 	//Board
-	renderer.Render(board);
+	renderer.Render(board, 0, 0);
 
 	//Turn indicator
 	renderer.Render(light, 31, 2);
@@ -112,8 +105,8 @@ void Game::RenderGame(Renderer& renderer) {
 	//Tiles
 	for (int i = 0; i < 9; ++i) {
 		for (int j = 0; j < 5; ++j) {
-			renderer.Render(map.tiles[i][j].border);
-			renderer.Render(map.tiles[i][j].sprite);
+			renderer.Render(map.tiles[i][j].border, (7 * i) + 1, (7 * j) + 5);
+			renderer.Render(map.tiles[i][j].sprite, (7 * i) + 2, (7 * j) + 6);
 		}
 	}
 
@@ -123,17 +116,17 @@ void Game::RenderGame(Renderer& renderer) {
 
 	//Render active card while selecting opening gambit targets
 	if (activeCard != nullptr && activeCard->GetUnit() != nullptr && mode == MODE_SELECT && effectCallback.Callback)
-		activeCard->GetUnit()->RenderOnBoard(renderer);
+		activeCard->GetUnit()->RenderOnBoard(renderer, (castPos.x * 7) + 2, (castPos.y * 7) + 6);
 
 	//Move mode indicators
 	if (mode == MODE_MOVE) {
 		for (int i = 0; i < attackable.size(); ++i) {
 			if (attackable[i] == selectable[selectionIdx]) {
-				COORD coord = selectable[selectionIdx]->border.pos;
-				DrawSword(coord.X, coord.Y, renderer);
-				coord = activeUnit->curTile->border.pos;
+				Coord coord = Coord((selectable[selectionIdx]->pos.x * 7) + 1, (selectable[selectionIdx]->pos.y * 7) + 5);
+				DrawSword(coord.x, coord.y, renderer);
+				coord = Coord((activeUnit->curTile->pos.x * 7) + 1, (activeUnit->curTile->pos.y * 7) + 5);
 				if (selectable[selectionIdx]->unit->CanAttack(activeUnit))
-					DrawSword(coord.X, coord.Y, renderer);
+					DrawSword(coord.x, coord.y, renderer);
 				goto end;
 			}
 		}
@@ -143,7 +136,7 @@ void Game::RenderGame(Renderer& renderer) {
 
 	//Hand
 	for (int i = 0; i < 7; ++i)
-		renderer.Render(hand[i].border);
+		renderer.Render(hand[i].border, (i * 7) + 1, 41);
 	for (int i = 0; i < players[turn].hand.size(); ++i) {
 		players[turn].hand[i]->sprite.SetColor(COLOR_LTWHITE);
 		renderer.Render(players[turn].hand[i]->sprite, (i * 7) + 9, 42);
@@ -577,8 +570,6 @@ void Game::UseCard() {
 		OnPreCastThisEvent preCastEvent = OnPreCastThisEvent(&map.tiles[pos.x][pos.y]);
 		effect->TriggerSelfEvent(EffectContext(effect, activeCard, this), &preCastEvent);
 	}
-	if (activeCard->GetUnit() != nullptr)
-		activeCard->GetUnit()->SetPosition(pos.x, pos.y);
 	castPos = pos;
 
 	//Reset hand position
@@ -649,7 +640,7 @@ void Game::PostCast() {
 void Game::MoveUnit() {
 	if (selectable[selectionIdx]->unit == nullptr || selectable[selectionIdx] == &map.tiles[pos.x][pos.y]) {
 		if (selectable[selectionIdx] != &map.tiles[pos.x][pos.y]) {
-			activeUnit->MoveToPosition(selectable[selectionIdx]->pos.x, selectable[selectionIdx]->pos.y, false);
+			activeUnit->MoveToTile(selectable[selectionIdx], false);
 			pos = selectable[selectionIdx]->pos;
 			ProcessEventStack();
 		}
@@ -703,12 +694,11 @@ void Game::AttackUnit() {
 }
 
 //Summon at tile or position
-void Game::Summon(Card* card, BoardTile* tile, bool actionBar) { Summon(card, tile->pos.x, tile->pos.y, actionBar); }
-void Game::Summon(Card* card, int x, int y, bool actionBar) {
+void Game::Summon(Card* card, BoardTile* tile, bool actionBar) {
 	if (!card->IsUnit())
 		return;
 	units.push_back(card->GetUnit());
-	units.back()->SetPosition(x, y);
+	units.back()->SetTile(tile);
 	units.back()->AddEffects();
 	units.back()->UpdateAuras();
 	units.back()->InitState();
@@ -1054,25 +1044,25 @@ void Game::GeneratePaths() {
 void Game::DrawPath(Renderer& renderer) {
 	int pathSize = path.size() - 1;
 	if (pathSize > 0) {
-		COORD coord = map.tiles[path[0].x][path[0].y].border.pos;
-		if (path[0].y > path[1].y) { DrawArrow(1, coord.X, coord.Y, renderer); }      //Start up
-		else if (path[0].x > path[1].x) { DrawArrow(2, coord.X, coord.Y, renderer); } //Start left
-		else if (path[0].y < path[1].y) { DrawArrow(3, coord.X, coord.Y, renderer); } //Start down
-		else if (path[0].x < path[1].x) { DrawArrow(4, coord.X, coord.Y, renderer); } //Start right
-		coord = map.tiles[path[pathSize].x][path[pathSize].y].border.pos;
-		if (path[pathSize].y < path[pathSize - 1].y) { DrawArrow(5, coord.X, coord.Y, renderer); }      //End up
-		else if (path[pathSize].x < path[pathSize - 1].x) { DrawArrow(6, coord.X, coord.Y, renderer); } //End left
-		else if (path[pathSize].y > path[pathSize - 1].y) { DrawArrow(7, coord.X, coord.Y, renderer); } //End down
-		else if (path[pathSize].x > path[pathSize - 1].x) { DrawArrow(8, coord.X, coord.Y, renderer); } //End right
+		Coord coord = Coord((path[0].x * 7) + 1, (path[0].y * 7) + 5);
+		if (path[0].y > path[1].y) { DrawArrow(1, coord.x, coord.y, renderer); }      //Start up
+		else if (path[0].x > path[1].x) { DrawArrow(2, coord.x, coord.y, renderer); } //Start left
+		else if (path[0].y < path[1].y) { DrawArrow(3, coord.x, coord.y, renderer); } //Start down
+		else if (path[0].x < path[1].x) { DrawArrow(4, coord.x, coord.y, renderer); } //Start right
+		coord = Coord((path[pathSize].x * 7) + 1, (path[pathSize].y * 7) + 5);
+		if (path[pathSize].y < path[pathSize - 1].y) { DrawArrow(5, coord.x, coord.y, renderer); }      //End up
+		else if (path[pathSize].x < path[pathSize - 1].x) { DrawArrow(6, coord.x, coord.y, renderer); } //End left
+		else if (path[pathSize].y > path[pathSize - 1].y) { DrawArrow(7, coord.x, coord.y, renderer); } //End down
+		else if (path[pathSize].x > path[pathSize - 1].x) { DrawArrow(8, coord.x, coord.y, renderer); } //End right
 		if (pathSize > 1) {
 			for (int i = 1; i < pathSize; ++i) {
-				coord = map.tiles[path[i].x][path[i].y].border.pos;
-				if (path[i].x == path[i - 1].x && path[i].x == path[i + 1].x) { DrawArrow(9, coord.X, coord.Y, renderer); }       //Up-down
-				else if (path[i].y == path[i - 1].y && path[i].y == path[i + 1].y) { DrawArrow(10, coord.X, coord.Y, renderer); } //Left-right
-				else if ((path[i].x > path[i - 1].x && path[i].y > path[i + 1].y) || (path[i].x > path[i + 1].x && path[i].y > path[i - 1].y)) { DrawArrow(11, coord.X, coord.Y, renderer); } //Up-left
-				else if ((path[i].x > path[i - 1].x && path[i].y < path[i + 1].y) || (path[i].x > path[i + 1].x && path[i].y < path[i - 1].y)) { DrawArrow(12, coord.X, coord.Y, renderer); } //Down-left
-				else if ((path[i].x < path[i - 1].x && path[i].y < path[i + 1].y) || (path[i].x < path[i + 1].x && path[i].y < path[i - 1].y)) { DrawArrow(13, coord.X, coord.Y, renderer); } //Down-right
-				else if ((path[i].x < path[i - 1].x && path[i].y > path[i + 1].y) || (path[i].x < path[i + 1].x && path[i].y > path[i - 1].y)) { DrawArrow(14, coord.X, coord.Y, renderer); } //Up-right
+				coord = Coord((path[i].x * 7) + 1, (path[i].y * 7) + 5);
+				if (path[i].x == path[i - 1].x && path[i].x == path[i + 1].x) { DrawArrow(9, coord.x, coord.y, renderer); }       //Up-down
+				else if (path[i].y == path[i - 1].y && path[i].y == path[i + 1].y) { DrawArrow(10, coord.x, coord.y, renderer); } //Left-right
+				else if ((path[i].x > path[i - 1].x && path[i].y > path[i + 1].y) || (path[i].x > path[i + 1].x && path[i].y > path[i - 1].y)) { DrawArrow(11, coord.x, coord.y, renderer); } //Up-left
+				else if ((path[i].x > path[i - 1].x && path[i].y < path[i + 1].y) || (path[i].x > path[i + 1].x && path[i].y < path[i - 1].y)) { DrawArrow(12, coord.x, coord.y, renderer); } //Down-left
+				else if ((path[i].x < path[i - 1].x && path[i].y < path[i + 1].y) || (path[i].x < path[i + 1].x && path[i].y < path[i - 1].y)) { DrawArrow(13, coord.x, coord.y, renderer); } //Down-right
+				else if ((path[i].x < path[i - 1].x && path[i].y > path[i + 1].y) || (path[i].x < path[i + 1].x && path[i].y > path[i - 1].y)) { DrawArrow(14, coord.x, coord.y, renderer); } //Up-right
 			}
 		}
 	}

@@ -11,7 +11,6 @@ public:
 	void SetSize(COORD size);
 	void SwapBuffer();
 	void ClearScreen();
-	void Render(Sprite sprite);
 	void Render(Sprite sprite, int x, int y);
 private:
 	HANDLE frameBuffer[2];

@@ -51,10 +51,7 @@ void BoardTile::SetFeature(eFeature newFeature) {
 
 	//Empty tiles
 	if (feature == TILE_MANA) {
-		sprite.buffer[7].Char.AsciiChar = 'Ü';
-		sprite.buffer[11].Char.AsciiChar = 'Þ';
-		sprite.buffer[13].Char.AsciiChar = 'Ý';
-		sprite.buffer[17].Char.AsciiChar = 'ß';
+		sprite.CreateFromFile("resources/tiles/manaspring.txt");
 		sprite.SetColor(COLOR_LTBLUE);
 	}
 
@@ -69,15 +66,9 @@ bool BoardTile::IsNear(BoardTile* tile) { return (abs(tile->pos.x - pos.x) < 2 &
 
 //Map constructor
 Map::Map() {
-	for (int i = 0; i < 9; ++i) {
-		for (int j = 0; j < 5; ++j) {
-			tiles[i][j].border.pos.X = (7 * i) + 1;
-			tiles[i][j].border.pos.Y = (7 * j) + 5;
-			tiles[i][j].sprite.pos.X = (7 * i) + 2;
-			tiles[i][j].sprite.pos.Y = (7 * j) + 6;
+	for (int i = 0; i < 9; ++i)
+		for (int j = 0; j < 5; ++j)
 			tiles[i][j].pos = Coord(i, j);
-		}
-	}
 	tiles[4][0].SetFeature(TILE_MANA);
 	tiles[5][2].SetFeature(TILE_MANA);
 	tiles[4][4].SetFeature(TILE_MANA);

@@ -40,21 +40,24 @@ Unit::~Unit() {}
 
 //Render unit on board
 void Unit::RenderOnBoard(Renderer& renderer) {
+	if (curTile != nullptr)
+		RenderOnBoard(renderer, (curTile->pos.x * 7) + 2, (curTile->pos.y * 7) + 6);
+}
+void Unit::RenderOnBoard(Renderer& renderer, int x, int y) {
 
 	//Draw sprite
 	hasAttacked ? sprite.SetColor(COLOR_GRAY) : sprite.SetColor(COLOR_LTWHITE);
-	renderer.Render(sprite);
+	renderer.Render(sprite, x, y);
 
 	//Update and draw ATK/HP sprites
-	hpSprite.pos.X += hpSprite.GetSize() - std::to_string(hp).size();
 	atkSprite.CreateFromString(std::to_string(atk), COLOR_GREEN);
 	hpSprite.CreateFromString(std::to_string(hp), COLOR_RED);
-	renderer.Render(atkSprite);
-	renderer.Render(hpSprite);
+	renderer.Render(atkSprite, x, y + 4);
+	renderer.Render(hpSprite, x + (5 - hpSprite.GetWidth()), y + 4);
 
 	//Draw forcefield if applicable
 	if (HasKeywords(KEYWORD_FORCEFIELD) && !forcefieldBroken && game != nullptr)
-		game->DrawForcefield(sprite.pos.X, sprite.pos.Y, renderer);
+		game->DrawForcefield(x, y, renderer);
 
 }
 
@@ -109,28 +112,20 @@ void Unit::InitState() {
 }
 
 //Set sprite position
-void Unit::SetPosition(int x, int y) {
-	if (curTile != nullptr) { curTile->unit = nullptr; }
-	int spriteX = (x * 7) + 2;
-	int spriteY = (y * 7) + 6;
-	sprite.pos.X = spriteX;
-	sprite.pos.Y = spriteY;
-	atkSprite.pos.X = spriteX;
-	atkSprite.pos.Y = spriteY + 4;
-	hpSprite.pos.X = (spriteX + 4) - (hpSprite.buffer.size() - 1);
-	hpSprite.pos.Y = spriteY + 4;
-	curTile = &game->map.tiles[x][y];
-	curTile->unit = this;
-	if (curTile->feature == TILE_MANA) {
-		curTile->SetFeature(TILE_NONE);
+void Unit::SetTile(BoardTile* tile) {
+	if (curTile != nullptr)
+		curTile->unit = nullptr;
+	curTile = tile;
+	tile->unit = this;
+	if (tile->feature == TILE_MANA) {
+		tile->SetFeature(TILE_NONE);
 		owner->AddMana(1);
 	}
 }
 
 //Move on board
-void Unit::MoveToTile(BoardTile* tile, bool byEffect) { MoveToPosition(tile->pos.x, tile->pos.y, byEffect); }
-void Unit::MoveToPosition(int x, int y, bool byEffect) {
-	SetPosition(x, y);
+void Unit::MoveToTile(BoardTile* tile, bool byEffect) {
+	SetTile(tile);
 	if (!byEffect) {
 		if (!hasCelerityMoved)
 			hasCelerityMoved = true;

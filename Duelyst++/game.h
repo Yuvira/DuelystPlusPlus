@@ -90,7 +90,6 @@ public:
 	void MoveUnit();
 	void AttackUnit();
 	void Summon(Card* card, BoardTile* tile, bool actionBar);
-	void Summon(Card* card, int x, int y, bool actionBar);
 	void SummonToken(eCard cardId, BoardTile* tile, Player* owner);
 	void Replace();
 	void ChangeTurn(bool newTurn);

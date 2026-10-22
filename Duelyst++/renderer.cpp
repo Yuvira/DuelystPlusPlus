@@ -41,19 +41,18 @@ void Renderer::SwapBuffer() {
 }
 
 //Render sprite
-void Renderer::Render(Sprite sprite) { Render(sprite, sprite.pos.X, sprite.pos.Y); }
 void Renderer::Render(Sprite sprite, int x, int y) {
-	if (sprite.buffer.size() == 0)
+	if (sprite.GetSize() == 0)
 		return;
 	SMALL_RECT box;
 	box.Top = y;
 	box.Left = x;
-	box.Bottom = y + sprite.height;
-	box.Right = x + sprite.width;
+	box.Bottom = y + sprite.GetHeight();
+	box.Right = x + sprite.GetWidth();
 	COORD size;
-	size.X = sprite.width;
-	size.Y = sprite.height;
-	WriteConsoleOutputA(frameBuffer[currentBuffer], &sprite.buffer[0], size, startPos, &box);
+	size.X = sprite.GetWidth();
+	size.Y = sprite.GetHeight();
+	WriteConsoleOutputA(frameBuffer[currentBuffer], &sprite.ReadBuffer(0), size, startPos, &box);
 }
 
 #pragma endregion
