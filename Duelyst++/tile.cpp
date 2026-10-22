@@ -131,7 +131,7 @@ BoardTile* Map::GetRandomEmptyCorner() {
 std::vector<BoardTile*> Map::GetAllNear(BoardTile* tile) {
 	std::vector<BoardTile*> valid;
 	if (tile != nullptr) {
-		NearbyRange range = NearbyRange(tile->pos, width, height);
+		NearbyRange range = NearbyRange(tile->pos, 1, width, height);
 		for (int i = range.x0; i <= range.x1; ++i)
 			for (int j = range.y0; j <= range.y1; ++j)
 				if (&tiles[i][j] != tile)
@@ -144,7 +144,7 @@ std::vector<BoardTile*> Map::GetAllNear(BoardTile* tile) {
 std::vector<BoardTile*> Map::GetEmptyNear(BoardTile* tile) {
 	std::vector<BoardTile*> valid;
 	if (tile != nullptr) {
-		NearbyRange range = NearbyRange(tile->pos, width, height);
+		NearbyRange range = NearbyRange(tile->pos, 1, width, height);
 		for (int i = range.x0; i <= range.x1; ++i)
 			for (int j = range.y0; j <= range.y1; ++j)
 				if (&tiles[i][j] != tile && !tiles[i][j].HasUnit())
@@ -157,7 +157,7 @@ std::vector<BoardTile*> Map::GetEmptyNear(BoardTile* tile) {
 std::vector<Unit*> Map::GetUnitsNear(BoardTile* tile) {
 	std::vector<Unit*> valid;
 	if (tile != nullptr) {
-		NearbyRange range = NearbyRange(tile->pos, width, height);
+		NearbyRange range = NearbyRange(tile->pos, 1, width, height);
 		for (int i = range.x0; i <= range.x1; ++i)
 			for (int j = range.y0; j <= range.y1; ++j)
 				if (&tiles[i][j] != tile && tiles[i][j].HasUnit())
@@ -172,6 +172,19 @@ BoardTile* Map::GetRandomEmptyNear(BoardTile* tile) {
 	if (valid.size() > 0)
 		return valid[rand() % valid.size()];
 	return nullptr;
+}
+
+//Get empty tiles within range of a given tile
+std::vector<BoardTile*> Map::GetEmptyInRange(BoardTile* tile, int rad, BoardTile* ignore) {
+	std::vector<BoardTile*> valid;
+	if (tile != nullptr) {
+		NearbyRange range = NearbyRange(tile->pos, rad, width, height);
+		for (int i = range.x0; i <= range.x1; ++i)
+			for (int j = range.y0; j <= range.y1; ++j)
+				if (abs(i - tile->pos.x) + abs(j - tile->pos.y) <= rad && &tiles[i][j] != tile && &tiles[i][j] != ignore && !tiles[i][j].HasUnit())
+					valid.push_back(&tiles[i][j]);
+	}
+	return valid;
 }
 
 #pragma endregion

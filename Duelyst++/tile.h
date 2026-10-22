@@ -29,11 +29,11 @@ public:
 
 //Helper for getting tiles in range
 struct NearbyRange {
-	NearbyRange(Coord pos, int width, int height) {
-		x0 = max(pos.x - 1, 0);
-		x1 = min(pos.x + 1, width - 1);
-		y0 = max(pos.y - 1, 0);
-		y1 = min(pos.y + 1, height - 1);
+	NearbyRange(Coord pos, int rad, int width, int height) {
+		x0 = max(pos.x - rad, 0);
+		x1 = min(pos.x + rad, width - 1);
+		y0 = max(pos.y - rad, 0);
+		y1 = min(pos.y + rad, height - 1);
 	}
 	int x0, x1, y0, y1;
 };
@@ -87,6 +87,9 @@ public:
 	std::vector<BoardTile*> GetEmptyNear(BoardTile* tile);
 	std::vector<Unit*> GetUnitsNear(BoardTile* tile);
 	BoardTile* GetRandomEmptyNear(BoardTile* tile);
+
+	//Get in range
+	std::vector<BoardTile*> GetEmptyInRange(BoardTile* tile, int rad, BoardTile* ignore);
 
 	//Tile objects
 	BoardTile tiles[9][5];
