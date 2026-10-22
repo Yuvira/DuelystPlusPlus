@@ -671,7 +671,7 @@ void Game::AttackUnit() {
 	bool canCounter = target->CanAttack(source);
 
 	//Process attack event
-	QueueEvent(new OnAttackEvent(turnCount, source, target, false));
+	QueueEvent(new OnAttackEvent(GetTurnCount(), source, target, false));
 	ProcessEventStack();
 
 	//Attack target and process events
@@ -682,7 +682,7 @@ void Game::AttackUnit() {
 	if (canCounter) {
 
 		//Process counterattack event
-		QueueEvent(new OnAttackEvent(turnCount, target, source, true));
+		QueueEvent(new OnAttackEvent(GetTurnCount(), target, source, true));
 		ProcessEventStack();
 
 		//Attack target and process events
