@@ -946,4 +946,16 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnDamageEvent& ev) {
 			ev.damage = 0; });
 
+	//Silhouette Tracer
+	effectDefinitions.try_emplace(SKILL_SILHOUETTE_TRACER, SKILL_SILHOUETTE_TRACER, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Teleport your General up to 3 spaces");
+	effectDefinitions.at(SKILL_SILHOUETTE_TRACER).RegisterSelfTrigger<OnPreCastThisEvent>(
+		[](EffectContext ctx, OnPreCastThisEvent& ev) {
+			std::vector<BoardTile*> valid = ctx.GetMap()->GetEmptyInRange(ctx.GetAllyGeneral()->curTile, 3, ev.tile);
+			ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
+				[](EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets) {
+					if (targets.size() > 0 && !targets[0]->HasUnit())
+						ctx.GetAllyGeneral()->MoveToTile(targets[0], true);
+			});
+	});
+
 }

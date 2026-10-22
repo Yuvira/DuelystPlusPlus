@@ -686,6 +686,13 @@ void Collections::RegisterCards() {
 		2, 1, 4, SKILL_SHIRO_PUPPYDRAGON
 	);
 
+	//Silhouette Tracer
+	cardDefinitions.try_emplace(
+		CARD_SILHOUETTE_TRACER, CARD_SILHOUETTE_TRACER, RARITY_COMMON, FACTION_NEUTRAL, TRIBE_NONE,
+		"silhouettetracer", "Silhouette Tracer",
+		4, 2, 6, SKILL_SILHOUETTE_TRACER
+	);
+
 	//Silvertongue Corsair
 	cardDefinitions.try_emplace(
 		CARD_SILVERTONGUE_CORSAIR, CARD_SILVERTONGUE_CORSAIR, RARITY_RARE, FACTION_NEUTRAL, TRIBE_NONE,
