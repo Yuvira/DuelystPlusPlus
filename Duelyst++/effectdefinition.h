@@ -20,6 +20,7 @@ struct EffectDefinition {
 		this->keywords = keywords;
 		this->description = description;
 		token = CARD_NONE;
+		isRemovable = true;
 		AuraPredicate = nullptr;
 	}
 
