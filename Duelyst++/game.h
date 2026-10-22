@@ -79,7 +79,6 @@ public:
 
 	//Aura effects
 	void ApplyAura(eEffect effectId, Card* sourceCard, Effect* sourceEffect);
-	void ApplyAura(Effect effect, Card* sourceCard, Effect* sourceEffect);
 	void RemoveAura(Effect* effect);
 	void RemoveAurasFromSource(Effect* sourceEffect);
 	void RemoveAurasAt(std::vector<int> indices);
