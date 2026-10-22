@@ -57,7 +57,6 @@ public:
 //Game class
 class Game {
 
-//Methods
 public:
 	
 	//Constructor
@@ -90,11 +89,11 @@ public:
 	void PostCast();
 	void MoveUnit();
 	void AttackUnit();
-	void Replace();
-	void ChangeTurn(bool newTurn);
 	void Summon(Card* card, BoardTile* tile, bool actionBar);
 	void Summon(Card* card, int x, int y, bool actionBar);
 	void SummonToken(eCard cardId, BoardTile* tile, Player* owner);
+	void Replace();
+	void ChangeTurn(bool newTurn);
 	void Overflow(Card* card);
 
 	//Selection & Movement
@@ -145,12 +144,42 @@ public:
 	//Gameplay objects
 	Collections* collections;
 	EventManager eventManager;
-	Player players[2];
 	Map map;
 	Tile hand[7];
 
-//Properties
 private:
+
+	//Gameplay properties
+	eMode mode;
+	Player players[2];
+	std::vector<Event*> eventStack;
+	std::vector<Effect*> auras;
+	EffectCallback effectCallback;
+	bool* modeSwitch;
+
+	//Turn tracking
+	bool turn;
+	int turnCount;
+	bool endTurn;
+
+	//Selection tracking
+	Coord pos;
+	Coord castPos;
+	int handIdx;
+	int selectionIdx;
+	Unit* activeUnit;
+	Card* activeCard;
+
+	//Pathfinding
+	std::vector<Coord> path;
+	std::vector<PathCoord> pathList;
+
+	//Selection objects
+	std::vector<BoardTile*> highlighted;
+	std::vector<BoardTile*> moveable;
+	std::vector<BoardTile*> hostile;
+	std::vector<BoardTile*> attackable;
+	std::vector<BoardTile*> selectable;
 
 	//Card object references
 	std::vector<Unit*> units;
@@ -163,33 +192,6 @@ private:
 	Sprite light;
 	Sprite board;
 	Sprite chars[10];
-
-	//Gameplay objects
-	std::vector<Event*> eventStack;
-	std::vector<Effect*> auras;
-	EffectCallback effectCallback;
-
-	//Selection objects
-	std::vector<BoardTile*> highlighted;
-	std::vector<BoardTile*> moveable;
-	std::vector<BoardTile*> hostile;
-	std::vector<BoardTile*> attackable;
-	std::vector<BoardTile*> selectable;
-
-	//Gameplay properties
-	std::vector<PathCoord> pathList;
-	std::vector<Coord> path;
-	Unit* activeUnit;
-	Card* activeCard;
-	eMode mode;
-	Coord pos;
-	Coord castPos;
-	int handIdx;
-	int selectionIdx;
-	bool turn;
-	bool endTurn;
-	int turnCount;
-	bool* modeSwitch;
 
 	//Debug
 	bool debugMode;

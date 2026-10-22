@@ -560,15 +560,16 @@ bool Game::IsTrackingAura(Effect* match) {
 //Use active card
 void Game::UseCard() {
 
-	//Use mana
-	players[turn].mana -= activeCard->cost;
-
 	//Set position and clear selectables
 	pos = selectable[selectionIdx]->pos;
 	hand[handIdx + 1].SetColor(COLOR_LTWHITE);
 	selectable.clear();
 	selectionIdx = -1;
 	mode = MODE_NONE;
+
+	//Use mana, return if not enough available
+	if (!players[turn].SpendMana(activeCard->cost))
+		return;
 
 	//Remove from hand and do pre-cast effect targeting
 	players[turn].hand.erase(players[turn].hand.begin() + handIdx);
@@ -701,58 +702,7 @@ void Game::AttackUnit() {
 
 }
 
-//Replace active card
-void Game::Replace() {
-	players[turn].Replace(handIdx);
-	ProcessEventStack();
-}
-
-//Change turn
-void Game::ChangeTurn(bool newTurn) {
-
-	//Indicate turn is ending
-	endTurn = true;
-
-	//Trigger end of turn, draw and reset replaces
-	if (turnCount > 0) {
-		players[turn].Draw();
-		players[turn].replaces = players[turn].maxReplaces;
-		QueueEvent(new OnTurnEndEvent(GetTurnCount(), &players[turn]));
-		ProcessEventStack();
-	}
-
-	//Clear cast history
-	castThisTurn.clear();
-
-	//Change turn
-	turn = newTurn;
-	++turnCount;
-
-	//Refresh mana
-	if (turnCount > 2 && players[turn].manaMax < 9)
-		++players[turn].manaMax;
-	players[turn].mana = players[turn].manaMax;
-
-	//Refresh units
-	for (Unit* unit : units)
-		unit->Refresh();
-
-	//Set turn indicator
-	if (turn)
-		light.SetColor(COLOR_RED);
-	else
-		light.SetColor(COLOR_LTBLUE);
-
-	//Trigger start of turn
-	QueueEvent(new OnTurnStartEvent(GetTurnCount(), &players[turn]));
-	ProcessEventStack();
-
-	//Turn has ended
-	endTurn = false;
-
-}
-
-//Summon at tile / position
+//Summon at tile or position
 void Game::Summon(Card* card, BoardTile* tile, bool actionBar) { Summon(card, tile->pos.x, tile->pos.y, actionBar); }
 void Game::Summon(Card* card, int x, int y, bool actionBar) {
 	if (!card->IsUnit())
@@ -773,6 +723,56 @@ void Game::SummonToken(eCard cardId, BoardTile* tile, Player* owner) {
 	if (token == nullptr)
 		return;
 	Summon(token, tile, false);
+}
+
+//Replace active card
+void Game::Replace() {
+	players[turn].Replace(handIdx);
+	ProcessEventStack();
+}
+
+//Change turn
+void Game::ChangeTurn(bool newTurn) {
+
+	//Indicate turn is ending
+	endTurn = true;
+
+	//Draw and trigger end of turn
+	if (turnCount > 0) {
+		players[turn].Draw();
+		QueueEvent(new OnTurnEndEvent(GetTurnCount(), &players[turn]));
+		ProcessEventStack();
+	}
+
+	//Clear cast history
+	castThisTurn.clear();
+
+	//Change turn
+	turn = newTurn;
+	++turnCount;
+
+	//Refresh mana
+	if (turnCount > 2)
+		players[turn].AddMaxMana(1);
+	players[turn].Refresh();
+
+	//Refresh units
+	for (Unit* unit : units)
+		unit->Refresh();
+
+	//Set turn indicator
+	if (turn)
+		light.SetColor(COLOR_RED);
+	else
+		light.SetColor(COLOR_LTBLUE);
+
+	//Trigger start of turn
+	QueueEvent(new OnTurnStartEvent(GetTurnCount(), &players[turn]));
+	ProcessEventStack();
+
+	//Turn has ended
+	endTurn = false;
+
 }
 
 //Send card that can't be added to hand to graveyard instead
@@ -815,9 +815,10 @@ void Game::SelectTile(BoardTile& tile) {
 
 //Select card in hand
 void Game::SelectCard() {
-	if (players[turn].hand[handIdx]->cost <= players[turn].mana) {
+	if (players[turn].hand[handIdx]->cost <= players[turn].ReadMana()) {
 		HighlightSelectable(players[turn].hand[handIdx]->GetTargetMode());
-		if (selectable.size() > 0) { activeCard = players[turn].hand[handIdx]; }
+		if (selectable.size() > 0)
+			activeCard = players[turn].hand[handIdx];
 	}
 }
 

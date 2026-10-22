@@ -35,9 +35,9 @@ void Collections::RegisterEffects() {
 	//Aethermaster
 	effectDefinitions.try_emplace(SKILL_AETHERMASTER, SKILL_AETHERMASTER, KEYWORD_NONE, "You may replace an additional card each turn");
 	effectDefinitions.at(SKILL_AETHERMASTER).RegisterSelfTrigger<OnAddThisEvent>([](EffectContext ctx, OnAddThisEvent& ev) {
-		ctx.GetOwner()->ModifyReplaceCount(1); });
+		ctx.GetOwner()->AddMaxReplaces(1); });
 	effectDefinitions.at(SKILL_AETHERMASTER).RegisterSelfTrigger<OnRemoveThisEvent>([](EffectContext ctx, OnRemoveThisEvent& ev) {
-		ctx.GetOwner()->ModifyReplaceCount(-1); });
+		ctx.GetOwner()->AddMaxReplaces(-1); });
 
 	//Alcuin Loremaster
 	effectDefinitions.try_emplace(SKILL_ALCUIN_LOREMASTER, SKILL_ALCUIN_LOREMASTER, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Put a copy of the most recently cast spell into your action bar");

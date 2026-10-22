@@ -78,10 +78,6 @@ void Player::Render(Renderer& renderer, bool left) {
 
 }
 
-#pragma endregion
-
-#pragma region Updates
-
 //Update mana sprites
 void Player::UpdateMana(eColor color) {
 	for (int i = 0; i < mana; ++i)
@@ -179,13 +175,6 @@ void Player::Replace(int idx) {
 	}
 }
 
-//Change max replaces
-void Player::ModifyReplaceCount(int delta) {
-	maxReplaces += delta;
-	if (delta > 0) { replaces += delta; }
-	else { replaces = min(replaces, maxReplaces); }
-}
-
 //Remove card from deck
 bool Player::RemoveFromDeck(Card* card) {
 	for (int i = 0; i < deck.size(); ++i) {
@@ -199,7 +188,47 @@ bool Player::RemoveFromDeck(Card* card) {
 
 #pragma endregion
 
-//Getters
+#pragma region Resource Management
+
+//Add to current mana
+void Player::AddMana(int add) {
+	mana += add;
+	mana = min(mana, manaMax);
+}
+
+//Change mana limit
+void Player::AddMaxMana(int add) {
+	manaMax += add;
+	manaMax = min(manaMax, 9);
+	mana = min(mana, manaMax);
+}
+
+//Spend mana, returns false if not enough
+bool Player::SpendMana(int spend) {
+	if (mana < spend)
+		return false;
+	mana -= spend;
+	return true;
+}
+
+//Change max replaces
+void Player::AddMaxReplaces(int add) {
+	maxReplaces += add;
+	if (add > 0) { replaces += add; }
+	else { replaces = min(replaces, maxReplaces); }
+}
+
+//Refresh mana and replace count
+void Player::Refresh() {
+	mana = manaMax;
+	replaces = maxReplaces;
+}
+
+#pragma endregion
+
+#pragma region Utils
+
+//Get all cards from deck and hand
 std::vector<Card*> Player::GetDeckAndHand() {
 	std::vector<Card*> valid;
 	valid.reserve(hand.size() + deck.size());
@@ -215,3 +244,5 @@ bool Player::HasCardInHand(Card* match) {
 			return true;
 	return false;
 }
+
+#pragma endregion

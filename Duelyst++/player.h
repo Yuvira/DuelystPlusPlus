@@ -14,6 +14,7 @@ enum eCard;
 
 //Player class
 class Player {
+
 public:
 
 	//Constructor
@@ -24,8 +25,8 @@ public:
 	void InitStartingHand();
 
 	//Rendering
-	void UpdateMana(eColor color);
 	void Render(Renderer& renderer, bool left);
+	void UpdateMana(eColor color);
 
 	//Actions
 	void Shuffle();
@@ -33,25 +34,36 @@ public:
 	void AddNewToHand(eCard cardId);
 	void AddNewToDeck(eCard cardId);
 	void Replace(int idx);
-	void ModifyReplaceCount(int delta);
 	bool RemoveFromDeck(Card* card);
 
-	//Getters
-	std::vector<Card*> GetDeckAndHand();
+	//Resource management
+	void AddMana(int add);
+	void AddMaxMana(int add);
+	bool SpendMana(int spend);
+	void AddMaxReplaces(int add);
+	void Refresh();
+
+	//Readers
+	const int& ReadMana() const { return mana; }
 
 	//Utils
+	std::vector<Card*> GetDeckAndHand();
 	bool HasCardInHand(Card* match);
+
+	//Properties
+	Game* game;
+	Unit* general;
+	Player* opponent;
+	std::vector<Card*> deck;
+	std::vector<Card*> hand;
+
+private:
 
 	//Properties
 	int manaMax;
 	int mana;
 	int maxReplaces;
 	int replaces;
-	Game* game;
-	Unit* general;
-	Player* opponent;
-	std::vector<Card*> deck;
-	std::vector<Card*> hand;
 	Sprite uiReplace;
 	Sprite uiCrystal[9];
 

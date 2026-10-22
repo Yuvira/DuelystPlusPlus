@@ -123,7 +123,7 @@ void Unit::SetPosition(int x, int y) {
 	curTile->unit = this;
 	if (curTile->feature == TILE_MANA) {
 		curTile->SetFeature(TILE_NONE);
-		if (owner->mana < 9) { ++owner->mana; }
+		owner->AddMana(1);
 	}
 }
 
