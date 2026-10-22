@@ -735,6 +735,55 @@ void Collections::RegisterCards() {
 		4, 3, 5, SKILL_SPELLJAMMER
 	);
 
+	//Storm Aratha
+	cardDefinitions.try_emplace(
+		CARD_STORM_ARATHA, CARD_STORM_ARATHA, RARITY_COMMON, FACTION_NEUTRAL, TRIBE_NONE,
+		"stormaratha", "Storm Aratha",
+		6, 6, 5, SKILL_FLYING
+	);
+
+	//Stormmetal Golem
+	cardDefinitions.try_emplace(
+		CARD_STORMMETAL_GOLEM, CARD_STORMMETAL_GOLEM, RARITY_NONE, FACTION_NEUTRAL, TRIBE_GOLEM,
+		"stormmetalgolem", "Stormmetal Golem",
+		6, 8, 8, EFFECT_NONE
+	);
+
+	//Sun Elemental
+	cardDefinitions.try_emplace(
+		CARD_SUN_ELEMENTAL, CARD_SUN_ELEMENTAL, RARITY_COMMON, FACTION_NEUTRAL, TRIBE_NONE,
+		"sunelemental", "Sun Elemental",
+		4, 3, 3, SKILL_SUN_ELEMENTAL
+	);
+
+	//Sun Seer
+	cardDefinitions.try_emplace(
+		CARD_SUN_SEER, CARD_SUN_SEER, RARITY_COMMON, FACTION_NEUTRAL, TRIBE_ARCANYST,
+		"sunseer", "Sun Seer",
+		3, 2, 4, SKILL_SUN_SEER
+	);
+
+	//Sunset Paragon
+	cardDefinitions.try_emplace(
+		CARD_SUNSET_PARAGON, CARD_SUNSET_PARAGON, RARITY_EPIC, FACTION_NEUTRAL, TRIBE_NONE,
+		"sunsetparagon", "Sunset Paragon",
+		5, 3, 2, SKILL_SUNSET_PARAGON
+	);
+
+	//Sunsteel Defender
+	cardDefinitions.try_emplace(
+		CARD_SUNSTEEL_DEFENDER, CARD_SUNSTEEL_DEFENDER, RARITY_RARE, FACTION_NEUTRAL, TRIBE_NONE,
+		"sunsteeldefender", "Sunsteel Defender",
+		4, 3, 3, SKILL_FORCEFIELD
+	);
+
+	//Swamp Entangler
+	cardDefinitions.try_emplace(
+		CARD_SWAMP_ENTANGLER, CARD_SWAMP_ENTANGLER, RARITY_COMMON, FACTION_NEUTRAL, TRIBE_NONE,
+		"swampentangler", "Swamp Entangler",
+		1, 0, 3, SKILL_PROVOKE
+	);
+
 #pragma endregion
 
 #pragma region Tokens

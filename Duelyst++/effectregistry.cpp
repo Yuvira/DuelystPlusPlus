@@ -1004,4 +1004,40 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnTurnEndEvent& ev) {
 			ev.player->Draw(); });
 
+	//Sun Elemental
+	effectDefinitions.try_emplace(SKILL_SUN_ELEMENTAL, SKILL_SUN_ELEMENTAL, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Give two random friendly minions +2 Health");
+	effectDefinitions.at(SKILL_SUN_ELEMENTAL).RegisterSelfTrigger<OnPreCastThisEvent>(
+		[](EffectContext ctx, OnPreCastThisEvent& ev) {
+			std::vector<Unit*> valid;
+			for (Unit* unit : ctx.game->GetUnits())
+				if (ctx.SharesOwner(unit) && !unit->IsGeneral())
+					valid.push_back(unit);
+			for (int i = 0; i < 2; ++i) {
+				if (valid.size() > 0) {
+					int idx = rand() % valid.size();
+					valid[idx]->AddEffect(MODIFIER_SUN_ELEMENTAL, ctx.card);
+					valid.erase(valid.begin() + idx);
+				}
+			}
+	});
+	effectDefinitions.try_emplace(MODIFIER_SUN_ELEMENTAL, MODIFIER_SUN_ELEMENTAL, KEYWORD_NONE, "Sun Elemental");
+	effectDefinitions.at(MODIFIER_SUN_ELEMENTAL).AddModifier(STAT_HP, MODTYPE_BUFF, 2);
+
+	//Sun Seer
+	effectDefinitions.try_emplace(SKILL_SUN_SEER, SKILL_SUN_SEER, KEYWORD_NONE, "Whenever this minion deals damage, restore 2 Health to your General");
+	effectDefinitions.at(SKILL_SUN_SEER).RegisterPostTrigger<OnDamageEvent>(
+		[](EffectContext ctx, OnDamageEvent& ev) {
+			return ctx.IsCardOnBoard(ev.source); },
+		[](EffectContext ctx, OnDamageEvent& ev) {
+			ctx.GetAllyGeneral()->Heal(ctx.card, 2); });
+
+	//Sunset Paragon
+	effectDefinitions.try_emplace(SKILL_SUNSET_PARAGON, SKILL_SUNSET_PARAGON, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: ALL nearby minions deal damage to themselves equal to their Attack");
+	effectDefinitions.at(SKILL_SUNSET_PARAGON).RegisterSelfTrigger<OnPreCastThisEvent>(
+		[](EffectContext ctx, OnPreCastThisEvent& ev) {
+			for (Unit* unit : ctx.GetMap()->GetUnitsNear(ev.tile))
+				if (!unit->IsGeneral())
+					unit->DealDamage(unit, unit->atk);
+	});
+
 }
