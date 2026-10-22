@@ -45,6 +45,7 @@ bool EffectContext::IsOnBoard() { return card->IsOnBoard(); }
 bool EffectContext::BothOnBoard(Card* compare) { return card->IsOnBoard() && compare->IsOnBoard(); }
 bool EffectContext::IsCard(Card* compare) { return card == compare; }
 bool EffectContext::IsCardOnBoard(Card* compare) { return card->IsOnBoard() && card == compare; }
+bool EffectContext::IsInOwnerHand() { return card->owner->HasCardInHand(card); }
 bool EffectContext::SharesOwner(Card* compare) { return card->owner == compare->owner; }
 bool EffectContext::IsOwnedBy(Player* compare) { return card->owner == compare; }
 bool EffectContext::IsAllied(Card* compare) { return card != compare && card->owner == compare->owner; }

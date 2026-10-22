@@ -70,7 +70,7 @@ void Collections::RegisterEffects() {
 			ctx.game->RemoveAurasFromSource(ctx.effect); });
 	effectDefinitions.try_emplace(AURA_ARCHON_SPELLBINDER, AURA_ARCHON_SPELLBINDER, KEYWORD_NONE, "Archon Spellbinder");
 	effectDefinitions.at(AURA_ARCHON_SPELLBINDER).SetAuraPredicate([](EffectContext ctx) {
-		return ctx.GetOwner()->HasCardInHand(ctx.card) && !ctx.CardSharesAuraOwner() && ctx.card->IsSpell(); });
+		return ctx.IsInOwnerHand() && !ctx.CardSharesAuraOwner() && ctx.card->IsSpell(); });
 	effectDefinitions.at(AURA_ARCHON_SPELLBINDER).AddModifier(STAT_COST, MODTYPE_BUFF, 1);
 
 	//Arrow Whistler
@@ -514,7 +514,7 @@ void Collections::RegisterEffects() {
 			ctx.game->RemoveAurasFromSource(ctx.effect); });
 	effectDefinitions.try_emplace(AURA_GOLEM_METALLURGIST, AURA_GOLEM_METALLURGIST, KEYWORD_NONE, "Golem Metallurgist");
 	effectDefinitions.at(AURA_GOLEM_METALLURGIST).SetAuraPredicate([](EffectContext ctx) {
-		return ctx.GetOwner()->HasCardInHand(ctx.card) && ctx.CardSharesAuraOwner() && ctx.card->IsUnit() && ctx.card->GetUnit()->tribe == TRIBE_GOLEM
+		return ctx.IsInOwnerHand() && ctx.CardSharesAuraOwner() && ctx.card->IsUnit() && ctx.card->GetUnit()->tribe == TRIBE_GOLEM
 			&& !ctx.game->AnyCastThisTurn([](Card* card) { return card->IsUnit() && card->GetUnit()->tribe == TRIBE_GOLEM; }); });
 	effectDefinitions.at(AURA_GOLEM_METALLURGIST).AddModifier(STAT_COST, MODTYPE_BUFF, -1);
 
@@ -693,7 +693,7 @@ void Collections::RegisterEffects() {
 			ctx.game->RemoveAurasFromSource(ctx.effect); });
 	effectDefinitions.try_emplace(AURA_MANAFORGER, AURA_MANAFORGER, KEYWORD_NONE, "Manaforger");
 	effectDefinitions.at(AURA_MANAFORGER).SetAuraPredicate([](EffectContext ctx) {
-		return ctx.GetOwner()->HasCardInHand(ctx.card) && ctx.CardSharesAuraOwner() && ctx.card->IsSpell()
+		return ctx.IsInOwnerHand() && ctx.CardSharesAuraOwner() && ctx.card->IsSpell()
 			&& !ctx.game->AnyCastThisTurn([](Card* card) { return card->IsSpell(); }); });
 	effectDefinitions.at(AURA_MANAFORGER).AddModifier(STAT_COST, MODTYPE_BUFF, -1);
 

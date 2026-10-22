@@ -35,6 +35,7 @@ struct EffectContext {
 	bool BothOnBoard(Card* compare);
 	bool IsCard(Card* compare);
 	bool IsCardOnBoard(Card* compare);
+	bool IsInOwnerHand();
 	bool SharesOwner(Card* compare);
 	bool IsOwnedBy(Player* compare);
 	bool IsAllied(Card* compare);
