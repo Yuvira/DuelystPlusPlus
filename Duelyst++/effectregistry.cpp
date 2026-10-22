@@ -958,4 +958,50 @@ void Collections::RegisterEffects() {
 			});
 	});
 
+	//Skywing
+	effectDefinitions.try_emplace(SKILL_SKYWING, SKILL_SKYWING, KEYWORD_FLYING, "{Flying}|Your other minions with {Flying} cost 1 less");
+	effectDefinitions.at(SKILL_SKYWING).RegisterSelfTrigger<OnAddThisEvent>(
+		[](EffectContext ctx, OnAddThisEvent& ev) {
+			ctx.game->ApplyAura(AURA_SKYWING, ctx.card, ctx.effect); });
+	effectDefinitions.at(SKILL_SKYWING).RegisterSelfTrigger<OnRemoveThisEvent>(
+		[](EffectContext ctx, OnRemoveThisEvent& ev) {
+			ctx.game->RemoveAurasFromSource(ctx.effect); });
+	effectDefinitions.try_emplace(AURA_SKYWING, AURA_SKYWING, KEYWORD_NONE, "Skywing");
+	effectDefinitions.at(AURA_SKYWING).SetAuraPredicate([](EffectContext ctx) {
+		return ctx.IsInOwnerHand() && ctx.CardSharesAuraOwner() && ctx.card->IsUnit() && ctx.GetUnit()->HasKeywords(KEYWORD_FLYING); });
+	effectDefinitions.at(AURA_SKYWING).AddModifier(STAT_COST, MODTYPE_BUFF, -1);
+
+	//Sojourner
+	effectDefinitions.try_emplace(SKILL_SOJOURNER, SKILL_SOJOURNER, KEYWORD_NONE, "Whenever this minion deals damage, draw a card");
+	effectDefinitions.at(SKILL_SOJOURNER).RegisterPostTrigger<OnDamageEvent>(
+		[](EffectContext ctx, OnDamageEvent& ev) {
+			return ctx.IsCardOnBoard(ev.source); },
+		[](EffectContext ctx, OnDamageEvent& ev) {
+			ctx.GetOwner()->Draw(); });
+
+	//Songweaver
+	effectDefinitions.try_emplace(SKILL_SONGWEAVER, SKILL_SONGWEAVER, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Give a nearby friendly minion +1/+1");
+	effectDefinitions.at(SKILL_SONGWEAVER).RegisterSelfTrigger<OnPreCastThisEvent>(
+		[](EffectContext ctx, OnPreCastThisEvent& ev) {
+			std::vector<BoardTile*> valid;
+			for (Unit* unit : ctx.GetMap()->GetUnitsNear(ev.tile))
+				if (ctx.SharesOwner(unit) && !unit->IsGeneral())
+					valid.push_back(unit->curTile);
+			ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
+				[](EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets) {
+					if (targets.size() > 0 && targets[0]->HasUnit())
+						targets[0]->unit->AddEffect(MODIFIER_SONGWEAVER, ctx.card);
+			});
+	});
+	effectDefinitions.try_emplace(MODIFIER_SONGWEAVER, MODIFIER_SONGWEAVER, KEYWORD_NONE, "Songweaver");
+	effectDefinitions.at(MODIFIER_SONGWEAVER).AddModifier(STAT_ATK, MODTYPE_BUFF, 1).AddModifier(STAT_HP, MODTYPE_BUFF, 1);
+
+	//Spelljammer
+	effectDefinitions.try_emplace(SKILL_SPELLJAMMER, SKILL_SPELLJAMMER, KEYWORD_NONE, "Each player draws an additional card at the end of their turns");
+	effectDefinitions.at(SKILL_SPELLJAMMER).RegisterPostTrigger<OnTurnEndEvent>(
+		[](EffectContext ctx, OnTurnEndEvent& ev) {
+			return ctx.IsOnBoard(); },
+		[](EffectContext ctx, OnTurnEndEvent& ev) {
+			ev.player->Draw(); });
+
 }

@@ -700,6 +700,41 @@ void Collections::RegisterCards() {
 		3, 3, 3, SKILL_SILVERTONGUE_CORSAIR
 	);
 
+	//Skyrock Golem
+	cardDefinitions.try_emplace(
+		CARD_SKYROCK_GOLEM, CARD_SKYROCK_GOLEM, RARITY_NONE, FACTION_NEUTRAL, TRIBE_GOLEM,
+		"skyrockgolem", "Skyrock Golem",
+		2, 3, 2, EFFECT_NONE
+	);
+
+	//Skywing
+	cardDefinitions.try_emplace(
+		CARD_SKYWING, CARD_SKYWING, RARITY_RARE, FACTION_NEUTRAL, TRIBE_WARMASTER,
+		"skywing", "Skywing",
+		3, 3, 3, SKILL_SKYWING
+	);
+
+	//Sojourner
+	cardDefinitions.try_emplace(
+		CARD_SOJOURNER, CARD_SOJOURNER, RARITY_RARE, FACTION_NEUTRAL, TRIBE_NONE,
+		"sojourner", "Sojourner",
+		3, 1, 5, SKILL_SOJOURNER
+	);
+
+	//Songweaver
+	cardDefinitions.try_emplace(
+		CARD_SONGWEAVER, CARD_SONGWEAVER, RARITY_COMMON, FACTION_NEUTRAL, TRIBE_NONE,
+		"songweaver", "Songweaver",
+		3, 3, 3, SKILL_SONGWEAVER
+	);
+
+	//Spelljammer
+	cardDefinitions.try_emplace(
+		CARD_SPELLJAMMER, CARD_SPELLJAMMER, RARITY_LEGENDARY, FACTION_NEUTRAL, TRIBE_NONE,
+		"spelljammer", "Spelljammer",
+		4, 3, 5, SKILL_SPELLJAMMER
+	);
+
 #pragma endregion
 
 #pragma region Tokens
