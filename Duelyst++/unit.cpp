@@ -77,8 +77,8 @@ void Unit::DrawDetails(Renderer& renderer, int& y) {
 //Check if unit has died
 void Unit::Update(bool& shouldLoop) {
 	if (hp < 1 || destroyed) {
-		game->QueueEvent(new OnDeathEvent(game->GetTurnCount(), this));
 		isDead = true;
+		game->QueueEvent(new OnDeathEvent(game->GetTurnCount(), this));
 		shouldLoop = true;
 	}
 }

@@ -54,7 +54,7 @@ public:
 	void SetFeature(eFeature newFeature);
 	void Dispel();
 	bool IsNear(BoardTile* tile);
-	bool HasUnit() { return unit != nullptr; }
+	bool HasUnit();
 	eFeature feature;
 	Unit* unit;
 	Sprite sprite;

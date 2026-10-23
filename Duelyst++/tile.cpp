@@ -68,6 +68,9 @@ void BoardTile::Dispel() {
 //Check if a tile is adjacent to this one
 bool BoardTile::IsNear(BoardTile* tile) { return (abs(tile->pos.x - pos.x) < 2 && abs(tile->pos.y - pos.y) < 2); }
 
+//Check if tile has a non-dead unit
+bool BoardTile::HasUnit() { return unit != nullptr && !unit->isDead; }
+
 #pragma endregion
 
 #pragma region Maps
