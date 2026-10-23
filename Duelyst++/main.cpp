@@ -11,7 +11,7 @@ int main() {
 	//Setup
 	system("title Duelyst++");
 	if (IS_DEBUG)
-		system("mode 250,49");
+		system("mode 266,49");
 	else
 		system("mode 115,49");
 	srand(time(NULL));

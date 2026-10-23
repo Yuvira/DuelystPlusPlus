@@ -172,6 +172,7 @@ public:
 	std::vector<BoardTile*> GetTargets();
 
 	//Getters
+	SpellEffect* GetSpellEffect() { return spellEffect; }
 	Spell* GetSpell() { return this; }
 
 private:

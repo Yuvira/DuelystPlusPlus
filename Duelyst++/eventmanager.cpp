@@ -41,6 +41,11 @@ void EventManager::NotifyPreEvent(Game* game, Event* event) {
 	for (Aura* a : game->GetAuras())
 		a->TriggerPreEvent(EffectContext(a, a->GetSourceCard(), game), event);
 
+	//Delayed triggers
+	for (Spell* s : game->GetDelayedTriggers())
+		if (s->GetSpellEffect() != nullptr)
+			s->GetSpellEffect()->TriggerPreEvent(EffectContext(s->GetSpellEffect(), s, game), event);
+
 }
 
 //Send post-events (for triggers in response to resolution) and log history
@@ -72,6 +77,11 @@ void EventManager::TriggerPostEvent(Game* game, Event* event) {
 	//Auras
 	for (Aura* a : game->GetAuras())
 		a->TriggerPostEvent(EffectContext(a, a->GetSourceCard(), game), event);
+
+	//Delayed triggers
+	for (Spell* s : game->GetDelayedTriggers())
+		if (s->GetSpellEffect() != nullptr)
+			s->GetSpellEffect()->TriggerPostEvent(EffectContext(s->GetSpellEffect(), s, game), event);
 
 	//Push to event history
 	eventLog.push_back(event->Clone());

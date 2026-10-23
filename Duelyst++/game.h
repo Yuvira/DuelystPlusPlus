@@ -75,6 +75,9 @@ public:
 	void QueueEvent(Event* event);
 	void ProcessEventStack();
 	void UpdateAuras();
+	void AddDelayedTrigger(Spell* spell);
+	void RemoveDelayedTrigger(Spell* spell);
+	bool IsTrackingDelayedTrigger(Spell* spell);
 
 	//Aura effects
 	void ApplyAura(eEffect auraId, Player* owner, Card* sourceCard, Effect* sourceEffect);
@@ -89,8 +92,8 @@ public:
 	void PostCast();
 	void MoveUnit();
 	void AttackUnit();
-	void Summon(Card* card, BoardTile* tile, bool actionBar);
-	void SummonToken(eCard cardId, BoardTile* tile, Player* owner);
+	Unit* Summon(Card* card, BoardTile* tile, bool actionBar);
+	Unit* SummonToken(eCard cardId, BoardTile* tile, Player* owner);
 	void Replace();
 	void ChangeTurn(bool newTurn);
 	void Overflow(Card* card);
@@ -124,6 +127,7 @@ public:
 	Player* GetNonTurnPlayer();
 	std::vector<Aura*> GetAuras();
 	std::vector<Unit*> GetUnits();
+	std::vector<Spell*> GetDelayedTriggers();
 	const std::vector<Card*>& GetGrave() const;
 	const std::vector<Unit*>& GetDestroyedUnits() const;
 	const std::vector<Spell*>& GetSpellHistory() const;
@@ -154,6 +158,7 @@ private:
 	EffectCallback effectCallback;
 	EffectCallback nextEffectCallback;
 	std::vector<BoardTile*> callbackTargets;
+	std::vector<Spell*> delayedTriggers;
 	bool* modeSwitch;
 
 	//Turn tracking

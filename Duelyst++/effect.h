@@ -49,6 +49,7 @@ struct EffectContext {
 	Player* GetOwner();
 	Player* GetOpponent();
 	Unit* GetUnit();
+	Spell* GetSpell();
 	Unit* GetAllyGeneral();
 	Unit* GetEnemyGeneral();
 	BoardTile* GetTile();
@@ -179,7 +180,7 @@ public:
 	SpellEffect(const EffectDefinition& definition);
 	~SpellEffect();
 
-	//Get targets
+	//Initial targeting
 	std::vector<BoardTile*> GetTargets(Game* game, Spell* spell) {
 		std::vector<BoardTile*> empty;
 		if (TargetMethod)
@@ -187,12 +188,17 @@ public:
 		return empty;
 	};
 
+	//Effect targets
+	void AddTarget(BoardTile* tile) { effectTargets.push_back(tile); }
+	std::vector<BoardTile*> GetEffectTargets() { return effectTargets; }
+
 	//Subclass getter
 	SpellEffect* GetSpellEffect() { return this; }
 
 private:
 
 	//Target method
+	std::vector<BoardTile*> effectTargets;
 	std::vector<BoardTile*> (*TargetMethod)(Game* game, Spell* spell);
 
 };

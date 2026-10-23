@@ -227,6 +227,14 @@ void Game::RenderDebug(Renderer& renderer) {
 			lines.push_back(aura->GetSourceCard()->name);
 		debugSprite.CreateFromTextBlock(lines);
 		renderer.Render(debugSprite, 215, 1);
+		lines.clear();
+
+		//Delayed trigger data
+		lines.push_back("{Delayed Triggers}");
+		for (Spell* spell : delayedTriggers)
+			lines.push_back(spell->name);
+		debugSprite.CreateFromTextBlock(lines);
+		renderer.Render(debugSprite, 240, 1);
 
 	}
 
@@ -467,6 +475,21 @@ void Game::UpdateAuras() {
 		card->UpdateAuras();
 }
 
+//Track spells that need to receive events post-resolution for delayed triggers
+void Game::AddDelayedTrigger(Spell* spell) {
+	if (spell != nullptr && !IsTrackingDelayedTrigger(spell))
+		delayedTriggers.push_back(spell);
+}
+void Game::RemoveDelayedTrigger(Spell* spell) {
+	for (int i = 0; i < delayedTriggers.size(); ++i) {
+		if (delayedTriggers[i] == spell) {
+			delayedTriggers.erase(delayedTriggers.begin() + i);
+			return;
+		}
+	}
+}
+bool Game::IsTrackingDelayedTrigger(Spell* spell) { return std::find(delayedTriggers.begin(), delayedTriggers.end(), spell) != delayedTriggers.end(); }
+
 #pragma endregion
 
 #pragma region Effects
@@ -695,25 +718,27 @@ void Game::AttackUnit() {
 }
 
 //Summon at tile or position
-void Game::Summon(Card* card, BoardTile* tile, bool actionBar) {
+Unit* Game::Summon(Card* card, BoardTile* tile, bool actionBar) {
 	if (!card->IsUnit())
-		return;
-	units.push_back(card->GetUnit());
-	units.back()->SetTile(tile);
-	units.back()->AddEffects();
-	units.back()->UpdateAuras();
-	units.back()->InitState();
-	QueueEvent(new OnSummonEvent(GetTurnCount(), card->GetUnit(), actionBar));
+		return nullptr;
+	Unit* unit = card->GetUnit();
+	units.push_back(unit);
+	unit->SetTile(tile);
+	unit->AddEffects();
+	unit->UpdateAuras();
+	unit->InitState();
+	QueueEvent(new OnSummonEvent(GetTurnCount(), unit, actionBar));
+	return unit;
 }
 
 //Summon token at tile
-void Game::SummonToken(eCard cardId, BoardTile* tile, Player* owner) {
+Unit* Game::SummonToken(eCard cardId, BoardTile* tile, Player* owner) {
 	if (cardId == CARD_NONE)
-		return;
+		return nullptr;
 	Unit* token = collections->GetNewUnitInstance(cardId, this, owner);
 	if (token == nullptr)
-		return;
-	Summon(token, tile, false);
+		return nullptr;
+	return Summon(token, tile, false);
 }
 
 //Replace active card
@@ -1185,6 +1210,10 @@ std::vector<Aura*> Game::GetAuras() {
 std::vector<Unit*> Game::GetUnits() {
 	std::vector<Unit*> unitIterator = units;
 	return unitIterator;
+}
+std::vector<Spell*> Game::GetDelayedTriggers() {
+	std::vector<Spell*> spellIterator = delayedTriggers;
+	return spellIterator;
 }
 
 //Unit list
