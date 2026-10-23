@@ -175,6 +175,21 @@ void EventManager::LogEvent(Game* game, Event* event) {
 
 #pragma region Utils
 
+//Get all events from a player's most recent turn (including the current one)
+std::vector<Event*> EventManager::GetMostRecentTurnEvents(Player* player) {
+	int max = -1;
+	std::vector<Event*> valid;
+	OnTurnStartEvent* turnStartEvent = nullptr;
+	for (Event* event : eventLog)
+		if (turnStartEvent = event->As<OnTurnStartEvent>())
+			if (turnStartEvent->player == player && turnStartEvent->turn > max)
+				max = turnStartEvent->turn;
+	for (Event* event : eventLog)
+		if (event->turn == max)
+			valid.push_back(event);
+	return valid;
+}
+
 //Check if any events from a player's most recent turn match a predicate
 bool EventManager::MostRecentPlayerTurnHasEvent(Player* player, bool (*Predicate)(Player* player, Event* event)) {
 	int max = -1;

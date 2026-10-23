@@ -16,6 +16,7 @@ public:
 	void NotifyPreEvent(Game* game, Event* event);
 	void TriggerPostEvent(Game* game, Event* event);
 	void LogEvent(Game* game, Event* event);
+	std::vector<Event*> GetMostRecentTurnEvents(Player* player);
 	bool MostRecentPlayerTurnHasEvent(Player* player, bool (*Predicate)(Player* player, Event* event));
 private:
 	std::vector<Event*> eventLog;
