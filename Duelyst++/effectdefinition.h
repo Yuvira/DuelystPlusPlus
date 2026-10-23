@@ -11,17 +11,30 @@
 class EffectContext;
 class EventTrigger;
 
+//Card type enum
+enum eEffectType {
+	EFFECTTYPE_CARD,
+	EFFECTTYPE_AURA,
+	EFFECTTYPE_SPELL
+};
+
 //Effect Definition
 struct EffectDefinition {
 
-	//Constructor
+	//Constructors
 	EffectDefinition(eEffect effectId, int keywords, std::string description) {
+		type = EFFECTTYPE_CARD;
 		this->effectId = effectId;
 		this->keywords = keywords;
 		this->description = description;
 		token = CARD_NONE;
 		isRemovable = true;
 		AuraPredicate = nullptr;
+	}
+	EffectDefinition(eEffect effectId, int keywords, std::string description, bool (*AuraPredicate)(EffectContext ctx))
+	: EffectDefinition(effectId, keywords, description) {
+		type = EFFECTTYPE_AURA;
+		this->AuraPredicate = AuraPredicate;
 	}
 
 	//Trigger registers
@@ -47,9 +60,9 @@ struct EffectDefinition {
 	void HideModifiers() { modifiers.HideValues(); }
 	void SetToken(eCard token) { this->token = token; }
 	void SetRemovable(bool removable) { this->isRemovable = removable; }
-	void SetAuraPredicate(bool (*Predicate)(EffectContext ctx)) { AuraPredicate = Predicate; }
 
 	//Properties
+	eEffectType type;
 	eEffect effectId;
 	std::string description;
 	int keywords;

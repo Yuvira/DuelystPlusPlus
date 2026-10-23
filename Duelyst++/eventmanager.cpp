@@ -38,7 +38,7 @@ void EventManager::NotifyPreEvent(Game* game, Event* event) {
 			e->TriggerPreEvent(EffectContext(e, c, game), event);
 
 	//Auras
-	for (Effect* a : game->GetAuras())
+	for (Aura* a : game->GetAuras())
 		a->TriggerPreEvent(EffectContext(a, a->GetSourceCard(), game), event);
 
 }
@@ -70,7 +70,7 @@ void EventManager::TriggerPostEvent(Game* game, Event* event) {
 			e->TriggerPostEvent(EffectContext(e, c, game), event);
 
 	//Auras
-	for (Effect* a : game->GetAuras())
+	for (Aura* a : game->GetAuras())
 		a->TriggerPostEvent(EffectContext(a, a->GetSourceCard(), game), event);
 
 	//Push to event history

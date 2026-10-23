@@ -7,6 +7,7 @@
 #include "modifiers.h"
 
 //Definitions
+class Aura;
 class BoardTile;
 class CardDefinition;
 class Effect;
@@ -41,6 +42,7 @@ struct TargetMode {
 
 //Card class
 class Card {
+
 public:
 
 	//Constructor
@@ -75,16 +77,17 @@ public:
 
 	//Utils
 	virtual TargetMode GetTargetMode() { return TargetMode(); }
-	virtual bool IsGeneral() { return false; }
-	virtual bool IsOnBoard() { return false; }
 	bool IsAlly();
 	bool IsEnemy();
 
-	//Subclass getters
+	//Subclass getters and helpers
 	virtual Unit* GetUnit() { return nullptr; }
 	virtual Spell* GetSpell() { return nullptr; }
 	bool IsUnit() { return GetUnit() != nullptr; }
 	bool IsSpell() { return GetSpell() != nullptr; }
+	virtual bool IsGeneral() { return false; }
+	virtual bool IsMinion() { return false; }
+	virtual bool IsOnBoard() { return false; }
 
 	//Properties
 	eCard cardId;
@@ -96,7 +99,7 @@ public:
 	Game* game;
 	Player* owner;
 	std::vector<Effect*> effects;
-	std::vector<Effect*> auras;
+	std::vector<Aura*> auras;
 	bool isToken;
 	Sprite sprite;
 	Sprite detailNameSprite;
@@ -107,6 +110,7 @@ public:
 
 //Unit class
 class Unit : public Card {
+
 public:
 
 	//Constructor
@@ -138,15 +142,16 @@ public:
 
 	//Utils
 	TargetMode GetTargetMode();
-	bool IsGeneral() { return tribe == TRIBE_GENERAL; }
 	bool CanAttack(Unit* target);
 	bool IsMoveable();
 	bool HasKeywords(int match);
 	bool IsProvoked();
-	bool IsOnBoard() { return curTile != nullptr; }
 
-	//Getter
+	//Subclass getter and helpers
 	Unit* GetUnit() { return this; }
+	bool IsGeneral() { return tribe == TRIBE_GENERAL; }
+	bool IsMinion() { return tribe != TRIBE_GENERAL; }
+	bool IsOnBoard() { return curTile != nullptr; }
 
 	//Properties
 	eTribe tribe;

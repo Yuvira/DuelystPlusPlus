@@ -160,7 +160,7 @@ int Card::GetStat(eStat stat, int base, bool withAuras) {
 Effect* Card::AddEffect(eEffect effectId, Card* sourceCard) {
 	if (effectId == EFFECT_NONE || game == nullptr)
 		return nullptr;
-	Effect* newEffect = game->collections->GetNewEffectInstance(effectId, sourceCard, nullptr);
+	Effect* newEffect = game->collections->GetNewEffectInstance(effectId);
 	if (newEffect == nullptr)
 		return nullptr;
 	effects.push_back(newEffect);
@@ -215,9 +215,9 @@ void Card::UpdateAuras() {
 		loop = false;
 
 		//Remove untracked auras and those that no longer apply
-		std::vector<Effect*> removed;
+		std::vector<Aura*> removed;
 		for (int i = 0; i < auras.size(); ++i) {
-			if (!game->IsTrackingAura(auras[i]) || !auras[i]->MatchesAuraPredicate(game, this)) {
+			if (!game->IsTrackingAura(auras[i]) || !auras[i]->MatchesPredicate(game, this)) {
 				removed.push_back(auras[i]);
 				auras.erase(auras.begin() + i);
 				loop = true;
@@ -230,8 +230,8 @@ void Card::UpdateAuras() {
 		}
 
 		//Add auras that match predicate
-		for (Effect* aura : game->GetAuras()) {
-			if (!HasAuraFromSource(aura->GetSourceEffect()) && aura->MatchesAuraPredicate(game, this)) {
+		for (Aura* aura : game->GetAuras()) {
+			if (!HasAuraFromSource(aura->GetSourceEffect()) && aura->MatchesPredicate(game, this)) {
 				auras.push_back(aura);
 				if (IsOnBoard()) {
 					OnAddThisEvent addEvent = OnAddThisEvent();
@@ -251,7 +251,7 @@ void Card::UpdateAuras() {
 
 //Card is tracking an aura from a given source
 bool Card::HasAuraFromSource(Effect* sourceEffect) {
-	for (Effect* aura : auras)
+	for (Aura* aura : auras)
 		if (aura->GetSourceEffect() == sourceEffect)
 			return true;
 	return false;

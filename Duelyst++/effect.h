@@ -8,8 +8,9 @@
 #include "modifiers.h"
 
 //Definitions
-class Card;
+class Aura;
 class BoardTile;
+class Card;
 class Effect;
 class EffectDefinition;
 class Game;
@@ -42,6 +43,7 @@ struct EffectContext {
 	bool IsOwnerTurn();
 	bool CardIsAuraSource();
 	bool CardSharesAuraOwner();
+	bool CardIsFriendOfAuraSource();
 	Player* GetOwner();
 	Player* GetOpponent();
 	Unit* GetUnit();
@@ -94,7 +96,7 @@ class Effect {
 public:
 
 	//Constructors
-	Effect(const EffectDefinition& definition, Card* sourceCard, Effect* sourceEffect);
+	Effect(const EffectDefinition& definition);
 	~Effect();
 
 	//Trigger dispatch
@@ -103,13 +105,8 @@ public:
 	void TriggerPostEvent(EffectContext ctx, Event* ev);
 	void TriggerSelfEvent(EffectContext ctx, Event* ev);
 
-	//Utils
+	//Setters
 	void UpdateModifier(eStat stat, int value);
-	bool MatchesAuraPredicate(Game* game, Card* card) { return AuraPredicate && AuraPredicate(EffectContext(this, card, game)); }
-
-	//Getters & Setters
-	Card* GetSourceCard() { return sourceCard; };
-	Effect* GetSourceEffect() { return sourceEffect; };
 	void SetToken(eCard token) { this->token = token; }
 
 	//Readonly getters
@@ -120,7 +117,11 @@ public:
 	const ModifierGroup& ReadModifiers() const { return modifiers; }
 	const bool& ReadIsRemovable() const { return isRemovable; }
 
-private:
+	//Subclass getters
+	virtual Aura* GetAura() { return nullptr; }
+	bool IsAura() { return GetAura() != nullptr; }
+
+protected:
 
 	//Properties
 	eEffect effectId;
@@ -129,11 +130,38 @@ private:
 	ModifierGroup modifiers;
 	eCard token;
 	bool isRemovable;
-	Card* sourceCard;
-	Effect* sourceEffect;
-	bool (*AuraPredicate)(EffectContext ctx);
 	std::vector<EventTrigger> preTriggers;
 	std::vector<EventTrigger> postTriggers;
 	std::vector<EventTrigger> selfTriggers;
+
+};
+
+//Aura that takes pointers to source objects and a predicate
+class Aura : public Effect {
+
+public:
+
+	//Constructor
+	Aura(const EffectDefinition& definition, Player* owner, Card* sourceCard, Effect* sourceEffect);
+	~Aura();
+
+	//Utils
+	bool MatchesPredicate(Game* game, Card* card) { return Predicate && Predicate(EffectContext(this, card, game)); }
+
+	//Source getters
+	Player* GetOwner();
+	Card* GetSourceCard() { return sourceCard; };
+	Effect* GetSourceEffect() { return sourceEffect; };
+
+	//Subclass getter
+	Aura* GetAura() { return this; }
+
+private:
+
+	//Properties
+	Player* owner;
+	Card* sourceCard;
+	Effect* sourceEffect;
+	bool (*Predicate)(EffectContext ctx);
 
 };

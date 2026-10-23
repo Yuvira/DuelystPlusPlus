@@ -64,26 +64,24 @@ void Collections::RegisterEffects() {
 	effectDefinitions.try_emplace(SKILL_ARCHON_SPELLBINDER, SKILL_ARCHON_SPELLBINDER, KEYWORD_NONE, "Your opponent's non-Bloodborn spells cost 1 more to cast");
 	effectDefinitions.at(SKILL_ARCHON_SPELLBINDER).RegisterSelfTrigger<OnAddThisEvent>(
 		[](EffectContext ctx, OnAddThisEvent& ev) {
-			ctx.game->ApplyAura(AURA_ARCHON_SPELLBINDER, ctx.card, ctx.effect); });
+			ctx.game->ApplyAura(AURA_ARCHON_SPELLBINDER, ctx.GetOwner(), ctx.card, ctx.effect); });
 	effectDefinitions.at(SKILL_ARCHON_SPELLBINDER).RegisterSelfTrigger<OnRemoveThisEvent>(
 		[](EffectContext ctx, OnRemoveThisEvent& ev) {
 			ctx.game->RemoveAurasFromSource(ctx.effect); });
-	effectDefinitions.try_emplace(AURA_ARCHON_SPELLBINDER, AURA_ARCHON_SPELLBINDER, KEYWORD_NONE, "Archon Spellbinder");
-	effectDefinitions.at(AURA_ARCHON_SPELLBINDER).SetAuraPredicate([](EffectContext ctx) {
-		return ctx.IsInOwnerHand() && !ctx.CardSharesAuraOwner() && ctx.card->IsSpell(); });
+	effectDefinitions.try_emplace(AURA_ARCHON_SPELLBINDER, AURA_ARCHON_SPELLBINDER, KEYWORD_NONE, "Archon Spellbinder",
+		[](EffectContext ctx) { return ctx.IsInOwnerHand() && !ctx.CardSharesAuraOwner() && ctx.card->IsSpell(); });
 	effectDefinitions.at(AURA_ARCHON_SPELLBINDER).AddModifier(STAT_COST, MODTYPE_BUFF, 1);
 
 	//Arrow Whistler
 	effectDefinitions.try_emplace(SKILL_ARROW_WHISTLER, SKILL_ARROW_WHISTLER, KEYWORD_RANGED, "{Ranged}|Your other minions with {Ranged} have +1 Attack");
 	effectDefinitions.at(SKILL_ARROW_WHISTLER).RegisterSelfTrigger<OnAddThisEvent>(
 		[](EffectContext ctx, OnAddThisEvent& ev) {
-			ctx.game->ApplyAura(AURA_ARROW_WHISTLER, ctx.card, ctx.effect); });
+			ctx.game->ApplyAura(AURA_ARROW_WHISTLER, ctx.GetOwner(), ctx.card, ctx.effect); });
 	effectDefinitions.at(SKILL_ARROW_WHISTLER).RegisterSelfTrigger<OnRemoveThisEvent>(
 		[](EffectContext ctx, OnRemoveThisEvent& ev) {
 			ctx.game->RemoveAurasFromSource(ctx.effect); });
-	effectDefinitions.try_emplace(AURA_ARROW_WHISTLER, AURA_ARROW_WHISTLER, KEYWORD_NONE, "Arrow Whistler");
-	effectDefinitions.at(AURA_ARROW_WHISTLER).SetAuraPredicate([](EffectContext ctx) {
-		return ctx.IsOnBoard() && ctx.CardSharesAuraOwner() && !ctx.CardIsAuraSource() && !ctx.card->IsGeneral() && ctx.card->GetUnit()->HasKeywords(KEYWORD_RANGED); });
+	effectDefinitions.try_emplace(AURA_ARROW_WHISTLER, AURA_ARROW_WHISTLER, KEYWORD_NONE, "Arrow Whistler",
+		[](EffectContext ctx) { return ctx.IsOnBoard() && ctx.CardIsFriendOfAuraSource() && !ctx.card->IsGeneral() && ctx.card->GetUnit()->HasKeywords(KEYWORD_RANGED); });
 	effectDefinitions.at(AURA_ARROW_WHISTLER).AddModifier(STAT_ATK, MODTYPE_BUFF, 1);
 
 	//Ash Mephyt
@@ -450,13 +448,12 @@ void Collections::RegisterEffects() {
 	effectDefinitions.try_emplace(SKILL_FIRST_SWORD_OF_AKRANE, SKILL_FIRST_SWORD_OF_AKRANE, KEYWORD_NONE, "Your other minions have +1 Attack");
 	effectDefinitions.at(SKILL_FIRST_SWORD_OF_AKRANE).RegisterSelfTrigger<OnAddThisEvent>(
 		[](EffectContext ctx, OnAddThisEvent& ev) {
-			ctx.game->ApplyAura(AURA_FIRST_SWORD_OF_AKRANE, ctx.card, ctx.effect); });
+			ctx.game->ApplyAura(AURA_FIRST_SWORD_OF_AKRANE, ctx.GetOwner(), ctx.card, ctx.effect); });
 	effectDefinitions.at(SKILL_FIRST_SWORD_OF_AKRANE).RegisterSelfTrigger<OnRemoveThisEvent>(
 		[](EffectContext ctx, OnRemoveThisEvent& ev) {
 			ctx.game->RemoveAurasFromSource(ctx.effect); });
-	effectDefinitions.try_emplace(AURA_FIRST_SWORD_OF_AKRANE, AURA_FIRST_SWORD_OF_AKRANE, KEYWORD_NONE, "First Sword of Akrane");
-	effectDefinitions.at(AURA_FIRST_SWORD_OF_AKRANE).SetAuraPredicate([](EffectContext ctx) {
-		return ctx.IsOnBoard() && ctx.CardSharesAuraOwner() && !ctx.CardIsAuraSource() && !ctx.card->IsGeneral(); });
+	effectDefinitions.try_emplace(AURA_FIRST_SWORD_OF_AKRANE, AURA_FIRST_SWORD_OF_AKRANE, KEYWORD_NONE, "First Sword of Akrane",
+		[](EffectContext ctx) { return ctx.IsOnBoard() && ctx.CardIsFriendOfAuraSource() && !ctx.card->IsGeneral(); });
 	effectDefinitions.at(AURA_FIRST_SWORD_OF_AKRANE).AddModifier(STAT_ATK, MODTYPE_BUFF, 1);
 
 	//Flameblood Warlock
@@ -495,26 +492,24 @@ void Collections::RegisterEffects() {
 	effectDefinitions.try_emplace(SKILL_GOLDEN_JUSTICAR, SKILL_GOLDEN_JUSTICAR, KEYWORD_PROVOKE, "{Provoke}|Your other minions with {Provoke} can move two additional spaces");
 	effectDefinitions.at(SKILL_GOLDEN_JUSTICAR).RegisterSelfTrigger<OnAddThisEvent>(
 		[](EffectContext ctx, OnAddThisEvent& ev) {
-			ctx.game->ApplyAura(AURA_GOLDEN_JUSTICAR, ctx.card, ctx.effect); });
+			ctx.game->ApplyAura(AURA_GOLDEN_JUSTICAR, ctx.GetOwner(), ctx.card, ctx.effect); });
 	effectDefinitions.at(SKILL_GOLDEN_JUSTICAR).RegisterSelfTrigger<OnRemoveThisEvent>(
 		[](EffectContext ctx, OnRemoveThisEvent& ev) {
 			ctx.game->RemoveAurasFromSource(ctx.effect); });
-	effectDefinitions.try_emplace(AURA_GOLDEN_JUSTICAR, AURA_GOLDEN_JUSTICAR, KEYWORD_NONE, "Golden Justicar");
-	effectDefinitions.at(AURA_GOLDEN_JUSTICAR).SetAuraPredicate([](EffectContext ctx) {
-		return ctx.IsOnBoard() && ctx.CardSharesAuraOwner() && ctx.CardIsAuraSource() && !ctx.card->IsGeneral() && ctx.card->GetUnit()->HasKeywords(KEYWORD_PROVOKE); });
+	effectDefinitions.try_emplace(AURA_GOLDEN_JUSTICAR, AURA_GOLDEN_JUSTICAR, KEYWORD_NONE, "Golden Justicar",
+		[](EffectContext ctx) { return ctx.IsOnBoard() && ctx.CardIsFriendOfAuraSource() && !ctx.card->IsGeneral() && ctx.card->GetUnit()->HasKeywords(KEYWORD_PROVOKE); });
 	effectDefinitions.at(AURA_GOLDEN_JUSTICAR).AddModifier(STAT_MOVE, MODTYPE_BUFF, 2);
 
 	//Golem Metallurgist
 	effectDefinitions.try_emplace(SKILL_GOLEM_METALLURGIST, SKILL_GOLEM_METALLURGIST, KEYWORD_NONE, "The first Golem you summon each turn costs 1 less");
 	effectDefinitions.at(SKILL_GOLEM_METALLURGIST).RegisterSelfTrigger<OnAddThisEvent>(
 		[](EffectContext ctx, OnAddThisEvent& ev) {
-			ctx.game->ApplyAura(AURA_GOLEM_METALLURGIST, ctx.card, ctx.effect); });
+			ctx.game->ApplyAura(AURA_GOLEM_METALLURGIST, ctx.GetOwner(), ctx.card, ctx.effect); });
 	effectDefinitions.at(SKILL_GOLEM_METALLURGIST).RegisterSelfTrigger<OnRemoveThisEvent>(
 		[](EffectContext ctx, OnRemoveThisEvent& ev) {
 			ctx.game->RemoveAurasFromSource(ctx.effect); });
-	effectDefinitions.try_emplace(AURA_GOLEM_METALLURGIST, AURA_GOLEM_METALLURGIST, KEYWORD_NONE, "Golem Metallurgist");
-	effectDefinitions.at(AURA_GOLEM_METALLURGIST).SetAuraPredicate([](EffectContext ctx) {
-		return ctx.IsInOwnerHand() && ctx.CardSharesAuraOwner() && ctx.card->IsUnit() && ctx.card->GetUnit()->tribe == TRIBE_GOLEM
+	effectDefinitions.try_emplace(AURA_GOLEM_METALLURGIST, AURA_GOLEM_METALLURGIST, KEYWORD_NONE, "Golem Metallurgist",
+		[](EffectContext ctx) { return ctx.IsInOwnerHand() && ctx.CardSharesAuraOwner() && ctx.card->IsUnit() && ctx.card->GetUnit()->tribe == TRIBE_GOLEM
 			&& !ctx.game->AnyCastThisTurn([](Card* card) { return card->IsUnit() && card->GetUnit()->tribe == TRIBE_GOLEM; }); });
 	effectDefinitions.at(AURA_GOLEM_METALLURGIST).AddModifier(STAT_COST, MODTYPE_BUFF, -1);
 
@@ -522,25 +517,23 @@ void Collections::RegisterEffects() {
 	effectDefinitions.try_emplace(SKILL_GOLEM_VANQUISHER, SKILL_GOLEM_VANQUISHER, KEYWORD_PROVOKE, "{Provoke}|Your other Golem minions have {Provoke}");
 	effectDefinitions.at(SKILL_GOLEM_VANQUISHER).RegisterSelfTrigger<OnAddThisEvent>(
 		[](EffectContext ctx, OnAddThisEvent& ev) {
-			ctx.game->ApplyAura(AURA_GOLEM_VANQUISHER, ctx.card, ctx.effect); });
+			ctx.game->ApplyAura(AURA_GOLEM_VANQUISHER, ctx.GetOwner(), ctx.card, ctx.effect); });
 	effectDefinitions.at(SKILL_GOLEM_VANQUISHER).RegisterSelfTrigger<OnRemoveThisEvent>(
 		[](EffectContext ctx, OnRemoveThisEvent& ev) {
 			ctx.game->RemoveAurasFromSource(ctx.effect); });
-	effectDefinitions.try_emplace(AURA_GOLEM_VANQUISHER, AURA_GOLEM_VANQUISHER, KEYWORD_PROVOKE, "Golem Vanquisher|{Provoke}");
-	effectDefinitions.at(AURA_GOLEM_VANQUISHER).SetAuraPredicate([](EffectContext ctx) {
-		return ctx.IsOnBoard() && ctx.CardSharesAuraOwner() && !ctx.CardIsAuraSource() && !ctx.card->IsGeneral() && ctx.card->GetUnit()->tribe == TRIBE_GOLEM; });
+	effectDefinitions.try_emplace(AURA_GOLEM_VANQUISHER, AURA_GOLEM_VANQUISHER, KEYWORD_PROVOKE, "Golem Vanquisher|{Provoke}",
+		[](EffectContext ctx) { return ctx.IsOnBoard() && ctx.CardIsFriendOfAuraSource() && !ctx.card->IsGeneral() && ctx.card->GetUnit()->tribe == TRIBE_GOLEM; });
 
 	//Grove Lion
 	effectDefinitions.try_emplace(SKILL_GROVE_LION, SKILL_GROVE_LION, KEYWORD_NONE, "While this minion is on the battlefield, your General has {Forcefield}");
 	effectDefinitions.at(SKILL_GROVE_LION).RegisterSelfTrigger<OnAddThisEvent>(
 		[](EffectContext ctx, OnAddThisEvent& ev) {
-			ctx.game->ApplyAura(AURA_GROVE_LION, ctx.card, ctx.effect); });
+			ctx.game->ApplyAura(AURA_GROVE_LION, ctx.GetOwner(), ctx.card, ctx.effect); });
 	effectDefinitions.at(SKILL_GROVE_LION).RegisterSelfTrigger<OnRemoveThisEvent>(
 		[](EffectContext ctx, OnRemoveThisEvent& ev) {
 			ctx.game->RemoveAurasFromSource(ctx.effect); });
-	effectDefinitions.try_emplace(AURA_GROVE_LION, AURA_GROVE_LION, KEYWORD_FORCEFIELD, "Grove Lion|{Forcefield}");
-	effectDefinitions.at(AURA_GROVE_LION).SetAuraPredicate([](EffectContext ctx) {
-		return ctx.IsOnBoard() && ctx.card == ctx.effect->GetSourceCard()->owner->general; });
+	effectDefinitions.try_emplace(AURA_GROVE_LION, AURA_GROVE_LION, KEYWORD_FORCEFIELD, "Grove Lion|{Forcefield}",
+		[](EffectContext ctx) { return ctx.IsOnBoard() && ctx.effect->IsAura() && ctx.card == ctx.effect->GetAura()->GetSourceCard()->owner->general; });
 
 	//Healing Mystic
 	effectDefinitions.try_emplace(SKILL_HEALING_MYSTIC, SKILL_HEALING_MYSTIC, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Restore 2 Health to anything");
@@ -649,18 +642,18 @@ void Collections::RegisterEffects() {
 	effectDefinitions.try_emplace(SKILL_LADY_LOCKE, SKILL_LADY_LOCKE, KEYWORD_OPENING_GAMBIT | KEYWORD_PROVOKE, "{Provoke}|{Opening Gambit}: Other minions you summon this turn gain +1/+1 and gain {Provoke}");
 	effectDefinitions.at(SKILL_LADY_LOCKE).RegisterSelfTrigger<OnPreCastThisEvent>(
 		[](EffectContext ctx, OnPreCastThisEvent& ev) {
-			ctx.game->ApplyAura(AURA_LADY_LOCKE, ctx.card, ctx.effect); });
-	effectDefinitions.try_emplace(AURA_LADY_LOCKE, AURA_LADY_LOCKE, KEYWORD_NONE, "Lady Locke|Minions you summon this turn gain +1/+1 and gain {Provoke}");
+			ctx.game->ApplyAura(AURA_LADY_LOCKE, ctx.GetOwner(), ctx.card, ctx.effect); });
+	effectDefinitions.try_emplace(AURA_LADY_LOCKE, AURA_LADY_LOCKE, KEYWORD_NONE, "Lady Locke|Minions you summon this turn gain +1/+1 and gain {Provoke}", nullptr);
 	effectDefinitions.at(AURA_LADY_LOCKE).RegisterPostTrigger<OnSummonEvent>(
 		[](EffectContext ctx, OnSummonEvent& ev) {
-			return ctx.IsAllied(ev.unit) && !ev.unit->IsGeneral(); },
+			return ctx.effect->IsAura() && ctx.effect->GetAura()->GetOwner() == ev.unit->owner && ctx.effect->GetAura()->GetSourceCard() != ev.unit && !ev.unit->IsGeneral(); },
 		[](EffectContext ctx, OnSummonEvent& ev) {
 			ev.unit->AddEffect(MODIFIER_LADY_LOCKE, ctx.card); });
 	effectDefinitions.at(AURA_LADY_LOCKE).RegisterPostTrigger<OnTurnEndEvent>(
 		[](EffectContext ctx, OnTurnEndEvent& ev) {
-			return ctx.IsOwnedBy(ev.player); },
+			return true; },
 		[](EffectContext ctx, OnTurnEndEvent& ev) {
-			ctx.game->RemoveAura(ctx.effect); });
+			ctx.game->RemoveAura(ctx.effect->GetAura()); });
 	effectDefinitions.try_emplace(MODIFIER_LADY_LOCKE, MODIFIER_LADY_LOCKE, KEYWORD_PROVOKE, "Lady Locke|{Provoke}");
 	effectDefinitions.at(MODIFIER_LADY_LOCKE).AddModifier(STAT_ATK, MODTYPE_BUFF, 1).AddModifier(STAT_HP, MODTYPE_BUFF, 1);
 
@@ -687,13 +680,12 @@ void Collections::RegisterEffects() {
 	effectDefinitions.try_emplace(SKILL_MANAFORGER, SKILL_MANAFORGER, KEYWORD_NONE, "The first non-Bloodborn spell you cast each turn costs 1 less");
 	effectDefinitions.at(SKILL_MANAFORGER).RegisterSelfTrigger<OnAddThisEvent>(
 		[](EffectContext ctx, OnAddThisEvent& ev) {
-			ctx.game->ApplyAura(AURA_MANAFORGER, ctx.card, ctx.effect); });
+			ctx.game->ApplyAura(AURA_MANAFORGER, ctx.GetOwner(), ctx.card, ctx.effect); });
 	effectDefinitions.at(SKILL_MANAFORGER).RegisterSelfTrigger<OnRemoveThisEvent>(
 		[](EffectContext ctx, OnRemoveThisEvent& ev) {
 			ctx.game->RemoveAurasFromSource(ctx.effect); });
-	effectDefinitions.try_emplace(AURA_MANAFORGER, AURA_MANAFORGER, KEYWORD_NONE, "Manaforger");
-	effectDefinitions.at(AURA_MANAFORGER).SetAuraPredicate([](EffectContext ctx) {
-		return ctx.IsInOwnerHand() && ctx.CardSharesAuraOwner() && ctx.card->IsSpell()
+	effectDefinitions.try_emplace(AURA_MANAFORGER, AURA_MANAFORGER, KEYWORD_NONE, "Manaforger",
+		[](EffectContext ctx) { return ctx.IsInOwnerHand() && ctx.CardSharesAuraOwner() && ctx.card->IsSpell()
 			&& !ctx.game->AnyCastThisTurn([](Card* card) { return card->IsSpell(); }); });
 	effectDefinitions.at(AURA_MANAFORGER).AddModifier(STAT_COST, MODTYPE_BUFF, -1);
 
@@ -849,8 +841,8 @@ void Collections::RegisterEffects() {
 	effectDefinitions.try_emplace(SKILL_PROPHET_OF_THE_WHITE_PALM, SKILL_PROPHET_OF_THE_WHITE_PALM, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Prevent ALL spell damage until your next turn");
 	effectDefinitions.at(SKILL_PROPHET_OF_THE_WHITE_PALM).RegisterSelfTrigger<OnPreCastThisEvent>(
 		[](EffectContext ctx, OnPreCastThisEvent& ev) {
-			ctx.game->ApplyAura(AURA_PROPHET_OF_THE_WHITE_PALM, ctx.card, ctx.effect); });
-	effectDefinitions.try_emplace(AURA_PROPHET_OF_THE_WHITE_PALM, AURA_PROPHET_OF_THE_WHITE_PALM, KEYWORD_NONE, "Prophet of the White Palm|Spell damage is prevented until your next turn");
+			ctx.game->ApplyAura(AURA_PROPHET_OF_THE_WHITE_PALM, ctx.GetOwner(), ctx.card, ctx.effect); });
+	effectDefinitions.try_emplace(AURA_PROPHET_OF_THE_WHITE_PALM, AURA_PROPHET_OF_THE_WHITE_PALM, KEYWORD_NONE, "Prophet of the White Palm|Spell damage is prevented until your next turn", nullptr);
 	effectDefinitions.at(AURA_PROPHET_OF_THE_WHITE_PALM).RegisterPreTrigger<OnDamageEvent>(
 		[](EffectContext ctx, OnDamageEvent& ev) {
 			return ev.source->IsSpell(); },
@@ -858,9 +850,9 @@ void Collections::RegisterEffects() {
 			ev.damage = 0; });
 	effectDefinitions.at(AURA_PROPHET_OF_THE_WHITE_PALM).RegisterPostTrigger<OnTurnStartEvent>(
 		[](EffectContext ctx, OnTurnStartEvent& ev) {
-			return ctx.IsOwnedBy(ev.player); },
+			return ctx.effect->IsAura() && ctx.effect->GetAura()->GetOwner() == ev.player; },
 		[](EffectContext ctx, OnTurnStartEvent& ev) {
-			ctx.game->RemoveAura(ctx.effect); });
+			ctx.game->RemoveAura(ctx.effect->GetAura()); });
 
 	//Quartermaster Gauj
 	effectDefinitions.try_emplace(SKILL_QUARTERMASTER_GAUJ, SKILL_QUARTERMASTER_GAUJ, KEYWORD_NONE, "Takes no damage from minions or Generals");
@@ -962,13 +954,12 @@ void Collections::RegisterEffects() {
 	effectDefinitions.try_emplace(SKILL_SKYWING, SKILL_SKYWING, KEYWORD_FLYING, "{Flying}|Your other minions with {Flying} cost 1 less");
 	effectDefinitions.at(SKILL_SKYWING).RegisterSelfTrigger<OnAddThisEvent>(
 		[](EffectContext ctx, OnAddThisEvent& ev) {
-			ctx.game->ApplyAura(AURA_SKYWING, ctx.card, ctx.effect); });
+			ctx.game->ApplyAura(AURA_SKYWING, ctx.GetOwner(), ctx.card, ctx.effect); });
 	effectDefinitions.at(SKILL_SKYWING).RegisterSelfTrigger<OnRemoveThisEvent>(
 		[](EffectContext ctx, OnRemoveThisEvent& ev) {
 			ctx.game->RemoveAurasFromSource(ctx.effect); });
-	effectDefinitions.try_emplace(AURA_SKYWING, AURA_SKYWING, KEYWORD_NONE, "Skywing");
-	effectDefinitions.at(AURA_SKYWING).SetAuraPredicate([](EffectContext ctx) {
-		return ctx.IsInOwnerHand() && ctx.CardSharesAuraOwner() && ctx.card->IsUnit() && ctx.GetUnit()->HasKeywords(KEYWORD_FLYING); });
+	effectDefinitions.try_emplace(AURA_SKYWING, AURA_SKYWING, KEYWORD_NONE, "Skywing",
+		[](EffectContext ctx) { return ctx.IsInOwnerHand() && ctx.CardSharesAuraOwner() && ctx.card->IsUnit() && ctx.GetUnit()->HasKeywords(KEYWORD_FLYING); });
 	effectDefinitions.at(AURA_SKYWING).AddModifier(STAT_COST, MODTYPE_BUFF, -1);
 
 	//Sojourner

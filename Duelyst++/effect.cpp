@@ -5,22 +5,26 @@
 #include "game.h"
 #include "tile.h"
 
-//Effect constructor
-Effect::Effect(const EffectDefinition& definition, Card* sourceCard, Effect* sourceEffect) {
+//Effect constructors
+Effect::Effect(const EffectDefinition& definition) {
 	this->effectId = definition.effectId;
 	this->description = definition.description;
 	this->keywords = definition.keywords;
 	this->modifiers = definition.modifiers;
 	this->token = definition.token;
 	this->isRemovable = definition.isRemovable;
-	this->sourceCard = sourceCard;
-	this->sourceEffect = sourceEffect;
-	AuraPredicate = definition.AuraPredicate;
 	preTriggers = definition.preTriggers;
 	postTriggers = definition.postTriggers;
 	selfTriggers = definition.selfTriggers;
 }
 Effect::~Effect() {}
+Aura::Aura(const EffectDefinition& definition, Player* owner, Card* sourceCard, Effect* sourceEffect) : Effect(definition) {
+	this->owner = owner;
+	this->sourceCard = sourceCard;
+	this->sourceEffect = sourceEffect;
+	Predicate = definition.AuraPredicate;
+}
+Aura::~Aura() {}
 
 //Dispatch triggers
 void Effect::DispatchTrigger(const std::vector<EventTrigger>& triggers, EffectContext ctx, Event* ev) {
@@ -40,6 +44,9 @@ void Effect::UpdateModifier(eStat stat, int value) {
 		description = "UpdateModifier Error";
 }
 
+//Aura owner
+Player* Aura::GetOwner() { return Predicate ? sourceCard->owner : owner; }
+
 //EffectContext Utilities
 bool EffectContext::IsOnBoard() { return card->IsOnBoard(); }
 bool EffectContext::BothOnBoard(Card* compare) { return card->IsOnBoard() && compare->IsOnBoard(); }
@@ -50,8 +57,9 @@ bool EffectContext::SharesOwner(Card* compare) { return card->owner == compare->
 bool EffectContext::IsOwnedBy(Player* compare) { return card->owner == compare; }
 bool EffectContext::IsAllied(Card* compare) { return card != compare && card->owner == compare->owner; }
 bool EffectContext::IsOwnerTurn() { return game->GetTurnPlayer() == card->owner; }
-bool EffectContext::CardIsAuraSource() { return card == effect->GetSourceCard(); }
-bool EffectContext::CardSharesAuraOwner() { return card->owner == effect->GetSourceCard()->owner; }
+bool EffectContext::CardIsAuraSource() { return effect->IsAura() && card == effect->GetAura()->GetSourceCard(); }
+bool EffectContext::CardSharesAuraOwner() { return effect->IsAura() && card->owner == effect->GetAura()->GetOwner(); }
+bool EffectContext::CardIsFriendOfAuraSource() { return effect->IsAura() && card->owner == effect->GetAura()->GetSourceCard()->owner && card != effect->GetAura()->GetSourceCard(); }
 Player* EffectContext::GetOwner() { return card->owner; }
 Player* EffectContext::GetOpponent() { return card->owner->opponent; }
 Unit* EffectContext::GetUnit() { return card->GetUnit(); }

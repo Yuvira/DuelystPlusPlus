@@ -75,13 +75,14 @@ public:
 	//Events
 	void QueueEvent(Event* event);
 	void ProcessEventStack();
+	void UpdateAuras();
 
 	//Aura effects
-	void ApplyAura(eEffect effectId, Card* sourceCard, Effect* sourceEffect);
-	void RemoveAura(Effect* effect);
+	void ApplyAura(eEffect auraId, Player* owner, Card* sourceCard, Effect* sourceEffect);
+	void RemoveAura(Aura* aura);
 	void RemoveAurasFromSource(Effect* sourceEffect);
 	void RemoveAurasAt(std::vector<int> indices);
-	bool IsTrackingAura(Effect* aura);
+	bool IsTrackingAura(Aura* aura);
 
 	//Actions
 	void UseCard();
@@ -124,7 +125,7 @@ public:
 	//Getters
 	Player* GetTurnPlayer();
 	Player* GetNonTurnPlayer();
-	std::vector<Effect*> GetAuras();
+	std::vector<Aura*> GetAuras();
 	std::vector<Unit*> GetUnits();
 	const std::vector<Card*>& GetGrave() const;
 	const std::vector<Unit*>& GetDestroyedUnits() const;
@@ -152,7 +153,7 @@ private:
 	eMode mode;
 	Player players[2];
 	std::vector<Event*> eventStack;
-	std::vector<Effect*> auras;
+	std::vector<Aura*> auras;
 	EffectCallback effectCallback;
 	EffectCallback nextEffectCallback;
 	std::vector<BoardTile*> callbackTargets;

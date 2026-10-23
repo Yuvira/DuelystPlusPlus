@@ -230,7 +230,7 @@ void Game::RenderDebug(Renderer& renderer) {
 
 		//Aura data
 		lines.push_back("{Auras}");
-		for (Effect* aura : auras)
+		for (Aura* aura : auras)
 			lines.push_back(aura->GetSourceCard()->name);
 		debugAuras.CreateFromTextBlock(lines);
 		renderer.Render(debugAuras, 215, 1);
@@ -453,12 +453,25 @@ void Game::QueueEvent(Event* event) { eventStack.push_back(event); }
 
 //Process waiting events
 void Game::ProcessEventStack() {
+	if (eventStack.size() == 0)
+		UpdateAuras();
 	while (eventStack.size() > 0) {
 		std::vector<Event*> eventsToProcess = eventStack;
 		eventStack.clear();
 		for (Event* event : eventsToProcess)
 			eventManager.TriggerPostEvent(this, event);
+		UpdateAuras();
 	}
+}
+
+//Update auras on all cards
+void Game::UpdateAuras() {
+	for (Unit* unit : units)
+		unit->UpdateAuras();
+	for (Card* card : players[0].GetDeckAndHand())
+		card->UpdateAuras();
+	for (Card* card : players[1].GetDeckAndHand())
+		card->UpdateAuras();
 }
 
 #pragma endregion
@@ -466,12 +479,12 @@ void Game::ProcessEventStack() {
 #pragma region Effects
 
 //Add effect to list
-void Game::ApplyAura(eEffect effectId, Card* sourceCard, Effect* sourceEffect) {
+void Game::ApplyAura(eEffect auraId, Player* owner, Card* sourceCard, Effect* sourceEffect) {
 
 	//Get effect instance
-	if (effectId == EFFECT_NONE)
+	if (auraId == EFFECT_NONE)
 		return;
-	Effect* newAura = collections->GetNewEffectInstance(effectId, sourceCard, sourceEffect);
+	Aura* newAura = collections->GetNewAuraInstance(auraId, owner, sourceCard, sourceEffect);
 	if (newAura == nullptr)
 		return;
 
@@ -481,23 +494,16 @@ void Game::ApplyAura(eEffect effectId, Card* sourceCard, Effect* sourceEffect) {
 			if (auras[i]->ReadID() == newAura->ReadID() && auras[i]->GetSourceEffect() == sourceEffect)
 				return;
 
-	//Add aura to list
+	//Add aura to list and update
 	auras.push_back(newAura);
-
-	//Update cards
-	for (Unit* unit : units)
-		unit->UpdateAuras();
-	for (Card* card : players[0].GetDeckAndHand())
-		card->UpdateAuras();
-	for (Card* card : players[1].GetDeckAndHand())
-		card->UpdateAuras();
+	UpdateAuras();
 
 }
 
 //Remove aura from list
-void Game::RemoveAura(Effect* effect) {
+void Game::RemoveAura(Aura* aura) {
 	for (int i = 0; i < auras.size(); ++i) {
-		if (auras[i] == effect) {
+		if (auras[i] == aura) {
 			RemoveAurasAt({ i });
 			return;
 		}
@@ -521,25 +527,20 @@ void Game::RemoveAurasAt(std::vector<int> indices) {
 		return;
 
 	//Remove auras
-	std::vector<Effect*> removed;
+	std::vector<Aura*> removed;
 	for (int i = indices.size() - 1; i >= 0; --i) {
 		removed.push_back(auras[indices[i]]);
 		auras.erase(auras.begin() + indices[i]);
 	}
 
 	//Update cards
-	for (Unit* unit : units)
-		unit->UpdateAuras();
-	for (Card* card : players[0].GetDeckAndHand())
-		card->UpdateAuras();
-	for (Card* card : players[1].GetDeckAndHand())
-		card->UpdateAuras();
+	UpdateAuras();
 
 }
 
 //Check if aura is still being tracked
-bool Game::IsTrackingAura(Effect* match) {
-	for (Effect* aura : auras)
+bool Game::IsTrackingAura(Aura* match) {
+	for (Aura* aura : auras)
 		if (aura == match)
 			return true;
 	return false;
@@ -1232,8 +1233,8 @@ Player* Game::GetTurnPlayer() { return &players[turn]; }
 Player* Game::GetNonTurnPlayer() { return &players[!turn]; }
 
 //Indirect iterators
-std::vector<Effect*> Game::GetAuras() {
-	std::vector<Effect*> auraIterator = auras;
+std::vector<Aura*> Game::GetAuras() {
+	std::vector<Aura*> auraIterator = auras;
 	return auraIterator;
 }
 std::vector<Unit*> Game::GetUnits() {
