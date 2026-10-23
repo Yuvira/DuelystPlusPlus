@@ -19,28 +19,6 @@ class SpellEffect;
 class Unit;
 struct Event;
 
-#pragma region Targeting Helpers
-
-//Targeting modes
-enum eTargetMode {
-	TARGET_MODE_ALL,
-	TARGET_MODE_NEAR_TILE,
-	TARGET_MODE_NEAR_UNITS,
-	TARGET_MODE_NEAR_ALLIES,
-	TARGET_MODE_NEAR_ENEMIES
-};
-
-//Targeting mode
-struct TargetMode {
-	TargetMode();
-	TargetMode(eTargetMode mode, bool (*Predicate)(BoardTile*));
-	~TargetMode();
-	eTargetMode mode;
-	bool (*Predicate)(BoardTile*);
-};
-
-#pragma endregion
-
 //Card class
 class Card {
 

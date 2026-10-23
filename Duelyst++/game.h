@@ -14,7 +14,6 @@ class Collections;
 class Card;
 class Spell;
 class Unit;
-struct TargetMode;
 
 //Debug mode
 inline constexpr bool IS_DEBUG = false;
@@ -107,8 +106,6 @@ public:
 	void HighlightTile(int x, int y, eColor color);
 	void HighlightMoveable(int x, int y);
 	void SearchMoveable(int x, int y, int range);
-	void HighlightSelectable(TargetMode targetMode);
-	void HighlightSelectable(TargetMode targetMode, BoardTile* tile);
 	void HighlightTargetsForCallback(std::vector<BoardTile*>& targets, EffectContext ctx, BoardTile* source, void (*Callback)(EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets));
 
 	//Pathfinding

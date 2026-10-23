@@ -8,18 +8,6 @@
 #include "renderer.h"
 #include "utils.h"
 
-#pragma region Helper Constructors
-
-//Targeting mode constructor
-TargetMode::TargetMode() : TargetMode(TARGET_MODE_ALL, nullptr) {}
-TargetMode::TargetMode(eTargetMode mode, bool (*Predicate)(BoardTile*)) {
-	this->mode = mode;
-	this->Predicate = Predicate;
-}
-TargetMode::~TargetMode() {}
-
-#pragma endregion
-
 #pragma region Card Constructor
 
 //Card constructor

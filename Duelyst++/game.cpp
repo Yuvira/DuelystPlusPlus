@@ -933,57 +933,6 @@ void Game::SearchMoveable(int x, int y, int range) {
 	if (CanMove(x + 1, y)) { HighlightTile(x + 1, y, COLOR_GRAY); SearchMoveable(x + 1, y, range - 1); } //Right
 }
 
-//Highlight targetable tiles
-void Game::HighlightSelectable(TargetMode targetMode) { HighlightSelectable(targetMode, nullptr); }
-void Game::HighlightSelectable(TargetMode targetMode, BoardTile* tile) {
-
-	//Clear
-	selectable.clear();
-
-	//All tiles
-	if (targetMode.mode == TARGET_MODE_ALL) {
-		for (int i = 0; i < 9; ++i)
-			for (int j = 0; j < 5; ++j)
-				selectable.push_back(&map.tiles[i][j]);
-	}
-
-	//Tiles near given tile
-	else if (targetMode.mode == TARGET_MODE_NEAR_TILE) {
-		if (tile != nullptr)
-			for (int i = max(tile->pos.x - 1, 0); i < min(tile->pos.x + 2, 9); ++i)
-				for (int j = max(tile->pos.y - 1, 0); j < min(tile->pos.y + 2, 5); ++j)
-					if (i != tile->pos.x || j != tile->pos.y)
-						selectable.push_back(&map.tiles[i][j]);
-	}
-
-	//Tiles near units
-	else if (targetMode.mode == TARGET_MODE_NEAR_UNITS || targetMode.mode == TARGET_MODE_NEAR_ALLIES || targetMode.mode == TARGET_MODE_NEAR_ENEMIES) {
-		for (int i = 0; i < units.size(); ++i)
-			if (targetMode.mode == TARGET_MODE_NEAR_UNITS || (targetMode.mode == TARGET_MODE_NEAR_ALLIES && units[i]->owner == &players[turn]) || (targetMode.mode == TARGET_MODE_NEAR_ENEMIES && units[i]->owner == &players[!turn]))
-				for (int j = max(units[i]->curTile->pos.x - 1, 0); j < min(units[i]->curTile->pos.x + 2, 9); ++j)
-					for (int k = max(units[i]->curTile->pos.y - 1, 0); k < min(units[i]->curTile->pos.y + 2, 5); ++k)
-						if (std::find(selectable.begin(), selectable.end(), &map.tiles[j][k]) == selectable.end())
-							selectable.push_back(&map.tiles[j][k]);
-	}
-
-	//Apply filters
-	if (targetMode.Predicate) {
-		for (int i = 0; i < selectable.size(); ++i) {
-			if (!targetMode.Predicate(selectable[i])) {
-				selectable.erase(selectable.begin() + i);
-				--i;
-			}
-		}
-	}
-
-	//If selectable tiles found, highlight first and switch to select mode
-	if (selectable.size() > 0) {
-		selectionIdx = 0;
-		mode = MODE_SELECT;
-	}
-
-}
-
 //Highlight targets and generate callback
 void Game::HighlightTargetsForCallback(std::vector<BoardTile*>& targets, EffectContext ctx, BoardTile* source, void (*Callback)(EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets)) {
 	if (targets.size() == 0)
