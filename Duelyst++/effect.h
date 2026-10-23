@@ -3,6 +3,7 @@
 //Include
 #include <string>
 #include <vector>
+#include "effectcontext.h"
 #include "effectids.h"
 #include "event.h"
 #include "modifiers.h"
@@ -21,46 +22,6 @@ class SpellEffect;
 enum eCard;
 
 #pragma region Helper Structs
-
-//Self reference container for passing to lambdas
-struct EffectContext {
-
-	//Constructor
-	EffectContext() : EffectContext(nullptr, nullptr, nullptr) {}
-	EffectContext(Effect* effect, Card* card, Game* game) {
-		this->effect = effect;
-		this->card = card;
-		this->game = game;
-	}
-
-	//Helpers
-	bool IsOnBoard();
-	bool BothOnBoard(Card* compare);
-	bool IsCard(Card* compare);
-	bool IsCardOnBoard(Card* compare);
-	bool IsInOwnerHand();
-	bool SharesOwner(Card* compare);
-	bool IsOwnedBy(Player* compare);
-	bool IsAllied(Card* compare);
-	bool IsOwnerTurn();
-	bool CardIsAuraSource();
-	bool CardSharesAuraOwner();
-	bool CardIsFriendOfAuraSource();
-	Player* GetOwner();
-	Player* GetOpponent();
-	Unit* GetUnit();
-	Spell* GetSpell();
-	Unit* GetAllyGeneral();
-	Unit* GetEnemyGeneral();
-	BoardTile* GetTile();
-	Map* GetMap();
-
-	//Properties
-	Effect* effect;
-	Card* card;
-	Game* game;
-
-};
 
 //Event trigger
 struct EventTrigger {

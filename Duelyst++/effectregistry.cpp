@@ -3,6 +3,7 @@
 #include "card.h"
 #include "collections.h"
 #include "effect.h"
+#include "effectcontext.h"
 #include "effectdefinition.h"
 #include "game.h"
 
@@ -69,7 +70,7 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnRemoveThisEvent& ev) {
 			ctx.game->RemoveAurasFromSource(ctx.effect); });
 	effectDefinitions.try_emplace(AURA_ARCHON_SPELLBINDER, AURA_ARCHON_SPELLBINDER, KEYWORD_NONE, "Archon Spellbinder",
-		[](EffectContext ctx) { return ctx.IsInOwnerHand() && !ctx.CardSharesAuraOwner() && ctx.card->IsSpell(); });
+		[](EffectContext ctx) { return ctx.IsAuraContext() && ctx.IsInOwnerHand() && !ctx.GetAuraContext().CardSharesAuraOwner() && ctx.card->IsSpell(); });
 	effectDefinitions.at(AURA_ARCHON_SPELLBINDER).AddModifier(STAT_COST, MODTYPE_BUFF, 1);
 
 	//Arrow Whistler
@@ -81,7 +82,7 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnRemoveThisEvent& ev) {
 			ctx.game->RemoveAurasFromSource(ctx.effect); });
 	effectDefinitions.try_emplace(AURA_ARROW_WHISTLER, AURA_ARROW_WHISTLER, KEYWORD_NONE, "Arrow Whistler",
-		[](EffectContext ctx) { return ctx.IsOnBoard() && ctx.CardIsFriendOfAuraSource() && !ctx.card->IsGeneral() && ctx.card->GetUnit()->HasKeywords(KEYWORD_RANGED); });
+		[](EffectContext ctx) { return ctx.IsAuraContext() && ctx.IsOnBoard() && ctx.GetAuraContext().CardIsFriendOfAuraSource() && !ctx.card->IsGeneral() && ctx.card->GetUnit()->HasKeywords(KEYWORD_RANGED); });
 	effectDefinitions.at(AURA_ARROW_WHISTLER).AddModifier(STAT_ATK, MODTYPE_BUFF, 1);
 
 	//Ash Mephyt
@@ -453,7 +454,7 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnRemoveThisEvent& ev) {
 			ctx.game->RemoveAurasFromSource(ctx.effect); });
 	effectDefinitions.try_emplace(AURA_FIRST_SWORD_OF_AKRANE, AURA_FIRST_SWORD_OF_AKRANE, KEYWORD_NONE, "First Sword of Akrane",
-		[](EffectContext ctx) { return ctx.IsOnBoard() && ctx.CardIsFriendOfAuraSource() && !ctx.card->IsGeneral(); });
+		[](EffectContext ctx) { return ctx.IsAuraContext() && ctx.IsOnBoard() && ctx.GetAuraContext().CardIsFriendOfAuraSource() && !ctx.card->IsGeneral(); });
 	effectDefinitions.at(AURA_FIRST_SWORD_OF_AKRANE).AddModifier(STAT_ATK, MODTYPE_BUFF, 1);
 
 	//Flameblood Warlock
@@ -497,7 +498,7 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnRemoveThisEvent& ev) {
 			ctx.game->RemoveAurasFromSource(ctx.effect); });
 	effectDefinitions.try_emplace(AURA_GOLDEN_JUSTICAR, AURA_GOLDEN_JUSTICAR, KEYWORD_NONE, "Golden Justicar",
-		[](EffectContext ctx) { return ctx.IsOnBoard() && ctx.CardIsFriendOfAuraSource() && !ctx.card->IsGeneral() && ctx.card->GetUnit()->HasKeywords(KEYWORD_PROVOKE); });
+		[](EffectContext ctx) { return ctx.IsAuraContext() && ctx.IsOnBoard() && ctx.GetAuraContext().CardIsFriendOfAuraSource() && !ctx.card->IsGeneral() && ctx.card->GetUnit()->HasKeywords(KEYWORD_PROVOKE); });
 	effectDefinitions.at(AURA_GOLDEN_JUSTICAR).AddModifier(STAT_MOVE, MODTYPE_BUFF, 2);
 
 	//Golem Metallurgist
@@ -509,7 +510,7 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnRemoveThisEvent& ev) {
 			ctx.game->RemoveAurasFromSource(ctx.effect); });
 	effectDefinitions.try_emplace(AURA_GOLEM_METALLURGIST, AURA_GOLEM_METALLURGIST, KEYWORD_NONE, "Golem Metallurgist",
-		[](EffectContext ctx) { return ctx.IsInOwnerHand() && ctx.CardSharesAuraOwner() && ctx.card->IsUnit() && ctx.card->GetUnit()->tribe == TRIBE_GOLEM
+		[](EffectContext ctx) { return ctx.IsAuraContext() && ctx.IsInOwnerHand() && ctx.GetAuraContext().CardSharesAuraOwner() && ctx.card->IsUnit() && ctx.card->GetUnit()->tribe == TRIBE_GOLEM
 			&& !ctx.game->AnyCastThisTurn([](Card* card) { return card->IsUnit() && card->GetUnit()->tribe == TRIBE_GOLEM; }); });
 	effectDefinitions.at(AURA_GOLEM_METALLURGIST).AddModifier(STAT_COST, MODTYPE_BUFF, -1);
 
@@ -522,7 +523,7 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnRemoveThisEvent& ev) {
 			ctx.game->RemoveAurasFromSource(ctx.effect); });
 	effectDefinitions.try_emplace(AURA_GOLEM_VANQUISHER, AURA_GOLEM_VANQUISHER, KEYWORD_PROVOKE, "Golem Vanquisher|{Provoke}",
-		[](EffectContext ctx) { return ctx.IsOnBoard() && ctx.CardIsFriendOfAuraSource() && !ctx.card->IsGeneral() && ctx.card->GetUnit()->tribe == TRIBE_GOLEM; });
+		[](EffectContext ctx) { return ctx.IsAuraContext() && ctx.IsOnBoard() && ctx.GetAuraContext().CardIsFriendOfAuraSource() && !ctx.card->IsGeneral() && ctx.card->GetUnit()->tribe == TRIBE_GOLEM; });
 
 	//Grove Lion
 	effectDefinitions.try_emplace(SKILL_GROVE_LION, SKILL_GROVE_LION, KEYWORD_NONE, "While this minion is on the battlefield, your General has {Forcefield}");
@@ -685,7 +686,7 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnRemoveThisEvent& ev) {
 			ctx.game->RemoveAurasFromSource(ctx.effect); });
 	effectDefinitions.try_emplace(AURA_MANAFORGER, AURA_MANAFORGER, KEYWORD_NONE, "Manaforger",
-		[](EffectContext ctx) { return ctx.IsInOwnerHand() && ctx.CardSharesAuraOwner() && ctx.card->IsSpell()
+		[](EffectContext ctx) { return ctx.IsAuraContext() && ctx.IsInOwnerHand() && ctx.GetAuraContext().CardSharesAuraOwner() && ctx.card->IsSpell()
 			&& !ctx.game->AnyCastThisTurn([](Card* card) { return card->IsSpell(); }); });
 	effectDefinitions.at(AURA_MANAFORGER).AddModifier(STAT_COST, MODTYPE_BUFF, -1);
 
@@ -959,7 +960,7 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnRemoveThisEvent& ev) {
 			ctx.game->RemoveAurasFromSource(ctx.effect); });
 	effectDefinitions.try_emplace(AURA_SKYWING, AURA_SKYWING, KEYWORD_NONE, "Skywing",
-		[](EffectContext ctx) { return ctx.IsInOwnerHand() && ctx.CardSharesAuraOwner() && ctx.card->IsUnit() && ctx.GetUnit()->HasKeywords(KEYWORD_FLYING); });
+		[](EffectContext ctx) { return ctx.IsAuraContext() && ctx.IsInOwnerHand() && ctx.GetAuraContext().CardSharesAuraOwner() && ctx.card->IsUnit() && ctx.GetUnit()->HasKeywords(KEYWORD_FLYING); });
 	effectDefinitions.at(AURA_SKYWING).AddModifier(STAT_COST, MODTYPE_BUFF, -1);
 
 	//Sojourner

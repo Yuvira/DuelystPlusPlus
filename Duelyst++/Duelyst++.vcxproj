@@ -123,6 +123,7 @@
     <ClCompile Include="cardviewer.cpp" />
     <ClCompile Include="collections.cpp" />
     <ClCompile Include="effect.cpp" />
+    <ClCompile Include="effectcontext.cpp" />
     <ClCompile Include="effectregistry.cpp" />
     <ClCompile Include="eventmanager.cpp" />
     <ClCompile Include="game.cpp" />
@@ -144,6 +145,7 @@
     <ClInclude Include="cardviewer.h" />
     <ClInclude Include="collections.h" />
     <ClInclude Include="effect.h" />
+    <ClInclude Include="effectcontext.h" />
     <ClInclude Include="effectdefinition.h" />
     <ClInclude Include="effectids.h" />
     <ClInclude Include="event.h" />

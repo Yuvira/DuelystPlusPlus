@@ -1,6 +1,7 @@
 //Include
 #include "card.h"
 #include "effect.h"
+#include "effectcontext.h"
 #include "effectdefinition.h"
 #include "game.h"
 #include "tile.h"
@@ -50,25 +51,3 @@ void Effect::UpdateModifier(eStat stat, int value) {
 
 //Aura owner
 Player* Aura::GetOwner() { return Predicate ? sourceCard->owner : owner; }
-
-//EffectContext Utilities
-bool EffectContext::IsOnBoard() { return card->IsOnBoard(); }
-bool EffectContext::BothOnBoard(Card* compare) { return card->IsOnBoard() && compare->IsOnBoard(); }
-bool EffectContext::IsCard(Card* compare) { return card == compare; }
-bool EffectContext::IsCardOnBoard(Card* compare) { return card->IsOnBoard() && card == compare; }
-bool EffectContext::IsInOwnerHand() { return card->owner->HasCardInHand(card); }
-bool EffectContext::SharesOwner(Card* compare) { return card->owner == compare->owner; }
-bool EffectContext::IsOwnedBy(Player* compare) { return card->owner == compare; }
-bool EffectContext::IsAllied(Card* compare) { return card != compare && card->owner == compare->owner; }
-bool EffectContext::IsOwnerTurn() { return game->GetTurnPlayer() == card->owner; }
-bool EffectContext::CardIsAuraSource() { return effect->IsAura() && card == effect->GetAura()->GetSourceCard(); }
-bool EffectContext::CardSharesAuraOwner() { return effect->IsAura() && card->owner == effect->GetAura()->GetOwner(); }
-bool EffectContext::CardIsFriendOfAuraSource() { return effect->IsAura() && card->owner == effect->GetAura()->GetSourceCard()->owner && card != effect->GetAura()->GetSourceCard(); }
-Player* EffectContext::GetOwner() { return card->owner; }
-Player* EffectContext::GetOpponent() { return card->owner->opponent; }
-Unit* EffectContext::GetUnit() { return card->GetUnit(); }
-Spell* EffectContext::GetSpell() { return card->GetSpell(); }
-Unit* EffectContext::GetAllyGeneral() { return card->owner->general; }
-Unit* EffectContext::GetEnemyGeneral() { return card->owner->opponent->general; }
-BoardTile* EffectContext::GetTile() { return card->IsOnBoard() ? card->GetUnit()->curTile : nullptr; }
-Map* EffectContext::GetMap() { return &game->map; }

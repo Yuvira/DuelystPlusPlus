@@ -3,6 +3,7 @@
 #include "card.h"
 #include "collections.h"
 #include "effect.h"
+#include "effectcontext.h"
 #include "effectdefinition.h"
 #include "game.h"
 
@@ -40,24 +41,26 @@ void Collections::RegisterSpells() {
 	});
 	effectDefinitions.at(SPELL_CONSUMING_REBIRTH).RegisterSelfTrigger<OnResolveThisEvent>(
 		[](EffectContext ctx, OnResolveThisEvent& ev) {
-			if (ctx.card->IsSpell() && ctx.effect->IsSpellEffect() && ev.tile->HasUnit()) {
-				ctx.effect->GetSpellEffect()->AddTarget(ev.tile);
-				ctx.effect->SetToken(ev.tile->unit->ReadID());
-				ev.tile->unit->Destroy(ctx.card);
-				ctx.game->AddDelayedTrigger(ctx.GetSpell());
+			if (ctx.IsSpellContext() && ev.tile->HasUnit()) {
+				SpellContext sctx = ctx.GetSpellContext();
+				sctx.effect->AddTarget(ev.tile);
+				sctx.effect->SetToken(ev.tile->unit->ReadID());
+				ev.tile->unit->Destroy(sctx.spell);
+				sctx.game->AddDelayedTrigger(sctx.spell);
 			}
 	});
 	effectDefinitions.at(SPELL_CONSUMING_REBIRTH).RegisterPostTrigger<OnTurnEndEvent>(
 		[](EffectContext ctx, OnTurnEndEvent& ev) {
-			return ctx.card->IsSpell() && ctx.game->IsTrackingDelayedTrigger(ctx.card->GetSpell()) && ctx.IsOwnedBy(ev.player); },
+			return ctx.IsSpellContext() && ctx.game->IsTrackingDelayedTrigger(ctx.card->GetSpell()) && ctx.IsOwnedBy(ev.player); },
 		[](EffectContext ctx, OnTurnEndEvent& ev) {
-			if (ctx.effect->IsSpellEffect()) {
-				std::vector<BoardTile*> targets = ctx.effect->GetSpellEffect()->GetEffectTargets();
+			if (ctx.IsSpellContext()) {
+				SpellContext sctx = ctx.GetSpellContext();
+				std::vector<BoardTile*> targets = sctx.effect->GetEffectTargets();
 				if (targets.size() > 0 && !targets[0]->HasUnit())
-					if (Unit* unit = ctx.game->SummonToken(ctx.effect->GetSpellEffect()->ReadToken(), targets[0], ctx.GetOwner()))
+					if (Unit* unit = ctx.game->SummonToken(sctx.effect->ReadToken(), targets[0], ctx.GetOwner()))
 						unit->AddEffect(MODIFIER_CONSUMING_REBIRTH);
+				ctx.game->RemoveDelayedTrigger(sctx.spell);
 			}
-			ctx.game->RemoveDelayedTrigger(ctx.GetSpell());
 	});
 	effectDefinitions.try_emplace(MODIFIER_CONSUMING_REBIRTH, MODIFIER_CONSUMING_REBIRTH, KEYWORD_NONE, "Consuming Rebirth");
 	effectDefinitions.at(MODIFIER_CONSUMING_REBIRTH).AddModifier(STAT_ATK, MODTYPE_BUFF, 1).AddModifier(STAT_HP, MODTYPE_BUFF, 1);
