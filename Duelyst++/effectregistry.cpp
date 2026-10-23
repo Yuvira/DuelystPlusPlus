@@ -1122,4 +1122,107 @@ void Collections::RegisterEffects() {
 			}
 	});
 
+	//Venom Toth
+	effectDefinitions.try_emplace(SKILL_VENOM_TOTH, SKILL_VENOM_TOTH, KEYWORD_NONE, "Whenever your opponent summons a minion, deal 1 damage to the enemy General");
+	effectDefinitions.at(SKILL_VENOM_TOTH).RegisterPostTrigger<OnSummonEvent>(
+		[](EffectContext ctx, OnSummonEvent& ev) {
+			return ctx.IsOnBoard() && !ctx.SharesOwner(ev.unit); },
+		[](EffectContext ctx, OnSummonEvent& ev) {
+			ctx.GetEnemyGeneral()->DealDamage(ctx.card, 1); });
+
+	//Void Hunter
+	effectDefinitions.try_emplace(SKILL_VOID_HUNTER, SKILL_VOID_HUNTER, KEYWORD_DYING_WISH, "{Dying Wish}: Draw a card");
+	effectDefinitions.at(SKILL_VOID_HUNTER).RegisterPostTrigger<OnDeathEvent>(
+		[](EffectContext ctx, OnDeathEvent& ev) {
+			return ctx.IsCard(ev.unit); },
+		[](EffectContext ctx, OnDeathEvent& ev) {
+			ctx.GetOwner()->Draw(); });
+
+	//War Talon
+	effectDefinitions.try_emplace(SKILL_WAR_TALON, SKILL_WAR_TALON, KEYWORD_FRENZY | KEYWORD_PROVOKE, "{Frenzy}, {Provoke}");
+
+	//White Widow
+	effectDefinitions.try_emplace(SKILL_WHITE_WIDOW, SKILL_WHITE_WIDOW, KEYWORD_NONE, "Whenever you replace a card, deal 2 damage to a random enemy");
+	effectDefinitions.at(SKILL_WHITE_WIDOW).RegisterPostTrigger<OnReplaceEvent>(
+		[](EffectContext ctx, OnReplaceEvent& ev) {
+			return ctx.IsOnBoard() && ctx.SharesOwner(ev.card); },
+		[](EffectContext ctx, OnReplaceEvent& ev) {
+			std::vector<Unit*> valid;
+			for (Unit* unit : ctx.game->GetUnits())
+				if (!ctx.SharesOwner(unit))
+					valid.push_back(unit);
+			if (valid.size() > 0)
+				valid[rand() % valid.size()]->DealDamage(ctx.card, 2);
+	});
+
+	//Wind Runner
+	effectDefinitions.try_emplace(SKILL_WIND_RUNNER, SKILL_WIND_RUNNER, KEYWORD_NONE, "After this minion moves, give all friendly minions around it +1/+1");
+	effectDefinitions.at(SKILL_WIND_RUNNER).RegisterPostTrigger<OnMoveEvent>(
+		[](EffectContext ctx, OnMoveEvent& ev) {
+			return ctx.IsCardOnBoard(ev.unit) && !ev.wasTeleported; },
+		[](EffectContext ctx, OnMoveEvent& ev) {
+			for (Unit* unit : ctx.GetMap()->GetUnitsNear(ctx.GetTile()))
+				if (ctx.SharesOwner(unit) && !unit->IsGeneral())
+					unit->AddEffect(MODIFIER_WIND_RUNNER, ctx.card);
+	});
+	effectDefinitions.try_emplace(MODIFIER_WIND_RUNNER, MODIFIER_WIND_RUNNER, KEYWORD_NONE, "Wind Runner");
+	effectDefinitions.at(MODIFIER_WIND_RUNNER).AddModifier(STAT_ATK, MODTYPE_BUFF, 1).AddModifier(STAT_HP, MODTYPE_BUFF, 1);
+
+	//Wings of Paradise
+	effectDefinitions.try_emplace(SKILL_WINGS_OF_PARADISE, SKILL_WINGS_OF_PARADISE, KEYWORD_FLYING, "{Flying}|Whenever you replace a card, this minion gains +2 Attack this turn");
+	effectDefinitions.at(SKILL_WINGS_OF_PARADISE).RegisterPostTrigger<OnReplaceEvent>(
+		[](EffectContext ctx, OnReplaceEvent& ev) {
+			return ctx.IsOnBoard() && ctx.SharesOwner(ev.card); },
+		[](EffectContext ctx, OnReplaceEvent& ev) {
+			ctx.card->AddEffect(MODIFIER_WINGS_OF_PARADISE, ctx.card);
+	});
+	effectDefinitions.try_emplace(MODIFIER_WINGS_OF_PARADISE, MODIFIER_WINGS_OF_PARADISE, KEYWORD_NONE, "Wings of Paradise");
+	effectDefinitions.at(MODIFIER_WINGS_OF_PARADISE).RegisterPostTrigger<OnTurnEndEvent>(
+		[](EffectContext ctx, OnTurnEndEvent& ev) {
+			return true; },
+		[](EffectContext ctx, OnTurnEndEvent& ev) {
+			ctx.card->RemoveEffect(ctx.effect); });
+	effectDefinitions.at(MODIFIER_WINGS_OF_PARADISE).AddModifier(STAT_ATK, MODTYPE_BUFF, 2);
+
+	//Wood-Wen
+	effectDefinitions.try_emplace(SKILL_WOODWEN, SKILL_WOODWEN, KEYWORD_PROVOKE | KEYWORD_OPENING_GAMBIT, "{Provoke}|{Opening Gambit}: Give a nearby friendly minion {Provoke}");
+	effectDefinitions.at(SKILL_WOODWEN).RegisterSelfTrigger<OnPreCastThisEvent>(
+		[](EffectContext ctx, OnPreCastThisEvent& ev) {
+			std::vector<BoardTile*> valid;
+			for (Unit* unit : ctx.GetMap()->GetUnitsNear(ev.tile))
+				if (ctx.SharesOwner(unit) && !unit->IsGeneral())
+					valid.push_back(unit->curTile);
+			ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
+				[](EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets) {
+					if (targets.size() > 0 && targets[0]->HasUnit())
+						targets[0]->unit->AddEffect(MODIFIER_WOODWEN, ctx.card);
+			});
+	});
+	effectDefinitions.try_emplace(MODIFIER_WOODWEN, MODIFIER_WOODWEN, KEYWORD_PROVOKE, "Wood-Wen|{Provoke}");
+
+	//Zurael, the Lifegiver
+	effectDefinitions.try_emplace(SKILL_ZURAEL_THE_LIFEGIVER, SKILL_ZURAEL_THE_LIFEGIVER, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Summon all non-token friendly minions destroyed on your opponent's last turn on random spaces");
+	effectDefinitions.at(SKILL_ZURAEL_THE_LIFEGIVER).RegisterSelfTrigger<OnPreCastThisEvent>(
+		[](EffectContext ctx, OnPreCastThisEvent& ev) {
+			std::vector<Unit*> units;
+			OnDeathEvent* deathEvent = nullptr;
+			for (Event* event : ctx.game->eventManager.GetMostRecentTurnEvents(ctx.GetOpponent())) {
+				if (deathEvent = event->As<OnDeathEvent>())
+					if (ctx.SharesOwner(deathEvent->unit) && !deathEvent->unit->IsGeneral() && !deathEvent->unit->isToken)
+						units.push_back(deathEvent->unit);
+			}
+			BoardTile* tile = nullptr;
+			for (Unit* unit : units)
+				if (tile = ctx.GetMap()->GetRandomEmpty(ev.tile))
+					ctx.game->SummonToken(unit->ReadID(), tile, ctx.GetOwner());
+	});
+
+	//Zyx
+	effectDefinitions.try_emplace(SKILL_ZYX, SKILL_ZYX, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Summon a copy of this minion on a random nearby space");
+	effectDefinitions.at(SKILL_ZYX).RegisterSelfTrigger<OnPreCastThisEvent>(
+		[](EffectContext ctx, OnPreCastThisEvent& ev) {
+			if (BoardTile* tile = ctx.GetMap()->GetRandomEmptyNear(ev.tile))
+				ctx.game->SummonToken(ctx.card->ReadID(), tile, ctx.GetOwner());
+	});
+
 }

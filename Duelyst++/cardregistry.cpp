@@ -371,6 +371,42 @@ void Collections::RegisterCards() {
 	cardDefinitions.try_emplace(
 		CARD_UNSEVEN, CARD_UNSEVEN, RARITY_LEGENDARY, FACTION_NEUTRAL, TRIBE_WARMASTER,
 		"unseven", "Unseven", 4, 2, 4, SKILL_UNSEVEN);
+	cardDefinitions.try_emplace(
+		CARD_VALE_HUNTER, CARD_VALE_HUNTER, RARITY_NONE, FACTION_NEUTRAL, TRIBE_NONE,
+		"valehunter", "Vale Hunter", 2, 1, 2, SKILL_RANGED);
+	cardDefinitions.try_emplace(
+		CARD_VENOM_TOTH, CARD_VENOM_TOTH, RARITY_EPIC, FACTION_NEUTRAL, TRIBE_NONE,
+		"venomtoth", "Venom Toth", 3, 3, 3, SKILL_VENOM_TOTH);
+	cardDefinitions.try_emplace(
+		CARD_VOID_HUNTER, CARD_VOID_HUNTER, RARITY_COMMON, FACTION_NEUTRAL, TRIBE_NONE,
+		"voidhunter", "Void Hunter", 3, 4, 2, SKILL_VOID_HUNTER);
+	cardDefinitions.try_emplace(
+		CARD_WAR_TALON, CARD_WAR_TALON, RARITY_COMMON, FACTION_NEUTRAL, TRIBE_NONE,
+		"wartalon", "War Talon", 7, 4, 9, SKILL_WAR_TALON);
+	cardDefinitions.try_emplace(
+		CARD_WHISTLING_BLADE, CARD_WHISTLING_BLADE, RARITY_COMMON, FACTION_NEUTRAL, TRIBE_NONE,
+		"whistlingblade", "Whistling Blade", 7, 2, 15, SKILL_PROVOKE);
+	cardDefinitions.try_emplace(
+		CARD_WHITE_WIDOW, CARD_WHITE_WIDOW, RARITY_RARE, FACTION_NEUTRAL, TRIBE_NONE,
+		"whitewidow", "White Widow", 4, 3, 4, SKILL_WHITE_WIDOW);
+	cardDefinitions.try_emplace(
+		CARD_WIND_RUNNER, CARD_WIND_RUNNER, RARITY_RARE, FACTION_NEUTRAL, TRIBE_NONE,
+		"windrunner", "Wind Runner", 3, 3, 3, SKILL_WIND_RUNNER);
+	cardDefinitions.try_emplace(
+		CARD_WINGS_OF_PARADISE, CARD_WINGS_OF_PARADISE, RARITY_COMMON, FACTION_NEUTRAL, TRIBE_NONE,
+		"wingsofparadise", "Wings of Paradise", 3, 3, 3, SKILL_WINGS_OF_PARADISE);
+	cardDefinitions.try_emplace(
+		CARD_WOODWEN, CARD_WOODWEN, RARITY_COMMON, FACTION_NEUTRAL, TRIBE_NONE,
+		"woodwen", "Wood-Wen", 2, 2, 2, SKILL_WOODWEN);
+	cardDefinitions.try_emplace(
+		CARD_YOUNG_FLAMEWING, CARD_YOUNG_FLAMEWING, RARITY_NONE, FACTION_NEUTRAL, TRIBE_NONE,
+		"youngflamewing", "Young Flamewing", 4, 5, 4, SKILL_FLYING);
+	cardDefinitions.try_emplace(
+		CARD_ZURAEL_THE_LIFEGIVER, CARD_ZURAEL_THE_LIFEGIVER, RARITY_LEGENDARY, FACTION_NEUTRAL, TRIBE_NONE,
+		"zuraelthelifegiver", "Zurael, the Lifegiver", 7, 4, 7, SKILL_ZURAEL_THE_LIFEGIVER);
+	cardDefinitions.try_emplace(
+		CARD_ZYX, CARD_ZYX, RARITY_RARE, FACTION_NEUTRAL, TRIBE_NONE,
+		"zyx", "Zyx", 2, 1, 2, SKILL_ZYX);
 
 #pragma endregion
 
