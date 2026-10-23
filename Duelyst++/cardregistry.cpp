@@ -412,25 +412,19 @@ void Collections::RegisterCards() {
 
 #pragma region Tokens
 
-	//Illusion (Prismatic Illusionist)
+	//Tokens
 	cardDefinitions.try_emplace(
 		CARD_ILLUSION, CARD_ILLUSION, RARITY_NONE, FACTION_NEUTRAL, TRIBE_ARCANYST,
 		"illusion", "Illusion", 1, 2, 1, EFFECT_NONE );
 	cardDefinitions.at(CARD_ILLUSION).isToken = true;
-
-	//Mini-Jax (Jax Truesight / Jaxi)
 	cardDefinitions.try_emplace(
 		CARD_MINI_JAX, CARD_MINI_JAX, RARITY_NONE, FACTION_NEUTRAL, TRIBE_NONE,
 		"minijax", "Mini-Jax", 1, 1, 1, SKILL_RANGED );
 	cardDefinitions.at(CARD_MINI_JAX).isToken = true;
-
-	//Spellspark (Firestarter)
 	cardDefinitions.try_emplace(
 		CARD_SPELLSPARK, CARD_SPELLSPARK, RARITY_NONE, FACTION_NEUTRAL, TRIBE_NONE,
 		"spellspark", "Spellspark", 1, 1, 1, SKILL_RUSH );
 	cardDefinitions.at(CARD_SPELLSPARK).isToken = true;
-
-	//Tombstone (Dioltas)
 	cardDefinitions.try_emplace(
 		CARD_TOMBSTONE, CARD_TOMBSTONE, RARITY_NONE, FACTION_NEUTRAL, TRIBE_NONE,
 		"tombstone", "Tombstone", 3, 0, 10, SKILL_PROVOKE );
@@ -440,12 +434,13 @@ void Collections::RegisterCards() {
 
 #pragma region Spells
 
-	//Breath of the Unborn
+	//Spells
 	cardDefinitions.try_emplace(
 		CARD_BREATH_OF_THE_UNBORN, CARD_BREATH_OF_THE_UNBORN, RARITY_COMMON, FACTION_ABYSSIAN,
 		"breathoftheunborn", "Breath of The Unborn", 4, SPELL_BREATH_OF_THE_UNBORN );
-
-	//Dark Seed
+	cardDefinitions.try_emplace(
+		CARD_CONSUMING_REBIRTH, CARD_CONSUMING_REBIRTH, RARITY_EPIC, FACTION_ABYSSIAN,
+		"consumingrebirth", "Consuming Rebirth", 2, SPELL_CONSUMING_REBIRTH );
 	cardDefinitions.try_emplace(
 		CARD_DARK_SEED, CARD_DARK_SEED, RARITY_RARE, FACTION_ABYSSIAN,
 		"darkseed", "Dark Seed", 4, SPELL_DARK_SEED );

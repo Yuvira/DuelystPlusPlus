@@ -179,6 +179,7 @@ enum eCard {
 
 	//Spells
 	CARD_BREATH_OF_THE_UNBORN,
+	CARD_CONSUMING_REBIRTH,
 	CARD_DARK_SEED,
 
 	//Tokens
