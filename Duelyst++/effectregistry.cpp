@@ -1040,4 +1040,86 @@ void Collections::RegisterEffects() {
 					unit->DealDamage(unit, unit->atk);
 	});
 
+	//Sworn Avenger
+	effectDefinitions.try_emplace(SKILL_SWORN_AVENGER, SKILL_SWORN_AVENGER, KEYWORD_RANGED, "{Ranged}|Whenever your General takes damage, this minion gains +1 Attack");
+	effectDefinitions.at(SKILL_SWORN_AVENGER).RegisterPostTrigger<OnDamageEvent>(
+		[](EffectContext ctx, OnDamageEvent& ev) {
+			return ctx.IsOnBoard() && ev.target == ctx.GetAllyGeneral(); },
+		[](EffectContext ctx, OnDamageEvent& ev) {
+			ctx.card->AddEffect(MODIFIER_SWORN_AVENGER, ctx.card); });
+	effectDefinitions.try_emplace(MODIFIER_SWORN_AVENGER, MODIFIER_SWORN_AVENGER, KEYWORD_NONE, "Sworn Avenger");
+	effectDefinitions.at(MODIFIER_SWORN_AVENGER).AddModifier(STAT_ATK, MODTYPE_BUFF, 1);
+
+	//Sworn Defender
+	effectDefinitions.try_emplace(SKILL_SWORN_DEFENDER, SKILL_SWORN_DEFENDER, KEYWORD_NONE, "Whenever your General takes damage, fully heal this minion");
+	effectDefinitions.at(SKILL_SWORN_DEFENDER).RegisterPostTrigger<OnDamageEvent>(
+		[](EffectContext ctx, OnDamageEvent& ev) {
+			return ctx.IsOnBoard() && ev.target == ctx.GetAllyGeneral(); },
+		[](EffectContext ctx, OnDamageEvent& ev) {
+			ctx.card->GetUnit()->Heal(ctx.card, 999); });
+
+	//Syvrel the Exile
+	effectDefinitions.try_emplace(SKILL_SYVREL_THE_EXILE, SKILL_SYVREL_THE_EXILE, KEYWORD_RANGED, "{Ranged}|Minions damaged by Syvrel are pulled in front of him");
+	effectDefinitions.at(SKILL_SYVREL_THE_EXILE).RegisterPostTrigger<OnDamageEvent>(
+		[](EffectContext ctx, OnDamageEvent& ev) {
+			return ctx.IsCardOnBoard(ev.source) && !ev.target->IsGeneral(); },
+		[](EffectContext ctx, OnDamageEvent& ev) {
+			if (BoardTile* tile = ctx.game->GetTileInFront(ctx.GetTile(), ctx.GetOwner()))
+				if (!tile->HasUnit())
+					ev.target->MoveToTile(tile, true);
+	});
+
+	//Tethermancer
+	effectDefinitions.try_emplace(SKILL_TETHERMANCER, SKILL_TETHERMANCER, KEYWORD_PROVOKE, "{Provoke}|Dispel any minion that deals damage to this one");
+	effectDefinitions.at(SKILL_TETHERMANCER).RegisterPostTrigger<OnDamageEvent>(
+		[](EffectContext ctx, OnDamageEvent& ev) {
+			return ctx.IsCardOnBoard(ev.target) && ev.source->IsUnit() && !ev.source->IsGeneral(); },
+		[](EffectContext ctx, OnDamageEvent& ev) {
+			ev.source->GetUnit()->Dispel(); });
+
+	//The High Hand
+	effectDefinitions.try_emplace(SKILL_THE_HIGH_HAND, SKILL_THE_HIGH_HAND, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Gains +1/+1 for each card in your opponent's action bar");
+	effectDefinitions.at(SKILL_THE_HIGH_HAND).RegisterSelfTrigger<OnPreCastThisEvent>(
+		[](EffectContext ctx, OnPreCastThisEvent& ev) {
+			if (ctx.GetOpponent()->hand.size() > 0) {
+				if (Effect* effect = ctx.card->AddEffect(MODIFIER_THE_HIGH_HAND, ctx.card)) {
+					effect->UpdateModifier(STAT_ATK, ctx.GetOpponent()->hand.size());
+					effect->UpdateModifier(STAT_HP, ctx.GetOpponent()->hand.size());
+					ctx.card->UpdateModifiers();
+				}
+			}
+	});
+	effectDefinitions.try_emplace(MODIFIER_THE_HIGH_HAND, MODIFIER_THE_HIGH_HAND, KEYWORD_NONE, "The High Hand");
+	effectDefinitions.at(MODIFIER_THE_HIGH_HAND).AddModifier(STAT_ATK, MODTYPE_BUFF, 1).AddModifier(STAT_HP, MODTYPE_BUFF, 1);
+
+	//Twilight Sorcerer
+	effectDefinitions.try_emplace(SKILL_TWILIGHT_SORCERER, SKILL_TWILIGHT_SORCERER, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Put a copy of a random spell you cast this game into your action bar");
+	effectDefinitions.at(SKILL_TWILIGHT_SORCERER).RegisterSelfTrigger<OnPreCastThisEvent>(
+		[](EffectContext ctx, OnPreCastThisEvent& ev) {
+			std::vector<Spell*> valid;
+			for (Spell* spell : ctx.game->GetSpellHistory())
+				if (ctx.SharesOwner(spell))
+					valid.push_back(spell);
+			if (valid.size() > 0)
+				ctx.GetOwner()->AddNewToHand(valid[rand() % valid.size()]->ReadID());
+	});
+
+	//Unseven
+	effectDefinitions.try_emplace(SKILL_UNSEVEN, SKILL_UNSEVEN, KEYWORD_DYING_WISH, "{Dying Wish}: Summon a minion with {Dying Wish} from your action bar");
+	effectDefinitions.at(SKILL_UNSEVEN).RegisterPostTrigger<OnDeathEvent>(
+		[](EffectContext ctx, OnDeathEvent& ev) {
+			return ctx.IsCard(ev.unit) && !ctx.GetTile()->HasUnit(); },
+		[](EffectContext ctx, OnDeathEvent& ev) {
+			std::vector<int> valid;
+			for (int i = 0; i < ctx.GetOwner()->hand.size(); ++i)
+				if (ctx.GetOwner()->hand[i]->IsUnit() && ctx.GetOwner()->hand[i]->GetUnit()->HasKeywords(KEYWORD_DYING_WISH))
+					valid.push_back(i);
+			if (valid.size() > 0) {
+				int idx = valid[rand() % valid.size()];
+				Card* card = ctx.GetOwner()->hand[idx];
+				ctx.GetOwner()->hand.erase(ctx.GetOwner()->hand.begin() + idx);
+				ctx.game->Summon(card, ctx.GetTile(), false);
+			}
+	});
+
 }

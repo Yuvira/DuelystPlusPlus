@@ -347,6 +347,30 @@ void Collections::RegisterCards() {
 	cardDefinitions.try_emplace(
 		CARD_SWAMP_ENTANGLER, CARD_SWAMP_ENTANGLER, RARITY_COMMON, FACTION_NEUTRAL, TRIBE_NONE,
 		"swampentangler", "Swamp Entangler", 1, 0, 3, SKILL_PROVOKE );
+	cardDefinitions.try_emplace(
+		CARD_SWORN_AVENGER, CARD_SWORN_AVENGER, RARITY_EPIC, FACTION_NEUTRAL, TRIBE_NONE,
+		"swornavenger", "Sworn Avenger", 3, 1, 3, SKILL_SWORN_AVENGER);
+	cardDefinitions.try_emplace(
+		CARD_SWORN_DEFENDER, CARD_SWORN_DEFENDER, RARITY_EPIC, FACTION_NEUTRAL, TRIBE_NONE,
+		"sworndefender", "Sworn Defender", 5, 4, 7, SKILL_SWORN_DEFENDER);
+	cardDefinitions.try_emplace(
+		CARD_SYVREL_THE_EXILE, CARD_SYVREL_THE_EXILE, RARITY_EPIC, FACTION_NEUTRAL, TRIBE_NONE,
+		"syvreltheexile", "Syvrel the Exile", 3, 1, 4, SKILL_SYVREL_THE_EXILE);
+	cardDefinitions.try_emplace(
+		CARD_TETHERMANCER, CARD_TETHERMANCER, RARITY_RARE, FACTION_NEUTRAL, TRIBE_NONE,
+		"tethermancer", "Tethermancer", 4, 1, 6, SKILL_TETHERMANCER);
+	cardDefinitions.try_emplace(
+		CARD_THE_HIGH_HAND, CARD_THE_HIGH_HAND, RARITY_COMMON, FACTION_NEUTRAL, TRIBE_NONE,
+		"thehighhand", "The High Hand", 5, 2, 3, SKILL_THE_HIGH_HAND);
+	cardDefinitions.try_emplace(
+		CARD_THORN_NEEDLER, CARD_THORN_NEEDLER, RARITY_NONE, FACTION_NEUTRAL, TRIBE_NONE,
+		"thornneedler", "Thorn Needler", 4, 6, 4, EFFECT_NONE);
+	cardDefinitions.try_emplace(
+		CARD_TWILIGHT_SORCERER, CARD_TWILIGHT_SORCERER, RARITY_EPIC, FACTION_NEUTRAL, TRIBE_NONE,
+		"twilightsorcerer", "Twilight Sorcerer", 5, 3, 6, SKILL_TWILIGHT_SORCERER);
+	cardDefinitions.try_emplace(
+		CARD_UNSEVEN, CARD_UNSEVEN, RARITY_LEGENDARY, FACTION_NEUTRAL, TRIBE_WARMASTER,
+		"unseven", "Unseven", 4, 2, 4, SKILL_UNSEVEN);
 
 #pragma endregion
 
