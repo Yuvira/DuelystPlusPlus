@@ -194,12 +194,7 @@ private:
 
 	//Debug
 	bool debugMode;
-	Sprite debugP1Deck;
-	Sprite debugP2Deck;
-	Sprite debugUnits;
-	Sprite debugGrave;
-	Sprite debugAuras;
+	Sprite debugSprite;
 	std::vector<std::string> debugLog;
-	Sprite debugLogSprite;
 
 };

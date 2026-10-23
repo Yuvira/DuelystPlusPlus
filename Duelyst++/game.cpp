@@ -46,9 +46,10 @@ Game::Game(Collections* collections, bool* modeSwitch) : players{ Player(this, I
 	//Board border
 	board.CreateFromFile("resources/board.txt");
 
-	//Initialize log
+	//Initialize debug log
 	debugLog.push_back("{Log Start}");
-	debugLogSprite.CreateFromString(debugLog.back());
+	debugSprite.CreateFromString(debugLog.back());
+	debugMode = false;
 
 	//Character sprites
 	char c[] = { 'Û', 'Þ', 'Ý', 'Ü', 'ß', 'X', '\\', '/', '³', 'Ä' };
@@ -77,14 +78,6 @@ Game::Game(Collections* collections, bool* modeSwitch) : players{ Player(this, I
 	MoveCursor(0, 0);
 	activeUnit = nullptr;
 	mode = MODE_NONE;
-
-	//Debug info
-	debugP1Deck.CreateFromString("P1 Deck");
-	debugP2Deck.CreateFromString("P2 Deck");
-	debugUnits.CreateFromString("Units");
-	debugGrave.CreateFromString("Graveyard");
-	debugAuras.CreateFromString("Auras");
-	debugMode = false;
 
 }
 Game::~Game() {}
@@ -200,47 +193,47 @@ void Game::RenderDebug(Renderer& renderer) {
 		lines.push_back("{P1 Deck}");
 		for (Card* card : players[0].deck)
 			lines.push_back(card->name);
-		debugP1Deck.CreateFromTextBlock(lines);
-		renderer.Render(debugP1Deck, 115, 1);
+		debugSprite.CreateFromTextBlock(lines);
+		renderer.Render(debugSprite, 115, 1);
 		lines.clear();
 
 		//Player 2 deck data
 		lines.push_back("{P2 Deck}");
 		for (Card* card : players[1].deck)
 			lines.push_back(card->name);
-		debugP2Deck.CreateFromTextBlock(lines);
-		renderer.Render(debugP2Deck, 140, 1);
+		debugSprite.CreateFromTextBlock(lines);
+		renderer.Render(debugSprite, 140, 1);
 		lines.clear();
 
 		//Minion data
 		lines.push_back("{Units}");
 		for (Card* card : units)
 			lines.push_back(card->name);
-		debugUnits.CreateFromTextBlock(lines);
-		renderer.Render(debugUnits, 165, 1);
+		debugSprite.CreateFromTextBlock(lines);
+		renderer.Render(debugSprite, 165, 1);
 		lines.clear();
 
 		//Graveyard data
 		lines.push_back("{Graveyard}");
 		for (Card* card : grave)
 			lines.push_back(card->name);
-		debugGrave.CreateFromTextBlock(lines);
-		renderer.Render(debugGrave, 190, 1);
+		debugSprite.CreateFromTextBlock(lines);
+		renderer.Render(debugSprite, 190, 1);
 		lines.clear();
 
 		//Aura data
 		lines.push_back("{Auras}");
 		for (Aura* aura : auras)
 			lines.push_back(aura->GetSourceCard()->name);
-		debugAuras.CreateFromTextBlock(lines);
-		renderer.Render(debugAuras, 215, 1);
+		debugSprite.CreateFromTextBlock(lines);
+		renderer.Render(debugSprite, 215, 1);
 
 	}
 
 	//Draw log info
 	else {
-		debugLogSprite.CreateFromTextBlock(debugLog);
-		renderer.Render(debugLogSprite, 115, 1);
+		debugSprite.CreateFromTextBlock(debugLog);
+		renderer.Render(debugSprite, 115, 1);
 	}
 
 }
