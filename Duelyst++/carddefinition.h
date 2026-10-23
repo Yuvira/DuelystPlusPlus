@@ -62,7 +62,6 @@ struct CardDefinition {
 	int atk;
 	int hp;
 	eEffect effect;
-	TargetMode targetMode;
 	bool isToken;
 	Sprite sprite;
 	Sprite detailNameSprite;

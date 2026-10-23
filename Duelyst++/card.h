@@ -15,6 +15,7 @@ class Game;
 class Player;
 class Renderer;
 class Spell;
+class SpellEffect;
 class Unit;
 struct Event;
 
@@ -54,11 +55,14 @@ public:
 	void UpdateDetails();
 
 	//Stats
-	virtual void UpdateModifiers() {}
+	virtual void UpdateModifiers() = 0;
 	int GetStat(eStat stat, int base, bool withAuras);
 
+	//Targeting
+	virtual std::vector<BoardTile*> GetTargets() = 0;
+
 	//Effects
-	Effect* AddEffect(eEffect effectId, Card* sourceCard);
+	Effect* AddEffect(eEffect effectId);
 	void RemoveEffect(Effect* effect);
 	void RemoveEffectAt(std::vector<int> indices);
 	void UpdateAuras();
@@ -74,11 +78,6 @@ public:
 	const Sprite& ReadDetailNameSprite() const { return detailNameSprite; }
 	const Sprite& ReadDetailStatSprite() const { return detailStatSprite; }
 	const std::vector<std::string>& ReadDetails() const { return details; }
-
-	//Utils
-	virtual TargetMode GetTargetMode() { return TargetMode(); }
-	bool IsAlly();
-	bool IsEnemy();
 
 	//Subclass getters and helpers
 	virtual Unit* GetUnit() { return nullptr; }
@@ -127,6 +126,7 @@ public:
 	void UpdateModifiers();
 
 	//Actions
+	std::vector<BoardTile*> GetTargets();
 	void InitState();
 	void SetTile(BoardTile* tile);
 	void MoveToTile(BoardTile* tile, bool byEffect);
@@ -141,7 +141,6 @@ public:
 	void RemoveEffects();
 
 	//Utils
-	TargetMode GetTargetMode();
 	bool CanAttack(Unit* target);
 	bool IsMoveable();
 	bool HasKeywords(int match);
@@ -179,7 +178,6 @@ public:
 //Spell class
 class Spell : public Card {
 
-//Methods
 public:
 
 	//Constructor
@@ -192,17 +190,15 @@ public:
 	//Updates
 	void UpdateModifiers();
 
+	//Targeting
+	std::vector<BoardTile*> GetTargets();
+
 	//Getters
-	TargetMode GetTargetMode() { return targetMode; }
 	Spell* GetSpell() { return this; }
 
-	//Setters
-	void SetTargetMode(TargetMode targetMode);
-
-//Properties
 private:
 
-	//Targeting mode
-	TargetMode targetMode;
+	//Spell effect
+	SpellEffect* spellEffect;
 
 };

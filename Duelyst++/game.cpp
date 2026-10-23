@@ -814,9 +814,12 @@ void Game::SelectTile(BoardTile& tile) {
 //Select card in hand
 void Game::SelectCard() {
 	if (players[turn].hand[handIdx]->cost <= players[turn].ReadMana()) {
-		HighlightSelectable(players[turn].hand[handIdx]->GetTargetMode());
-		if (selectable.size() > 0)
+		selectable = players[turn].hand[handIdx]->GetTargets();
+		if (selectable.size() > 0) {
 			activeCard = players[turn].hand[handIdx];
+			selectionIdx = 0;
+			mode = MODE_SELECT;
+		}
 	}
 }
 

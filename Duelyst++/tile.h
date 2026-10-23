@@ -74,6 +74,7 @@ public:
 	BoardTile* GetTile(int x, int y);
 
 	//Get all
+	std::vector<BoardTile*> GetAllEmpty();
 	std::vector<BoardTile*> GetAllEmpty(BoardTile* ignore);
 	BoardTile* GetRandomEmpty();
 	BoardTile* GetRandomEmpty(BoardTile* ignore);
@@ -90,6 +91,12 @@ public:
 
 	//Get in range
 	std::vector<BoardTile*> GetEmptyInRange(BoardTile* tile, int rad, BoardTile* ignore);
+
+	//Get near allies
+	std::vector<BoardTile*> GetEmptyNearAllies(Player* player);
+
+	//Utils
+	void ConcatUnique(std::vector<BoardTile*>& base, const std::vector<BoardTile*>& add);
 
 	//Tile objects
 	BoardTile tiles[9][5];

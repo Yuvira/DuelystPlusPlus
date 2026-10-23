@@ -16,6 +16,8 @@ class EffectDefinition;
 class Game;
 class Map;
 class Player;
+class Spell;
+class SpellEffect;
 enum eCard;
 
 #pragma region Helper Structs
@@ -119,7 +121,9 @@ public:
 
 	//Subclass getters
 	virtual Aura* GetAura() { return nullptr; }
+	virtual SpellEffect* GetSpellEffect() { return nullptr; }
 	bool IsAura() { return GetAura() != nullptr; }
+	bool IsSpellEffect() { return GetSpellEffect() != nullptr; }
 
 protected:
 
@@ -163,5 +167,32 @@ private:
 	Card* sourceCard;
 	Effect* sourceEffect;
 	bool (*Predicate)(EffectContext ctx);
+
+};
+
+//Spell effect that has a built-in targeting mode
+class SpellEffect : public Effect {
+
+public:
+
+	//Constructor
+	SpellEffect(const EffectDefinition& definition);
+	~SpellEffect();
+
+	//Get targets
+	std::vector<BoardTile*> GetTargets(Game* game, Spell* spell) {
+		std::vector<BoardTile*> empty;
+		if (TargetMethod)
+			return TargetMethod(game, spell);
+		return empty;
+	};
+
+	//Subclass getter
+	SpellEffect* GetSpellEffect() { return this; }
+
+private:
+
+	//Target method
+	std::vector<BoardTile*> (*TargetMethod)(Game* game, Spell* spell);
 
 };

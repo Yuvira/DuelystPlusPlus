@@ -32,8 +32,6 @@ Card::Card(const CardDefinition& definition, Game* game, Player* owner) {
 	cost = definition.cost;
 	this->game = game;
 	this->owner = owner;
-	if (definition.effect != EFFECT_NONE && game != nullptr)
-		AddEffect(definition.effect, this);
 	isToken = definition.isToken;
 	sprite = definition.sprite;
 	detailNameSprite = definition.detailNameSprite;
@@ -157,10 +155,10 @@ int Card::GetStat(eStat stat, int base, bool withAuras) {
 #pragma region Card Effects
 
 //Add effect to list, returns pointer to added effect instance
-Effect* Card::AddEffect(eEffect effectId, Card* sourceCard) {
+Effect* Card::AddEffect(eEffect effectId) {
 	if (effectId == EFFECT_NONE || game == nullptr)
 		return nullptr;
-	Effect* newEffect = game->collections->GetNewEffectInstance(effectId);
+	Effect* newEffect = game->collections->GetNewCardEffectInstance(effectId);
 	if (newEffect == nullptr)
 		return nullptr;
 	effects.push_back(newEffect);
@@ -274,22 +272,6 @@ std::vector<eCard> Card::GetTokens() {
 		if (effect->ReadToken() != CARD_NONE && std::find(tokenList.begin(), tokenList.end(), effect->ReadToken()) == tokenList.end())
 			tokenList.push_back(effect->ReadToken());
 	return tokenList;
-}
-
-#pragma endregion
-
-#pragma region Utils
-
-//Get card ownership
-bool Card::IsAlly() {
-	if (game == nullptr)
-		return false;
-	return owner == game->GetTurnPlayer();
-}
-bool Card::IsEnemy() {
-	if (game == nullptr)
-		return false;
-	return owner != game->GetTurnPlayer();
 }
 
 #pragma endregion

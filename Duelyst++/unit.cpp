@@ -1,6 +1,7 @@
 //Include
 #include "card.h"
 #include "carddefinition.h"
+#include "collections.h"
 #include "effect.h"
 #include "event.h"
 #include "game.h"
@@ -30,7 +31,13 @@ Unit::Unit(const CardDefinition& definition, Game* game, Player* owner) : Card(d
 	hasCelerityAttacked = true;
 	forcefieldBroken = false;
 	curTile = nullptr;
+	if (definition.effect != EFFECT_NONE && game != nullptr) {
+		Effect* effect = game->collections->GetNewCardEffectInstance(definition.effect);
+		if (effect != nullptr)
+			effects.push_back(effect);
+	}
 	UpdateModifiers();
+	UpdateAuras();
 }
 Unit::~Unit() {}
 
@@ -101,6 +108,13 @@ void Unit::UpdateModifiers() {
 #pragma endregion
 
 #pragma region Actions
+
+//Get targets
+std::vector<BoardTile*> Unit::GetTargets() {
+	if (HasKeywords(KEYWORD_AIRDROP))
+		return game->map.GetAllEmpty();
+	return game->map.GetEmptyNearAllies(owner);
+}
 
 //Initialize states
 void Unit::InitState() {
@@ -264,7 +278,7 @@ void Unit::Dispel() {
 	}
 
 	//Add dispelled effect
-	AddEffect(EFFECT_DISPELLED, nullptr);
+	AddEffect(EFFECT_DISPELLED);
 
 	//Remove misc
 	hasCelerityMoved = true;
@@ -293,13 +307,6 @@ void Unit::RemoveEffects() {
 #pragma endregion
 
 #pragma region Utils
-
-//Get targeting mode
-TargetMode Unit::GetTargetMode() {
-	if (HasKeywords(KEYWORD_AIRDROP))
-		return TargetMode(TARGET_MODE_ALL, [](BoardTile* tile) { return tile->unit == nullptr; });
-	return TargetMode(TARGET_MODE_NEAR_ALLIES, [](BoardTile* tile) { return tile->unit == nullptr; });
-}
 
 //Can unit attack target
 bool Unit::CanAttack(Unit* target) {

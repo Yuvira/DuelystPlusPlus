@@ -444,19 +444,11 @@ void Collections::RegisterCards() {
 	cardDefinitions.try_emplace(
 		CARD_BREATH_OF_THE_UNBORN, CARD_BREATH_OF_THE_UNBORN, RARITY_COMMON, FACTION_ABYSSIAN,
 		"breathoftheunborn", "Breath of The Unborn", 4, SPELL_BREATH_OF_THE_UNBORN );
-	cardDefinitions.at(CARD_BREATH_OF_THE_UNBORN).targetMode = TargetMode(
-		TARGET_MODE_ALL,
-		[](BoardTile* tile) { return tile->HasUnit(); }
-	);
 
 	//Dark Seed
 	cardDefinitions.try_emplace(
 		CARD_DARK_SEED, CARD_DARK_SEED, RARITY_RARE, FACTION_ABYSSIAN,
 		"darkseed", "Dark Seed", 4, SPELL_DARK_SEED );
-	cardDefinitions.at(CARD_DARK_SEED).targetMode = TargetMode(
-		TARGET_MODE_ALL,
-		[](BoardTile* tile) { return tile->HasUnit() && tile->unit->IsEnemy() && tile->unit->tribe == TRIBE_GENERAL; }
-	);
 
 #pragma endregion
 

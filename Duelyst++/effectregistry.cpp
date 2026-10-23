@@ -28,7 +28,7 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnPreCastThisEvent& ev) {
 			for (Card* card : ctx.GetOwner()->hand)
 				if (card->IsSpell())
-					card->AddEffect(MODIFIER_ABJUDICATOR, ctx.card);
+					card->AddEffect(MODIFIER_ABJUDICATOR);
 	});
 	effectDefinitions.try_emplace(MODIFIER_ABJUDICATOR, MODIFIER_ABJUDICATOR, KEYWORD_NONE, "Abjudicator");
 	effectDefinitions.at(MODIFIER_ABJUDICATOR).AddModifier(STAT_COST, MODTYPE_BUFF, -1);
@@ -56,7 +56,7 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnSummonEvent& ev) {
 			return ctx.IsOnBoard() && ctx.IsAllied(ev.unit) && ev.unit->HasKeywords(KEYWORD_OPENING_GAMBIT) && ev.wasCast; },
 		[](EffectContext ctx, OnSummonEvent& ev) {
-			ctx.card->AddEffect(MODIFIER_ARAKI_HEADHUNTER, ctx.card); });
+			ctx.card->AddEffect(MODIFIER_ARAKI_HEADHUNTER); });
 	effectDefinitions.try_emplace(MODIFIER_ARAKI_HEADHUNTER, MODIFIER_ARAKI_HEADHUNTER, KEYWORD_NONE, "Araki Headhunter");
 	effectDefinitions.at(MODIFIER_ARAKI_HEADHUNTER).AddModifier(STAT_ATK, MODTYPE_BUFF, 2);
 
@@ -100,7 +100,7 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnReplaceEvent& ev) {
 			return ctx.IsCard(ev.card); },
 		[](EffectContext ctx, OnReplaceEvent& ev) {
-			ev.card->AddEffect(MODIFIER_ASTRAL_CRUSADER, ctx.card); });
+			ev.card->AddEffect(MODIFIER_ASTRAL_CRUSADER); });
 	effectDefinitions.try_emplace(MODIFIER_ASTRAL_CRUSADER, MODIFIER_ASTRAL_CRUSADER, KEYWORD_NONE, "Astral Crusader");
 	effectDefinitions.at(MODIFIER_ASTRAL_CRUSADER).AddModifier(STAT_ATK, MODTYPE_BUFF, 3).AddModifier(STAT_HP, MODTYPE_BUFF, 3).AddModifier(STAT_COST, MODTYPE_BUFF, -3);
 
@@ -118,7 +118,7 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnDeathEvent& ev) {
 			for (Unit* unit : ctx.GetMap()->GetUnitsNear(ctx.GetTile()))
 				if (ctx.SharesOwner(unit) && !unit->IsGeneral())
-					unit->AddEffect(MODIFIER_AZURE_HORN_SHAMAN, ctx.card);
+					unit->AddEffect(MODIFIER_AZURE_HORN_SHAMAN);
 	});
 	effectDefinitions.try_emplace(MODIFIER_AZURE_HORN_SHAMAN, MODIFIER_AZURE_HORN_SHAMAN, KEYWORD_NONE, "Azure Horn Shaman");
 	effectDefinitions.at(MODIFIER_AZURE_HORN_SHAMAN).AddModifier(STAT_HP, MODTYPE_BUFF, 4);
@@ -131,7 +131,7 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnTurnEndEvent& ev) {
 			for (Unit* unit : ctx.game->GetUnits())
 				if (ctx.IsAllied(unit) && !unit->IsGeneral())
-					unit->AddEffect(MODIFIER_BASTION, ctx.card);
+					unit->AddEffect(MODIFIER_BASTION);
 	});
 	effectDefinitions.try_emplace(MODIFIER_BASTION, MODIFIER_BASTION, KEYWORD_NONE, "Bastion");
 	effectDefinitions.at(MODIFIER_BASTION).AddModifier(STAT_HP, MODTYPE_BUFF, 1);
@@ -240,7 +240,7 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnTurnStartEvent& ev) {
 			if (ctx.game->eventManager.MostRecentPlayerTurnHasEvent(ctx.GetOpponent(), [](Player* player, Event* event) {
 				return event->type == EVENT_DAMAGE && event->As<OnDamageEvent>()->target == player->opponent->general;
-			})) ctx.card->AddEffect(MODIFIER_CHAKKRAM, ctx.card);
+			})) ctx.card->AddEffect(MODIFIER_CHAKKRAM);
 	});
 	effectDefinitions.at(SKILL_CHAKKRAM).RegisterPostTrigger<OnAddToHandEvent>(
 		[](EffectContext ctx, OnAddToHandEvent& ev) {
@@ -248,7 +248,7 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnAddToHandEvent& ev) {
 			if (ctx.game->eventManager.MostRecentPlayerTurnHasEvent(ctx.GetOpponent(), [](Player* player, Event* event) {
 				return event->type == EVENT_DAMAGE && event->As<OnDamageEvent>()->target == player->opponent->general;
-			})) ctx.card->AddEffect(MODIFIER_CHAKKRAM, ctx.card);
+			})) ctx.card->AddEffect(MODIFIER_CHAKKRAM);
 	});
 	effectDefinitions.try_emplace(MODIFIER_CHAKKRAM, MODIFIER_CHAKKRAM, KEYWORD_NONE, "Chakkram");
 	effectDefinitions.at(MODIFIER_CHAKKRAM).RegisterPostTrigger<OnTurnEndEvent>(
@@ -279,7 +279,7 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnSummonEvent& ev) {
 			return ctx.IsOnBoard() && !ctx.SharesOwner(ev.unit); },
 		[](EffectContext ctx, OnSummonEvent& ev) {
-			ctx.card->AddEffect(MODIFIER_CRIMSON_OCULUS, ctx.card); });
+			ctx.card->AddEffect(MODIFIER_CRIMSON_OCULUS); });
 	effectDefinitions.try_emplace(MODIFIER_CRIMSON_OCULUS, MODIFIER_CRIMSON_OCULUS, KEYWORD_NONE, "Crimson Oculus");
 	effectDefinitions.at(MODIFIER_CRIMSON_OCULUS).AddModifier(STAT_ATK, MODTYPE_BUFF, 1).AddModifier(STAT_HP, MODTYPE_BUFF, 1);
 
@@ -314,7 +314,7 @@ void Collections::RegisterEffects() {
 			return ctx.IsOnBoard() && ctx.IsOwnedBy(ev.player); },
 		[](EffectContext ctx, OnTurnStartEvent& ev) {
 			ctx.GetEnemyGeneral()->DealDamage(ctx.card, 4);
-			ctx.card->AddEffect(MODIFIER_DARK_NEMESIS, ctx.card);
+			ctx.card->AddEffect(MODIFIER_DARK_NEMESIS);
 	});
 	effectDefinitions.try_emplace(MODIFIER_DARK_NEMESIS, MODIFIER_DARK_NEMESIS, KEYWORD_NONE, "Dark Nemesis");
 	effectDefinitions.at(MODIFIER_DARK_NEMESIS).AddModifier(STAT_ATK, MODTYPE_BUFF, 4);
@@ -561,7 +561,7 @@ void Collections::RegisterEffects() {
 				[](EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets) {
 					if (targets.size() > 0 && targets[0]->HasUnit()) {
 						targets[0]->unit->Destroy(ctx.card);
-						ctx.card->AddEffect(MODIFIER_HOLLOW_GROVEKEEPER, ctx.card);
+						ctx.card->AddEffect(MODIFIER_HOLLOW_GROVEKEEPER);
 					}
 			});
 	});
@@ -648,7 +648,7 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnSummonEvent& ev) {
 			return ctx.effect->IsAura() && ctx.effect->GetAura()->GetOwner() == ev.unit->owner && ctx.effect->GetAura()->GetSourceCard() != ev.unit && !ev.unit->IsGeneral(); },
 		[](EffectContext ctx, OnSummonEvent& ev) {
-			ev.unit->AddEffect(MODIFIER_LADY_LOCKE, ctx.card); });
+			ev.unit->AddEffect(MODIFIER_LADY_LOCKE); });
 	effectDefinitions.at(AURA_LADY_LOCKE).RegisterPostTrigger<OnTurnEndEvent>(
 		[](EffectContext ctx, OnTurnEndEvent& ev) {
 			return true; },
@@ -722,7 +722,7 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnSummonEvent& ev) {
 			return ctx.IsOnBoard() && ctx.IsAllied(ev.unit) && ctx.GetTile()->IsNear(ev.unit->curTile); },
 		[](EffectContext ctx, OnSummonEvent& ev) {
-			ev.unit->AddEffect(MODIFIER_MIRKBLOOD_DEVOURER, ctx.card); });
+			ev.unit->AddEffect(MODIFIER_MIRKBLOOD_DEVOURER); });
 	effectDefinitions.try_emplace(MODIFIER_MIRKBLOOD_DEVOURER, MODIFIER_MIRKBLOOD_DEVOURER, KEYWORD_NONE, "Mirkblood Devourer");
 	effectDefinitions.at(MODIFIER_MIRKBLOOD_DEVOURER).AddModifier(STAT_ATK, MODTYPE_BUFF, 1).AddModifier(STAT_HP, MODTYPE_BUFF, 1);
 
@@ -734,7 +734,7 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnTurnStartEvent& ev) {
 			int atk = ctx.card->GetStat(STAT_ATK, ctx.card->GetUnit()->baseAtk, false);
 			int hp = ctx.card->GetStat(STAT_HP, ctx.card->GetUnit()->baseHpMax, false);
-			if (Effect* effect = ctx.card->AddEffect(MODIFIER_MOEBIUS, ctx.card)) {
+			if (Effect* effect = ctx.card->AddEffect(MODIFIER_MOEBIUS)) {
 				effect->UpdateModifier(STAT_ATK, hp);
 				effect->UpdateModifier(STAT_HP, atk);
 			}
@@ -777,7 +777,7 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnCastEvent& ev) {
 			for (Unit* unit : ctx.game->GetUnits())
 				if (ctx.SharesOwner(ctx.card) && !unit->IsGeneral() && unit->tribe == TRIBE_ARCANYST)
-					unit->AddEffect(MODIFIER_OWLBEAST_SAGE, ctx.card);
+					unit->AddEffect(MODIFIER_OWLBEAST_SAGE);
 	});
 	effectDefinitions.try_emplace(MODIFIER_OWLBEAST_SAGE, MODIFIER_OWLBEAST_SAGE, KEYWORD_NONE, "Owlbeast Sage");
 	effectDefinitions.at(MODIFIER_OWLBEAST_SAGE).AddModifier(STAT_HP, MODTYPE_BUFF, 2);
@@ -802,7 +802,7 @@ void Collections::RegisterEffects() {
 			ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
 				[](EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets) {
 					if (targets.size() > 0 && targets[0]->HasUnit())
-						targets[0]->unit->AddEffect(MODIFIER_PRIMUS_FIST, ctx.card);
+						targets[0]->unit->AddEffect(MODIFIER_PRIMUS_FIST);
 			});
 	});
 	effectDefinitions.try_emplace(MODIFIER_PRIMUS_FIST, MODIFIER_PRIMUS_FIST, KEYWORD_NONE, "Primus Fist");
@@ -902,7 +902,7 @@ void Collections::RegisterEffects() {
 			return ctx.IsOnBoard() && ev.target == ctx.GetAllyGeneral(); },
 		[](EffectContext ctx, OnDamageEvent& ev) {
 			ctx.GetOwner()->Draw();
-			ctx.card->AddEffect(MODIFIER_RUBY_RIFTER, ctx.card);
+			ctx.card->AddEffect(MODIFIER_RUBY_RIFTER);
 	});
 	effectDefinitions.try_emplace(MODIFIER_RUBY_RIFTER, MODIFIER_RUBY_RIFTER, KEYWORD_NONE, "Ruby Rifter");
 	effectDefinitions.at(MODIFIER_RUBY_RIFTER).AddModifier(STAT_ATK, MODTYPE_BUFF, 2);
@@ -925,7 +925,7 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnTurnEndEvent& ev) {
 			for (Unit* unit : ctx.GetMap()->GetUnitsNear(ctx.GetTile()))
 				if (ctx.SharesOwner(unit) && !unit->IsGeneral())
-					unit->AddEffect(MODIFIER_SHIRO_PUPPYDRAGON, ctx.card);
+					unit->AddEffect(MODIFIER_SHIRO_PUPPYDRAGON);
 	});
 	effectDefinitions.try_emplace(MODIFIER_SHIRO_PUPPYDRAGON, MODIFIER_SHIRO_PUPPYDRAGON, KEYWORD_NONE, "Shiro Puppydragon");
 	effectDefinitions.at(MODIFIER_SHIRO_PUPPYDRAGON).AddModifier(STAT_ATK, MODTYPE_BUFF, 1);
@@ -981,7 +981,7 @@ void Collections::RegisterEffects() {
 			ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
 				[](EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets) {
 					if (targets.size() > 0 && targets[0]->HasUnit())
-						targets[0]->unit->AddEffect(MODIFIER_SONGWEAVER, ctx.card);
+						targets[0]->unit->AddEffect(MODIFIER_SONGWEAVER);
 			});
 	});
 	effectDefinitions.try_emplace(MODIFIER_SONGWEAVER, MODIFIER_SONGWEAVER, KEYWORD_NONE, "Songweaver");
@@ -1006,7 +1006,7 @@ void Collections::RegisterEffects() {
 			for (int i = 0; i < 2; ++i) {
 				if (valid.size() > 0) {
 					int idx = rand() % valid.size();
-					valid[idx]->AddEffect(MODIFIER_SUN_ELEMENTAL, ctx.card);
+					valid[idx]->AddEffect(MODIFIER_SUN_ELEMENTAL);
 					valid.erase(valid.begin() + idx);
 				}
 			}
@@ -1037,7 +1037,7 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnDamageEvent& ev) {
 			return ctx.IsOnBoard() && ev.target == ctx.GetAllyGeneral(); },
 		[](EffectContext ctx, OnDamageEvent& ev) {
-			ctx.card->AddEffect(MODIFIER_SWORN_AVENGER, ctx.card); });
+			ctx.card->AddEffect(MODIFIER_SWORN_AVENGER); });
 	effectDefinitions.try_emplace(MODIFIER_SWORN_AVENGER, MODIFIER_SWORN_AVENGER, KEYWORD_NONE, "Sworn Avenger");
 	effectDefinitions.at(MODIFIER_SWORN_AVENGER).AddModifier(STAT_ATK, MODTYPE_BUFF, 1);
 
@@ -1073,7 +1073,7 @@ void Collections::RegisterEffects() {
 	effectDefinitions.at(SKILL_THE_HIGH_HAND).RegisterSelfTrigger<OnPreCastThisEvent>(
 		[](EffectContext ctx, OnPreCastThisEvent& ev) {
 			if (ctx.GetOpponent()->hand.size() > 0) {
-				if (Effect* effect = ctx.card->AddEffect(MODIFIER_THE_HIGH_HAND, ctx.card)) {
+				if (Effect* effect = ctx.card->AddEffect(MODIFIER_THE_HIGH_HAND)) {
 					effect->UpdateModifier(STAT_ATK, ctx.GetOpponent()->hand.size());
 					effect->UpdateModifier(STAT_HP, ctx.GetOpponent()->hand.size());
 					ctx.card->UpdateModifiers();
@@ -1154,7 +1154,7 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnMoveEvent& ev) {
 			for (Unit* unit : ctx.GetMap()->GetUnitsNear(ctx.GetTile()))
 				if (ctx.SharesOwner(unit) && !unit->IsGeneral())
-					unit->AddEffect(MODIFIER_WIND_RUNNER, ctx.card);
+					unit->AddEffect(MODIFIER_WIND_RUNNER);
 	});
 	effectDefinitions.try_emplace(MODIFIER_WIND_RUNNER, MODIFIER_WIND_RUNNER, KEYWORD_NONE, "Wind Runner");
 	effectDefinitions.at(MODIFIER_WIND_RUNNER).AddModifier(STAT_ATK, MODTYPE_BUFF, 1).AddModifier(STAT_HP, MODTYPE_BUFF, 1);
@@ -1165,7 +1165,7 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnReplaceEvent& ev) {
 			return ctx.IsOnBoard() && ctx.SharesOwner(ev.card); },
 		[](EffectContext ctx, OnReplaceEvent& ev) {
-			ctx.card->AddEffect(MODIFIER_WINGS_OF_PARADISE, ctx.card);
+			ctx.card->AddEffect(MODIFIER_WINGS_OF_PARADISE);
 	});
 	effectDefinitions.try_emplace(MODIFIER_WINGS_OF_PARADISE, MODIFIER_WINGS_OF_PARADISE, KEYWORD_NONE, "Wings of Paradise");
 	effectDefinitions.at(MODIFIER_WINGS_OF_PARADISE).RegisterPostTrigger<OnTurnEndEvent>(
@@ -1186,7 +1186,7 @@ void Collections::RegisterEffects() {
 			ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
 				[](EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets) {
 					if (targets.size() > 0 && targets[0]->HasUnit())
-						targets[0]->unit->AddEffect(MODIFIER_WOODWEN, ctx.card);
+						targets[0]->unit->AddEffect(MODIFIER_WOODWEN);
 			});
 	});
 	effectDefinitions.try_emplace(MODIFIER_WOODWEN, MODIFIER_WOODWEN, KEYWORD_PROVOKE, "Wood-Wen|{Provoke}");

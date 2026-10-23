@@ -30,11 +30,17 @@ struct EffectDefinition {
 		token = CARD_NONE;
 		isRemovable = true;
 		AuraPredicate = nullptr;
+		TargetMethod = nullptr;
 	}
 	EffectDefinition(eEffect effectId, int keywords, std::string description, bool (*AuraPredicate)(EffectContext ctx))
 	: EffectDefinition(effectId, keywords, description) {
 		type = EFFECTTYPE_AURA;
 		this->AuraPredicate = AuraPredicate;
+	}
+	EffectDefinition(eEffect effectId, std::string description, std::vector<BoardTile*>(*TargetMethod)(Game* game, Spell* spell))
+		: EffectDefinition(effectId, KEYWORD_NONE, description) {
+		type = EFFECTTYPE_SPELL;
+		this->TargetMethod = TargetMethod;
 	}
 
 	//Trigger registers
@@ -70,6 +76,7 @@ struct EffectDefinition {
 	eCard token;
 	bool isRemovable;
 	bool (*AuraPredicate)(EffectContext ctx);
+	std::vector<BoardTile*> (*TargetMethod)(Game* game, Spell* spell);
 	std::vector<EventTrigger> preTriggers;
 	std::vector<EventTrigger> postTriggers;
 	std::vector<EventTrigger> selfTriggers;

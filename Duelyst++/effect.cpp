@@ -25,6 +25,10 @@ Aura::Aura(const EffectDefinition& definition, Player* owner, Card* sourceCard, 
 	Predicate = definition.AuraPredicate;
 }
 Aura::~Aura() {}
+SpellEffect::SpellEffect(const EffectDefinition& definition) : Effect(definition) {
+	TargetMethod = definition.TargetMethod;
+}
+SpellEffect::~SpellEffect() {}
 
 //Dispatch triggers
 void Effect::DispatchTrigger(const std::vector<EventTrigger>& triggers, EffectContext ctx, Event* ev) {

@@ -94,6 +94,7 @@ BoardTile* Map::GetTile(int x, int y) {
 }
 
 //Get all empty tiles
+std::vector<BoardTile*> Map::GetAllEmpty() { return GetAllEmpty(nullptr); }
 std::vector<BoardTile*> Map::GetAllEmpty(BoardTile* ignore) {
 	std::vector<BoardTile*> valid;
 	for (BoardTile (&column)[height] : tiles)
@@ -190,4 +191,21 @@ std::vector<BoardTile*> Map::GetEmptyInRange(BoardTile* tile, int rad, BoardTile
 	return valid;
 }
 
+//Get empty tiles near units allied to given player
+std::vector<BoardTile*> Map::GetEmptyNearAllies(Player* player) {
+	std::vector<BoardTile*> valid;
+	for (BoardTile(&column)[height] : tiles)
+		for (BoardTile& tile : column)
+			if (tile.HasUnit() && tile.unit->owner == player)
+				ConcatUnique(valid, GetEmptyNear(&tile));
+	return valid;
+}
+
 #pragma endregion
+
+//Add unique tiles to list
+void Map::ConcatUnique(std::vector<BoardTile*>& base, const std::vector<BoardTile*>& add) {
+	for (BoardTile* tile : add)
+		if (std::find(base.begin(), base.end(), tile) == base.end())
+			base.push_back(tile);
+}

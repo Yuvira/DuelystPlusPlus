@@ -29,8 +29,8 @@ Collections::~Collections() {}
 #pragma region Instance Generators
 
 //Get a new effect instance based on definition with ID
-Effect* Collections::GetNewEffectInstance(eEffect effectId) {
-	if (!effectDefinitions.contains(effectId))
+Effect* Collections::GetNewCardEffectInstance(eEffect effectId) {
+	if (!effectDefinitions.contains(effectId) || effectDefinitions.at(effectId).type != EFFECTTYPE_CARD)
 		return nullptr;
 	return new Effect(effectDefinitions.at(effectId));
 }
@@ -40,6 +40,13 @@ Aura* Collections::GetNewAuraInstance(eEffect auraId, Player* owner, Card* sourc
 	if (!effectDefinitions.contains(auraId) || effectDefinitions.at(auraId).type != EFFECTTYPE_AURA)
 		return nullptr;
 	return new Aura(effectDefinitions.at(auraId), owner, sourceCard, sourceEffect);
+}
+
+//Get a new effect instance based on definition with ID
+SpellEffect* Collections::GetNewSpellEffectInstance(eEffect effectId) {
+	if (!effectDefinitions.contains(effectId) || effectDefinitions.at(effectId).type != EFFECTTYPE_SPELL)
+		return nullptr;
+	return new SpellEffect(effectDefinitions.at(effectId));
 }
 
 //Get a new card instance based on definition with ID
