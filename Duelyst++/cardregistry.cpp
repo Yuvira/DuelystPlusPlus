@@ -7,18 +7,38 @@
 //Register card objects
 void Collections::RegisterCards() {
 
-#pragma region Generals
-
 	//Generals
 	cardDefinitions.try_emplace(
 		CARD_ARGEON_HIGHMAYNE, CARD_ARGEON_HIGHMAYNE, RARITY_NONE, FACTION_LYONAR, TRIBE_GENERAL,
 		"argeonhighmayne", "Argeon Highmayne", 0, 2, 25, EFFECT_NONE );
 
+#pragma region Abyssian
+
+	//Spells
+	cardDefinitions.try_emplace(
+		CARD_BREATH_OF_THE_UNBORN, CARD_BREATH_OF_THE_UNBORN, RARITY_COMMON, FACTION_ABYSSIAN,
+		"breathoftheunborn", "Breath of The Unborn", 4, SPELL_BREATH_OF_THE_UNBORN);
+	cardDefinitions.try_emplace(
+		CARD_CONSUMING_REBIRTH, CARD_CONSUMING_REBIRTH, RARITY_EPIC, FACTION_ABYSSIAN,
+		"consumingrebirth", "Consuming Rebirth", 2, SPELL_CONSUMING_REBIRTH);
+	cardDefinitions.try_emplace(
+		CARD_DAEMONIC_LURE, CARD_DAEMONIC_LURE, RARITY_NONE, FACTION_ABYSSIAN,
+		"daemoniclure", "Daemonic Lure", 2, SPELL_DAEMONIC_LURE);
+	cardDefinitions.try_emplace(
+		CARD_DARK_SEED, CARD_DARK_SEED, RARITY_RARE, FACTION_ABYSSIAN,
+		"darkseed", "Dark Seed", 4, SPELL_DARK_SEED);
+	cardDefinitions.try_emplace(
+		CARD_DARK_TRANSFORMATION, CARD_DARK_TRANSFORMATION, RARITY_NONE, FACTION_ABYSSIAN,
+		"darktransformation", "Dark Transformation", 5, SPELL_DARK_TRANSFORMATION);
+	cardDefinitions.try_emplace(
+		CARD_DARKFIRE_SACRIFICE, CARD_DARKFIRE_SACRIFICE, RARITY_RARE, FACTION_ABYSSIAN,
+		"darkfiresacrifice", "Darkfire Sacrifice", 0, SPELL_DARKFIRE_SACRIFICE);
+
 #pragma endregion
 
-#pragma region Minions
+#pragma region Neutral
 
-	//Minion Cards
+	//Minions
 	cardDefinitions.try_emplace(
 		CARD_ABJUDICATOR, CARD_ABJUDICATOR, RARITY_RARE, FACTION_NEUTRAL, TRIBE_ARCANYST,
 		"abjudicator", "Abjudicator", 3, 3, 1, SKILL_ABJUDICATOR );
@@ -432,30 +452,6 @@ void Collections::RegisterCards() {
 		CARD_WRAITHLING, CARD_WRAITHLING, RARITY_NONE, FACTION_ABYSSIAN, TRIBE_NONE,
 		"wraithling", "Wraithling", 1, 1, 1, EFFECT_NONE);
 	cardDefinitions.at(CARD_WRAITHLING).isToken = true;
-
-#pragma endregion
-
-#pragma region Spells
-
-	//Spells
-	cardDefinitions.try_emplace(
-		CARD_BREATH_OF_THE_UNBORN, CARD_BREATH_OF_THE_UNBORN, RARITY_COMMON, FACTION_ABYSSIAN,
-		"breathoftheunborn", "Breath of The Unborn", 4, SPELL_BREATH_OF_THE_UNBORN );
-	cardDefinitions.try_emplace(
-		CARD_CONSUMING_REBIRTH, CARD_CONSUMING_REBIRTH, RARITY_EPIC, FACTION_ABYSSIAN,
-		"consumingrebirth", "Consuming Rebirth", 2, SPELL_CONSUMING_REBIRTH );
-	cardDefinitions.try_emplace(
-		CARD_DAEMONIC_LURE, CARD_DAEMONIC_LURE, RARITY_NONE, FACTION_ABYSSIAN,
-		"daemoniclure", "Daemonic Lure", 2, SPELL_DAEMONIC_LURE);
-	cardDefinitions.try_emplace(
-		CARD_DARK_SEED, CARD_DARK_SEED, RARITY_RARE, FACTION_ABYSSIAN,
-		"darkseed", "Dark Seed", 4, SPELL_DARK_SEED );
-	cardDefinitions.try_emplace(
-		CARD_DARK_TRANSFORMATION, CARD_DARK_TRANSFORMATION, RARITY_NONE, FACTION_ABYSSIAN,
-		"darktransformation", "Dark Transformation", 5, SPELL_DARK_TRANSFORMATION);
-	cardDefinitions.try_emplace(
-		CARD_DARKFIRE_SACRIFICE, CARD_DARKFIRE_SACRIFICE, RARITY_RARE, FACTION_ABYSSIAN,
-		"darkfiresacrifice", "Darkfire Sacrifice", 0, SPELL_DARKFIRE_SACRIFICE);
 
 #pragma endregion
 

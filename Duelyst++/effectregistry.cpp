@@ -23,6 +23,8 @@ void Collections::RegisterEffects() {
 	effectDefinitions.try_emplace(SKILL_RANGED, SKILL_RANGED, KEYWORD_RANGED, "{Ranged}");
 	effectDefinitions.try_emplace(SKILL_RUSH, SKILL_RUSH, KEYWORD_RUSH, "{Rush}");
 
+#pragma region Neutral
+
 	//Abjudicator
 	effectDefinitions.try_emplace(SKILL_ABJUDICATOR, SKILL_ABJUDICATOR, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Lower the cost of all spells in your action bar by 1");
 	effectDefinitions.at(SKILL_ABJUDICATOR).RegisterSelfTrigger<OnPreCastThisEvent>(
@@ -1176,5 +1178,7 @@ void Collections::RegisterEffects() {
 			if (BoardTile* tile = ctx.GetMap()->GetRandomEmptyNear(ev.tile))
 				ctx.game->SummonToken(ctx.card->ReadID(), tile, ctx.GetOwner());
 	});
+
+#pragma endregion
 
 }
