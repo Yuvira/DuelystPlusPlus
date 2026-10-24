@@ -13,7 +13,7 @@ void Collections::RegisterSpells() {
 	//Breath of The Unborn
 	effectDefinitions.try_emplace(SPELL_BREATH_OF_THE_UNBORN, SPELL_BREATH_OF_THE_UNBORN, "Deal 2 damage to all enemy minions. Fully heal all friendly minions",
 		[](Game* game, Spell* spell) {
-			return game->map.GetAllUnitTiles(FILTER_MINIONS, FILTER_NEUTRAL, nullptr); });
+			return game->map.GetAll(); });
 	effectDefinitions.at(SPELL_BREATH_OF_THE_UNBORN).RegisterSelfTrigger<OnResolveThisEvent>(
 		[](EffectContext ctx, OnResolveThisEvent& ev) {
 			for (Unit* unit : ctx.game->GetUnits()) {
@@ -61,10 +61,8 @@ void Collections::RegisterSpells() {
 			return game->map.GetAllUnitTiles(FILTER_GENERALS, FILTER_ENEMY, spell->owner); });
 	effectDefinitions.at(SPELL_DARK_SEED).RegisterSelfTrigger<OnResolveThisEvent>(
 		[](EffectContext ctx, OnResolveThisEvent& ev) {
-			if (ev.tile->HasUnit()) {
-				int damage = ctx.GetOpponent()->hand.size();
-				ev.tile->unit->DealDamage(ctx.card, damage);
-			}
+			int damage = ctx.GetOpponent()->hand.size();
+			ctx.GetEnemyGeneral()->DealDamage(ctx.card, damage);
 	});
 
 }
