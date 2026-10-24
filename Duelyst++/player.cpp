@@ -47,6 +47,8 @@ void Player::InitStartingHand() {
 			hand.push_back(deck[i]);
 		deck.erase(deck.begin(), deck.begin() + 5);
 	}
+	for (Card* card : GetDeckAndHand())
+		card->UpdateAuras();
 }
 
 #pragma endregion
