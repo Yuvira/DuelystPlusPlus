@@ -16,13 +16,10 @@ void Collections::RegisterSpells() {
 			return game->map.GetAll(); });
 	effectDefinitions.at(SPELL_BREATH_OF_THE_UNBORN).RegisterSelfTrigger<OnResolveThisEvent>(
 		[](EffectContext ctx, OnResolveThisEvent& ev) {
-			for (Unit* unit : ctx.game->GetUnits()) {
-				if (!unit->IsGeneral()) {
-					ctx.SharesOwner(unit)
-						? unit->Heal(ctx.card, 999)
-						: unit->DealDamage(ctx.card, 2);
-				}
-			}
+			for (Unit* unit : ctx.GetMap()->GetAllUnits(FILTER_MINIONS, FILTER_NEUTRAL, nullptr))
+				ctx.SharesOwner(unit)
+					? unit->Heal(ctx.card, 999)
+					: unit->DealDamage(ctx.card, 2);
 	});
 
 	//Consuming Rebirth
