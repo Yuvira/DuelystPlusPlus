@@ -86,6 +86,7 @@ public:
 	BoardTile* GetTile(int x, int y);
 
 	//Get all
+	std::vector<BoardTile*> GetAll();
 	std::vector<BoardTile*> GetAllEmpty();
 	std::vector<BoardTile*> GetAllEmpty(BoardTile* ignore);
 	std::vector<Unit*> GetAllUnits();

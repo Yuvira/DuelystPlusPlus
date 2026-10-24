@@ -93,6 +93,15 @@ BoardTile* Map::GetTile(int x, int y) {
 	return &tiles[x][y];
 }
 
+//Get all tiles
+std::vector<BoardTile*> Map::GetAll() {
+	std::vector<BoardTile*> valid;
+	for (BoardTile(&column)[height] : tiles)
+		for (BoardTile& tile : column)
+			valid.push_back(&tile);
+	return valid;
+}
+
 //Get all empty tiles
 std::vector<BoardTile*> Map::GetAllEmpty() { return GetAllEmpty(nullptr); }
 std::vector<BoardTile*> Map::GetAllEmpty(BoardTile* ignore) {
