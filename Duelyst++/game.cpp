@@ -108,7 +108,7 @@ void Game::RenderGame(Renderer& renderer) {
 		units[i]->RenderOnBoard(renderer);
 
 	//Render active card while selecting opening gambit targets
-	if (activeCard != nullptr && activeCard->GetUnit() != nullptr && mode == MODE_SELECT && effectCallback.Callback)
+	if (activeCard != nullptr && activeCard->IsUnit() && mode == MODE_SELECT && effectCallback.Callback)
 		activeCard->GetUnit()->RenderOnBoard(renderer, (castPos.x * 7) + 2, (castPos.y * 7) + 6);
 
 	//Move mode indicators
