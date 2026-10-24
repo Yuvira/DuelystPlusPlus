@@ -1,0 +1,7 @@
+Duelyst had no cast/resolve distinction, so anything that triggered on spell cast would do so AFTER that spell resolved
+This has some strange interactions so I'm sticking to cast->resolve for now unless it becomes a problem
+
+Daemonic Lure
+Original version teleported as a post-resolution follow-up
+This means damage events resolved BEFORE teleport target was set and action occurred
+This version selects damage and teleport targets before doing both actions 'simultaneously'
