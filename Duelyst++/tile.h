@@ -29,12 +29,16 @@ enum eUnitFilterAllegiance {
 	FILTER_ENEMY
 };
 
+#pragma region Helpers
+
 //Custom co-ordinate because you can't vector COORD
-class Coord {
-public:
-	Coord();
-	Coord(int x, int y);
-	~Coord();
+struct Coord {
+	Coord() : Coord(0, 0) {}
+	Coord(int x, int y) {
+		this->x = x;
+		this->y = y;
+	}
+	~Coord() {}
 	int x;
 	int y;
 };
@@ -50,16 +54,10 @@ struct NearbyRange {
 	int x0, x1, y0, y1;
 };
 
-//Tile class
-class Tile {
-public:
-	Tile();
-	~Tile();
-	void SetColor(eColor color);
-	Sprite border;
-};
+#pragma endregion
 
-class BoardTile : public Tile {
+//Board tile object
+class BoardTile {
 public:
 	BoardTile();
 	~BoardTile();
@@ -67,10 +65,11 @@ public:
 	void Dispel();
 	bool IsNear(BoardTile* tile);
 	bool HasUnit();
-	eFeature feature;
-	Unit* unit;
-	Sprite sprite;
 	Coord pos;
+	Unit* unit;
+	eFeature feature;
+	Sprite sprite;
+	eColor borderColor;
 };
 
 //Map (tiles container)
@@ -83,6 +82,7 @@ public:
 	~Map();
 
 	//Get from position
+	BoardTile* GetTile(Coord xy);
 	BoardTile* GetTile(int x, int y);
 
 	//Get all
@@ -119,13 +119,17 @@ public:
 	void ConcatUnique(std::vector<BoardTile*>& base, const std::vector<BoardTile*>& add);
 	bool FilterUnit(Unit* unit, eUnitFilterType type, eUnitFilterAllegiance allegiance, Player* player);
 
+	//Property getters
+	int GetWidth() { return width; }
+	int GetHeight() { return height; }
+
 	//Tile objects
 	BoardTile tiles[9][5];
 
 private:
 
 	//Size properties
-	inline static const int width = 9;
-	inline static const int height = 5;
+	static constexpr int width = 9;
+	static constexpr int height = 5;
 
 };

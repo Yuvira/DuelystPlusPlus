@@ -37,7 +37,6 @@ int main() {
 
 		//Collection
 		else {
-			cardViewer.Update();
 			renderer.ClearScreen();
 			cardViewer.RenderCollection(renderer);
 			renderer.SwapBuffer();

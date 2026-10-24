@@ -20,6 +20,7 @@ CardViewer::CardViewer(Game* game, Collections* collections, bool* modeSwitch) {
 
 	//Border
 	board.CreateFromFile("resources/border.txt");
+	tileBorder.CreateFromFile("resources/tile.txt");
 
 	//Variables
 	pos = Coord(0, 0);
@@ -42,13 +43,20 @@ void CardViewer::RenderCollection(Renderer& renderer) {
 	renderer.Render(board, 0, 0);
 
 	//Tiles
-	for (int i = 0; i < 9; ++i)
-		for (int j = 0; j < 6; ++j)
-			renderer.Render(tiles[i][j].border, (i * 7) + 1, (j * 7) + 6);
+	tileBorder.SetColor(COLOR_LTWHITE);
+	for (int x = 0; x < pageWidth; ++x)
+		for (int y = 0; y < pageHeight; ++y)
+			renderer.Render(tileBorder, TileX(x), TileY(y));
+	tileBorder.SetColor(COLOR_AQUA);
+	renderer.Render(tileBorder, TileX(pos.x), TileY(pos.y));
 
 	//Cards
-	for (int a = page * 54; a < min((page + 1) * 54, collections->GetCardCount()); ++a)
-		collections->RenderCardSprite(renderer, (((a - (page * 54)) % 9) * 7) + 2, (((a - (page * 54)) / 9) * 7) + 7, a);
+	int x, y;
+	for (int idx = StartIdx(page); idx < min(StartIdx(page + 1), collections->GetCardCount()); ++idx) {
+		x = ((idx - StartIdx(page)) % pageWidth);
+		y = ((idx - StartIdx(page)) / pageWidth);
+		collections->RenderCardSprite(renderer, SpriteX(x), SpriteY(y), idx);
+	}
 
 	//Card counts
 	count[0].CreateFromString("Generals  : " + std::to_string(collections->CountCardsWhere([](const CardDefinition& def) { return def.tribe == TRIBE_GENERAL; })));
@@ -111,27 +119,6 @@ void CardViewer::Input() {
 	else if (asciiVal == 80 || asciiVal == 112) { *modeSwitch = true; } //P
 
 }
-
-#pragma endregion
-
-#pragma region Updates
-
-//Update loop
-void CardViewer::Update() {
-
-	//Clear tiles highlights
-	for (int i = 0; i < 9; ++i)
-		for (int j = 0; j < 6; ++j)
-			tiles[i][j].SetColor(COLOR_LTWHITE);
-
-	//Highlight cursor position
-	tiles[pos.x][pos.y].SetColor(COLOR_AQUA);
-
-}
-
-#pragma endregion
-
-#pragma region Movement
 
 //Move cursor position
 void CardViewer::MoveCursor(int x, int y) {

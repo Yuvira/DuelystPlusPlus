@@ -64,6 +64,10 @@ public:
 
 	//Rendering
 	void RenderGame(Renderer& renderer);
+	void RenderTile(Renderer& renderer, Coord xy);
+	void RenderTile(Renderer& renderer, int x, int y);
+	void RenderSprite(Renderer& renderer, Sprite& sprite, Coord xy);
+	void RenderSprite(Renderer& renderer, Sprite& sprite, int x, int y);
 	void RenderSidebar(Renderer& renderer);
 	void RenderDebug(Renderer& renderer);
 
@@ -142,11 +146,16 @@ public:
 	std::string GetCardString(Card* card);
 	void Log(std::string log);
 
+	//Render position evals
+	constexpr int TileX(int x) { return (x * 7) + 1; }
+	constexpr int TileY(int y) { return (y * 7) + 5; }
+	constexpr int SpriteX(int x) { return (x * 7) + 2; }
+	constexpr int SpriteY(int y) { return (y * 7) + 6; }
+
 	//Gameplay objects
 	Collections* collections;
 	EventManager eventManager;
 	Map map;
-	Tile hand[7];
 
 private:
 
@@ -173,6 +182,7 @@ private:
 	int selectionIdx;
 	Unit* activeUnit;
 	Card* activeCard;
+	static constexpr int handSize = 7;
 
 	//Pathfinding
 	std::vector<Coord> path;
@@ -195,6 +205,7 @@ private:
 	//Sprites
 	Sprite light;
 	Sprite board;
+	Sprite tileBorder;
 	Sprite chars[10];
 
 	//Debug

@@ -11,27 +11,44 @@ class Renderer;
 //Codex view
 class CardViewer {
 
-//Methods
 public:
+
+	//Constructor
 	CardViewer(Game* game, Collections* collections, bool* modeSwitch);
 	~CardViewer();
-	void Input();
-	void Update();
+
+	//Rendering
 	void RenderCollection(Renderer& renderer);
 	void RenderSidebar(Renderer& renderer);
+
+	//Input
+	void Input();
 	void MoveCursor(int x, int y);
 
-//Properties
+	//Render position evals
+	constexpr int TileX(int x) { return (x * 7) + 1; }
+	constexpr int TileY(int y) { return (y * 7) + 6; }
+	constexpr int SpriteX(int x) { return (x * 7) + 2; }
+	constexpr int SpriteY(int y) { return (y + 1) * 7; }
+	constexpr int StartIdx(int page) { return page * cardsPerPage; }
+
 private:
-	Sprite board;
-	Sprite count[5];
-	Sprite pageNumber;
-	Game* game;
-	Collections* collections;
-	Tile tiles[9][7];
+
+	//Properties
 	Coord pos;
 	int page;
 	int pageCount;
+	Game* game;
+	Collections* collections;
 	bool* modeSwitch;
+	Sprite board;
+	Sprite tileBorder;
+	Sprite count[5];
+	Sprite pageNumber;
+
+	//Constants
+	static constexpr int pageWidth = 9;
+	static constexpr int pageHeight = 6;
+	static constexpr int cardsPerPage = pageWidth * pageHeight;
 
 };

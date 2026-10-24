@@ -43,8 +43,9 @@ Game::Game(Collections* collections, bool* modeSwitch) : players{ Player(this, I
 	this->collections = collections;
 	this->modeSwitch = modeSwitch;
 
-	//Board border
+	//Sprites
 	board.CreateFromFile("resources/board.txt");
+	tileBorder.CreateFromFile("resources/tile.txt");
 
 	//Initialize debug log
 	debugLog.push_back("{Log Start}");
@@ -96,10 +97,11 @@ void Game::RenderGame(Renderer& renderer) {
 	renderer.Render(light, 31, 2);
 
 	//Tiles
-	for (int i = 0; i < 9; ++i) {
-		for (int j = 0; j < 5; ++j) {
-			renderer.Render(map.tiles[i][j].border, (7 * i) + 1, (7 * j) + 5);
-			renderer.Render(map.tiles[i][j].sprite, (7 * i) + 2, (7 * j) + 6);
+	for (int x = 0; x < map.GetWidth(); ++x) {
+		for (int y = 0; y < map.GetHeight(); ++y) {
+			tileBorder.SetColor(map.GetTile(x, y)->borderColor);
+			RenderTile(renderer, x, y);
+			RenderSprite(renderer, map.GetTile(x, y)->sprite, x, y);
 		}
 	}
 
@@ -109,30 +111,33 @@ void Game::RenderGame(Renderer& renderer) {
 
 	//Render active card while selecting opening gambit targets
 	if (activeCard != nullptr && activeCard->IsUnit() && mode == MODE_SELECT && effectCallback.Callback)
-		activeCard->GetUnit()->RenderOnBoard(renderer, (castPos.x * 7) + 2, (castPos.y * 7) + 6);
+		activeCard->GetUnit()->RenderOnBoard(renderer, SpriteX(castPos.x), SpriteY(castPos.y));
 
 	//Move mode indicators
 	if (mode == MODE_MOVE) {
-		for (int i = 0; i < attackable.size(); ++i) {
-			if (attackable[i] == selectable[selectionIdx]) {
-				Coord coord = Coord((selectable[selectionIdx]->pos.x * 7) + 1, (selectable[selectionIdx]->pos.y * 7) + 5);
-				DrawSword(coord.x, coord.y, renderer);
-				coord = Coord((activeUnit->curTile->pos.x * 7) + 1, (activeUnit->curTile->pos.y * 7) + 5);
-				if (selectable[selectionIdx]->unit->CanAttack(activeUnit))
-					DrawSword(coord.x, coord.y, renderer);
-				goto end;
-			}
+		BoardTile* atkTile = nullptr;
+		for (BoardTile* tile : attackable)
+			if (tile == selectable[selectionIdx])
+				atkTile = tile;
+		if (atkTile != nullptr) {
+			DrawSword(TileX(selectable[selectionIdx]->pos.x), TileY(selectable[selectionIdx]->pos.y), renderer);
+			if (selectable[selectionIdx]->unit->CanAttack(activeUnit))
+				DrawSword(TileX(activeUnit->curTile->pos.x), TileY(activeUnit->curTile->pos.y), renderer);
 		}
-		DrawPath(renderer);
-	end:;
+		else
+			DrawPath(renderer);
 	}
 
 	//Hand
-	for (int i = 0; i < 7; ++i)
-		renderer.Render(hand[i].border, (i * 7) + 1, 41);
-	for (int i = 0; i < players[turn].hand.size(); ++i) {
-		players[turn].hand[i]->sprite.SetColor(COLOR_LTWHITE);
-		renderer.Render(players[turn].hand[i]->sprite, (i * 7) + 9, 42);
+	for (int x = 0; x < handSize; ++x) {
+		tileBorder.SetColor(COLOR_LTWHITE);
+		if (x == handIdx + 1 && mode == MODE_HAND)
+			tileBorder.SetColor(COLOR_AQUA);
+		renderer.Render(tileBorder, TileX(x), 41);
+	}
+	for (int x = 0; x < players[turn].hand.size(); ++x) {
+		players[turn].hand[x]->sprite.SetColor(COLOR_LTWHITE);
+		renderer.Render(players[turn].hand[x]->sprite, SpriteX(x + 1), 42);
 	}
 
 	//Player UI
@@ -146,6 +151,12 @@ void Game::RenderGame(Renderer& renderer) {
 	RenderDebug(renderer);
 
 }
+
+//Render objects at board position
+void Game::RenderTile(Renderer& renderer, Coord xy) { RenderTile(renderer, xy.x, xy.y); }
+void Game::RenderTile(Renderer& renderer, int x, int y) { renderer.Render(tileBorder, TileX(x), TileY(y)); }
+void Game::RenderSprite(Renderer& renderer, Sprite& sprite, Coord xy) { RenderSprite(renderer, sprite, xy.x, xy.y); }
+void Game::RenderSprite(Renderer& renderer, Sprite& sprite, int x, int y) { renderer.Render(sprite, SpriteX(x), SpriteY(y)); }
 
 //Render sidebar
 void Game::RenderSidebar(Renderer& renderer) {
@@ -407,34 +418,35 @@ void Game::Update() {
 	players[0].UpdateMana(COLOR_LTBLUE);
 	players[1].UpdateMana(COLOR_RED);
 
-	//Clear tiles highlights
-	for (int i = 0; i < 9; ++i)
-		for (int j = 0; j < 5; ++j)
-			map.tiles[i][j].SetColor(COLOR_LTWHITE);
+	//Clear highlights
+	for (int x = 0; x < map.GetWidth(); ++x)
+		for (int y = 0; y < map.GetHeight(); ++y)
+			map.GetTile(x, y)->borderColor = COLOR_LTWHITE;
 
-	//Re-highlight hostiles
+	//Highlight hostiles
 	hostile.clear();
-	for (int i = 0; i < units.size(); ++i)
-		if (units[i]->owner != &players[turn])
-			hostile.push_back(units[i]->curTile);
-	for (int i = 0; i < hostile.size(); ++i)
-		hostile[i]->SetColor(COLOR_LTRED);
+	for (Unit* unit : units) {
+		if (unit->owner != &players[turn]) {
+			hostile.push_back(unit->curTile);
+			unit->curTile->borderColor = COLOR_LTRED;
+		}
+	}
 
 	//Highlight moveable spaces and create move path
 	if (mode == MODE_MOVE) {
 		GeneratePaths();
-		for (int i = 0; i < highlighted.size(); ++i)
-			highlighted[i]->SetColor(COLOR_AQUA);
-		map.tiles[pos.x][pos.y].SetColor(COLOR_LTWHITE);
-		for (int i = 0; i < attackable.size(); ++i)
-			attackable[i]->SetColor(COLOR_RED);
+		for (BoardTile* tile : highlighted)
+			tile->borderColor = COLOR_AQUA;
+		map.GetTile(pos)->borderColor = COLOR_LTWHITE;
+		for (BoardTile* tile : attackable)
+			tile->borderColor = COLOR_RED;
 	}
 
 	//Highlight selectable spaces
 	else if (mode == MODE_SELECT) {
-		for (int i = 0; i < selectable.size(); ++i)
-			selectable[i]->SetColor(COLOR_GREEN);
-		selectable[selectionIdx]->SetColor(COLOR_LTGREEN);
+		for (BoardTile* tile : selectable)
+			tile->borderColor = COLOR_GREEN;
+		selectable[selectionIdx]->borderColor = COLOR_LTGREEN;
 	}
 
 	//Highlight cursor position
@@ -571,7 +583,6 @@ void Game::UseCard() {
 
 	//Set position and clear selectables
 	pos = selectable[selectionIdx]->pos;
-	hand[handIdx + 1].SetColor(COLOR_LTWHITE);
 	selectable.clear();
 	selectionIdx = -1;
 	mode = MODE_NONE;
@@ -843,27 +854,18 @@ void Game::SelectCard() {
 
 //Move cursor position
 void Game::MoveCursor(int x, int y) {
-
-	//Move cursor
 	pos.x = (pos.x + x + 9) % 9;
 	if ((y == -1 && pos.y == 0) || (y == 1 && pos.y == 4)) {
 		handIdx = max(min(pos.x - 1, 5), 0);
-		hand[handIdx + 1].SetColor(COLOR_AQUA);
 		pos = Coord(-1, -1);
 		mode = MODE_HAND;
 	}
 	else
 		pos.y = (pos.y + y + 5) % 5;
-
 }
 
 //Move cursor position
 void Game::MoveCursorHand(int x, int y) {
-
-	//Deselect tiles
-	hand[handIdx + 1].SetColor(COLOR_LTWHITE);
-
-	//Move cursor
 	handIdx = (handIdx + x + 6) % 6;
 	if (y != -1) {
 		pos = Coord(handIdx + 1, y);
@@ -871,10 +873,6 @@ void Game::MoveCursorHand(int x, int y) {
 		mode = MODE_NONE;
 		return;
 	}
-
-	//Select new tiles
-	hand[handIdx + 1].SetColor(COLOR_AQUA);
-
 }
 
 //Move selected tiles
@@ -918,8 +916,8 @@ end:;
 
 //Highlight tiles
 void Game::HighlightTile(int x, int y, eColor color) {
-	map.tiles[x][y].SetColor(color);
-	highlighted.push_back(&map.tiles[x][y]);
+	map.GetTile(x, y)->borderColor = color;
+	highlighted.push_back(map.GetTile(x, y));
 	if (color == COLOR_AQUA && mode == MODE_NONE)
 		if (map.tiles[pos.x][pos.y].unit != nullptr)
 			if (!map.tiles[pos.x][pos.y].unit->hasMoved && map.tiles[pos.x][pos.y].unit->IsMoveable())
@@ -939,7 +937,7 @@ void Game::HighlightMoveable(int x, int y) {
 	}
 	else
 		SearchMoveable(pos.x, pos.y, map.tiles[pos.x][pos.y].unit->moveRange);
-	map.tiles[x][y].SetColor(COLOR_AQUA);
+	map.GetTile(x, y)->borderColor = COLOR_AQUA;
 }
 
 //Recursively search for moveable spaces

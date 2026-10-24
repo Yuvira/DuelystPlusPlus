@@ -2,39 +2,14 @@
 #include "card.h"
 #include "tile.h"
 
-#pragma region Coords
-
-//Custom co-ord
-Coord::Coord() : Coord(0, 0) {}
-Coord::Coord(int x, int y) {
-	this->x = x;
-	this->y = y;
-}
-Coord::~Coord() {}
-
-#pragma endregion
-
-#pragma region Tiles
-
-//Tile constructor
-Tile::Tile() { 
-	border.CreateFromFile("resources/tile.txt");
-	SetColor(COLOR_LTWHITE);
-} 
-Tile::~Tile() {}
-
-//Select tiles
-void Tile::SetColor(eColor color) { border.SetColor(color); }
-
-#pragma endregion
-
 #pragma region Board Tiles
 
 //Board tile constructor
-BoardTile::BoardTile() : Tile() {
-	sprite.Resize(5, 5);
-	SetFeature(TILE_NONE);
+BoardTile::BoardTile() {
 	unit = nullptr;
+	SetFeature(TILE_NONE);
+	sprite.Resize(5, 5);
+	borderColor = COLOR_LTWHITE;
 }
 BoardTile::~BoardTile() {}
 
@@ -87,6 +62,7 @@ Map::Map() {
 Map::~Map() {}
 
 //Get tile at co-ordinates
+BoardTile* Map::GetTile(Coord xy) { return GetTile(xy.x, xy.y); }
 BoardTile* Map::GetTile(int x, int y) {
 	if (x < 0 || x >= width || y < 0 || y >= height)
 		return nullptr;
