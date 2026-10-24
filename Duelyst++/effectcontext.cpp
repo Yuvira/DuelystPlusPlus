@@ -32,3 +32,5 @@ Map* EffectContext::GetMap() { return &game->map; }
 bool AuraContext::CardIsAuraSource() { return card == aura->GetSourceCard(); }
 bool AuraContext::CardSharesAuraOwner() { return card->owner == aura->GetOwner(); }
 bool AuraContext::CardIsFriendOfAuraSource() { return card->owner == aura->GetSourceCard()->owner && card != aura->GetSourceCard(); }
+bool AuraContext::IsAuraSource(Card* compare) { return compare == aura->GetSourceCard(); }
+bool AuraContext::SharesAuraOwner(Card* compare) { return compare->owner == aura->GetOwner(); }

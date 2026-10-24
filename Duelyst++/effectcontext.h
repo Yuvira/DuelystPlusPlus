@@ -72,6 +72,8 @@ struct AuraContext {
 	bool CardIsAuraSource();
 	bool CardSharesAuraOwner();
 	bool CardIsFriendOfAuraSource();
+	bool IsAuraSource(Card* compare);
+	bool SharesAuraOwner(Card* compare);
 
 	//Properties
 	Aura* aura;

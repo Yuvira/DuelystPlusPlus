@@ -635,7 +635,7 @@ void Collections::RegisterEffects() {
 	effectDefinitions.try_emplace(AURA_LADY_LOCKE, AURA_LADY_LOCKE, KEYWORD_NONE, "Lady Locke|Minions you summon this turn gain +1/+1 and gain {Provoke}", nullptr);
 	effectDefinitions.at(AURA_LADY_LOCKE).RegisterPostTrigger<OnSummonEvent>(
 		[](EffectContext ctx, OnSummonEvent& ev) {
-			return ctx.effect->IsAura() && ctx.effect->GetAura()->GetOwner() == ev.unit->owner && ctx.effect->GetAura()->GetSourceCard() != ev.unit && !ev.unit->IsGeneral(); },
+			return ctx.IsAuraContext() && ctx.GetAuraContext().SharesAuraOwner(ev.unit) && !ctx.GetAuraContext().IsAuraSource(ev.unit) && ev.unit->IsMinion(); },
 		[](EffectContext ctx, OnSummonEvent& ev) {
 			ev.unit->AddEffect(MODIFIER_LADY_LOCKE); });
 	effectDefinitions.at(AURA_LADY_LOCKE).RegisterPostTrigger<OnTurnEndEvent>(
