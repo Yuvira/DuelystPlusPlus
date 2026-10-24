@@ -179,6 +179,14 @@ void Collections::RenderCardDetails(Renderer& renderer, int x, int& y, Card* car
 		RenderCardDetails(renderer, x, y, tokenId);
 	}
 
+	//Draw tile
+	if (card->IsUnit() && card->GetUnit()->IsOnBoard() && card->GetUnit()->curTile->HasTile()) {
+		y = max(y, 7);
+		renderer.Render(tileDividerSprite, x, y);
+		y += 2;
+		RenderCardDetails(renderer, x, y, card->GetUnit()->curTile->tile);
+	}
+
 }
 
 #pragma endregion

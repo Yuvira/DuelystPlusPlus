@@ -175,8 +175,10 @@ void Game::RenderSidebar(Renderer& renderer) {
 
 	//Unit on board
 	if (mode == MODE_NONE) {
-		if (map.tiles[pos.x][pos.y].unit != nullptr)
-			map.tiles[pos.x][pos.y].unit->DrawDetails(renderer, y);
+		if (map.GetTile(pos)->HasUnit())
+			map.GetTile(pos)->unit->DrawDetails(renderer, y);
+		else if (map.GetTile(pos)->HasTile())
+			map.GetTile(pos)->tile->DrawDetails(renderer, y);
 	}
 
 	//Card in hand
