@@ -24,27 +24,20 @@ class Card {
 
 public:
 
-	//Constructor
-	Card(const CardDefinition& definition, Game* game, Player* owner);
-	~Card();
+	//Constructor and virtual destructor
+	explicit Card(const CardDefinition& definition, Game* game, Player* owner);
+	virtual ~Card() = 0;
 
 	//Rendering
 	virtual void DrawDetails(Renderer& renderer, int& y);
-	void UpdateDetails();
+	virtual void UpdateDetails();
 
 	//Stats
-	virtual void UpdateModifiers() = 0;
-	int GetStat(eStat stat, int base, bool withAuras);
-
-	//Targeting
-	virtual std::vector<BoardTile*> GetTargets() = 0;
+	virtual void UpdateModifiers() {}
 
 	//Effects
-	Effect* AddEffect(eEffect effectId);
-	void RemoveEffect(Effect* effect);
-	void RemoveEffectAt(std::vector<int> indices);
-	void UpdateAuras();
-	bool HasAuraFromSource(Effect* source);
+	virtual Effect* AddEffect(eEffect effectId);
+	virtual bool RemoveEffect(Effect* effect);
 
 	//Getters
 	std::vector<Effect*> GetEffects();
@@ -71,13 +64,9 @@ public:
 	eRarity rarity;
 	eFaction faction;
 	std::string name;
-	int baseCost;
-	int cost;
 	Game* game;
 	Player* owner;
 	std::vector<Effect*> effects;
-	std::vector<Aura*> auras;
-	bool isToken;
 	Sprite sprite;
 	Sprite detailNameSprite;
 	Sprite detailStatSprite;
@@ -85,26 +74,80 @@ public:
 
 };
 
+//Cards that can exist in hand/deck and be played
+class PlayableCard : public virtual Card {
+
+public:
+
+	//Virtual destructor
+	~PlayableCard() override = 0;
+
+	//Rendering
+	void UpdateDetails() override;
+
+	//Stats
+	virtual void UpdateModifiers() override = 0;
+	virtual int GetStat(eStat stat, bool withAuras) = 0;
+
+	//Targeting
+	virtual std::vector<BoardTile*> GetTargets() = 0;
+
+	//Effects
+	Effect* AddEffect(eEffect effectId) override;
+	bool RemoveEffect(Effect* effect) override;
+	void UpdateAuras();
+	bool HasAuraFromSource(Effect* source);
+
+	//Properties
+	int baseCost = 0;
+	int cost = 0;
+	std::vector<Aura*> auras;
+	bool isToken = false;
+
+protected:
+
+	//Internal stat getter
+	int GetStat(eStat stat, int base, bool withAuras);
+
+};
+
+//Cards that can exist on the board
+class BoardCard : public virtual Card {
+
+public:
+
+	//Virtual destructor
+	~BoardCard() override = 0;
+
+	//Utils
+	bool IsOnBoard() { return curTile != nullptr; }
+
+	//Properties
+	BoardTile* curTile = nullptr;
+
+};
+
 //Unit class
-class Unit : public Card {
+class Unit : public PlayableCard, public BoardCard {
 
 public:
 
 	//Constructor
 	Unit(const CardDefinition& definition, Game* game, Player* owner);
-	~Unit();
+	~Unit() override;
 
 	//Rendering
 	void RenderOnBoard(Renderer& renderer);
 	void RenderOnBoard(Renderer& renderer, int x, int y);
-	void DrawDetails(Renderer& renderer, int& y);
+	void DrawDetails(Renderer& renderer, int& y) override;
 
-	//Updates
+	//Updates & Stats
 	void Update(bool& shouldLoop);
-	void UpdateModifiers();
+	void UpdateModifiers() override;
+	int GetStat(eStat stat, bool withAuras) override;
 
 	//Actions
-	std::vector<BoardTile*> GetTargets();
+	std::vector<BoardTile*> GetTargets() override;
 	void InitState();
 	void SetTile(BoardTile* tile);
 	void MoveToTile(BoardTile* tile, bool byEffect);
@@ -127,10 +170,9 @@ public:
 	bool IsProvoked();
 
 	//Subclass getter and helpers
-	Unit* GetUnit() { return this; }
-	bool IsGeneral() { return tribe == TRIBE_GENERAL; }
-	bool IsMinion() { return tribe != TRIBE_GENERAL; }
-	bool IsOnBoard() { return curTile != nullptr; }
+	Unit* GetUnit() override { return this; }
+	bool IsGeneral() override { return tribe == TRIBE_GENERAL; }
+	bool IsMinion() override { return tribe != TRIBE_GENERAL; }
 
 	//Properties
 	eTribe tribe;
@@ -149,33 +191,33 @@ public:
 	bool hasCelerityMoved;
 	bool hasCelerityAttacked;
 	bool forcefieldBroken;
-	BoardTile* curTile;
 	Sprite hpSprite;
 	Sprite atkSprite;
 
 };
 
 //Spell class
-class Spell : public Card {
+class Spell : public PlayableCard {
 
 public:
 
 	//Constructor
 	Spell(const CardDefinition& definition, Game* game, Player* owner);
-	~Spell();
+	~Spell() override;
 
 	//Rendering
-	void DrawDetails(Renderer& renderer, int& y);
+	void DrawDetails(Renderer& renderer, int& y) override;
 
-	//Updates
-	void UpdateModifiers();
+	//Updates & Stats
+	void UpdateModifiers() override;
+	int GetStat(eStat stat, bool withAuras) override;
 
 	//Targeting
-	std::vector<BoardTile*> GetTargets();
+	std::vector<BoardTile*> GetTargets() override;
 
 	//Getters
 	SpellEffect* GetSpellEffect() { return spellEffect; }
-	Spell* GetSpell() { return this; }
+	Spell* GetSpell() override { return this; }
 
 private:
 

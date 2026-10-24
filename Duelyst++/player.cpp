@@ -34,7 +34,7 @@ Player::~Player() {}
 
 //Shuffle all cards into deck and draw 5
 void Player::InitStartingHand() {
-	for (Card* card : hand)
+	for (PlayableCard* card : hand)
 		deck.push_back(card);
 	hand.clear();
 	Shuffle();
@@ -47,7 +47,7 @@ void Player::InitStartingHand() {
 			hand.push_back(deck[i]);
 		deck.erase(deck.begin(), deck.begin() + 5);
 	}
-	for (Card* card : GetDeckAndHand())
+	for (PlayableCard* card : GetDeckAndHand())
 		card->UpdateAuras();
 }
 
@@ -94,7 +94,7 @@ void Player::UpdateMana(eColor color) {
 
 //Shuffle deck
 void Player::Shuffle() {
-	std::vector<Card*> shuffle;
+	std::vector<PlayableCard*> shuffle;
 	for (int i = 0; i < deck.size(); ) {
 		int idx = rand() % deck.size();
 		shuffle.push_back(deck[idx]);
@@ -108,7 +108,7 @@ void Player::Shuffle() {
 //Draw card
 void Player::Draw() {
 	if (deck.size() > 0) {
-		Card* card = deck[0];
+		PlayableCard* card = deck[0];
 		deck.erase(deck.begin());
 		if (hand.size() < 6) {
 			hand.push_back(card);
@@ -124,7 +124,7 @@ void Player::Draw() {
 void Player::AddNewToHand(eCard cardId) {
 	if (cardId == CARD_NONE || game == nullptr)
 		return;
-	Card* newCard = game->collections->GetNewCardInstance(cardId, game, this);
+	PlayableCard* newCard = game->collections->GetNewPlayableCardInstance(cardId, game, this);
 	if (newCard == nullptr)
 		return;
 	if (hand.size() < 6) {
@@ -141,7 +141,7 @@ void Player::AddNewToHand(eCard cardId) {
 void Player::AddNewToDeck(eCard cardId) {
 	if (cardId == CARD_NONE || game == nullptr)
 		return;
-	Card* newCard = game->collections->GetNewCardInstance(cardId, game, this);
+	PlayableCard* newCard = game->collections->GetNewPlayableCardInstance(cardId, game, this);
 	if (newCard == nullptr)
 		return;
 	deck.push_back(newCard);
@@ -153,7 +153,7 @@ void Player::Replace(int idx) {
 	if (replaces > 0 && deck.size() > 0 && hand.size() > idx) {
 
 		//Remove card from hand
-		Card* replaced = hand[idx];
+		PlayableCard* replaced = hand[idx];
 		hand.erase(hand.begin() + idx);
 
 		//Draw new card
@@ -176,7 +176,7 @@ void Player::Replace(int idx) {
 }
 
 //Remove card from deck
-bool Player::RemoveFromDeck(Card* card) {
+bool Player::RemoveFromDeck(PlayableCard* card) {
 	for (int i = 0; i < deck.size(); ++i) {
 		if (deck[i] == card) {
 			deck.erase(deck.begin() + i);
@@ -229,8 +229,8 @@ void Player::Refresh() {
 #pragma region Utils
 
 //Get all cards from deck and hand
-std::vector<Card*> Player::GetDeckAndHand() {
-	std::vector<Card*> valid;
+std::vector<PlayableCard*> Player::GetDeckAndHand() {
+	std::vector<PlayableCard*> valid;
 	valid.reserve(hand.size() + deck.size());
 	valid.insert(valid.end(), hand.begin(), hand.end());
 	valid.insert(valid.end(), deck.begin(), deck.end());
@@ -239,7 +239,7 @@ std::vector<Card*> Player::GetDeckAndHand() {
 
 //Check if player has a specific card in their hand
 bool Player::HasCardInHand(Card* match) {
-	for (Card* card : hand)
+	for (PlayableCard* card : hand)
 		if (card == match)
 			return true;
 	return false;

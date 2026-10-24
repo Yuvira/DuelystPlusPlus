@@ -62,7 +62,7 @@ Game::Game(Collections* collections, bool* modeSwitch) : players{ Player(this, I
 
 	//Initialize players
 	for (int i = 0; i < 2; ++i) {
-		Summon(collections->GetNewCardInstance(CARD_ARGEON_HIGHMAYNE, this, &players[i]), map.GetTile(i * 8, 2), false);
+		Summon(collections->GetNewUnitInstance(CARD_ARGEON_HIGHMAYNE, this, &players[i]), map.GetTile(i * 8, 2), false);
 		players[i].general = units.back();
 		players[i].InitStartingHand();
 	}
@@ -481,9 +481,9 @@ void Game::ProcessEventStack() {
 void Game::UpdateAuras() {
 	for (Unit* unit : units)
 		unit->UpdateAuras();
-	for (Card* card : players[0].GetDeckAndHand())
+	for (PlayableCard* card : players[0].GetDeckAndHand())
 		card->UpdateAuras();
-	for (Card* card : players[1].GetDeckAndHand())
+	for (PlayableCard* card : players[1].GetDeckAndHand())
 		card->UpdateAuras();
 }
 
@@ -729,10 +729,7 @@ void Game::AttackUnit() {
 }
 
 //Summon at tile or position
-Unit* Game::Summon(Card* card, BoardTile* tile, bool actionBar) {
-	if (!card->IsUnit())
-		return nullptr;
-	Unit* unit = card->GetUnit();
+Unit* Game::Summon(Unit* unit, BoardTile* tile, bool actionBar) {
 	units.push_back(unit);
 	unit->SetTile(tile);
 	unit->AddEffects();
@@ -1218,7 +1215,7 @@ std::vector<Spell*> Game::GetDelayedTriggers() {
 const std::vector<Card*>& Game::GetGrave() const { return grave; }
 const std::vector<Unit*>& Game::GetDestroyedUnits() const { return destroyedUnits; }
 const std::vector<Spell*>& Game::GetSpellHistory() const { return spellHistory; }
-const std::vector<Card*>& Game::GetCardsCastThisTurn() const { return castThisTurn; }
+const std::vector<PlayableCard*>& Game::GetCardsCastThisTurn() const { return castThisTurn; }
 
 //Util getters
 const int& Game::GetTurnCount() const { return turnCount; }
@@ -1241,10 +1238,10 @@ bool Game::CanMove(int x, int y) {
 }
 
 //Check if any cards matching predicate were cast this turn
-bool Game::AnyCastThisTurn(bool (*Predicate)(Card*)) {
+bool Game::AnyCastThisTurn(bool (*Predicate)(PlayableCard*)) {
 	if (!Predicate)
 		return true;
-	for (Card* card : castThisTurn)
+	for (PlayableCard* card : castThisTurn)
 		if (Predicate(card))
 			return true;
 	return false;

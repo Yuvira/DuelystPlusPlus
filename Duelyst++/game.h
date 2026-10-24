@@ -96,7 +96,7 @@ public:
 	void PostCast();
 	void MoveUnit();
 	void AttackUnit();
-	Unit* Summon(Card* card, BoardTile* tile, bool actionBar);
+	Unit* Summon(Unit* card, BoardTile* tile, bool actionBar);
 	Unit* SummonToken(eCard cardId, BoardTile* tile, Player* owner);
 	void Replace();
 	void ChangeTurn(bool newTurn);
@@ -135,13 +135,13 @@ public:
 	const std::vector<Card*>& GetGrave() const;
 	const std::vector<Unit*>& GetDestroyedUnits() const;
 	const std::vector<Spell*>& GetSpellHistory() const;
-	const std::vector<Card*>& GetCardsCastThisTurn() const;
+	const std::vector<PlayableCard*>& GetCardsCastThisTurn() const;
 	const int& GetTurnCount() const;
 	BoardTile* GetTileInFront(BoardTile* tile, Player* player);
 
 	//Utils
 	bool CanMove(int x, int y);
-	bool AnyCastThisTurn(bool (*Predicate)(Card*));
+	bool AnyCastThisTurn(bool (*Predicate)(PlayableCard*));
 	std::string GetPlayerString(Player* player);
 	std::string GetCardString(Card* card);
 	void Log(std::string log);
@@ -181,7 +181,7 @@ private:
 	int handIdx;
 	int selectionIdx;
 	Unit* activeUnit;
-	Card* activeCard;
+	PlayableCard* activeCard;
 	static constexpr int handSize = 7;
 
 	//Pathfinding
@@ -200,7 +200,7 @@ private:
 	std::vector<Card*> grave;
 	std::vector<Unit*> destroyedUnits;
 	std::vector<Spell*> spellHistory;
-	std::vector<Card*> castThisTurn;
+	std::vector<PlayableCard*> castThisTurn;
 
 	//Sprites
 	Sprite light;

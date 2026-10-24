@@ -28,6 +28,7 @@ public:
 	Aura* GetNewAuraInstance(eEffect auraId, Player* owner, Card* sourceCard, Effect* sourceEffect);
 	SpellEffect* GetNewSpellEffectInstance(eEffect effectId);
 	Card* GetNewCardInstance(eCard cardId, Game* game, Player* player);
+	PlayableCard* GetNewPlayableCardInstance(eCard cardId, Game* game, Player* player);
 	Unit* GetNewUnitInstance(eCard cardId, Game* game, Player* player);
 
 	//Rendering

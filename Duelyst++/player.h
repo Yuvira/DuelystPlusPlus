@@ -9,6 +9,7 @@ class Game;
 class Collections;
 class Renderer;
 class Card;
+class PlayableCard;
 class Unit;
 enum eCard;
 
@@ -34,7 +35,7 @@ public:
 	void AddNewToHand(eCard cardId);
 	void AddNewToDeck(eCard cardId);
 	void Replace(int idx);
-	bool RemoveFromDeck(Card* card);
+	bool RemoveFromDeck(PlayableCard* card);
 
 	//Resource management
 	void AddMana(int add);
@@ -47,15 +48,15 @@ public:
 	const int& ReadMana() const { return mana; }
 
 	//Utils
-	std::vector<Card*> GetDeckAndHand();
+	std::vector<PlayableCard*> GetDeckAndHand();
 	bool HasCardInHand(Card* match);
 
 	//Properties
 	Game* game;
 	Unit* general;
 	Player* opponent;
-	std::vector<Card*> deck;
-	std::vector<Card*> hand;
+	std::vector<PlayableCard*> deck;
+	std::vector<PlayableCard*> hand;
 
 private:
 

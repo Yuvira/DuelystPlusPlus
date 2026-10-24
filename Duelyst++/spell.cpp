@@ -9,6 +9,9 @@
 
 //Game constructors
 Spell::Spell(const CardDefinition& definition, Game* game, Player* owner) : Card(definition, game, owner) {
+	this->baseCost = definition.cost;
+	this->cost = definition.cost;
+	this->isToken = definition.isToken;
 	if (definition.effect != EFFECT_NONE && game != nullptr) {
 		SpellEffect* effect = game->collections->GetNewSpellEffectInstance(definition.effect);
 		if (effect != nullptr) {
@@ -28,7 +31,14 @@ void Spell::DrawDetails(Renderer& renderer, int& y) {
 }
 
 //Update cost when buffs change
-void Spell::UpdateModifiers() { cost = GetStat(STAT_COST, baseCost, true); }
+void Spell::UpdateModifiers() { cost = PlayableCard::GetStat(STAT_COST, baseCost, true); }
+
+//Get stat
+int Spell::GetStat(eStat stat, bool withAuras) {
+	if (stat != STAT_COST)
+		return -1;
+	return PlayableCard::GetStat(STAT_COST, baseCost, withAuras);
+}
 
 //Get targets
 std::vector<BoardTile*> Spell::GetTargets() {

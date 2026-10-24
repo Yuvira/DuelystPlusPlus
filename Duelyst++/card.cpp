@@ -12,19 +12,20 @@
 
 //Card constructor
 Card::Card(const CardDefinition& definition, Game* game, Player* owner) {
-	cardId = definition.cardId;
-	rarity = definition.rarity;
-	faction = definition.faction;
-	name = definition.name;
-	baseCost = definition.cost;
-	cost = definition.cost;
+	this->cardId = definition.cardId;
+	this->rarity = definition.rarity;
+	this->faction = definition.faction;
+	this->name = definition.name;
 	this->game = game;
 	this->owner = owner;
-	isToken = definition.isToken;
 	sprite = definition.sprite;
 	detailNameSprite = definition.detailNameSprite;
 }
-Card::~Card() {}
+
+//Virtual destructors
+Card::~Card() = default;
+PlayableCard::~PlayableCard() = default;
+BoardCard::~BoardCard() = default;
 
 #pragma endregion
 
@@ -61,6 +62,14 @@ void Card::UpdateDetails() {
 
 	}
 
+}
+
+//Update aura details for cards that can have them
+void PlayableCard::UpdateDetails() {
+
+	//Base detail update
+	Card::UpdateDetails();
+
 	//Loop auras
 	for (int i = 0; i < auras.size(); ++i) {
 
@@ -84,7 +93,7 @@ void Card::UpdateDetails() {
 #pragma region Stat Updates
 
 //Get stat with modifiers applied
-int Card::GetStat(eStat stat, int base, bool withAuras) {
+int PlayableCard::GetStat(eStat stat, int base, bool withAuras) {
 
 	//If any fixers exist, apply them and ignore everything else
 	bool fixed = false;
@@ -154,40 +163,43 @@ Effect* Card::AddEffect(eEffect effectId) {
 		OnAddThisEvent addEvent = OnAddThisEvent();
 		newEffect->TriggerSelfEvent(EffectContext(newEffect, this, game), &addEvent);
 	}
-	UpdateModifiers();
-	UpdateAuras();
 	return newEffect;
 }
 
-//Remove effect from list
-void Card::RemoveEffect(Effect* effect) {
+//Remove effect from list, returns true if effect was found and removed
+bool Card::RemoveEffect(Effect* effect) {
 	for (int i = 0; i < effects.size(); ++i) {
 		if (effects[i] == effect) {
-			RemoveEffectAt({i});
-			return;
+			Effect* removed = effects[i];
+			effects.erase(effects.begin() + i);
+			OnRemoveThisEvent removeEvent = OnRemoveThisEvent();
+			removed->TriggerSelfEvent(EffectContext(removed, this, game), &removeEvent);
+			return true;
 		}
 	}
+	return false;
 }
 
-//Remove effects at indices
-void Card::RemoveEffectAt(std::vector<int> indices) {
-	if (indices.empty())
-		return;
-	std::vector<Effect*> removed;
-	for (int i = indices.size() - 1; i >= 0; --i) {
-		removed.push_back(effects[indices[i]]);
-		effects.erase(effects.begin() + indices[i]);
+//PlayableCard extensions that update modifiers and auras
+Effect* PlayableCard::AddEffect(eEffect effectId) {
+	Effect* effect = Card::AddEffect(effectId);
+	if (effect != nullptr) {
+		UpdateModifiers();
+		UpdateAuras();
 	}
-	for (int i = 0; i < removed.size(); ++i) {
-		OnRemoveThisEvent removeEvent = OnRemoveThisEvent();
-		removed[i]->TriggerSelfEvent(EffectContext(removed[i], this, game), &removeEvent);
+	return effect;
+}
+bool PlayableCard::RemoveEffect(Effect* effect) {
+	if (Card::RemoveEffect(effect)) {
+		UpdateModifiers();
+		UpdateAuras();
+		return true;
 	}
-	UpdateModifiers();
-	UpdateAuras();
+	return false;
 }
 
 //Update aura list
-void Card::UpdateAuras() {
+void PlayableCard::UpdateAuras() {
 
 	//Return if no game reference to pull auras from
 	if (game == nullptr)
@@ -236,7 +248,7 @@ void Card::UpdateAuras() {
 }
 
 //Card is tracking an aura from a given source
-bool Card::HasAuraFromSource(Effect* sourceEffect) {
+bool PlayableCard::HasAuraFromSource(Effect* sourceEffect) {
 	for (Aura* aura : auras)
 		if (aura->GetSourceEffect() == sourceEffect)
 			return true;

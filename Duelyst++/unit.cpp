@@ -14,12 +14,15 @@
 
 //Unit constructors
 Unit::Unit(const CardDefinition& definition, Game* game, Player* owner) : Card(definition, game, owner) {
-	tribe = definition.tribe;
-	baseAtk = definition.atk;
-	atk = definition.atk;
-	baseHpMax = definition.hp;
-	hpMax = definition.hp;
-	hp = definition.hp;
+	this->tribe = definition.tribe;
+	this->baseCost = definition.cost;
+	this->cost = definition.cost;
+	this->baseAtk = definition.atk;
+	this->atk = definition.atk;
+	this->baseHpMax = definition.hp;
+	this->hpMax = definition.hp;
+	this->hp = definition.hp;
+	this->isToken = definition.isToken;
 	baseMoveRange = 2;
 	moveRange = 2;
 	keywords = KEYWORD_NONE;
@@ -93,16 +96,27 @@ void Unit::Update(bool& shouldLoop) {
 //Update attack/health/cost when buffs change
 void Unit::UpdateModifiers() {
 	int hpDelta = hp - hpMax;
-	cost = GetStat(STAT_COST, baseCost, true);
-	atk = GetStat(STAT_ATK, baseAtk, true);
-	hpMax = GetStat(STAT_HP, baseHpMax, true);
-	moveRange = GetStat(STAT_MOVE, baseMoveRange, true);
+	cost = PlayableCard::GetStat(STAT_COST, baseCost, true);
+	atk = PlayableCard::GetStat(STAT_ATK, baseAtk, true);
+	hpMax = PlayableCard::GetStat(STAT_HP, baseHpMax, true);
+	moveRange = PlayableCard::GetStat(STAT_MOVE, baseMoveRange, true);
 	hp = hpMax + hpDelta;
 	keywords = KEYWORD_NONE;
 	for (Effect* effect : effects)
 		keywords |= effect->ReadKeywords();
 	for (Effect* aura : auras)
 		keywords |= aura->ReadKeywords();
+}
+
+//Get stat
+int Unit::GetStat(eStat stat, bool withAuras) {
+	switch (stat) {
+		case STAT_COST: return PlayableCard::GetStat(STAT_COST, baseCost,      withAuras);
+		case STAT_ATK:  return PlayableCard::GetStat(STAT_ATK,  baseAtk,       withAuras);
+		case STAT_HP:   return PlayableCard::GetStat(STAT_HP,   baseHpMax,     withAuras);
+		case STAT_MOVE: return PlayableCard::GetStat(STAT_MOVE, baseMoveRange, withAuras);
+	}
+	return -1;
 }
 
 #pragma endregion

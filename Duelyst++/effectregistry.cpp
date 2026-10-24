@@ -357,8 +357,8 @@ void Collections::RegisterEffects() {
 			return ctx.IsCard(ev.card) && ctx.card->IsUnit(); },
 		[](EffectContext ctx, OnReplaceEvent& ev) {
 			if (BoardTile* tile = ctx.GetMap()->GetRandomEmptyNear(ctx.GetAllyGeneral()->curTile)) {
-				if (ctx.GetOwner()->RemoveFromDeck(ctx.card)) {
-					ctx.game->Summon(ctx.card, tile, false);
+				if (ctx.GetOwner()->RemoveFromDeck(ctx.GetUnit())) {
+					ctx.game->Summon(ctx.GetUnit(), tile, false);
 					ctx.GetAllyGeneral()->DealDamage(ctx.card, 2);
 				}
 			}
@@ -502,7 +502,7 @@ void Collections::RegisterEffects() {
 			ctx.game->RemoveAurasFromSource(ctx.effect); });
 	effectDefinitions.try_emplace(AURA_GOLEM_METALLURGIST, AURA_GOLEM_METALLURGIST, KEYWORD_NONE, "Golem Metallurgist",
 		[](EffectContext ctx) { return ctx.IsAuraContext() && ctx.IsInOwnerHand() && ctx.GetAuraContext().CardSharesAuraOwner() && ctx.card->IsUnit() && ctx.card->GetUnit()->tribe == TRIBE_GOLEM
-			&& !ctx.game->AnyCastThisTurn([](Card* card) { return card->IsUnit() && card->GetUnit()->tribe == TRIBE_GOLEM; }); });
+			&& !ctx.game->AnyCastThisTurn([](PlayableCard* card) { return card->IsUnit() && card->GetUnit()->tribe == TRIBE_GOLEM; }); });
 	effectDefinitions.at(AURA_GOLEM_METALLURGIST).AddModifier(STAT_COST, MODTYPE_BUFF, -1);
 
 	//Golem Vanquisher
@@ -674,7 +674,7 @@ void Collections::RegisterEffects() {
 			ctx.game->RemoveAurasFromSource(ctx.effect); });
 	effectDefinitions.try_emplace(AURA_MANAFORGER, AURA_MANAFORGER, KEYWORD_NONE, "Manaforger",
 		[](EffectContext ctx) { return ctx.IsAuraContext() && ctx.IsInOwnerHand() && ctx.GetAuraContext().CardSharesAuraOwner() && ctx.card->IsSpell()
-			&& !ctx.game->AnyCastThisTurn([](Card* card) { return card->IsSpell(); }); });
+			&& !ctx.game->AnyCastThisTurn([](PlayableCard* card) { return card->IsSpell(); }); });
 	effectDefinitions.at(AURA_MANAFORGER).AddModifier(STAT_COST, MODTYPE_BUFF, -1);
 
 	//Maw
@@ -715,10 +715,10 @@ void Collections::RegisterEffects() {
 	effectDefinitions.try_emplace(SKILL_MOEBIUS, SKILL_MOEBIUS, KEYWORD_NONE, "At the start of your turn, fully heal this minion and switch its Attack and Health");
 	effectDefinitions.at(SKILL_MOEBIUS).RegisterPostTrigger<OnTurnStartEvent>(
 		[](EffectContext ctx, OnTurnStartEvent& ev) {
-			return ctx.IsOnBoard() && ctx.IsOwnedBy(ev.player); },
+			return ctx.card->IsUnit() && ctx.IsOnBoard() && ctx.IsOwnedBy(ev.player); },
 		[](EffectContext ctx, OnTurnStartEvent& ev) {
-			int atk = ctx.card->GetStat(STAT_ATK, ctx.card->GetUnit()->baseAtk, false);
-			int hp = ctx.card->GetStat(STAT_HP, ctx.card->GetUnit()->baseHpMax, false);
+			int atk = ctx.GetUnit()->GetStat(STAT_ATK, false);
+			int hp = ctx.GetUnit()->GetStat(STAT_HP, false);
 			if (Effect* effect = ctx.card->AddEffect(MODIFIER_MOEBIUS)) {
 				effect->UpdateModifier(STAT_ATK, hp);
 				effect->UpdateModifier(STAT_HP, atk);
@@ -1075,9 +1075,9 @@ void Collections::RegisterEffects() {
 					valid.push_back(i);
 			if (valid.size() > 0) {
 				int idx = valid[rand() % valid.size()];
-				Card* card = ctx.GetOwner()->hand[idx];
+				Unit* unit = ctx.GetOwner()->hand[idx]->GetUnit();
 				ctx.GetOwner()->hand.erase(ctx.GetOwner()->hand.begin() + idx);
-				ctx.game->Summon(card, ctx.GetTile(), false);
+				ctx.game->Summon(unit, ctx.GetTile(), false);
 			}
 	});
 

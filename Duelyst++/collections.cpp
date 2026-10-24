@@ -61,6 +61,17 @@ Card* Collections::GetNewCardInstance(eCard cardId, Game* game, Player* player) 
 }
 
 //Get a new unit instance based on definition with ID
+PlayableCard* Collections::GetNewPlayableCardInstance(eCard cardId, Game* game, Player* player) {
+	if (!cardDefinitions.contains(cardId))
+		return nullptr;
+	if (cardDefinitions.at(cardId).type == CARDTYPE_UNIT)
+		return new Unit(cardDefinitions.at(cardId), game, player);
+	else if (cardDefinitions.at(cardId).type == CARDTYPE_SPELL)
+		return new Spell(cardDefinitions.at(cardId), game, player);
+	return nullptr;
+}
+
+//Get a new unit instance based on definition with ID
 Unit* Collections::GetNewUnitInstance(eCard cardId, Game* game, Player* player) {
 	if (!cardDefinitions.contains(cardId) || cardDefinitions.at(cardId).type != CARDTYPE_UNIT)
 		return nullptr;
