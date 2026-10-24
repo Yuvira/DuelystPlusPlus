@@ -140,7 +140,7 @@ void Game::RenderGame(Renderer& renderer) {
 	//Hand
 	for (int x = 0; x < handSize; ++x) {
 		tileBorder.SetColor(COLOR_LTWHITE);
-		if (x == handIdx + 1 && mode == MODE_HAND)
+		if (x == handIdx + 1 && (mode == MODE_HAND || mode == MODE_SELECT))
 			tileBorder.SetColor(COLOR_AQUA);
 		renderer.Render(tileBorder, TileX(x), 41);
 	}
@@ -182,12 +182,14 @@ void Game::RenderSidebar(Renderer& renderer) {
 	}
 
 	//Card in hand
-	else if (mode == MODE_HAND || mode == MODE_SELECT) {
+	else if (mode == MODE_HAND || mode == MODE_SELECT || mode == MODE_MOVE) {
 
 		//Show target for current effect
-		if (mode == MODE_SELECT && effectCallback.Callback) {
-			if (selectable[selectionIdx]->unit != nullptr)
+		if (mode == MODE_MOVE || (mode == MODE_SELECT && effectCallback.Callback)) {
+			if (selectable[selectionIdx]->HasUnit())
 				selectable[selectionIdx]->unit->DrawDetails(renderer, y);
+			else if (selectable[selectionIdx]->HasTile())
+				selectable[selectionIdx]->tile->DrawDetails(renderer, y);
 		}
 
 		//Otherwise show card in hand
