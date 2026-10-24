@@ -5,17 +5,9 @@
 #include "sprite.h"
 
 //Definition
+class Player;
+class Tile;
 class Unit;
-
-//Tile features
-enum eFeature {
-	TILE_NONE,
-	TILE_MANA,
-	TILE_SAND,
-	TILE_HALLOW,
-	TILE_FLOURISH,
-	TILE_CREEP,
-};
 
 //Unit filters
 enum eUnitFilterType {
@@ -61,14 +53,12 @@ class BoardTile {
 public:
 	BoardTile();
 	~BoardTile();
-	void SetFeature(eFeature newFeature);
-	void Dispel();
 	bool IsNear(BoardTile* tile);
 	bool HasUnit();
+	bool HasTile();
 	Coord pos;
 	Unit* unit;
-	eFeature feature;
-	Sprite sprite;
+	Tile* tile;
 	eColor borderColor;
 };
 

@@ -69,6 +69,11 @@ Game::Game(Collections* collections, bool* modeSwitch) : players{ Player(this, I
 	players[0].opponent = &players[1];
 	players[1].opponent = &players[0];
 
+	//Generate mana tiles
+	CreateTile(CARD_MANA_SPRING, map.GetTile(4, 0), nullptr);
+	CreateTile(CARD_MANA_SPRING, map.GetTile(5, 2), nullptr);
+	CreateTile(CARD_MANA_SPRING, map.GetTile(4, 4), nullptr);
+
 	//Variables
 	pos = Coord(0, 0);
 	handIdx = -1;
@@ -96,18 +101,22 @@ void Game::RenderGame(Renderer& renderer) {
 	//Turn indicator
 	renderer.Render(light, 31, 2);
 
-	//Tiles
+	//Tile borders
 	for (int x = 0; x < map.GetWidth(); ++x) {
 		for (int y = 0; y < map.GetHeight(); ++y) {
 			tileBorder.SetColor(map.GetTile(x, y)->borderColor);
 			RenderTile(renderer, x, y);
-			RenderSprite(renderer, map.GetTile(x, y)->sprite, x, y);
 		}
 	}
 
+	//Tiles
+	for (Tile* tile : tiles)
+		RenderSprite(renderer, tile->sprite, tile->curTile->pos);
+
 	//Units
-	for (int i = 0; i < units.size(); ++i)
-		units[i]->RenderOnBoard(renderer);
+	for (Unit* unit : units)
+		if (unit->curTile != nullptr)
+			unit->RenderOnBoard(renderer, SpriteX(unit->curTile->pos.x), SpriteY(unit->curTile->pos.y));
 
 	//Render active card while selecting opening gambit targets
 	if (activeCard != nullptr && activeCard->IsUnit() && mode == MODE_SELECT && effectCallback.Callback)
@@ -187,6 +196,8 @@ void Game::RenderSidebar(Renderer& renderer) {
 
 }
 
+#pragma region Debug Render
+
 //Render debug info
 void Game::RenderDebug(Renderer& renderer) {
 
@@ -216,7 +227,7 @@ void Game::RenderDebug(Renderer& renderer) {
 		renderer.Render(debugSprite, 140, 1);
 		lines.clear();
 
-		//Minion data
+		//Unit data
 		lines.push_back("{Units}");
 		for (Card* card : units)
 			lines.push_back(card->name);
@@ -240,12 +251,20 @@ void Game::RenderDebug(Renderer& renderer) {
 		renderer.Render(debugSprite, 215, 1);
 		lines.clear();
 
+		//Tile data
+		lines.push_back("{Tiles}");
+		for (Tile* tile : tiles)
+			lines.push_back(tile->name);
+		debugSprite.CreateFromTextBlock(lines);
+		renderer.Render(debugSprite, 190, 25);
+		lines.clear();
+
 		//Delayed trigger data
 		lines.push_back("{Delayed Triggers}");
 		for (Spell* spell : delayedTriggers)
 			lines.push_back(spell->name);
 		debugSprite.CreateFromTextBlock(lines);
-		renderer.Render(debugSprite, 240, 1);
+		renderer.Render(debugSprite, 215, 25);
 
 	}
 
@@ -256,6 +275,8 @@ void Game::RenderDebug(Renderer& renderer) {
 	}
 
 }
+
+#pragma endregion
 
 #pragma endregion
 
@@ -749,6 +770,63 @@ Unit* Game::SummonToken(eCard cardId, BoardTile* tile, Player* owner) {
 	return Summon(token, tile, false);
 }
 
+//Create tile object on board tile
+Tile* Game::CreateTile(eCard cardId, BoardTile* tile, Player* owner) {
+
+	//Ensure validity
+	if (cardId == CARD_NONE)
+		return nullptr;
+	Tile* newTile = collections->GetNewTileInstance(cardId, this, owner);
+	if (newTile == nullptr)
+		return nullptr;
+
+	//Remove old tile object
+	if (tile->HasTile())
+		RemoveTile(tile->tile);
+
+	//Add new tile object
+	tiles.push_back(newTile);
+	newTile->curTile = tile;
+	tile->tile = newTile;
+	newTile->AddEffects();
+
+	//Set color
+	if (newTile->owner == &players[0])
+		newTile->sprite.SetColor(COLOR_LTBLUE);
+	else if (newTile->owner == &players[1])
+		newTile->sprite.SetColor(COLOR_LTRED);
+	else
+		newTile->sprite.SetColor(COLOR_LTWHITE);
+
+	//Return new tile object
+	return newTile;
+
+}
+
+//Remove tile object from board
+void Game::DispelTile(BoardTile* tile) {
+	if (tile->HasTile())
+		RemoveTile(tile->tile);
+	if (tile->HasUnit())
+		tile->unit->Dispel();
+}
+
+//Remove tile object from board
+bool Game::RemoveTile(Tile* tile) {
+	for (int i = 0; i < tiles.size(); ++i) {
+		if (tiles[i] == tile) {
+			tiles[i]->RemoveEffects();
+			if (tiles[i] == tiles[i]->curTile->tile)
+				tiles[i]->curTile->tile = nullptr;
+			tiles[i]->curTile = nullptr;
+			grave.push_back(tiles[i]);
+			tiles.erase(tiles.begin() + i);
+			return true;
+		}
+	}
+	return false;
+}
+
 //Replace active card
 void Game::Replace() {
 	players[turn].Replace(handIdx);
@@ -1205,6 +1283,10 @@ std::vector<Aura*> Game::GetAuras() {
 std::vector<Unit*> Game::GetUnits() {
 	std::vector<Unit*> unitIterator = units;
 	return unitIterator;
+}
+std::vector<Tile*> Game::GetTiles() {
+	std::vector<Tile*> tileIterator = tiles;
+	return tileIterator;
 }
 std::vector<Spell*> Game::GetDelayedTriggers() {
 	std::vector<Spell*> spellIterator = delayedTriggers;

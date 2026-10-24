@@ -18,7 +18,8 @@ enum eEventType {
 	EVENT_ADD_THIS,
 	EVENT_REMOVE_THIS,
 	EVENT_PRE_CAST_THIS,
-	EVENT_RESOLVE_THIS
+	EVENT_RESOLVE_THIS,
+	EVENT_TILE_UNIT_CHANGED,
 };
 
 //Define
@@ -229,4 +230,13 @@ struct OnResolveThisEvent : Event {
 		this->tile = tile;
 	}
 	BoardTile* tile;
+};
+
+//Triggers on an effect when the unit on the attached card's tile changes
+struct OnThisTileUnitChangedEvent : Event {
+	static constexpr eEventType typeKey = EVENT_TILE_UNIT_CHANGED;
+	Event* Clone() const override { return new OnThisTileUnitChangedEvent(*this); }
+	OnThisTileUnitChangedEvent() : Event(-1) {
+		type = EVENT_TILE_UNIT_CHANGED;
+	}
 };

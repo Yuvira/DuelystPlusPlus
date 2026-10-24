@@ -3,7 +3,6 @@
 #include "card.h"
 #include "carddefinition.h"
 #include "collections.h"
-#include "tile.h"
 
 //Register card objects
 void Collections::RegisterCards() {
@@ -457,6 +456,18 @@ void Collections::RegisterCards() {
 	cardDefinitions.try_emplace(
 		CARD_DARKFIRE_SACRIFICE, CARD_DARKFIRE_SACRIFICE, RARITY_RARE, FACTION_ABYSSIAN,
 		"darkfiresacrifice", "Darkfire Sacrifice", 0, SPELL_DARKFIRE_SACRIFICE);
+
+#pragma endregion
+
+#pragma region Tiles
+
+	//Tiles
+	cardDefinitions.try_emplace(
+		CARD_MANA_SPRING, CARD_MANA_SPRING, RARITY_NONE, FACTION_NEUTRAL,
+		"manaspring", "Mana Spring", TILE_MANA_SPRING);
+	cardDefinitions.try_emplace(
+		CARD_MANA_SPRING_EMPTY, CARD_MANA_SPRING_EMPTY, RARITY_NONE, FACTION_NEUTRAL,
+		"manaspringempty", "Empty Mana Spring", EFFECT_NONE);
 
 #pragma endregion
 

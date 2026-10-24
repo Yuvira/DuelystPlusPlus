@@ -1,4 +1,5 @@
 //Include
+#include "boardtile.h"
 #include "card.h"
 #include "carddefinition.h"
 #include "collections.h"
@@ -7,7 +8,6 @@
 #include "game.h"
 #include "player.h"
 #include "renderer.h"
-#include "tile.h"
 #include "utils.h"
 
 #pragma region Constructors / Initialization
@@ -49,10 +49,6 @@ Unit::~Unit() {}
 #pragma region Rendering
 
 //Render unit on board
-void Unit::RenderOnBoard(Renderer& renderer) {
-	if (curTile != nullptr)
-		RenderOnBoard(renderer, (curTile->pos.x * 7) + 2, (curTile->pos.y * 7) + 6);
-}
 void Unit::RenderOnBoard(Renderer& renderer, int x, int y) {
 
 	//Draw sprite
@@ -141,14 +137,16 @@ void Unit::InitState() {
 
 //Set sprite position
 void Unit::SetTile(BoardTile* tile) {
-	if (curTile != nullptr)
+	OnThisTileUnitChangedEvent tileEvent = OnThisTileUnitChangedEvent();
+	if (curTile != nullptr && curTile->unit == this) {
 		curTile->unit = nullptr;
+		if (curTile->HasTile())
+			curTile->tile->TriggerUnitChanged();
+	}
 	curTile = tile;
 	tile->unit = this;
-	if (tile->feature == TILE_MANA) {
-		tile->SetFeature(TILE_NONE);
-		owner->AddMana(1);
-	}
+	if (curTile->HasTile())
+		curTile->tile->TriggerUnitChanged();
 }
 
 //Move on board

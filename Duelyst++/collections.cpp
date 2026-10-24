@@ -18,6 +18,7 @@ Collections::Collections() {
 	RegisterEffects();
 	RegisterSpells();
 	RegisterCards();
+	RegisterTiles();
 	for (const eCard& key : cardDefinitions | std::ranges::views::keys)
 		cardIds.push_back(key);
 	std::sort(cardIds.begin(), cardIds.end());
@@ -57,6 +58,8 @@ Card* Collections::GetNewCardInstance(eCard cardId, Game* game, Player* player) 
 		return new Unit(cardDefinitions.at(cardId), game, player);
 	else if (cardDefinitions.at(cardId).type == CARDTYPE_SPELL)
 		return new Spell(cardDefinitions.at(cardId), game, player);
+	else if (cardDefinitions.at(cardId).type == CARDTYPE_TILE)
+		return new Tile(cardDefinitions.at(cardId), game, player);
 	return nullptr;
 }
 
@@ -76,6 +79,13 @@ Unit* Collections::GetNewUnitInstance(eCard cardId, Game* game, Player* player) 
 	if (!cardDefinitions.contains(cardId) || cardDefinitions.at(cardId).type != CARDTYPE_UNIT)
 		return nullptr;
 	return new Unit(cardDefinitions.at(cardId), game, player);
+}
+
+//Get a new unit instance based on definition with ID
+Tile* Collections::GetNewTileInstance(eCard cardId, Game* game, Player* player) {
+	if (!cardDefinitions.contains(cardId) || cardDefinitions.at(cardId).type != CARDTYPE_TILE)
+		return nullptr;
+	return new Tile(cardDefinitions.at(cardId), game, player);
 }
 
 #pragma endregion
@@ -112,8 +122,11 @@ void Collections::RenderCardDetails(Renderer& renderer, int x, int& y, eCard car
 	renderer.Render(cardDefinitions.at(cardId).sprite, x, y);
 	renderer.Render(cardDefinitions.at(cardId).detailNameSprite, x + 6, y);
 	++y;
-	renderer.Render(cardDefinitions.at(cardId).detailStatSprite, x + 6, y);
-	y += 2;
+	if (cardDefinitions.at(cardId).detailStatSprite.GetSize() > 0) {
+		renderer.Render(cardDefinitions.at(cardId).detailStatSprite, x + 6, y);
+		++y;
+	}
+	++y;
 
 	//Draw effect
 	eEffect effectId = cardDefinitions.at(cardId).effect;
@@ -144,8 +157,11 @@ void Collections::RenderCardDetails(Renderer& renderer, int x, int& y, Card* car
 	renderer.Render(card->ReadSprite(), x, y);
 	renderer.Render(card->ReadDetailNameSprite(), x + 6, y);
 	++y;
-	renderer.Render(card->ReadDetailStatSprite(), x + 6, y);
-	y += 2;
+	if (card->ReadDetailStatSprite().GetSize() > 0) {
+		renderer.Render(card->ReadDetailStatSprite(), x + 6, y);
+		++y;
+	}
+	++y;
 
 	//Draw effects
 	descriptionSprite.CreateFromTextBlock(card->ReadDetails());

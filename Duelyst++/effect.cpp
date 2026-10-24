@@ -1,10 +1,10 @@
 //Include
+#include "boardtile.h"
 #include "card.h"
 #include "effect.h"
 #include "effectcontext.h"
 #include "effectdefinition.h"
 #include "game.h"
-#include "tile.h"
 
 //Effect constructors
 Effect::Effect(const EffectDefinition& definition) {

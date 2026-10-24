@@ -52,9 +52,9 @@ public:
 	void CreateFromTextBlock(const std::vector<std::string>& lines);
 
 	//Utils
-	int GetSize() { return width * height; }
-	int GetWidth() { return width; }
-	int GetHeight() { return height; }
+	int GetSize() const { return width * height; }
+	int GetWidth() const { return width; }
+	int GetHeight() const { return height; }
 	const CHAR_INFO& ReadBuffer(int idx) const {
 		if (idx < 0 || idx >= buffer.size())
 			return CHAR_INFO();

@@ -2,9 +2,9 @@
 
 //Include
 #include <vector>
+#include "boardtile.h"
 #include "cardids.h"
 #include "effect.h"
-#include "tile.h"
 #include "player.h"
 #include "eventmanager.h"
 #include "sprite.h"
@@ -98,6 +98,9 @@ public:
 	void AttackUnit();
 	Unit* Summon(Unit* card, BoardTile* tile, bool actionBar);
 	Unit* SummonToken(eCard cardId, BoardTile* tile, Player* owner);
+	Tile* CreateTile(eCard cardId, BoardTile* tile, Player* owner);
+	void DispelTile(BoardTile* tile);
+	bool RemoveTile(Tile* tile);
 	void Replace();
 	void ChangeTurn(bool newTurn);
 	void Overflow(Card* card);
@@ -129,8 +132,9 @@ public:
 	//Getters
 	Player* GetTurnPlayer();
 	Player* GetNonTurnPlayer();
-	std::vector<Aura*> GetAuras();
 	std::vector<Unit*> GetUnits();
+	std::vector<Tile*> GetTiles();
+	std::vector<Aura*> GetAuras();
 	std::vector<Spell*> GetDelayedTriggers();
 	const std::vector<Card*>& GetGrave() const;
 	const std::vector<Unit*>& GetDestroyedUnits() const;
@@ -197,6 +201,7 @@ private:
 
 	//Card object references
 	std::vector<Unit*> units;
+	std::vector<Tile*> tiles;
 	std::vector<Card*> grave;
 	std::vector<Unit*> destroyedUnits;
 	std::vector<Spell*> spellHistory;

@@ -1,7 +1,7 @@
 #pragma once
 
 //Include
-#include "tile.h"
+#include "boardtile.h"
 
 //Define
 class Collections;

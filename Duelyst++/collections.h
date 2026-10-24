@@ -30,6 +30,7 @@ public:
 	Card* GetNewCardInstance(eCard cardId, Game* game, Player* player);
 	PlayableCard* GetNewPlayableCardInstance(eCard cardId, Game* game, Player* player);
 	Unit* GetNewUnitInstance(eCard cardId, Game* game, Player* player);
+	Tile* GetNewTileInstance(eCard cardId, Game* game, Player* player);
 
 	//Rendering
 	void RenderCardSprite(Renderer& renderer, int x, int y, int cardIdx);
@@ -54,6 +55,7 @@ private:
 	//Registers
 	void RegisterEffects();
 	void RegisterSpells();
+	void RegisterTiles();
 	void RegisterCards();
 
 	//Definition maps

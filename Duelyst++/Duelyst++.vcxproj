@@ -134,7 +134,9 @@
     <ClCompile Include="spell.cpp" />
     <ClCompile Include="spellregistry.cpp" />
     <ClCompile Include="sprite.cpp" />
+    <ClCompile Include="boardtile.cpp" />
     <ClCompile Include="tile.cpp" />
+    <ClCompile Include="tileregistry.cpp" />
     <ClCompile Include="unit.cpp" />
     <ClCompile Include="card.cpp" />
   </ItemGroup>
@@ -154,7 +156,7 @@
     <ClInclude Include="modifiers.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="sprite.h" />
-    <ClInclude Include="tile.h" />
+    <ClInclude Include="boardtile.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>

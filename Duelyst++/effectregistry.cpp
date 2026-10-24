@@ -408,7 +408,7 @@ void Collections::RegisterEffects() {
 			ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
 				[](EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets) {
 					if (targets.size() > 0)
-						targets[0]->Dispel();
+						ctx.game->DispelTile(targets[0]);
 			});
 	});
 
@@ -651,7 +651,7 @@ void Collections::RegisterEffects() {
 	effectDefinitions.at(SKILL_LIGHTBENDER).RegisterSelfTrigger<OnPreCastThisEvent>(
 		[](EffectContext ctx, OnPreCastThisEvent& ev) {
 			for (BoardTile* tile : ctx.GetMap()->GetAllNear(ev.tile))
-				tile->Dispel();
+				ctx.game->DispelTile(tile);
 	});
 
 	//Lux Ignis

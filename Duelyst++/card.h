@@ -16,6 +16,7 @@ class Player;
 class Renderer;
 class Spell;
 class SpellEffect;
+class Tile;
 class Unit;
 struct Event;
 
@@ -53,8 +54,10 @@ public:
 	//Subclass getters and helpers
 	virtual Unit* GetUnit() { return nullptr; }
 	virtual Spell* GetSpell() { return nullptr; }
+	virtual Tile* GetTile() { return nullptr; }
 	bool IsUnit() { return GetUnit() != nullptr; }
 	bool IsSpell() { return GetSpell() != nullptr; }
+	bool IsTile() { return GetTile() != nullptr; }
 	virtual bool IsGeneral() { return false; }
 	virtual bool IsMinion() { return false; }
 	virtual bool IsOnBoard() { return false; }
@@ -137,7 +140,6 @@ public:
 	~Unit() override;
 
 	//Rendering
-	void RenderOnBoard(Renderer& renderer);
 	void RenderOnBoard(Renderer& renderer, int x, int y);
 	void DrawDetails(Renderer& renderer, int& y) override;
 
@@ -223,5 +225,24 @@ private:
 
 	//Spell effect
 	SpellEffect* spellEffect;
+
+};
+
+//Tile class
+class Tile : public BoardCard {
+
+public:
+
+	//Constructor
+	Tile(const CardDefinition& definition, Game* game, Player* owner);
+	~Tile() override;
+
+	//On enter/leave events
+	void AddEffects();
+	void RemoveEffects();
+	void TriggerUnitChanged();
+
+	//Subclass getter
+	Tile* GetTile() override { return this; }
 
 };
