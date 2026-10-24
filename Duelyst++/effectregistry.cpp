@@ -23,6 +23,50 @@ void Collections::RegisterEffects() {
 	effectDefinitions.try_emplace(SKILL_RANGED, SKILL_RANGED, KEYWORD_RANGED, "{Ranged}");
 	effectDefinitions.try_emplace(SKILL_RUSH, SKILL_RUSH, KEYWORD_RUSH, "{Rush}");
 
+#pragma region Abyssian
+
+	//Black Solus
+	effectDefinitions.try_emplace(SKILL_BLACK_SOLUS, SKILL_BLACK_SOLUS, KEYWORD_NONE, "When you summon a Wraithling, this gains +2 Attack");
+	effectDefinitions.at(SKILL_BLACK_SOLUS).RegisterPostTrigger<OnSummonEvent>(
+		[](EffectContext ctx, OnSummonEvent& ev) {
+			return ctx.IsOnBoard() && ctx.SharesOwner(ev.unit) && ev.unit->ReadID() == CARD_WRAITHLING; },
+		[](EffectContext ctx, OnSummonEvent& ev) {
+			ctx.card->AddEffect(MODIFIER_BLACK_SOLUS); });
+	effectDefinitions.try_emplace(MODIFIER_BLACK_SOLUS, MODIFIER_BLACK_SOLUS, KEYWORD_NONE, "Black Solus");
+	effectDefinitions.at(MODIFIER_BLACK_SOLUS).AddModifier(STAT_ATK, MODTYPE_BUFF, 2);
+
+	//Blood Siren
+	effectDefinitions.try_emplace(SKILL_BLOOD_SIREN, SKILL_BLOOD_SIREN, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Give a nearby enemy -2 attack this turn");
+	effectDefinitions.at(SKILL_BLOOD_SIREN).RegisterSelfTrigger<OnPreCastThisEvent>(
+		[](EffectContext ctx, OnPreCastThisEvent& ev) {
+			std::vector<BoardTile*> valid = ctx.GetMap()->GetUnitTilesNear(ev.tile, FILTER_ALL, FILTER_ENEMY, ctx.GetOwner());
+			ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
+				[](EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets) {
+					if (targets.size() > 0 && targets[0]->HasUnit())
+						targets[0]->unit->AddEffect(MODIFIER_BLOOD_SIREN);
+			});
+	});
+	effectDefinitions.try_emplace(MODIFIER_BLOOD_SIREN, MODIFIER_BLOOD_SIREN, KEYWORD_NONE, "Blood Siren");
+	effectDefinitions.at(MODIFIER_BLOOD_SIREN).RegisterPostTrigger<OnTurnEndEvent>(
+		[](EffectContext ctx, OnTurnEndEvent& ev) {
+			return true; },
+		[](EffectContext ctx, OnTurnEndEvent& ev) {
+			ctx.card->RemoveEffect(ctx.effect); });
+	effectDefinitions.at(MODIFIER_BLOOD_SIREN).AddModifier(STAT_ATK, MODTYPE_BUFF, -2);
+
+	//Bloodtide Priestess
+	effectDefinitions.try_emplace(SKILL_BLOODTIDE_PRIESTESS, SKILL_BLOODTIDE_PRIESTESS, KEYWORD_DEATHWATCH, "{Deathwatch}: Summon a Wraithling on a random nearby space");
+	effectDefinitions.at(SKILL_BLOODTIDE_PRIESTESS).RegisterPostTrigger<OnDeathEvent>(
+		[](EffectContext ctx, OnDeathEvent& ev) {
+			return ctx.IsOnBoard() && !ctx.IsCard(ev.unit); },
+		[](EffectContext ctx, OnDeathEvent& ev) {
+			if (BoardTile* tile = ctx.GetMap()->GetRandomEmptyNear(ctx.GetTile()))
+				ctx.game->SummonToken(CARD_WRAITHLING, tile, ctx.GetOwner());
+	});
+	effectDefinitions.at(SKILL_BLOODTIDE_PRIESTESS).SetToken(CARD_WRAITHLING);
+
+#pragma endregion
+
 #pragma region Neutral
 
 	//Abjudicator

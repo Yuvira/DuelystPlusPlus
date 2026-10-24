@@ -14,6 +14,17 @@ void Collections::RegisterCards() {
 
 #pragma region Abyssian
 
+	//Minions
+	cardDefinitions.try_emplace(
+		CARD_BLACK_SOLUS, CARD_BLACK_SOLUS, RARITY_EPIC, FACTION_ABYSSIAN, TRIBE_NONE,
+		"blacksolus", "Black Solus", 5, 4, 7, SKILL_BLACK_SOLUS);
+	cardDefinitions.try_emplace(
+		CARD_BLOOD_SIREN, CARD_BLOOD_SIREN, RARITY_COMMON, FACTION_ABYSSIAN, TRIBE_NONE,
+		"bloodsiren", "Blood Siren", 2, 3, 2, SKILL_BLOOD_SIREN);
+	cardDefinitions.try_emplace(
+		CARD_BLOODTIDE_PRIESTESS, CARD_BLOODTIDE_PRIESTESS, RARITY_RARE, FACTION_ABYSSIAN, TRIBE_NONE,
+		"bloodtidepriestess", "Bloodtide Priestess", 4, 3, 3, SKILL_BLOODTIDE_PRIESTESS);
+
 	//Spells
 	cardDefinitions.try_emplace(
 		CARD_BREATH_OF_THE_UNBORN, CARD_BREATH_OF_THE_UNBORN, RARITY_COMMON, FACTION_ABYSSIAN,

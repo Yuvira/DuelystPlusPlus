@@ -48,6 +48,11 @@ enum eCard {
 
 #pragma region Abyssian
 
+	//Minions
+	CARD_BLACK_SOLUS,
+	CARD_BLOOD_SIREN,
+	CARD_BLOODTIDE_PRIESTESS,
+
 	//Spells
 	CARD_BREATH_OF_THE_UNBORN,
 	CARD_CONSUMING_REBIRTH,
