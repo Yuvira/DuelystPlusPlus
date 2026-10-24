@@ -429,6 +429,10 @@ void Collections::RegisterCards() {
 		CARD_TOMBSTONE, CARD_TOMBSTONE, RARITY_NONE, FACTION_NEUTRAL, TRIBE_NONE,
 		"tombstone", "Tombstone", 3, 0, 10, SKILL_PROVOKE );
 	cardDefinitions.at(CARD_TOMBSTONE).isToken = true;
+	cardDefinitions.try_emplace(
+		CARD_WRAITHLING, CARD_WRAITHLING, RARITY_NONE, FACTION_ABYSSIAN, TRIBE_NONE,
+		"wraithling", "Wraithling", 1, 1, 1, EFFECT_NONE);
+	cardDefinitions.at(CARD_WRAITHLING).isToken = true;
 
 #pragma endregion
 
@@ -442,8 +446,17 @@ void Collections::RegisterCards() {
 		CARD_CONSUMING_REBIRTH, CARD_CONSUMING_REBIRTH, RARITY_EPIC, FACTION_ABYSSIAN,
 		"consumingrebirth", "Consuming Rebirth", 2, SPELL_CONSUMING_REBIRTH );
 	cardDefinitions.try_emplace(
+		CARD_DAEMONIC_LURE, CARD_DAEMONIC_LURE, RARITY_NONE, FACTION_ABYSSIAN,
+		"daemoniclure", "Daemonic Lure", 2, SPELL_DAEMONIC_LURE);
+	cardDefinitions.try_emplace(
 		CARD_DARK_SEED, CARD_DARK_SEED, RARITY_RARE, FACTION_ABYSSIAN,
 		"darkseed", "Dark Seed", 4, SPELL_DARK_SEED );
+	cardDefinitions.try_emplace(
+		CARD_DARK_TRANSFORMATION, CARD_DARK_TRANSFORMATION, RARITY_NONE, FACTION_ABYSSIAN,
+		"darktransformation", "Dark Transformation", 5, SPELL_DARK_TRANSFORMATION);
+	cardDefinitions.try_emplace(
+		CARD_DARKFIRE_SACRIFICE, CARD_DARKFIRE_SACRIFICE, RARITY_RARE, FACTION_ABYSSIAN,
+		"darkfiresacrifice", "Darkfire Sacrifice", 0, SPELL_DARKFIRE_SACRIFICE);
 
 #pragma endregion
 
