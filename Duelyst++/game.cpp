@@ -808,7 +808,7 @@ void Game::SelectTile(BoardTile& tile) {
 			for (int j = max(tile.pos.y - 1, 0); j < min(tile.pos.y + 2, 5); ++j)
 				if (map.tiles[i][j].unit != nullptr)
 					if (map.tiles[i][j].unit->owner != &players[turn])
-						if (map.tiles[i][j].unit->HasKeywords(KEYWORD_PROVOKE))
+						if (map.tiles[i][j].unit->HasKeyword(KEYWORD_PROVOKE))
 							if (tile.unit->CanAttack(map.tiles[i][j].unit)) {
 								attackable.push_back(&map.tiles[i][j]);
 								provoked = true;
@@ -930,7 +930,7 @@ void Game::HighlightTile(int x, int y, eColor color) {
 
 //Highlight moveable spaces
 void Game::HighlightMoveable(int x, int y) {
-	if (map.tiles[pos.x][pos.y].unit->HasKeywords(KEYWORD_FLYING)) {
+	if (map.tiles[pos.x][pos.y].unit->HasKeyword(KEYWORD_FLYING)) {
 		for (int i = 0; i < 9; ++i)
 			for (int j = 0; j < 5; ++j)
 				if (i != pos.x || j != pos.y)
@@ -983,7 +983,7 @@ bool Game::AddToPaths(int x, int y, int last, int count) {
 		for (int i = 0; i < pathList.size(); ++i)
 			if (pathList[i].pos.x == x && pathList[i].pos.y == y)
 				return false;
-		if (map.tiles[pos.x][pos.y].unit->HasKeywords(KEYWORD_FLYING)) {
+		if (map.tiles[pos.x][pos.y].unit->HasKeyword(KEYWORD_FLYING)) {
 			pathList.push_back(PathCoord(Coord(x, y), last, count));
 			if (selectable[selectionIdx]->pos.x == x && selectable[selectionIdx]->pos.y == y)
 				return true;

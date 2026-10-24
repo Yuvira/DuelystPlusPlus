@@ -63,7 +63,7 @@ void Unit::RenderOnBoard(Renderer& renderer, int x, int y) {
 	renderer.Render(hpSprite, x + (5 - hpSprite.GetWidth()), y + 4);
 
 	//Draw forcefield if applicable
-	if (HasKeywords(KEYWORD_FORCEFIELD) && !forcefieldBroken && game != nullptr)
+	if (HasKeyword(KEYWORD_FORCEFIELD) && !forcefieldBroken && game != nullptr)
 		game->DrawForcefield(x, y, renderer);
 
 }
@@ -111,17 +111,17 @@ void Unit::UpdateModifiers() {
 
 //Get targets
 std::vector<BoardTile*> Unit::GetTargets() {
-	if (HasKeywords(KEYWORD_AIRDROP))
+	if (HasKeyword(KEYWORD_AIRDROP))
 		return game->map.GetAllEmpty();
 	return game->map.GetEmptyNearAllies(owner);
 }
 
 //Initialize states
 void Unit::InitState() {
-	hasMoved = !HasKeywords(KEYWORD_RUSH);
-	hasAttacked = !HasKeywords(KEYWORD_RUSH);
-	hasCelerityMoved = !HasKeywords(KEYWORD_RUSH) || !HasKeywords(KEYWORD_CELERITY);
-	hasCelerityAttacked = !HasKeywords(KEYWORD_RUSH) || !HasKeywords(KEYWORD_CELERITY);
+	hasMoved = !HasKeyword(KEYWORD_RUSH);
+	hasAttacked = !HasKeyword(KEYWORD_RUSH);
+	hasCelerityMoved = !HasAllKeywords(KEYWORD_RUSH | KEYWORD_CELERITY);
+	hasCelerityAttacked = !HasAllKeywords(KEYWORD_RUSH | KEYWORD_CELERITY);
 	forcefieldBroken = false;
 }
 
@@ -156,10 +156,9 @@ void Unit::Attack(Unit* target, bool counter) {
 	int damage = atk;
 
 	//Damage all adjacent units if this has Frenzy and is targeting an adjacent tile
-	if (!counter && HasKeywords(KEYWORD_FRENZY) && curTile->IsNear(target->curTile)) {
-		for (Unit* unit : game->map.GetUnitsNear(curTile))
-			if (unit->owner != owner)
-				unit->DealDamage(this, damage);
+	if (!counter && HasKeyword(KEYWORD_FRENZY) && curTile->IsNear(target->curTile)) {
+		for (Unit* unit : game->map.GetUnitsNear(curTile, FILTER_ALL, FILTER_ENEMY, owner))
+			unit->DealDamage(this, damage);
 	}
 
 	//Otherwise just damage target
@@ -194,8 +193,8 @@ void Unit::Exhaust() {
 void Unit::Refresh() {
 	hasMoved = false;
 	hasAttacked = false;
-	hasCelerityMoved = !HasKeywords(KEYWORD_CELERITY);
-	hasCelerityAttacked = !HasKeywords(KEYWORD_CELERITY);
+	hasCelerityMoved = !HasKeyword(KEYWORD_CELERITY);
+	hasCelerityAttacked = !HasKeyword(KEYWORD_CELERITY);
 	forcefieldBroken = false;
 }
 
@@ -210,7 +209,7 @@ int Unit::DealDamage(Card* source, int damage) {
 	if (damageEvent->damage > 0) {
 
 		//Negate if target has forcefield
-		if (HasKeywords(KEYWORD_FORCEFIELD) && !forcefieldBroken) {
+		if (HasKeyword(KEYWORD_FORCEFIELD) && !forcefieldBroken) {
 			forcefieldBroken = true;
 			damageEvent->damage = 0;
 		}
@@ -312,7 +311,7 @@ void Unit::RemoveEffects() {
 bool Unit::CanAttack(Unit* target) {
 	if (target != nullptr) {
 		if (atk > 0) {
-			if (HasKeywords(KEYWORD_RANGED))
+			if (HasKeyword(KEYWORD_RANGED))
 				return true;
 			else if (abs(curTile->pos.x - target->curTile->pos.x) < 2 && abs(curTile->pos.y - target->curTile->pos.y) < 2)
 				return true;
@@ -329,7 +328,8 @@ bool Unit::IsMoveable() {
 }
 
 //Check if unit has all given keywords
-bool Unit::HasKeywords(int match) { return (keywords & match) == match; }
+bool Unit::HasAllKeywords(int match) { return (keywords & match) == match; }
+bool Unit::HasAnyKeywords(int match) { return (keywords & match) != 0; }
 
 //Is unit being provoked
 bool Unit::IsProvoked() {
@@ -337,7 +337,7 @@ bool Unit::IsProvoked() {
 		for (int j = max(curTile->pos.y - 1, 0); j < min(curTile->pos.y + 2, 5); ++j)
 			if (game->map.tiles[i][j].unit != nullptr)
 				if (game->map.tiles[i][j].unit->owner != owner)
-					if (game->map.tiles[i][j].unit->HasKeywords(KEYWORD_PROVOKE))
+					if (game->map.tiles[i][j].unit->HasKeyword(KEYWORD_PROVOKE))
 						return true;
 	return false;
 }

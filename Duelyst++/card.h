@@ -121,7 +121,9 @@ public:
 	//Utils
 	bool CanAttack(Unit* target);
 	bool IsMoveable();
-	bool HasKeywords(int match);
+	bool HasKeyword(eKeywordFlags match) { return HasAllKeywords(match); }
+	bool HasAllKeywords(int match);
+	bool HasAnyKeywords(int match);
 	bool IsProvoked();
 
 	//Subclass getter and helpers

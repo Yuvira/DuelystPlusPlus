@@ -55,7 +55,7 @@ void Collections::RegisterEffects() {
 	effectDefinitions.try_emplace(SKILL_ARAKI_HEADHUNTER, SKILL_ARAKI_HEADHUNTER, KEYWORD_NONE, "Whenever you summon a minion with {Opening Gambit} from your action bar, gain +2 Attack");
 	effectDefinitions.at(SKILL_ARAKI_HEADHUNTER).RegisterPostTrigger<OnSummonEvent>(
 		[](EffectContext ctx, OnSummonEvent& ev) {
-			return ctx.IsOnBoard() && ctx.IsAllied(ev.unit) && ev.unit->HasKeywords(KEYWORD_OPENING_GAMBIT) && ev.wasCast; },
+			return ctx.IsOnBoard() && ctx.IsAllied(ev.unit) && ev.unit->HasKeyword(KEYWORD_OPENING_GAMBIT) && ev.wasCast; },
 		[](EffectContext ctx, OnSummonEvent& ev) {
 			ctx.card->AddEffect(MODIFIER_ARAKI_HEADHUNTER); });
 	effectDefinitions.try_emplace(MODIFIER_ARAKI_HEADHUNTER, MODIFIER_ARAKI_HEADHUNTER, KEYWORD_NONE, "Araki Headhunter");
@@ -82,7 +82,7 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnRemoveThisEvent& ev) {
 			ctx.game->RemoveAurasFromSource(ctx.effect); });
 	effectDefinitions.try_emplace(AURA_ARROW_WHISTLER, AURA_ARROW_WHISTLER, KEYWORD_NONE, "Arrow Whistler",
-		[](EffectContext ctx) { return ctx.IsAuraContext() && ctx.IsOnBoard() && ctx.GetAuraContext().CardIsFriendOfAuraSource() && !ctx.card->IsGeneral() && ctx.card->GetUnit()->HasKeywords(KEYWORD_RANGED); });
+		[](EffectContext ctx) { return ctx.IsAuraContext() && ctx.IsOnBoard() && ctx.GetAuraContext().CardIsFriendOfAuraSource() && !ctx.card->IsGeneral() && ctx.card->GetUnit()->HasKeyword(KEYWORD_RANGED); });
 	effectDefinitions.at(AURA_ARROW_WHISTLER).AddModifier(STAT_ATK, MODTYPE_BUFF, 1);
 
 	//Ash Mephyt
@@ -117,9 +117,8 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnDeathEvent& ev) {
 			return ctx.IsCard(ev.unit); },
 		[](EffectContext ctx, OnDeathEvent& ev) {
-			for (Unit* unit : ctx.GetMap()->GetUnitsNear(ctx.GetTile()))
-				if (ctx.SharesOwner(unit) && !unit->IsGeneral())
-					unit->AddEffect(MODIFIER_AZURE_HORN_SHAMAN);
+			for (Unit* unit : ctx.GetMap()->GetUnitsNear(ctx.GetTile(), FILTER_MINIONS, FILTER_ALLY, ctx.GetOwner()))
+				unit->AddEffect(MODIFIER_AZURE_HORN_SHAMAN);
 	});
 	effectDefinitions.try_emplace(MODIFIER_AZURE_HORN_SHAMAN, MODIFIER_AZURE_HORN_SHAMAN, KEYWORD_NONE, "Azure Horn Shaman");
 	effectDefinitions.at(MODIFIER_AZURE_HORN_SHAMAN).AddModifier(STAT_HP, MODTYPE_BUFF, 4);
@@ -130,8 +129,8 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnTurnEndEvent& ev) {
 			return ctx.IsOnBoard() && ctx.IsOwnedBy(ev.player); },
 		[](EffectContext ctx, OnTurnEndEvent& ev) {
-			for (Unit* unit : ctx.game->GetUnits())
-				if (ctx.IsAllied(unit) && !unit->IsGeneral())
+			for (Unit* unit : ctx.GetMap()->GetAllUnits(FILTER_MINIONS, FILTER_ALLY, ctx.GetOwner()))
+				if (unit != ctx.card)
 					unit->AddEffect(MODIFIER_BASTION);
 	});
 	effectDefinitions.try_emplace(MODIFIER_BASTION, MODIFIER_BASTION, KEYWORD_NONE, "Bastion");
@@ -159,7 +158,7 @@ void Collections::RegisterEffects() {
 	effectDefinitions.try_emplace(SKILL_BLISTERING_SKORN, SKILL_BLISTERING_SKORN, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Deal 1 damage to everything (including itself)");
 	effectDefinitions.at(SKILL_BLISTERING_SKORN).RegisterSelfTrigger<OnPreCastThisEvent>(
 		[](EffectContext ctx, OnPreCastThisEvent& ev) {
-			for (Unit* unit : ctx.game->GetUnits())
+			for (Unit* unit : ctx.GetMap()->GetAllUnits())
 				unit->DealDamage(ctx.card, 1);
 			if (ctx.card->IsUnit())
 				ctx.card->GetUnit()->DealDamage(ctx.card, 1);
@@ -195,10 +194,7 @@ void Collections::RegisterEffects() {
 	effectDefinitions.try_emplace(SKILL_BLOODTEAR_ALCHEMIST, SKILL_BLOODTEAR_ALCHEMIST, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Deal 1 damage to an enemy");
 	effectDefinitions.at(SKILL_BLOODTEAR_ALCHEMIST).RegisterSelfTrigger<OnPreCastThisEvent>(
 		[](EffectContext ctx, OnPreCastThisEvent& ev) {
-			std::vector<BoardTile*> valid;
-			for (Unit* target : ctx.game->GetUnits())
-				if (!ctx.SharesOwner(target))
-					valid.push_back(target->curTile);
+			std::vector<BoardTile*> valid = ctx.GetMap()->GetAllUnitTiles(FILTER_ALL, FILTER_ENEMY, ctx.GetOwner());
 			ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
 				[](EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets) {
 					if (targets.size() > 0 && targets[0]->HasUnit())
@@ -220,9 +216,8 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnTurnEndEvent& ev) {
 			return ctx.IsOnBoard() && ctx.IsOwnedBy(ev.player); },
 		[](EffectContext ctx, OnTurnEndEvent& ev) {
-			for (Unit* unit : ctx.GetMap()->GetUnitsNear(ctx.GetTile()))
-				if (!ctx.SharesOwner(unit) && !unit->IsGeneral())
-					unit->DealDamage(ctx.card, 2);
+			for (Unit* unit : ctx.GetMap()->GetUnitsNear(ctx.GetTile(), FILTER_MINIONS, FILTER_ENEMY, ctx.GetOwner()))
+				unit->DealDamage(ctx.card, 2);
 	});
 
 	//Captain Hank Hart
@@ -289,9 +284,9 @@ void Collections::RegisterEffects() {
 	effectDefinitions.at(SKILL_CROSSBONES).RegisterSelfTrigger<OnPreCastThisEvent>(
 		[](EffectContext ctx, OnPreCastThisEvent& ev) {
 			std::vector<BoardTile*> valid;
-			for (Unit* target : ctx.game->GetUnits())
-				if (!ctx.SharesOwner(target) && !target->IsGeneral() && target->HasKeywords(KEYWORD_RANGED))
-					valid.push_back(target->curTile);
+			for (Unit* unit : ctx.GetMap()->GetAllUnits(FILTER_MINIONS, FILTER_ENEMY, ctx.GetOwner()))
+				if (unit->HasKeyword(KEYWORD_RANGED))
+					valid.push_back(unit->curTile);
 			ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
 				[](EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets) {
 					if (targets.size() > 0 && targets[0]->HasUnit())
@@ -332,9 +327,8 @@ void Collections::RegisterEffects() {
 	effectDefinitions.try_emplace(SKILL_DEATHBLIGHTER, SKILL_DEATHBLIGHTER, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Deal 3 damage to all enemy minions around it");
 	effectDefinitions.at(SKILL_DEATHBLIGHTER).RegisterSelfTrigger<OnPreCastThisEvent>(
 		[](EffectContext ctx, OnPreCastThisEvent& ev) {
-			for (Unit* unit : ctx.GetMap()->GetUnitsNear(ev.tile))
-				if (!ctx.SharesOwner(unit) && !unit->IsGeneral())
-					unit->DealDamage(ctx.card, 3);
+			for (Unit* unit : ctx.GetMap()->GetUnitsNear(ev.tile, FILTER_MINIONS, FILTER_ENEMY, ctx.GetOwner()))
+				unit->DealDamage(ctx.card, 3);
 	});
 
 	//Decimus
@@ -477,10 +471,7 @@ void Collections::RegisterEffects() {
 	effectDefinitions.try_emplace(SKILL_GHOST_LYNX, SKILL_GHOST_LYNX, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Teleport a nearby minion to a random space");
 	effectDefinitions.at(SKILL_GHOST_LYNX).RegisterSelfTrigger<OnPreCastThisEvent>(
 		[](EffectContext ctx, OnPreCastThisEvent& ev) {
-			std::vector<BoardTile*> valid;
-			for (Unit* unit : ctx.GetMap()->GetUnitsNear(ev.tile))
-				if (!unit->IsGeneral())
-					valid.push_back(unit->curTile);
+			std::vector<BoardTile*> valid = ctx.GetMap()->GetUnitTilesNear(ev.tile, FILTER_MINIONS, FILTER_NEUTRAL, nullptr);
 			ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
 				[](EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets) {
 					if (targets.size() > 0 && targets[0]->HasUnit())
@@ -498,7 +489,7 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnRemoveThisEvent& ev) {
 			ctx.game->RemoveAurasFromSource(ctx.effect); });
 	effectDefinitions.try_emplace(AURA_GOLDEN_JUSTICAR, AURA_GOLDEN_JUSTICAR, KEYWORD_NONE, "Golden Justicar",
-		[](EffectContext ctx) { return ctx.IsAuraContext() && ctx.IsOnBoard() && ctx.GetAuraContext().CardIsFriendOfAuraSource() && !ctx.card->IsGeneral() && ctx.card->GetUnit()->HasKeywords(KEYWORD_PROVOKE); });
+		[](EffectContext ctx) { return ctx.IsAuraContext() && ctx.IsOnBoard() && ctx.GetAuraContext().CardIsFriendOfAuraSource() && !ctx.card->IsGeneral() && ctx.card->GetUnit()->HasKeyword(KEYWORD_PROVOKE); });
 	effectDefinitions.at(AURA_GOLDEN_JUSTICAR).AddModifier(STAT_MOVE, MODTYPE_BUFF, 2);
 
 	//Golem Metallurgist
@@ -540,9 +531,7 @@ void Collections::RegisterEffects() {
 	effectDefinitions.try_emplace(SKILL_HEALING_MYSTIC, SKILL_HEALING_MYSTIC, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Restore 2 Health to anything");
 	effectDefinitions.at(SKILL_HEALING_MYSTIC).RegisterSelfTrigger<OnPreCastThisEvent>(
 		[](EffectContext ctx, OnPreCastThisEvent& ev) {
-			std::vector<BoardTile*> valid;
-			for (Unit* target : ctx.game->GetUnits())
-				valid.push_back(target->curTile);
+			std::vector<BoardTile*> valid = ctx.GetMap()->GetAllUnitTiles();
 			ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
 				[](EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets) {
 					if (targets.size() > 0 && targets[0]->HasUnit())
@@ -555,8 +544,8 @@ void Collections::RegisterEffects() {
 	effectDefinitions.at(SKILL_HOLLOW_GROVEKEEPER).RegisterSelfTrigger<OnPreCastThisEvent>(
 		[](EffectContext ctx, OnPreCastThisEvent& ev) {
 			std::vector<BoardTile*> valid;
-			for (Unit* unit : ctx.GetMap()->GetUnitsNear(ev.tile))
-				if (!unit->IsGeneral() && (unit->HasKeywords(KEYWORD_PROVOKE) || unit->HasKeywords(KEYWORD_FRENZY)))
+			for (Unit* unit : ctx.GetMap()->GetUnitsNear(ev.tile, FILTER_MINIONS, FILTER_NEUTRAL, nullptr))
+				if (unit->HasAnyKeywords(KEYWORD_PROVOKE | KEYWORD_FRENZY))
 					valid.push_back(unit->curTile);
 			ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
 				[](EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets) {
@@ -574,9 +563,8 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnDeathEvent& ev) {
 			return ctx.IsCard(ev.unit); },
 		[](EffectContext ctx, OnDeathEvent& ev) {
-			for (Unit* unit : ctx.game->GetUnits())
-				if (!ctx.SharesOwner(unit) && !unit->IsGeneral())
-					unit->Dispel();
+			for (Unit* unit : ctx.GetMap()->GetAllUnits(FILTER_MINIONS, FILTER_ENEMY, ctx.GetOwner()))
+				unit->Dispel();
 	});
 
 	//Jax Truesight
@@ -672,9 +660,8 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnTurnEndEvent& ev) {
 			return ctx.IsOnBoard() && ctx.IsOwnedBy(ev.player); },
 		[](EffectContext ctx, OnTurnEndEvent& ev) {
-			for (Unit* unit : ctx.GetMap()->GetUnitsNear(ctx.GetTile()))
-				if (ctx.SharesOwner(unit) && !unit->IsGeneral())
-					unit->Heal(ctx.card, 2);
+			for (Unit* unit : ctx.GetMap()->GetUnitsNear(ctx.GetTile(), FILTER_MINIONS, FILTER_ALLY, ctx.GetOwner()))
+				unit->Heal(ctx.card, 2);
 	});
 	
 	//Manaforger
@@ -694,10 +681,7 @@ void Collections::RegisterEffects() {
 	effectDefinitions.try_emplace(SKILL_MAW, SKILL_MAW, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Deal 2 damage to a nearby enemy minion");
 	effectDefinitions.at(SKILL_MAW).RegisterSelfTrigger<OnPreCastThisEvent>(
 		[](EffectContext ctx, OnPreCastThisEvent& ev) {
-			std::vector<BoardTile*> valid;
-			for (Unit* unit : ctx.GetMap()->GetUnitsNear(ev.tile))
-				if (!ctx.SharesOwner(unit) && !unit->IsGeneral())
-					valid.push_back(unit->curTile);
+			std::vector<BoardTile*> valid = ctx.GetMap()->GetUnitTilesNear(ev.tile, FILTER_MINIONS, FILTER_ENEMY, ctx.GetOwner());
 			ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
 				[](EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets) {
 					if (targets.size() > 0 && targets[0]->HasUnit())
@@ -766,7 +750,7 @@ void Collections::RegisterEffects() {
 	effectDefinitions.try_emplace(SKILL_NIGHT_WATCHER, SKILL_NIGHT_WATCHER, KEYWORD_FORCEFIELD, "{Forcefield}|Whenever ANY player summons a minion with {Rush}, exhaust it");
 	effectDefinitions.at(SKILL_NIGHT_WATCHER).RegisterPostTrigger<OnSummonEvent>(
 		[](EffectContext ctx, OnSummonEvent& ev) {
-			return ctx.IsOnBoard() && ev.unit->HasKeywords(KEYWORD_RUSH); },
+			return ctx.IsOnBoard() && ev.unit->HasKeyword(KEYWORD_RUSH); },
 		[](EffectContext ctx, OnSummonEvent& ev) {
 			ev.unit->Exhaust(); });
 
@@ -776,8 +760,8 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnCastEvent& ev) {
 			return ctx.IsOnBoard() && ev.card->IsSpell() && ctx.SharesOwner(ev.card); },
 		[](EffectContext ctx, OnCastEvent& ev) {
-			for (Unit* unit : ctx.game->GetUnits())
-				if (ctx.SharesOwner(ctx.card) && !unit->IsGeneral() && unit->tribe == TRIBE_ARCANYST)
+			for (Unit* unit : ctx.GetMap()->GetAllUnits(FILTER_MINIONS, FILTER_ALLY, ctx.GetOwner()))
+				if (unit->tribe == TRIBE_ARCANYST)
 					unit->AddEffect(MODIFIER_OWLBEAST_SAGE);
 	});
 	effectDefinitions.try_emplace(MODIFIER_OWLBEAST_SAGE, MODIFIER_OWLBEAST_SAGE, KEYWORD_NONE, "Owlbeast Sage");
@@ -796,10 +780,7 @@ void Collections::RegisterEffects() {
 	effectDefinitions.try_emplace(SKILL_PRIMUS_FIST, SKILL_PRIMUS_FIST, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Give a nearby friendly minion +2 Attack this turn");
 	effectDefinitions.at(SKILL_PRIMUS_FIST).RegisterSelfTrigger<OnPreCastThisEvent>(
 		[](EffectContext ctx, OnPreCastThisEvent& ev) {
-			std::vector<BoardTile*> valid;
-			for (Unit* unit : ctx.GetMap()->GetUnitsNear(ev.tile))
-				if (ctx.SharesOwner(unit) && !unit->IsGeneral())
-					valid.push_back(unit->curTile);
+			std::vector<BoardTile*> valid = ctx.GetMap()->GetUnitTilesNear(ev.tile, FILTER_MINIONS, FILTER_ALLY, ctx.GetOwner());
 			ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
 				[](EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets) {
 					if (targets.size() > 0 && targets[0]->HasUnit())
@@ -869,10 +850,7 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnDamageEvent& ev) {
 			return ctx.IsOnBoard() && ev.target == ctx.GetAllyGeneral(); },
 		[](EffectContext ctx, OnDamageEvent& ev) {
-			std::vector<Unit*> valid;
-			for (Unit* unit : ctx.GetMap()->GetUnitsNear(ctx.GetTile()))
-				if (!ctx.SharesOwner(unit) && !unit->IsGeneral())
-					valid.push_back(unit);
+			std::vector<Unit*> valid = ctx.GetMap()->GetUnitsNear(ctx.GetTile(), FILTER_MINIONS, FILTER_ENEMY, ctx.GetOwner());
 			if (valid.size() > 0)
 				valid[rand() % valid.size()]->DealDamage(ctx.card, 7);
 	});
@@ -881,10 +859,7 @@ void Collections::RegisterEffects() {
 	effectDefinitions.try_emplace(SKILL_REPULSOR_BEAST, SKILL_REPULSOR_BEAST, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Push a nearby enemy minion to any space");
 	effectDefinitions.at(SKILL_REPULSOR_BEAST).RegisterSelfTrigger<OnPreCastThisEvent>(
 		[](EffectContext ctx, OnPreCastThisEvent& ev) {
-			std::vector<BoardTile*> valid;
-			for (Unit* unit : ctx.GetMap()->GetUnitsNear(ev.tile))
-				if (!ctx.SharesOwner(unit) && !unit->IsGeneral())
-					valid.push_back(unit->curTile);
+			std::vector<BoardTile*> valid = ctx.GetMap()->GetUnitTilesNear(ev.tile, FILTER_MINIONS, FILTER_ENEMY, ctx.GetOwner());
 			ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
 				[](EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets) {
 					std::vector<BoardTile*> valid = ctx.GetMap()->GetAllEmpty(source);
@@ -924,9 +899,8 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnTurnEndEvent& ev) {
 			return ctx.IsOnBoard() && ctx.IsOwnedBy(ev.player); },
 		[](EffectContext ctx, OnTurnEndEvent& ev) {
-			for (Unit* unit : ctx.GetMap()->GetUnitsNear(ctx.GetTile()))
-				if (ctx.SharesOwner(unit) && !unit->IsGeneral())
-					unit->AddEffect(MODIFIER_SHIRO_PUPPYDRAGON);
+			for (Unit* unit : ctx.GetMap()->GetUnitsNear(ctx.GetTile(), FILTER_MINIONS, FILTER_ALLY, ctx.GetOwner()))
+				unit->AddEffect(MODIFIER_SHIRO_PUPPYDRAGON);
 	});
 	effectDefinitions.try_emplace(MODIFIER_SHIRO_PUPPYDRAGON, MODIFIER_SHIRO_PUPPYDRAGON, KEYWORD_NONE, "Shiro Puppydragon");
 	effectDefinitions.at(MODIFIER_SHIRO_PUPPYDRAGON).AddModifier(STAT_ATK, MODTYPE_BUFF, 1);
@@ -960,7 +934,7 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnRemoveThisEvent& ev) {
 			ctx.game->RemoveAurasFromSource(ctx.effect); });
 	effectDefinitions.try_emplace(AURA_SKYWING, AURA_SKYWING, KEYWORD_NONE, "Skywing",
-		[](EffectContext ctx) { return ctx.IsAuraContext() && ctx.IsInOwnerHand() && ctx.GetAuraContext().CardSharesAuraOwner() && ctx.card->IsUnit() && ctx.GetUnit()->HasKeywords(KEYWORD_FLYING); });
+		[](EffectContext ctx) { return ctx.IsAuraContext() && ctx.IsInOwnerHand() && ctx.GetAuraContext().CardSharesAuraOwner() && ctx.card->IsUnit() && ctx.GetUnit()->HasKeyword(KEYWORD_FLYING); });
 	effectDefinitions.at(AURA_SKYWING).AddModifier(STAT_COST, MODTYPE_BUFF, -1);
 
 	//Sojourner
@@ -975,10 +949,7 @@ void Collections::RegisterEffects() {
 	effectDefinitions.try_emplace(SKILL_SONGWEAVER, SKILL_SONGWEAVER, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Give a nearby friendly minion +1/+1");
 	effectDefinitions.at(SKILL_SONGWEAVER).RegisterSelfTrigger<OnPreCastThisEvent>(
 		[](EffectContext ctx, OnPreCastThisEvent& ev) {
-			std::vector<BoardTile*> valid;
-			for (Unit* unit : ctx.GetMap()->GetUnitsNear(ev.tile))
-				if (ctx.SharesOwner(unit) && !unit->IsGeneral())
-					valid.push_back(unit->curTile);
+			std::vector<BoardTile*> valid = ctx.GetMap()->GetUnitTilesNear(ev.tile, FILTER_MINIONS, FILTER_ALLY, ctx.GetOwner());
 			ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
 				[](EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets) {
 					if (targets.size() > 0 && targets[0]->HasUnit())
@@ -1000,10 +971,7 @@ void Collections::RegisterEffects() {
 	effectDefinitions.try_emplace(SKILL_SUN_ELEMENTAL, SKILL_SUN_ELEMENTAL, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Give two random friendly minions +2 Health");
 	effectDefinitions.at(SKILL_SUN_ELEMENTAL).RegisterSelfTrigger<OnPreCastThisEvent>(
 		[](EffectContext ctx, OnPreCastThisEvent& ev) {
-			std::vector<Unit*> valid;
-			for (Unit* unit : ctx.game->GetUnits())
-				if (ctx.SharesOwner(unit) && !unit->IsGeneral())
-					valid.push_back(unit);
+			std::vector<Unit*> valid = ctx.GetMap()->GetAllUnits(FILTER_MINIONS, FILTER_ALLY, ctx.GetOwner());
 			for (int i = 0; i < 2; ++i) {
 				if (valid.size() > 0) {
 					int idx = rand() % valid.size();
@@ -1027,9 +995,8 @@ void Collections::RegisterEffects() {
 	effectDefinitions.try_emplace(SKILL_SUNSET_PARAGON, SKILL_SUNSET_PARAGON, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: ALL nearby minions deal damage to themselves equal to their Attack");
 	effectDefinitions.at(SKILL_SUNSET_PARAGON).RegisterSelfTrigger<OnPreCastThisEvent>(
 		[](EffectContext ctx, OnPreCastThisEvent& ev) {
-			for (Unit* unit : ctx.GetMap()->GetUnitsNear(ev.tile))
-				if (!unit->IsGeneral())
-					unit->DealDamage(unit, unit->atk);
+			for (Unit* unit : ctx.GetMap()->GetUnitsNear(ev.tile, FILTER_MINIONS, FILTER_NEUTRAL, nullptr))
+				unit->DealDamage(unit, unit->atk);
 	});
 
 	//Sworn Avenger
@@ -1104,7 +1071,7 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnDeathEvent& ev) {
 			std::vector<int> valid;
 			for (int i = 0; i < ctx.GetOwner()->hand.size(); ++i)
-				if (ctx.GetOwner()->hand[i]->IsUnit() && ctx.GetOwner()->hand[i]->GetUnit()->HasKeywords(KEYWORD_DYING_WISH))
+				if (ctx.GetOwner()->hand[i]->IsUnit() && ctx.GetOwner()->hand[i]->GetUnit()->HasKeyword(KEYWORD_DYING_WISH))
 					valid.push_back(i);
 			if (valid.size() > 0) {
 				int idx = valid[rand() % valid.size()];
@@ -1139,10 +1106,7 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnReplaceEvent& ev) {
 			return ctx.IsOnBoard() && ctx.SharesOwner(ev.card); },
 		[](EffectContext ctx, OnReplaceEvent& ev) {
-			std::vector<Unit*> valid;
-			for (Unit* unit : ctx.game->GetUnits())
-				if (!ctx.SharesOwner(unit))
-					valid.push_back(unit);
+			std::vector<Unit*> valid = ctx.GetMap()->GetAllUnits(FILTER_ALL, FILTER_ENEMY, ctx.GetOwner());
 			if (valid.size() > 0)
 				valid[rand() % valid.size()]->DealDamage(ctx.card, 2);
 	});
@@ -1153,9 +1117,8 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnMoveEvent& ev) {
 			return ctx.IsCardOnBoard(ev.unit) && !ev.wasTeleported; },
 		[](EffectContext ctx, OnMoveEvent& ev) {
-			for (Unit* unit : ctx.GetMap()->GetUnitsNear(ctx.GetTile()))
-				if (ctx.SharesOwner(unit) && !unit->IsGeneral())
-					unit->AddEffect(MODIFIER_WIND_RUNNER);
+			for (Unit* unit : ctx.GetMap()->GetUnitsNear(ctx.GetTile(), FILTER_MINIONS, FILTER_ALLY, ctx.GetOwner()))
+				unit->AddEffect(MODIFIER_WIND_RUNNER);
 	});
 	effectDefinitions.try_emplace(MODIFIER_WIND_RUNNER, MODIFIER_WIND_RUNNER, KEYWORD_NONE, "Wind Runner");
 	effectDefinitions.at(MODIFIER_WIND_RUNNER).AddModifier(STAT_ATK, MODTYPE_BUFF, 1).AddModifier(STAT_HP, MODTYPE_BUFF, 1);
@@ -1180,10 +1143,7 @@ void Collections::RegisterEffects() {
 	effectDefinitions.try_emplace(SKILL_WOODWEN, SKILL_WOODWEN, KEYWORD_PROVOKE | KEYWORD_OPENING_GAMBIT, "{Provoke}|{Opening Gambit}: Give a nearby friendly minion {Provoke}");
 	effectDefinitions.at(SKILL_WOODWEN).RegisterSelfTrigger<OnPreCastThisEvent>(
 		[](EffectContext ctx, OnPreCastThisEvent& ev) {
-			std::vector<BoardTile*> valid;
-			for (Unit* unit : ctx.GetMap()->GetUnitsNear(ev.tile))
-				if (ctx.SharesOwner(unit) && !unit->IsGeneral())
-					valid.push_back(unit->curTile);
+			std::vector<BoardTile*> valid = ctx.GetMap()->GetUnitTilesNear(ev.tile, FILTER_MINIONS, FILTER_ALLY, ctx.GetOwner());
 			ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
 				[](EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets) {
 					if (targets.size() > 0 && targets[0]->HasUnit())

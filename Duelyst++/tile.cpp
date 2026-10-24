@@ -113,6 +113,28 @@ BoardTile* Map::GetRandomEmpty(BoardTile* ignore) {
 	return nullptr;
 }
 
+//Get all units on board with optional filter
+std::vector<Unit*> Map::GetAllUnits() { return GetAllUnits(FILTER_ALL, FILTER_NEUTRAL, nullptr); }
+std::vector<Unit*> Map::GetAllUnits(eUnitFilterType type, eUnitFilterAllegiance allegiance, Player* player) {
+	std::vector<Unit*> valid;
+	for (BoardTile(&column)[height] : tiles)
+		for (BoardTile& tile : column)
+			if (tile.HasUnit() && FilterUnit(tile.unit, type, allegiance, player))
+				valid.push_back(tile.unit);
+	return valid;
+}
+
+//Get all tiles with units with optional filter
+std::vector<BoardTile*> Map::GetAllUnitTiles() { return GetAllUnitTiles(FILTER_ALL, FILTER_NEUTRAL, nullptr); }
+std::vector<BoardTile*> Map::GetAllUnitTiles(eUnitFilterType type, eUnitFilterAllegiance allegiance, Player* player) {
+	std::vector<BoardTile*> valid;
+	for (BoardTile(&column)[height] : tiles)
+		for (BoardTile& tile : column)
+			if (tile.HasUnit() && FilterUnit(tile.unit, type, allegiance, player))
+				valid.push_back(&tile);
+	return valid;
+}
+
 //Get all empty corners
 std::vector<BoardTile*> Map::GetEmptyCorners() {
 	std::vector<BoardTile*> valid;
@@ -157,15 +179,30 @@ std::vector<BoardTile*> Map::GetEmptyNear(BoardTile* tile) {
 	return valid;
 }
 
-//Get units near a given tile
-std::vector<Unit*> Map::GetUnitsNear(BoardTile* tile) {
+//Get units near a given tile with optional filter
+std::vector<Unit*> Map::GetUnitsNear(BoardTile* tile) { return GetUnitsNear(tile, FILTER_ALL, FILTER_NEUTRAL, nullptr); }
+std::vector<Unit*> Map::GetUnitsNear(BoardTile* tile, eUnitFilterType type, eUnitFilterAllegiance allegiance, Player* player) {
 	std::vector<Unit*> valid;
 	if (tile != nullptr) {
 		NearbyRange range = NearbyRange(tile->pos, 1, width, height);
 		for (int i = range.x0; i <= range.x1; ++i)
 			for (int j = range.y0; j <= range.y1; ++j)
-				if (&tiles[i][j] != tile && tiles[i][j].HasUnit())
+				if (&tiles[i][j] != tile && tiles[i][j].HasUnit() && FilterUnit(tiles[i][j].unit, type, allegiance, player))
 					valid.push_back(tiles[i][j].unit);
+	}
+	return valid;
+}
+
+//Get tiles with units near a given tile with optional filter
+std::vector<BoardTile*> Map::GetUnitTilesNear(BoardTile* tile) { return GetUnitTilesNear(tile, FILTER_ALL, FILTER_NEUTRAL, nullptr); }
+std::vector<BoardTile*> Map::GetUnitTilesNear(BoardTile* tile, eUnitFilterType type, eUnitFilterAllegiance allegiance, Player* player) {
+	std::vector<BoardTile*> valid;
+	if (tile != nullptr) {
+		NearbyRange range = NearbyRange(tile->pos, 1, width, height);
+		for (int i = range.x0; i <= range.x1; ++i)
+			for (int j = range.y0; j <= range.y1; ++j)
+				if (&tiles[i][j] != tile && tiles[i][j].HasUnit() && FilterUnit(tiles[i][j].unit, type, allegiance, player))
+					valid.push_back(&tiles[i][j]);
 	}
 	return valid;
 }
@@ -208,4 +245,13 @@ void Map::ConcatUnique(std::vector<BoardTile*>& base, const std::vector<BoardTil
 	for (BoardTile* tile : add)
 		if (std::find(base.begin(), base.end(), tile) == base.end())
 			base.push_back(tile);
+}
+
+//Filter unit by type and allegiance, returns true if unit passes checks
+bool Map::FilterUnit(Unit* unit, eUnitFilterType type, eUnitFilterAllegiance allegiance, Player* player) {
+	if (type == FILTER_GENERALS && unit->IsMinion()) return false;
+	if (type == FILTER_MINIONS && unit->IsGeneral()) return false;
+	if (allegiance == FILTER_ALLY && unit->owner != player) return false;
+	if (allegiance == FILTER_ENEMY && unit->owner == player) return false;
+	return true;
 }

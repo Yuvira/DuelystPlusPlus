@@ -17,6 +17,18 @@ enum eFeature {
 	TILE_CREEP,
 };
 
+//Unit filters
+enum eUnitFilterType {
+	FILTER_ALL,
+	FILTER_GENERALS,
+	FILTER_MINIONS,
+};
+enum eUnitFilterAllegiance {
+	FILTER_NEUTRAL,
+	FILTER_ALLY,
+	FILTER_ENEMY
+};
+
 //Custom co-ordinate because you can't vector COORD
 class Coord {
 public:
@@ -76,6 +88,10 @@ public:
 	//Get all
 	std::vector<BoardTile*> GetAllEmpty();
 	std::vector<BoardTile*> GetAllEmpty(BoardTile* ignore);
+	std::vector<Unit*> GetAllUnits();
+	std::vector<Unit*> GetAllUnits(eUnitFilterType type, eUnitFilterAllegiance allegiance, Player* player);
+	std::vector<BoardTile*> GetAllUnitTiles();
+	std::vector<BoardTile*> GetAllUnitTiles(eUnitFilterType type, eUnitFilterAllegiance allegiance, Player* player);
 	BoardTile* GetRandomEmpty();
 	BoardTile* GetRandomEmpty(BoardTile* ignore);
 
@@ -87,6 +103,9 @@ public:
 	std::vector<BoardTile*> GetAllNear(BoardTile* tile);
 	std::vector<BoardTile*> GetEmptyNear(BoardTile* tile);
 	std::vector<Unit*> GetUnitsNear(BoardTile* tile);
+	std::vector<Unit*> GetUnitsNear(BoardTile* tile, eUnitFilterType type, eUnitFilterAllegiance allegiance, Player* player);
+	std::vector<BoardTile*> GetUnitTilesNear(BoardTile* tile);
+	std::vector<BoardTile*> GetUnitTilesNear(BoardTile* tile, eUnitFilterType type, eUnitFilterAllegiance allegiance, Player* player);
 	BoardTile* GetRandomEmptyNear(BoardTile* tile);
 
 	//Get in range
@@ -97,6 +116,7 @@ public:
 
 	//Utils
 	void ConcatUnique(std::vector<BoardTile*>& base, const std::vector<BoardTile*>& add);
+	bool FilterUnit(Unit* unit, eUnitFilterType type, eUnitFilterAllegiance allegiance, Player* player);
 
 	//Tile objects
 	BoardTile tiles[9][5];

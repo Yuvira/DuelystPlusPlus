@@ -13,12 +13,7 @@ void Collections::RegisterSpells() {
 	//Breath of The Unborn
 	effectDefinitions.try_emplace(SPELL_BREATH_OF_THE_UNBORN, SPELL_BREATH_OF_THE_UNBORN, "Deal 2 damage to all enemy minions. Fully heal all friendly minions",
 		[](Game* game, Spell* spell) {
-			std::vector<BoardTile*> valid;
-			for (Unit* unit : game->GetUnits())
-				if (!unit->IsGeneral())
-					valid.push_back(unit->curTile);
-			return valid;
-	});
+			return game->map.GetAllUnitTiles(FILTER_MINIONS, FILTER_NEUTRAL, nullptr); });
 	effectDefinitions.at(SPELL_BREATH_OF_THE_UNBORN).RegisterSelfTrigger<OnResolveThisEvent>(
 		[](EffectContext ctx, OnResolveThisEvent& ev) {
 			for (Unit* unit : ctx.game->GetUnits()) {
@@ -33,12 +28,7 @@ void Collections::RegisterSpells() {
 	//Consuming Rebirth
 	effectDefinitions.try_emplace(SPELL_CONSUMING_REBIRTH, SPELL_CONSUMING_REBIRTH, "Destroy a friendly minion. At the end of your turn, re-summon it on the same space and give it +1/+1.",
 		[](Game* game, Spell* spell) {
-			std::vector<BoardTile*> valid;
-			for (Unit* unit : game->GetUnits())
-				if (spell->owner == unit->owner && !unit->IsGeneral())
-					valid.push_back(unit->curTile);
-			return valid;
-	});
+			return game->map.GetAllUnitTiles(FILTER_MINIONS, FILTER_ALLY, spell->owner); });
 	effectDefinitions.at(SPELL_CONSUMING_REBIRTH).RegisterSelfTrigger<OnResolveThisEvent>(
 		[](EffectContext ctx, OnResolveThisEvent& ev) {
 			if (ctx.IsSpellContext() && ev.tile->HasUnit()) {
@@ -68,7 +58,7 @@ void Collections::RegisterSpells() {
 	//Dark Seed
 	effectDefinitions.try_emplace(SPELL_DARK_SEED, SPELL_DARK_SEED, "Deal 1 damage to the enemy general for each card in the opponent's action bar",
 		[](Game* game, Spell* spell) {
-			return std::vector<BoardTile*> { spell->owner->opponent->general->curTile }; });
+			return game->map.GetAllUnitTiles(FILTER_GENERALS, FILTER_ENEMY, spell->owner); });
 	effectDefinitions.at(SPELL_DARK_SEED).RegisterSelfTrigger<OnResolveThisEvent>(
 		[](EffectContext ctx, OnResolveThisEvent& ev) {
 			if (ev.tile->HasUnit()) {
