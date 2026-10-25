@@ -25,6 +25,7 @@ enum eMode {
 	MODE_NONE,
 	MODE_MOVE,
 	MODE_HAND,
+	MODE_ARTIFACT,
 	MODE_SELECT
 };
 
@@ -103,13 +104,16 @@ public:
 	bool RemoveTile(Tile* tile);
 	void Replace();
 	void ChangeTurn(bool newTurn);
-	void Overflow(Card* card);
+	void SendToGrave(Card* card);
 
 	//Selection & Movement
 	void SelectTile(BoardTile& tile);
 	void SelectCard();
 	void MoveCursor(int x, int y);
 	void MoveCursorHand(int x, int y);
+	void MoveCursorArtifacts(int x, int y);
+	void MoveToHand(int x);
+	void MoveToArtifacts(int x);
 	void SetTargetSize(int size);
 	void SetDefaultSelectionIndex();
 	void MoveSelect(int dX, int dY);
@@ -186,6 +190,7 @@ private:
 	Coord pos;
 	Coord castPos;
 	int handIdx;
+	int artifactIdx;
 	int selectionIdx;
 	int targetSize;
 	int targetMinDelta;
@@ -218,6 +223,9 @@ private:
 	Sprite board;
 	Sprite tileBorder;
 	Sprite chars[10];
+	Sprite artifactSprite;
+	Sprite durabilitySpriteLeft;
+	Sprite durabilitySpriteRight;
 
 	//Debug
 	bool debugMode;

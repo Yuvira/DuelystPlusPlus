@@ -116,7 +116,7 @@ bool Player::Draw() {
 		hand.back()->UpdateAuras();
 	}
 	else
-		game->Overflow(card);
+		game->SendToGrave(card);
 	game->QueueEvent(new OnDrawEvent(game->GetTurnCount(), card));
 	return true;
 }
@@ -133,7 +133,7 @@ void Player::AddNewToHand(eCard cardId) {
 		hand.back()->UpdateAuras();
 	}
 	else
-		game->Overflow(newCard);
+		game->SendToGrave(newCard);
 	game->QueueEvent(new OnAddToHandEvent(game->GetTurnCount(), newCard));
 }
 
@@ -202,6 +202,28 @@ bool Player::RemoveFromDeck(PlayableCard* card) {
 	return false;
 }
 
+//Artifacts
+void Player::AddArtifact(Artifact* artifact) {
+	artifacts.push_back(artifact);
+	if (artifacts.size() > maxArtifacts) {
+		Artifact* remove = artifacts[0];
+		remove->RemoveEffects();
+		artifacts.erase(artifacts.begin());
+		game->SendToGrave(remove);
+	}
+	artifact->AddEffects();
+	artifact->UpdateAuras();
+}
+void Player::RemoveArtifact(Artifact* artifact) {
+	for (int i = 0; i < artifacts.size(); ++i) {
+		if (artifacts[i] == artifact) {
+			artifact->RemoveEffects();
+			artifacts.erase(artifacts.begin() + i);
+			--i;
+		}
+	}
+}
+
 #pragma endregion
 
 #pragma region Resource Management
@@ -251,6 +273,12 @@ std::vector<PlayableCard*> Player::GetDeckAndHand() {
 	valid.insert(valid.end(), hand.begin(), hand.end());
 	valid.insert(valid.end(), deck.begin(), deck.end());
 	return valid;
+}
+
+//Get iterable artifacts
+std::vector<Artifact*> Player::GetArtifacts() {
+	std::vector<Artifact*> artifactIterator = artifacts;
+	return artifactIterator;
 }
 
 //Check if player has a specific card in their hand

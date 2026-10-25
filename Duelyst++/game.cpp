@@ -57,6 +57,11 @@ Game::Game(Collections* collections, bool* modeSwitch) : players{ Player(this, I
 	for (int i = 0; i < 10; ++i)
 		chars[i].CreateFromChar(c[i]);
 
+	//Artifact sprites
+	artifactSprite.CreateFromString("[]");
+	durabilitySpriteLeft.CreateFromChar('Þ');
+	durabilitySpriteRight.CreateFromChar('Ý');
+
 	//Turn indicator
 	light.CreateFromString("®é¯", COLOR_LTBLUE);
 
@@ -162,6 +167,29 @@ void Game::RenderGame(Renderer& renderer) {
 	players[0].Render(renderer, true);
 	players[1].Render(renderer, false);
 
+	//Artifacts
+	for (int i = 0; i < players[0].GetArtifacts().size(); ++i) {
+		renderer.Render(artifactSprite, 26 - (i * 7), 3);
+		for (int j = 0; j < players[0].GetArtifacts()[i]->GetDurability(); ++j) {
+			renderer.Render(durabilitySpriteLeft, (24 - (i * 7)) - j, 3);
+		}
+	}
+	for (int i = 0; i < players[1].GetArtifacts().size(); ++i) {
+		renderer.Render(artifactSprite, 37 + (i * 7), 3);
+		for (int j = 0; j < players[1].GetArtifacts()[i]->GetDurability(); ++j) {
+			renderer.Render(durabilitySpriteRight, 40 + (i * 7) + j, 3);
+		}
+	}
+	if (mode == MODE_ARTIFACT) {
+		int s0 = players[0].GetArtifacts().size();
+		artifactSprite.SetColor(COLOR_AQUA);
+		if (artifactIdx < s0)
+			renderer.Render(artifactSprite, 26 - (((s0 - artifactIdx) - 1) * 7), 3);
+		else
+			renderer.Render(artifactSprite, 37 + ((artifactIdx - s0) * 7), 3);
+		artifactSprite.SetColor(COLOR_LTWHITE);
+	}
+
 	//Sidebar
 	RenderSidebar(renderer);
 
@@ -207,6 +235,15 @@ void Game::RenderSidebar(Renderer& renderer) {
 
 	}
 
+	//Artifact
+	else if (mode == MODE_ARTIFACT) {
+		int s0 = players[0].GetArtifacts().size();
+		if (artifactIdx < s0)
+			players[0].GetArtifacts()[(s0 - artifactIdx) - 1]->DrawDetails(renderer, y);
+		else
+			players[1].GetArtifacts()[artifactIdx - s0]->DrawDetails(renderer, y);
+	}
+
 }
 
 #pragma region Debug Render
@@ -248,12 +285,21 @@ void Game::RenderDebug(Renderer& renderer) {
 		renderer.Render(debugSprite, 165, 1);
 		lines.clear();
 
+		//Artifact data
+		lines.push_back("{Artifacts}");
+		for (Player& player : players)
+			for (Artifact* artifact : player.GetArtifacts())
+				lines.push_back(artifact->name);
+		debugSprite.CreateFromTextBlock(lines);
+		renderer.Render(debugSprite, 190, 1);
+		lines.clear();
+
 		//Graveyard data
 		lines.push_back("{Graveyard}");
 		for (Card* card : grave)
 			lines.push_back(card->name);
 		debugSprite.CreateFromTextBlock(lines);
-		renderer.Render(debugSprite, 190, 1);
+		renderer.Render(debugSprite, 215, 1);
 		lines.clear();
 
 		//Aura data
@@ -261,7 +307,7 @@ void Game::RenderDebug(Renderer& renderer) {
 		for (Aura* aura : auras)
 			lines.push_back(aura->GetSourceCard()->name);
 		debugSprite.CreateFromTextBlock(lines);
-		renderer.Render(debugSprite, 215, 1);
+		renderer.Render(debugSprite, 240, 1);
 		lines.clear();
 
 		//Tile data
@@ -269,7 +315,7 @@ void Game::RenderDebug(Renderer& renderer) {
 		for (Tile* tile : tiles)
 			lines.push_back(tile->name);
 		debugSprite.CreateFromTextBlock(lines);
-		renderer.Render(debugSprite, 190, 25);
+		renderer.Render(debugSprite, 215, 25);
 		lines.clear();
 
 		//Delayed trigger data
@@ -277,7 +323,7 @@ void Game::RenderDebug(Renderer& renderer) {
 		for (Spell* spell : delayedTriggers)
 			lines.push_back(spell->name);
 		debugSprite.CreateFromTextBlock(lines);
-		renderer.Render(debugSprite, 215, 25);
+		renderer.Render(debugSprite, 240, 25);
 
 	}
 
@@ -360,6 +406,17 @@ void Game::Input() {
 		else if (asciiVal == 32)                                               //Space
 			if (handIdx < players[turn].hand.size())
 				SelectCard();
+
+	}
+
+	//Navigating artifacts
+	else if (mode == MODE_ARTIFACT) {
+
+		//Move pointer
+		if (asciiVal == 119 || asciiVal == 87) { MoveCursorArtifacts(0, 4); }       //W
+		else if (asciiVal == 97 || asciiVal == 65) { MoveCursorArtifacts(-1, -1); } //A
+		else if (asciiVal == 115 || asciiVal == 83) { MoveCursorArtifacts(0, 0); }  //S
+		else if (asciiVal == 100 || asciiVal == 68) { MoveCursorArtifacts(1, -1); } //D
 
 	}
 
@@ -447,6 +504,12 @@ void Game::Update() {
 			--i;
 		}
 	}
+
+	//Clean up destroyed artifacts
+	for (Player& player : players)
+		for (Artifact* artifact : player.GetArtifacts())
+			if (artifact->IsDestroyed())
+				player.RemoveArtifact(artifact);
 
 	//Update mana bars
 	players[0].UpdateMana(COLOR_LTBLUE);
@@ -701,6 +764,8 @@ void Game::PostCast() {
 		grave.push_back(activeCard);
 		spellHistory.push_back(activeCard->GetSpell());
 	}
+	else if (activeCard->IsArtifact())
+		players[turn].AddArtifact(activeCard->GetArtifact());
 	ProcessEventStack();
 
 	//Remove active card reference
@@ -886,7 +951,7 @@ void Game::ChangeTurn(bool newTurn) {
 }
 
 //Send card that can't be added to hand to graveyard instead
-void Game::Overflow(Card* card) { grave.push_back(card); }
+void Game::SendToGrave(Card* card) { grave.push_back(card); }
 
 #pragma endregion
 
@@ -938,10 +1003,13 @@ void Game::SelectCard() {
 //Move cursor position
 void Game::MoveCursor(int x, int y) {
 	pos.x = (pos.x + x + 9) % 9;
-	if ((y == -1 && pos.y == 0) || (y == 1 && pos.y == 4)) {
-		handIdx = max(min(pos.x - 1, 5), 0);
-		pos = Coord(-1, -1);
-		mode = MODE_HAND;
+	int s0 = players[0].GetArtifacts().size();
+	int s1 = players[1].GetArtifacts().size();
+	if (y == -1 && pos.y == 0 && s0 + s1 > 0) {
+		MoveToArtifacts(pos.x);
+	}
+	else if ((y == -1 && pos.y == 0) || (y == 1 && pos.y == 4)) {
+		MoveToHand(pos.x);
 	}
 	else
 		pos.y = (pos.y + y + 5) % 5;
@@ -950,12 +1018,67 @@ void Game::MoveCursor(int x, int y) {
 //Move cursor position
 void Game::MoveCursorHand(int x, int y) {
 	handIdx = (handIdx + x + 6) % 6;
+	int s0 = players[0].GetArtifacts().size();
+	int s1 = players[1].GetArtifacts().size();
 	if (y != -1) {
-		pos = Coord(handIdx + 1, y);
-		handIdx = -1;
-		mode = MODE_NONE;
-		return;
+		if (y > 0 || (y == 0 && s0 + s1 == 0)) {
+			pos = Coord(handIdx + 1, y);
+			handIdx = -1;
+			mode = MODE_NONE;
+			return;
+		}
+		else
+			MoveToArtifacts(handIdx + 1);
 	}
+}
+
+//Move cursor position
+void Game::MoveCursorArtifacts(int x, int y) {
+	int s0 = players[0].GetArtifacts().size();
+	int s1 = players[1].GetArtifacts().size();
+	int count = s0 + s1;
+	artifactIdx = (artifactIdx + x + count) % count;
+	if (y != -1) {
+		int left = s0 > 0 ? 4 - s0 : 5;
+		int xPos = left + artifactIdx;
+		if (s0 > 0 && artifactIdx >= s0)
+			xPos += 1;
+		if (y == 0) {
+			pos = Coord(xPos, y);
+			artifactIdx = -1;
+			mode = MODE_NONE;
+			return;
+		}
+		else
+			MoveToHand(xPos);
+	}
+}
+
+//Move cursor into hand based on board position
+void Game::MoveToHand(int x) {
+	handIdx = max(min(x - 1, 5), 0);
+	pos = Coord(-1, -1);
+	artifactIdx = -1;
+	mode = MODE_HAND;
+}
+
+//Move cursor into artifacts based on board position
+void Game::MoveToArtifacts(int x) {
+	int s0 = players[0].GetArtifacts().size();
+	int s1 = players[1].GetArtifacts().size();
+	int left = s0 > 0 ? 4 - s0 : 5;
+	int right = s1 > 0 ? 4 + s1 : 3;
+	if (x <= left)
+		artifactIdx = 0;
+	else if (x >= right)
+		artifactIdx = s0 + s1 - 1;
+	else if (x < 4 || s0 == 0)
+		artifactIdx = x - left;
+	else
+		artifactIdx = (x - 1) - left;
+	pos = Coord(-1, -1);
+	handIdx = -1;
+	mode = MODE_ARTIFACT;
 }
 
 //Set target size (clamped to 1x1 - 3x3)

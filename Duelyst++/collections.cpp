@@ -17,6 +17,7 @@
 Collections::Collections() {
 	RegisterEffects();
 	RegisterSpells();
+	RegisterArtifacts();
 	RegisterCards();
 	RegisterTiles();
 	for (const eCard& key : cardDefinitions | std::ranges::views::keys)
@@ -58,6 +59,8 @@ Card* Collections::GetNewCardInstance(eCard cardId, Game* game, Player* player) 
 		return new Unit(cardDefinitions.at(cardId), game, player);
 	else if (cardDefinitions.at(cardId).type == CARDTYPE_SPELL)
 		return new Spell(cardDefinitions.at(cardId), game, player);
+	else if (cardDefinitions.at(cardId).type == CARDTYPE_ARTIFACT)
+		return new Artifact(cardDefinitions.at(cardId), game, player);
 	else if (cardDefinitions.at(cardId).type == CARDTYPE_TILE)
 		return new Tile(cardDefinitions.at(cardId), game, player);
 	return nullptr;
@@ -71,6 +74,8 @@ PlayableCard* Collections::GetNewPlayableCardInstance(eCard cardId, Game* game, 
 		return new Unit(cardDefinitions.at(cardId), game, player);
 	else if (cardDefinitions.at(cardId).type == CARDTYPE_SPELL)
 		return new Spell(cardDefinitions.at(cardId), game, player);
+	else if (cardDefinitions.at(cardId).type == CARDTYPE_ARTIFACT)
+		return new Artifact(cardDefinitions.at(cardId), game, player);
 	return nullptr;
 }
 
@@ -79,6 +84,13 @@ Unit* Collections::GetNewUnitInstance(eCard cardId, Game* game, Player* player) 
 	if (!cardDefinitions.contains(cardId) || cardDefinitions.at(cardId).type != CARDTYPE_UNIT)
 		return nullptr;
 	return new Unit(cardDefinitions.at(cardId), game, player);
+}
+
+//Get a new artifact instance based on definition with ID
+Artifact* Collections::GetNewArtifactInstance(eCard cardId, Game* game, Player* player) {
+	if (!cardDefinitions.contains(cardId) || cardDefinitions.at(cardId).type != CARDTYPE_ARTIFACT)
+		return nullptr;
+	return new Artifact(cardDefinitions.at(cardId), game, player);
 }
 
 //Get a new unit instance based on definition with ID

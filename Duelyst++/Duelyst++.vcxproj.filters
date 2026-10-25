@@ -75,6 +75,12 @@
     <ClCompile Include="tile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="artifact.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="artifactregistry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="renderer.h">

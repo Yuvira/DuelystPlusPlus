@@ -232,6 +232,10 @@ int Unit::DealDamage(Card* source, int damage) {
 			if (hp <= 0)
 				Destroy(source);
 			game->QueueEvent(damageEvent);
+			if (owner->general == this) {
+				for (Artifact* artifact : owner->GetArtifacts())
+					artifact->Damage(source);
+			}
 		}
 
 	}

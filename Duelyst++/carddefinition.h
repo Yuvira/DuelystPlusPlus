@@ -10,6 +10,7 @@
 enum eCardType {
 	CARDTYPE_UNIT,
 	CARDTYPE_SPELL,
+	CARDTYPE_ARTIFACT,
 	CARDTYPE_TILE
 };
 
@@ -49,6 +50,14 @@ struct CardDefinition {
 		this->cost = cost;
 		sprite.CreateFromFile("resources/spells/" + path + ".txt");
 		GenerateDetailName(" - SPELL");
+		Utils::GenerateStatSprite(detailStatSprite, cost);
+	}
+	CardDefinition(eCard cardId, eRarity rarity, eFaction faction, std::string path, std::string name, int cost, int hp, eEffect effect)
+		: CardDefinition(CARDTYPE_ARTIFACT, cardId, rarity, faction, path, name, effect) {
+		this->cost = cost;
+		this->hp = hp;
+		sprite.CreateFromFile("resources/artifacts/" + path + ".txt");
+		GenerateDetailName(" - ARTIFACT");
 		Utils::GenerateStatSprite(detailStatSprite, cost);
 	}
 	CardDefinition(eCard cardId, eRarity rarity, eFaction faction, std::string path, std::string name, eEffect effect)

@@ -7,6 +7,7 @@
 #include "modifiers.h"
 
 //Definitions
+class Artifact;
 class Aura;
 class BoardTile;
 class BoardCard;
@@ -55,9 +56,11 @@ public:
 	//Subclass getters and helpers
 	virtual Unit* GetUnit() { return nullptr; }
 	virtual Spell* GetSpell() { return nullptr; }
+	virtual Artifact* GetArtifact() { return nullptr; }
 	virtual Tile* GetTile() { return nullptr; }
 	bool IsUnit() { return GetUnit() != nullptr; }
 	bool IsSpell() { return GetSpell() != nullptr; }
+	bool IsArtifact() { return GetArtifact() != nullptr; }
 	bool IsTile() { return GetTile() != nullptr; }
 	virtual bool IsGeneral() { return false; }
 	virtual bool IsMinion() { return false; }
@@ -228,6 +231,44 @@ private:
 
 	//Spell effect
 	SpellEffect* spellEffect;
+
+};
+
+//Spell class
+class Artifact : public PlayableCard {
+
+public:
+
+	//Constructor
+	Artifact(const CardDefinition& definition, Game* game, Player* owner);
+	~Artifact() override;
+
+	//Rendering
+	void DrawDetails(Renderer& renderer, int& y) override;
+
+	//Updates & Stats
+	void UpdateModifiers() override;
+	int GetStat(eStat stat, bool withAuras) override;
+
+	//Actions
+	std::vector<BoardTile*> GetTargets() override;
+	void Damage(Card* source);
+	void Destroy(Card* source);
+	void AddEffects();
+	void RemoveEffects();
+
+	//Getters
+	Artifact* GetArtifact() override { return this; }
+	int GetDurability() { return durability; }
+	bool IsDestroyed() { return destroyed; }
+	bool IsActive() { return isActive; }
+
+private:
+
+	//Properties
+	int durability;
+	bool destroyed;
+	bool isActive;
 
 };
 

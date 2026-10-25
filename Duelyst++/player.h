@@ -5,11 +5,12 @@
 #include "sprite.h"
 
 //Define
-class Game;
-class Collections;
-class Renderer;
+class Artifact;
 class Card;
+class Collections;
+class Game;
 class PlayableCard;
+class Renderer;
 class Unit;
 enum eCard;
 
@@ -39,6 +40,8 @@ public:
 	bool RemoveFromHand(PlayableCard* card);
 	bool RemoveFromDeck(int idx);
 	bool RemoveFromDeck(PlayableCard* card);
+	void AddArtifact(Artifact* artifact);
+	void RemoveArtifact(Artifact* artifact);
 
 	//Resource management
 	void AddMana(int add);
@@ -52,6 +55,7 @@ public:
 
 	//Utils
 	std::vector<PlayableCard*> GetDeckAndHand();
+	std::vector<Artifact*> GetArtifacts();
 	bool HasCardInHand(Card* match);
 
 	//Properties
@@ -70,7 +74,9 @@ private:
 	int mana;
 	int maxReplaces;
 	int replaces;
+	std::vector<Artifact*> artifacts;
 	Sprite uiReplace;
 	Sprite uiCrystal[9];
+	static constexpr int maxArtifacts = 3;
 
 };

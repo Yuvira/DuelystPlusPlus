@@ -23,13 +23,16 @@ public:
 	Collections();
 	~Collections();
 
-	//Instance generators
+	//Effect instance generators
 	Effect* GetNewCardEffectInstance(eEffect effectId);
 	Aura* GetNewAuraInstance(eEffect auraId, Player* owner, Card* sourceCard, Effect* sourceEffect);
 	SpellEffect* GetNewSpellEffectInstance(eEffect effectId);
+
+	//Card instance generators
 	Card* GetNewCardInstance(eCard cardId, Game* game, Player* player);
 	PlayableCard* GetNewPlayableCardInstance(eCard cardId, Game* game, Player* player);
 	Unit* GetNewUnitInstance(eCard cardId, Game* game, Player* player);
+	Artifact* GetNewArtifactInstance(eCard cardId, Game* game, Player* player);
 	Tile* GetNewTileInstance(eCard cardId, Game* game, Player* player);
 
 	//Rendering
@@ -55,6 +58,7 @@ private:
 	//Registers
 	void RegisterEffects();
 	void RegisterSpells();
+	void RegisterArtifacts();
 	void RegisterTiles();
 	void RegisterCards();
 

@@ -119,6 +119,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="artifact.cpp" />
+    <ClCompile Include="artifactregistry.cpp" />
     <ClCompile Include="cardregistry.cpp" />
     <ClCompile Include="cardviewer.cpp" />
     <ClCompile Include="collections.cpp" />
