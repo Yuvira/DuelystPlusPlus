@@ -153,6 +153,9 @@ void Collections::RenderCardDetails(Renderer& renderer, int x, int& y, eCard car
 //Draw details for card instance
 void Collections::RenderCardDetails(Renderer& renderer, int x, int& y, Card* card) {
 
+	//Starting y position
+	int startY = y;
+
 	//Draw details
 	renderer.Render(card->ReadSprite(), x, y);
 	renderer.Render(card->ReadDetailNameSprite(), x + 6, y);
@@ -171,7 +174,8 @@ void Collections::RenderCardDetails(Renderer& renderer, int x, int& y, Card* car
 	//Draw tokens
 	std::vector<eCard> tokens = card->GetTokens();
 	if (tokens.size() > 0) {
-		y = max(y, 7);
+		y = max(y, startY + 6);
+		startY = y + 2;
 		renderer.Render(tokenDividerSprite, x, y);
 	}
 	for (eCard tokenId : tokens) {
@@ -181,7 +185,7 @@ void Collections::RenderCardDetails(Renderer& renderer, int x, int& y, Card* car
 
 	//Draw tile
 	if (card->IsUnit() && card->GetUnit()->IsOnBoard() && card->GetUnit()->curTile->HasTile()) {
-		y = max(y, 7);
+		y = max(y, startY + 6);
 		renderer.Render(tileDividerSprite, x, y);
 		y += 2;
 		RenderCardDetails(renderer, x, y, card->GetUnit()->curTile->tile);
