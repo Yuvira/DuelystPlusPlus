@@ -226,6 +226,18 @@ void Collections::RegisterSpells() {
 	});
 	effectDefinitions.at(SPELL_SHADOW_NOVA).SetToken(CARD_SHADOW_CREEP);
 
+	//Shadow Reflection
+	effectDefinitions.try_emplace(SPELL_SHADOW_REFLECTION, SPELL_SHADOW_REFLECTION, "Give a friendly minion +5 Attack",
+		[](Game* game, Spell* spell) {
+			return game->map.GetAllUnitTiles(FILTER_MINIONS, FILTER_ALLY, spell->owner); });
+	effectDefinitions.at(SPELL_SHADOW_REFLECTION).RegisterSelfTrigger<OnResolveThisEvent>(
+		[](EffectContext ctx, OnResolveThisEvent& ev) {
+			if (ev.tile->HasUnit())
+				ev.tile->unit->AddEffect(MODIFIER_SHADOW_REFLECTION);
+	});
+	effectDefinitions.try_emplace(MODIFIER_SHADOW_REFLECTION, MODIFIER_SHADOW_REFLECTION, KEYWORD_NONE, "Shadow Reflection");
+	effectDefinitions.at(MODIFIER_SHADOW_REFLECTION).AddModifier(STAT_ATK, MODTYPE_BUFF, 5);
+
 #pragma endregion
 
 }

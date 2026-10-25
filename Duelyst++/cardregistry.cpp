@@ -25,6 +25,9 @@ void Collections::RegisterCards() {
 		CARD_BLOODTIDE_PRIESTESS, CARD_BLOODTIDE_PRIESTESS, RARITY_RARE, FACTION_ABYSSIAN, TRIBE_NONE,
 		"bloodtidepriestess", "Bloodtide Priestess", 4, 3, 3, SKILL_BLOODTIDE_PRIESTESS);
 	cardDefinitions.try_emplace(
+		CARD_DARKSPINE_ELEMENTAL, CARD_DARKSPINE_ELEMENTAL, RARITY_RARE, FACTION_ABYSSIAN, TRIBE_NONE,
+		"darkspineelemental", "Darkspine Elemental", 2, 1, 4, SKILL_DARKSPINE_ELEMENTAL);
+	cardDefinitions.try_emplace(
 		CARD_DEEPFIRE_DEVOURER, CARD_DEEPFIRE_DEVOURER, RARITY_COMMON, FACTION_ABYSSIAN, TRIBE_NONE,
 		"deepfiredevourer", "Deepfire Devourer", 4, 4, 4, SKILL_DEEPFIRE_DEVOURER);
 	cardDefinitions.try_emplace(
@@ -36,6 +39,15 @@ void Collections::RegisterCards() {
 	cardDefinitions.try_emplace(
 		CARD_REAPER_OF_THE_NINE_MOONS, CARD_REAPER_OF_THE_NINE_MOONS, RARITY_EPIC, FACTION_ABYSSIAN, TRIBE_NONE,
 		"reaperoftheninemoons", "Reaper of the Nine Moons", 5, 5, 3, SKILL_REAPER_OF_THE_NINE_MOONS);
+	cardDefinitions.try_emplace(
+		CARD_SHADOW_SISTER_KELAINO, CARD_SHADOW_SISTER_KELAINO, RARITY_LEGENDARY, FACTION_ABYSSIAN, TRIBE_NONE,
+		"shadowsisterkelaino", "Shadow Sister Kelaino", 4, 3, 3, SKILL_SHADOW_SISTER_KELAINO);
+	cardDefinitions.try_emplace(
+		CARD_SHADOW_WATCHER, CARD_SHADOW_WATCHER, RARITY_NONE, FACTION_ABYSSIAN, TRIBE_NONE,
+		"shadowwatcher", "Shadow Watcher", 3, 2, 2, SKILL_SHADOW_WATCHER);
+	cardDefinitions.try_emplace(
+		CARD_SHADOWDANCER, CARD_SHADOWDANCER, RARITY_RARE, FACTION_ABYSSIAN, TRIBE_NONE,
+		"shadowdancer", "Shadowdancer", 5, 4, 4, SKILL_SHADOWDANCER);
 
 	//Spells
 	cardDefinitions.try_emplace(
@@ -74,6 +86,9 @@ void Collections::RegisterCards() {
 	cardDefinitions.try_emplace(
 		CARD_SHADOW_NOVA, CARD_SHADOW_NOVA, RARITY_NONE, FACTION_ABYSSIAN,
 		"shadownova", "Shadow Nova", 4, SPELL_SHADOW_NOVA);
+	cardDefinitions.try_emplace(
+		CARD_SHADOW_REFLECTION, CARD_SHADOW_REFLECTION, RARITY_COMMON, FACTION_ABYSSIAN,
+		"shadowreflection", "Shadow Reflection", 3, SPELL_SHADOW_REFLECTION);
 
 #pragma endregion
 

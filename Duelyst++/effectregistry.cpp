@@ -65,6 +65,14 @@ void Collections::RegisterEffects() {
 	});
 	effectDefinitions.at(SKILL_BLOODTIDE_PRIESTESS).SetToken(CARD_WRAITHLING);
 
+	//Darkspine Elemental
+	effectDefinitions.try_emplace(SKILL_DARKSPINE_ELEMENTAL, SKILL_DARKSPINE_ELEMENTAL, KEYWORD_NONE, "Double the damage dealt by friendly {Shadow Creep}");
+	effectDefinitions.at(SKILL_DARKSPINE_ELEMENTAL).RegisterPreTrigger<OnDamageEvent>(
+		[](EffectContext ctx, OnDamageEvent& ev) {
+			return ctx.IsOnBoard() && ctx.SharesOwner(ev.source) && ev.source->ReadID() == CARD_SHADOW_CREEP; },
+		[](EffectContext ctx, OnDamageEvent& ev) {
+			ev.damage *= 2; });
+
 	//Deepfire Devourer
 	effectDefinitions.try_emplace(SKILL_DEEPFIRE_DEVOURER, SKILL_DEEPFIRE_DEVOURER, KEYWORD_FRENZY | KEYWORD_OPENING_GAMBIT, "{Frenzy}|{Opening Gambit}: Destroy friendly minions around it and gain +2/+2 for each minion");
 	effectDefinitions.at(SKILL_DEEPFIRE_DEVOURER).RegisterSelfTrigger<OnPreCastThisEvent>(
@@ -124,6 +132,36 @@ void Collections::RegisterEffects() {
 					ctx.game->Summon(unit, ctx.GetTile(), false);
 				}
 			}
+	});
+
+	//Shadow Sister Kelaino
+	effectDefinitions.try_emplace(SKILL_SHADOW_SISTER_KELAINO, SKILL_SHADOW_SISTER_KELAINO, KEYWORD_NONE, "Whenever an enemy minion or General takes damage, restore 1 Health to your General");
+	effectDefinitions.at(SKILL_SHADOW_SISTER_KELAINO).RegisterPostTrigger<OnDamageEvent>(
+		[](EffectContext ctx, OnDamageEvent& ev) {
+			return ctx.IsOnBoard() && !ctx.SharesOwner(ev.target); },
+		[](EffectContext ctx, OnDamageEvent& ev) {
+			ctx.GetAllyGeneral()->Heal(ctx.card, 1);
+	});
+
+	//Shadow Watcher
+	effectDefinitions.try_emplace(SKILL_SHADOW_WATCHER, SKILL_SHADOW_WATCHER, KEYWORD_DEATHWATCH, "{Deathwatch}: Gains +1/+1");
+	effectDefinitions.at(SKILL_SHADOW_WATCHER).RegisterPostTrigger<OnDeathEvent>(
+		[](EffectContext ctx, OnDeathEvent& ev) {
+			return ctx.IsOnBoard() && !ctx.IsCard(ev.unit); },
+		[](EffectContext ctx, OnDeathEvent& ev) {
+			ctx.card->AddEffect(MODIFIER_SHADOW_WATCHER);
+	});
+	effectDefinitions.try_emplace(MODIFIER_SHADOW_WATCHER, MODIFIER_SHADOW_WATCHER, KEYWORD_NONE, "Shadow Watcher");
+	effectDefinitions.at(MODIFIER_SHADOW_WATCHER).AddModifier(STAT_ATK, MODTYPE_BUFF, 1).AddModifier(STAT_HP, MODTYPE_BUFF, 1);
+
+	//Shadowdancer
+	effectDefinitions.try_emplace(SKILL_SHADOWDANCER, SKILL_SHADOWDANCER, KEYWORD_DEATHWATCH, "{Deathwatch}: Deal 1 damage to the enemy General, and restore 1 Health to your General");
+	effectDefinitions.at(SKILL_SHADOWDANCER).RegisterPostTrigger<OnDeathEvent>(
+		[](EffectContext ctx, OnDeathEvent& ev) {
+			return ctx.IsOnBoard() && !ctx.IsCard(ev.unit); },
+		[](EffectContext ctx, OnDeathEvent& ev) {
+			ctx.GetEnemyGeneral()->DealDamage(ctx.card, 1);
+			ctx.GetAllyGeneral()->Heal(ctx.card, 1);
 	});
 
 #pragma endregion
