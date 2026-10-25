@@ -110,7 +110,10 @@ public:
 	void SelectCard();
 	void MoveCursor(int x, int y);
 	void MoveCursorHand(int x, int y);
+	void SetTargetSize(int size);
+	void SetDefaultSelectionIndex();
 	void MoveSelect(int dX, int dY);
+	bool IsValidTargetPos(Coord xy);
 
 	//Highlights
 	void HighlightTile(int x, int y, eColor color);
@@ -184,6 +187,9 @@ private:
 	Coord castPos;
 	int handIdx;
 	int selectionIdx;
+	int targetSize;
+	int targetMinDelta;
+	int targetMaxDelta;
 	Unit* activeUnit;
 	PlayableCard* activeCard;
 	static constexpr int handSize = 7;

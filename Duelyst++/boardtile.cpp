@@ -37,6 +37,21 @@ BoardTile* Map::GetTile(int x, int y) {
 	return &tiles[x][y];
 }
 
+//Get AOE at co-ordinates
+std::vector<BoardTile*> Map::Get2x2(Coord xy) { return GetSquare(xy.x, xy.y, xy.x + 1, xy.y + 1); }
+std::vector<BoardTile*> Map::Get2x2(int x, int y) { return GetSquare(x, y, x + 1, y + 1); }
+std::vector<BoardTile*> Map::Get3x3(Coord xy) { return GetSquare(xy.x - 1, xy.y - 1, xy.x + 1, xy.y + 1); }
+std::vector<BoardTile*> Map::Get3x3(int x, int y) { return GetSquare(x - 1, y - 1, x + 1, y + 1); }
+std::vector<BoardTile*> Map::GetSquare(int x0, int y0, int x1, int y1) {
+	std::vector<BoardTile*> valid;
+	BoardTile* tile;
+	for (int x = x0; x <= x1; ++x)
+		for (int y = y0; y <= y1; ++y)
+			if (tile = GetTile(x, y))
+				valid.push_back(tile);
+	return valid;
+}
+
 //Get all tiles
 std::vector<BoardTile*> Map::GetAll() {
 	std::vector<BoardTile*> valid;

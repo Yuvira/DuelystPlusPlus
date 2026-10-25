@@ -75,6 +75,13 @@ public:
 	BoardTile* GetTile(Coord xy);
 	BoardTile* GetTile(int x, int y);
 
+	//Get AOE
+	std::vector<BoardTile*> Get2x2(Coord xy);
+	std::vector<BoardTile*> Get2x2(int x, int y);
+	std::vector<BoardTile*> Get3x3(Coord xy);
+	std::vector<BoardTile*> Get3x3(int x, int y);
+	std::vector<BoardTile*> GetSquare(int x0, int y0, int x1, int y1);
+
 	//Get all
 	std::vector<BoardTile*> GetAll();
 	std::vector<BoardTile*> GetAllEmpty();

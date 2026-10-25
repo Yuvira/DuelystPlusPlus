@@ -78,6 +78,9 @@ Game::Game(Collections* collections, bool* modeSwitch) : players{ Player(this, I
 	pos = Coord(0, 0);
 	handIdx = -1;
 	selectionIdx = -1;
+	targetSize = 1;
+	targetMinDelta = 0;
+	targetMaxDelta = 0;
 	turnCount = 0;
 	endTurn = false;
 	ChangeTurn(false);
@@ -477,7 +480,10 @@ void Game::Update() {
 	else if (mode == MODE_SELECT) {
 		for (BoardTile* tile : selectable)
 			tile->borderColor = COLOR_GREEN;
-		selectable[selectionIdx]->borderColor = COLOR_LTGREEN;
+		for (int x = selectable[selectionIdx]->pos.x - targetMinDelta; x <= selectable[selectionIdx]->pos.x + targetMaxDelta; ++x)
+			for (int y = selectable[selectionIdx]->pos.y - targetMinDelta; y <= selectable[selectionIdx]->pos.y + targetMaxDelta; ++y)
+				if (BoardTile* tile = map.GetTile(x, y))
+					tile->borderColor = COLOR_LTGREEN;
 	}
 
 	//Highlight cursor position
@@ -615,6 +621,7 @@ void Game::UseCard() {
 	//Set position and clear selectables
 	pos = selectable[selectionIdx]->pos;
 	selectable.clear();
+	SetTargetSize(1);
 	selectionIdx = -1;
 	mode = MODE_NONE;
 
@@ -644,6 +651,7 @@ void Game::UseEffect() {
 	BoardTile* tile = selectable[selectionIdx];
 	pos = tile->pos;
 	selectable.clear();
+	SetTargetSize(1);
 	selectionIdx = -1;
 	mode = MODE_NONE;
 
@@ -921,7 +929,7 @@ void Game::SelectCard() {
 		selectable = players[turn].hand[handIdx]->GetTargets();
 		if (selectable.size() > 0) {
 			activeCard = players[turn].hand[handIdx];
-			selectionIdx = 0;
+			SetDefaultSelectionIndex();
 			mode = MODE_SELECT;
 		}
 	}
@@ -950,6 +958,27 @@ void Game::MoveCursorHand(int x, int y) {
 	}
 }
 
+//Set target size (clamped to 1x1 - 3x3)
+void Game::SetTargetSize(int size) {
+	targetSize = max(min(size, 3), 1);
+	targetMinDelta = (targetSize - 1) / 2;
+	targetMaxDelta = targetSize / 2;
+}
+
+//Set default index for selection based on target radius
+void Game::SetDefaultSelectionIndex() {
+	if (targetSize > 1) {
+		BoardTile* tile;
+		for (int i = 0; i < selectable.size(); ++i) {
+			if (IsValidTargetPos(selectable[i]->pos)) {
+				selectionIdx = i;
+				return;
+			}
+		}
+	}
+	selectionIdx = 0;
+}
+
 //Move selected tiles
 void Game::MoveSelect(int dX, int dY) {
 
@@ -970,14 +999,16 @@ void Game::MoveSelect(int dX, int dY) {
 	//Get indices of tiles in closest column/row in given direction
 	std::vector<int> indices;
 	for (int i = 0; i < selectable.size(); ++i) {
-		if (direction) curDelta = selectable[i]->pos.x - curPos.x;
-		else curDelta = selectable[i]->pos.y - curPos.y;
-		if (positive && curDelta <= 0) curDelta += direction ? map.GetWidth() : map.GetHeight();
-		else if (!positive && curDelta >= 0) curDelta -= direction ? map.GetWidth() : map.GetHeight();
-		if (curDelta == minDelta) indices.push_back(i);
-		else if (abs(curDelta) < abs(minDelta)) {
-			minDelta = curDelta;
-			indices = { i };
+		if (IsValidTargetPos(selectable[i]->pos)) {
+			if (direction) curDelta = selectable[i]->pos.x - curPos.x;
+			else curDelta = selectable[i]->pos.y - curPos.y;
+			if (positive && curDelta <= 0) curDelta += direction ? map.GetWidth() : map.GetHeight();
+			else if (!positive && curDelta >= 0) curDelta -= direction ? map.GetWidth() : map.GetHeight();
+			if (curDelta == minDelta) indices.push_back(i);
+			else if (abs(curDelta) < abs(minDelta)) {
+				minDelta = curDelta;
+				indices = { i };
+			}
 		}
 	}
 
@@ -992,6 +1023,15 @@ void Game::MoveSelect(int dX, int dY) {
 		}
 	}
 
+}
+
+//Check if a co-ordinate is a valid selection position given current target size
+bool Game::IsValidTargetPos(Coord xy) {
+	if (xy.x < targetMinDelta || xy.y < targetMinDelta)
+		return false;
+	if (xy.x >= map.GetWidth() - targetMaxDelta || xy.y >= map.GetHeight() - targetMaxDelta)
+		return false;
+	return true;
 }
 
 #pragma endregion
@@ -1038,7 +1078,7 @@ void Game::HighlightTargetsForCallback(std::vector<BoardTile*>& targets, EffectC
 	if (targets.size() == 0)
 		return;
 	selectable = targets;
-	selectionIdx = 0;
+	SetDefaultSelectionIndex();
 	mode = MODE_SELECT;
 	if (effectCallback.Callback)
 		nextEffectCallback = EffectCallback(EffectContext(ctx.effect, ctx.card, ctx.game), source, Callback);
