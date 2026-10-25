@@ -1142,15 +1142,14 @@ void Collections::RegisterEffects() {
 		[](EffectContext ctx, OnDeathEvent& ev) {
 			return ctx.IsCard(ev.unit) && !ctx.GetTile()->HasUnit(); },
 		[](EffectContext ctx, OnDeathEvent& ev) {
-			std::vector<int> valid;
-			for (int i = 0; i < ctx.GetOwner()->hand.size(); ++i)
-				if (ctx.GetOwner()->hand[i]->IsUnit() && ctx.GetOwner()->hand[i]->GetUnit()->HasKeyword(KEYWORD_DYING_WISH))
-					valid.push_back(i);
+			std::vector<Unit*> valid;
+			for (PlayableCard* card : ctx.GetOwner()->hand)
+				if (card->IsUnit() && card->GetUnit()->HasKeyword(KEYWORD_DYING_WISH))
+					valid.push_back(card->GetUnit());
 			if (valid.size() > 0) {
-				int idx = valid[rand() % valid.size()];
-				Unit* unit = ctx.GetOwner()->hand[idx]->GetUnit();
-				ctx.GetOwner()->hand.erase(ctx.GetOwner()->hand.begin() + idx);
-				ctx.game->Summon(unit, ctx.GetTile(), false);
+				Unit* unit = valid[rand() % valid.size()];
+				if (ctx.GetOwner()->RemoveFromHand(unit))
+					ctx.game->Summon(unit, ctx.GetTile(), false);
 			}
 	});
 

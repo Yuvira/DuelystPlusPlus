@@ -612,16 +612,14 @@ void Game::UseCard() {
 	selectionIdx = -1;
 	mode = MODE_NONE;
 
-	//Use mana, return if not enough available
-	if (!players[turn].SpendMana(activeCard->cost))
+	//Remove card from hand and spend mana, return if either action fails
+	if (!players[turn].RemoveFromHand(handIdx) || !players[turn].SpendMana(activeCard->cost))
 		return;
 
-	//Remove from hand and do pre-cast effect targeting
-	players[turn].hand.erase(players[turn].hand.begin() + handIdx);
-	for (Effect* effect : activeCard->GetEffects()) {
-		OnPreCastThisEvent preCastEvent = OnPreCastThisEvent(&map.tiles[pos.x][pos.y]);
+	//Run pre-cast triggers
+	OnPreCastThisEvent preCastEvent = OnPreCastThisEvent(map.GetTile(pos));
+	for (Effect* effect : activeCard->GetEffects())
 		effect->TriggerSelfEvent(EffectContext(effect, activeCard, this), &preCastEvent);
-	}
 	castPos = pos;
 
 	//Reset hand position

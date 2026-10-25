@@ -35,6 +35,9 @@ public:
 	void AddNewToHand(eCard cardId);
 	void AddNewToDeck(eCard cardId);
 	void Replace(int idx);
+	bool RemoveFromHand(int idx);
+	bool RemoveFromHand(PlayableCard* card);
+	bool RemoveFromDeck(int idx);
 	bool RemoveFromDeck(PlayableCard* card);
 
 	//Resource management

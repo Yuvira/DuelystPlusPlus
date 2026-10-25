@@ -175,14 +175,29 @@ void Player::Replace(int idx) {
 	}
 }
 
-//Remove card from deck
+//Remove card from hand or deck
+bool Player::RemoveFromHand(int idx) {
+	if (idx < 0 || idx >= hand.size())
+		return false;
+	hand.erase(hand.begin() + idx);
+	return true;
+}
+bool Player::RemoveFromHand(PlayableCard* card) {
+	for (int i = 0; i < hand.size(); ++i)
+		if (hand[i] == card)
+			return RemoveFromHand(i);
+	return false;
+}
+bool Player::RemoveFromDeck(int idx) {
+	if (idx < 0 || idx >= deck.size())
+		return false;
+	deck.erase(deck.begin() + idx);
+	return true;
+}
 bool Player::RemoveFromDeck(PlayableCard* card) {
-	for (int i = 0; i < deck.size(); ++i) {
-		if (deck[i] == card) {
-			deck.erase(deck.begin() + i);
-			return true;
-		}
-	}
+	for (int i = 0; i < deck.size(); ++i)
+		if (deck[i] == card)
+			return RemoveFromDeck(i);
 	return false;
 }
 
