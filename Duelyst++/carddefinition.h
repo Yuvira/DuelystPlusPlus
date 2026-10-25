@@ -25,7 +25,7 @@ struct CardDefinition {
 		this->name = name;
 		this->effect = effect;
 		tribe = TRIBE_NONE;
-		cost = cost;
+		cost = 0;
 		atk = 0;
 		hp = 0;
 		isToken = false;
