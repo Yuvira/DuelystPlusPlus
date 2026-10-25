@@ -65,6 +65,15 @@ void Collections::RegisterCards() {
 	cardDefinitions.try_emplace(
 		CARD_NETHER_SUMMONING, CARD_NETHER_SUMMONING, RARITY_LEGENDARY, FACTION_ABYSSIAN,
 		"nethersummoning", "Nether Summoning", 5, SPELL_NETHER_SUMMONING);
+	cardDefinitions.try_emplace(
+		CARD_RITE_OF_THE_UNDERVAULT, CARD_RITE_OF_THE_UNDERVAULT, RARITY_EPIC, FACTION_ABYSSIAN,
+		"riteoftheundervault", "Rite of the Undervault", 6, SPELL_RITE_OF_THE_UNDERVAULT);
+	cardDefinitions.try_emplace(
+		CARD_RITUAL_BANSHING, CARD_RITUAL_BANSHING, RARITY_RARE, FACTION_ABYSSIAN,
+		"ritualbanishing", "Ritual Banishing", 3, SPELL_RITUAL_BANSHING);
+	cardDefinitions.try_emplace(
+		CARD_SHADOW_NOVA, CARD_SHADOW_NOVA, RARITY_NONE, FACTION_ABYSSIAN,
+		"shadownova", "Shadow Nova", 4, SPELL_SHADOW_NOVA);
 
 #pragma endregion
 
@@ -496,6 +505,9 @@ void Collections::RegisterCards() {
 	cardDefinitions.try_emplace(
 		CARD_MANA_SPRING_EMPTY, CARD_MANA_SPRING_EMPTY, RARITY_NONE, FACTION_NEUTRAL,
 		"manaspringempty", "Empty Mana Spring", EFFECT_NONE);
+	cardDefinitions.try_emplace(
+		CARD_SHADOW_CREEP, CARD_SHADOW_CREEP, RARITY_NONE, FACTION_NEUTRAL,
+		"shadowcreep", "Shadow Creep", TILE_SHADOW_CREEP);
 
 #pragma endregion
 

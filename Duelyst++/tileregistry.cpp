@@ -32,4 +32,12 @@ void Collections::RegisterTiles() {
 			}
 	});
 
+	//Shadow Creep
+	effectDefinitions.try_emplace(TILE_SHADOW_CREEP, TILE_SHADOW_CREEP, KEYWORD_NONE, "Deals 1 damage to enemy minions and Generals standing on it at the end of owner's turn");
+	effectDefinitions.at(TILE_SHADOW_CREEP).RegisterPostTrigger<OnTurnEndEvent>(
+		[](EffectContext ctx, OnTurnEndEvent& ev) {
+			return ctx.GetOwner() == ev.player && ctx.card->IsTile() && ctx.GetTile() != nullptr && ctx.GetTile()->HasUnit() && ctx.GetTile()->unit->owner != ctx.GetOwner(); },
+		[](EffectContext ctx, OnTurnEndEvent& ev) {
+			ctx.GetTile()->unit->DealDamage(ctx.card, 1); });
+
 }

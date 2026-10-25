@@ -181,6 +181,51 @@ void Collections::RegisterSpells() {
 			}
 	});
 
+	//Rite of the Undervault
+	effectDefinitions.try_emplace(SPELL_RITE_OF_THE_UNDERVAULT, SPELL_RITE_OF_THE_UNDERVAULT, "Draw to fill your action bar",
+		[](Game* game, Spell* spell) {
+			return game->map.GetAll(); });
+	effectDefinitions.at(SPELL_RITE_OF_THE_UNDERVAULT).RegisterSelfTrigger<OnResolveThisEvent>(
+		[](EffectContext ctx, OnResolveThisEvent& ev) {
+			while (ctx.GetOwner()->hand.size() < ctx.GetOwner()->maxHandSize && ctx.GetOwner()->deck.size() > 0)
+				ctx.GetOwner()->Draw();
+	});
+
+	//Ritual Banishing
+	effectDefinitions.try_emplace(SPELL_RITUAL_BANSHING, SPELL_RITUAL_BANSHING, "Destroy a friendly minion to destroy an enemy minion",
+		[](Game* game, Spell* spell) {
+			return game->map.GetAllUnitTiles(FILTER_MINIONS, FILTER_ALLY, spell->owner); });
+	effectDefinitions.at(SPELL_RITUAL_BANSHING).RegisterSelfTrigger<OnPreCastThisEvent>(
+		[](EffectContext ctx, OnPreCastThisEvent& ev) {
+			std::vector<BoardTile*> valid = ctx.GetMap()->GetAllUnitTiles(FILTER_MINIONS, FILTER_ENEMY, ctx.GetOwner());
+			ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
+				[](EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets) {
+					if (ctx.IsSpellContext() && targets.size() > 0 && targets[0]->HasUnit())
+						ctx.GetSpellContext().effect->AddTarget(targets[0]);
+			});
+	});
+	effectDefinitions.at(SPELL_RITUAL_BANSHING).RegisterSelfTrigger<OnResolveThisEvent>(
+		[](EffectContext ctx, OnResolveThisEvent& ev) {
+			if (ev.tile->HasUnit())
+				ev.tile->unit->Destroy(ctx.card);
+			if (ctx.IsSpellContext()) {
+				std::vector<BoardTile*> targets = ctx.effect->GetSpellEffect()->GetEffectTargets();
+				if (targets.size() > 0 && targets[0]->HasUnit())
+					targets[0]->unit->Destroy(ctx.card);
+			}
+	});
+
+	//Shadow Nova
+	effectDefinitions.try_emplace(SPELL_SHADOW_NOVA, SPELL_SHADOW_NOVA, "Turn a 2x2 area into {Shadow Creep}",
+		[](Game* game, Spell* spell) {
+			game->SetTargetSize(2); return game->map.GetAll(); });
+	effectDefinitions.at(SPELL_SHADOW_NOVA).RegisterSelfTrigger<OnResolveThisEvent>(
+		[](EffectContext ctx, OnResolveThisEvent& ev) {
+			for (BoardTile* tile : ctx.GetMap()->Get2x2(ev.tile->pos))
+				ctx.game->CreateTile(CARD_SHADOW_CREEP, tile, ctx.GetOwner());
+	});
+	effectDefinitions.at(SPELL_SHADOW_NOVA).SetToken(CARD_SHADOW_CREEP);
+
 #pragma endregion
 
 }
