@@ -20,19 +20,27 @@ EventManager::~EventManager() {}
 void EventManager::NotifyPreEvent(Game* game, Event* event) {
 
 	//Turn player
-	for (Unit* u : game->GetUnits())
-		if (u->owner == game->GetTurnPlayer())
-			for (Effect* e : u->GetEffects())
+	for (Unit* u : game->GetUnits()) {
+		if (u->owner == game->GetTurnPlayer()) {
+			for (Effect* e : u->GetEffects()) {
 				e->TriggerPreEvent(EffectContext(e, u, game), event);
+	}}}
+	for (Artifact* a : game->GetTurnPlayer()->GetArtifacts())
+		for (Effect* e : a->GetEffects())
+			e->TriggerPreEvent(EffectContext(e, a, game), event);
 	for (Card* c : game->GetTurnPlayer()->GetDeckAndHand())
 		for (Effect* e : c->GetEffects())
 			e->TriggerPreEvent(EffectContext(e, c, game), event);
 
 	//Non-turn player
-	for (Unit* u : game->GetUnits())
-		if (u->owner == game->GetNonTurnPlayer())
-			for (Effect* e : u->GetEffects())
+	for (Unit* u : game->GetUnits()) {
+		if (u->owner == game->GetNonTurnPlayer()) {
+			for (Effect* e : u->GetEffects()) {
 				e->TriggerPreEvent(EffectContext(e, u, game), event);
+	}}}
+	for (Artifact* a : game->GetNonTurnPlayer()->GetArtifacts())
+		for (Effect* e : a->GetEffects())
+			e->TriggerPreEvent(EffectContext(e, a, game), event);
 	for (Card* c : game->GetNonTurnPlayer()->GetDeckAndHand())
 		for (Effect* e : c->GetEffects())
 			e->TriggerPreEvent(EffectContext(e, c, game), event);
@@ -65,6 +73,9 @@ void EventManager::TriggerPostEvent(Game* game, Event* event) {
 			for (Effect* e : u->GetEffects()) {
 				e->TriggerPostEvent(EffectContext(e, u, game), event);
 	}}}
+	for (Artifact* a : game->GetTurnPlayer()->GetArtifacts())
+		for (Effect* e : a->GetEffects())
+			e->TriggerPostEvent(EffectContext(e, a, game), event);
 	for (Card* c : game->GetTurnPlayer()->GetDeckAndHand())
 		for (Effect* e : c->GetEffects())
 			e->TriggerPostEvent(EffectContext(e, c, game), event);
@@ -75,6 +86,9 @@ void EventManager::TriggerPostEvent(Game* game, Event* event) {
 			for (Effect* e : u->GetEffects()) {
 				e->TriggerPostEvent(EffectContext(e, u, game), event);
 	}}}
+	for (Artifact* a : game->GetNonTurnPlayer()->GetArtifacts())
+		for (Effect* e : a->GetEffects())
+			e->TriggerPostEvent(EffectContext(e, a, game), event);
 	for (Card* c : game->GetNonTurnPlayer()->GetDeckAndHand())
 		for (Effect* e : c->GetEffects())
 			e->TriggerPostEvent(EffectContext(e, c, game), event);
