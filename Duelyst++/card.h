@@ -9,6 +9,7 @@
 //Definitions
 class Aura;
 class BoardTile;
+class BoardCard;
 class CardDefinition;
 class Effect;
 class Game;
@@ -61,6 +62,7 @@ public:
 	virtual bool IsGeneral() { return false; }
 	virtual bool IsMinion() { return false; }
 	virtual bool IsOnBoard() { return false; }
+	virtual BoardCard* GetCardOnBoard() { return nullptr; }
 
 	//Properties
 	eCard cardId;
@@ -123,7 +125,8 @@ public:
 	~BoardCard() override = 0;
 
 	//Utils
-	bool IsOnBoard() { return curTile != nullptr; }
+	bool IsOnBoard() override { return curTile != nullptr; }
+	BoardCard* GetCardOnBoard() override { return this; }
 
 	//Properties
 	BoardTile* curTile = nullptr;

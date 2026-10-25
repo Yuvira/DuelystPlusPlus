@@ -25,7 +25,7 @@ Unit* EffectContext::GetUnit() { return card->GetUnit(); }
 Spell* EffectContext::GetSpell() { return card->GetSpell(); }
 Unit* EffectContext::GetAllyGeneral() { return card->owner->general; }
 Unit* EffectContext::GetEnemyGeneral() { return card->owner->opponent->general; }
-BoardTile* EffectContext::GetTile() { return card->IsOnBoard() ? card->GetUnit()->curTile : nullptr; }
+BoardTile* EffectContext::GetTile() { return card->IsOnBoard() ? card->GetCardOnBoard()->curTile : nullptr; }
 Map* EffectContext::GetMap() { return &game->map; }
 
 //AuraContext Utilities
