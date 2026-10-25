@@ -15,7 +15,7 @@ void Collections::RegisterTiles() {
 		[](EffectContext ctx, OnAddThisEvent& ev) {
 			if (ctx.card->IsTile()) {
 				BoardTile* tile = ctx.card->GetTile()->curTile;
-				if (tile->HasUnit()) {
+				if (tile != nullptr && tile->HasUnit()) {
 					tile->unit->owner->AddMana(1);
 					ctx.game->CreateTile(CARD_MANA_SPRING_EMPTY, tile, ctx.GetOwner());
 				}
@@ -25,7 +25,7 @@ void Collections::RegisterTiles() {
 		[](EffectContext ctx, OnThisTileUnitChangedEvent& ev) {
 			if (ctx.card->IsTile()) {
 				BoardTile* tile = ctx.card->GetTile()->curTile;
-				if (tile->HasUnit()) {
+				if (tile != nullptr && tile->HasUnit()) {
 					tile->unit->owner->AddMana(1);
 					ctx.game->CreateTile(CARD_MANA_SPRING_EMPTY, tile, ctx.GetOwner());
 				}
