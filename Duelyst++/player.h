@@ -31,7 +31,7 @@ public:
 
 	//Actions
 	void Shuffle();
-	void Draw();
+	bool Draw();
 	void AddNewToHand(eCard cardId);
 	void AddNewToDeck(eCard cardId);
 	void Replace(int idx);
@@ -60,6 +60,8 @@ public:
 	Player* opponent;
 	std::vector<PlayableCard*> deck;
 	std::vector<PlayableCard*> hand;
+	static constexpr int startHandSize = 5;
+	static constexpr int maxHandSize = 6;
 
 private:
 

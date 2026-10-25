@@ -38,14 +38,14 @@ void Player::InitStartingHand() {
 		deck.push_back(card);
 	hand.clear();
 	Shuffle();
-	if (deck.size() < 5) {
+	if (deck.size() < startHandSize) {
 		hand = deck;
 		deck.clear();
 	}
 	else {
-		for (int i = 0; i < 5; ++i)
+		for (int i = 0; i < startHandSize; ++i)
 			hand.push_back(deck[i]);
-		deck.erase(deck.begin(), deck.begin() + 5);
+		deck.erase(deck.begin(), deck.begin() + startHandSize);
 	}
 	for (PlayableCard* card : GetDeckAndHand())
 		card->UpdateAuras();
@@ -63,9 +63,9 @@ void Player::Render(Renderer& renderer, bool left) {
 		renderer.Render(uiCrystal[i], left ? (i * 2) + 2 : 62 - (i * 2), 2);
 
 	//Cards in hand/deck
-	std::string str = std::to_string(hand.size()) + "/6 " + std::to_string(deck.size()) + "/40";
-	if (!left)
-		str = std::to_string(deck.size()) + "/40 " + std::to_string(hand.size()) + "/6";
+	std::string str;
+	if (left) str = std::to_string(hand.size()) + "/" + std::to_string(maxHandSize) + " " + std::to_string(deck.size()) + "/40";
+	else str = std::to_string(deck.size()) + "/40 " + std::to_string(hand.size()) + "/" + std::to_string(maxHandSize);
 	Sprite spr;
 	spr.CreateFromString(str);
 	renderer.Render(spr, left ? 20 : 45 - str.length(), 2);
@@ -106,18 +106,19 @@ void Player::Shuffle() {
 }
 
 //Draw card
-void Player::Draw() {
-	if (deck.size() > 0) {
-		PlayableCard* card = deck[0];
-		deck.erase(deck.begin());
-		if (hand.size() < 6) {
-			hand.push_back(card);
-			hand.back()->UpdateAuras();
-		}
-		else
-			game->Overflow(card);
-		game->QueueEvent(new OnDrawEvent(game->GetTurnCount(), card));
+bool Player::Draw() {
+	if (deck.size() == 0)
+		return false;
+	PlayableCard* card = deck[0];
+	deck.erase(deck.begin());
+	if (hand.size() < maxHandSize) {
+		hand.push_back(card);
+		hand.back()->UpdateAuras();
 	}
+	else
+		game->Overflow(card);
+	game->QueueEvent(new OnDrawEvent(game->GetTurnCount(), card));
+	return true;
 }
 
 //Add card to hand
@@ -127,7 +128,7 @@ void Player::AddNewToHand(eCard cardId) {
 	PlayableCard* newCard = game->collections->GetNewPlayableCardInstance(cardId, game, this);
 	if (newCard == nullptr)
 		return;
-	if (hand.size() < 6) {
+	if (hand.size() < maxHandSize) {
 		hand.push_back(newCard);
 		hand.back()->UpdateAuras();
 	}
