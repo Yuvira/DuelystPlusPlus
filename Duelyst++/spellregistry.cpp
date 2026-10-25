@@ -10,6 +10,8 @@
 //Register spell effects
 void Collections::RegisterSpells() {
 
+#pragma region Abyssian
+
 	//Breath of The Unborn
 	effectDefinitions.try_emplace(SPELL_BREATH_OF_THE_UNBORN, SPELL_BREATH_OF_THE_UNBORN, "Deal 2 damage to all enemy minions. Fully heal all friendly minions",
 		[](Game* game, Spell* spell) {
@@ -116,5 +118,26 @@ void Collections::RegisterSpells() {
 		[](EffectContext ctx, OnSummonEvent& ev) {
 			ctx.game->RemoveAura(ctx.effect->GetAura()); });
 	effectDefinitions.at(AURA_DARKFIRE_SACRIFICE).AddModifier(STAT_COST, MODTYPE_BUFF, -2);
+
+	//Deathfire Crescendo
+	effectDefinitions.try_emplace(SPELL_DEATHFIRE_CRESCENDO, SPELL_DEATHFIRE_CRESCENDO, "Give a friendly minion, \"{Deathwatch}: Gains +2/+2\"",
+		[](Game* game, Spell* spell) {
+			return game->map.GetAllUnitTiles(FILTER_MINIONS, FILTER_ALLY, spell->owner); });
+	effectDefinitions.at(SPELL_DEATHFIRE_CRESCENDO).RegisterSelfTrigger<OnResolveThisEvent>(
+		[](EffectContext ctx, OnResolveThisEvent& ev) {
+			if (ev.tile->HasUnit())
+				ev.tile->unit->AddEffect(EFFECT_DEATHFIRE_CRESCENDO);
+	});
+	effectDefinitions.try_emplace(EFFECT_DEATHFIRE_CRESCENDO, EFFECT_DEATHFIRE_CRESCENDO, KEYWORD_DEATHWATCH, "Deathfire Crescendo|{Deathwatch}: Gains +2/+2");
+	effectDefinitions.at(EFFECT_DEATHFIRE_CRESCENDO).RegisterPostTrigger<OnDeathEvent>(
+		[](EffectContext ctx, OnDeathEvent& ev) {
+			return ctx.IsOnBoard() && !ctx.IsCard(ev.unit); },
+		[](EffectContext ctx, OnDeathEvent& ev) {
+			ctx.card->AddEffect(MODIFIER_DEATHFIRE_CRESCENDO);
+	});
+	effectDefinitions.try_emplace(MODIFIER_DEATHFIRE_CRESCENDO, MODIFIER_DEATHFIRE_CRESCENDO, KEYWORD_NONE, "Deathfire Crescendo");
+	effectDefinitions.at(MODIFIER_DEATHFIRE_CRESCENDO).AddModifier(STAT_ATK, MODTYPE_BUFF, 2).AddModifier(STAT_HP, MODTYPE_BUFF, 2);
+
+#pragma endregion
 
 }

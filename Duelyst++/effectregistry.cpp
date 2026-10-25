@@ -65,6 +65,33 @@ void Collections::RegisterEffects() {
 	});
 	effectDefinitions.at(SKILL_BLOODTIDE_PRIESTESS).SetToken(CARD_WRAITHLING);
 
+	//Deepfire Devourer
+	effectDefinitions.try_emplace(SKILL_DEEPFIRE_DEVOURER, SKILL_DEEPFIRE_DEVOURER, KEYWORD_FRENZY | KEYWORD_OPENING_GAMBIT, "{Frenzy}|{Opening Gambit}: Destroy friendly minions around it and gain +2/+2 for each minion");
+	effectDefinitions.at(SKILL_DEEPFIRE_DEVOURER).RegisterSelfTrigger<OnPreCastThisEvent>(
+		[](EffectContext ctx, OnPreCastThisEvent& ev) {
+			int count = 0;
+			for (Unit* unit : ctx.GetMap()->GetUnitsNear(ev.tile, FILTER_MINIONS, FILTER_ALLY, ctx.GetOwner())) {
+				unit->Destroy(ctx.card);
+				++count;
+			}
+			if (Effect* effect = ctx.card->AddEffect(MODIFIER_DEEPFIRE_DEVOURER)) {
+				effect->UpdateModifier(STAT_ATK, count * 2);
+				effect->UpdateModifier(STAT_HP, count * 2);
+				ctx.card->UpdateModifiers();
+			}
+	});
+	effectDefinitions.try_emplace(MODIFIER_DEEPFIRE_DEVOURER, MODIFIER_DEEPFIRE_DEVOURER, KEYWORD_NONE, "Deepfire Devourer");
+	effectDefinitions.at(MODIFIER_DEEPFIRE_DEVOURER).AddModifier(STAT_ATK, MODTYPE_BUFF, 2).AddModifier(STAT_HP, MODTYPE_BUFF, 2);
+
+	//Gloomchaser
+	effectDefinitions.try_emplace(SKILL_GLOOMCHASER, SKILL_GLOOMCHASER, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Summon a 1/1 Wraithling in a random nearby space");
+	effectDefinitions.at(SKILL_GLOOMCHASER).RegisterSelfTrigger<OnPreCastThisEvent>(
+		[](EffectContext ctx, OnPreCastThisEvent& ev) {
+			if (BoardTile* tile = ctx.GetMap()->GetRandomEmptyNear(ev.tile))
+				ctx.game->SummonToken(CARD_WRAITHLING, tile, ctx.GetOwner());
+	});
+	effectDefinitions.at(SKILL_GLOOMCHASER).SetToken(CARD_WRAITHLING);
+
 #pragma endregion
 
 #pragma region Neutral

@@ -24,6 +24,12 @@ void Collections::RegisterCards() {
 	cardDefinitions.try_emplace(
 		CARD_BLOODTIDE_PRIESTESS, CARD_BLOODTIDE_PRIESTESS, RARITY_RARE, FACTION_ABYSSIAN, TRIBE_NONE,
 		"bloodtidepriestess", "Bloodtide Priestess", 4, 3, 3, SKILL_BLOODTIDE_PRIESTESS);
+	cardDefinitions.try_emplace(
+		CARD_DEEPFIRE_DEVOURER, CARD_DEEPFIRE_DEVOURER, RARITY_COMMON, FACTION_ABYSSIAN, TRIBE_NONE,
+		"deepfiredevourer", "Deepfire Devourer", 4, 4, 4, SKILL_DEEPFIRE_DEVOURER);
+	cardDefinitions.try_emplace(
+		CARD_GLOOMCHASER, CARD_GLOOMCHASER, RARITY_NONE, FACTION_ABYSSIAN, TRIBE_NONE,
+		"gloomchaser", "Gloomchaser", 2, 2, 2, SKILL_GLOOMCHASER);
 
 	//Spells
 	cardDefinitions.try_emplace(
@@ -44,6 +50,9 @@ void Collections::RegisterCards() {
 	cardDefinitions.try_emplace(
 		CARD_DARKFIRE_SACRIFICE, CARD_DARKFIRE_SACRIFICE, RARITY_RARE, FACTION_ABYSSIAN,
 		"darkfiresacrifice", "Darkfire Sacrifice", 0, SPELL_DARKFIRE_SACRIFICE);
+	cardDefinitions.try_emplace(
+		CARD_DEATHFIRE_CRESCENDO, CARD_DEATHFIRE_CRESCENDO, RARITY_LEGENDARY, FACTION_ABYSSIAN,
+		"deathfirecrescendo", "Deathfire Crescendo", 3, SPELL_DEATHFIRE_CRESCENDO);
 
 #pragma endregion
 
