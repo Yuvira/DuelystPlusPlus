@@ -41,6 +41,11 @@ void EventManager::NotifyPreEvent(Game* game, Event* event) {
 	for (Aura* a : game->GetAuras())
 		a->TriggerPreEvent(EffectContext(a, a->GetSourceCard(), game), event);
 
+	//Tiles
+	for (Tile* t : game->GetTiles())
+		for (Effect* e : t->GetEffects())
+			e->TriggerPreEvent(EffectContext( e, t, game), event);
+
 	//Delayed triggers
 	for (Spell* s : game->GetDelayedTriggers())
 		if (s->GetSpellEffect() != nullptr)
@@ -77,6 +82,11 @@ void EventManager::TriggerPostEvent(Game* game, Event* event) {
 	//Auras
 	for (Aura* a : game->GetAuras())
 		a->TriggerPostEvent(EffectContext(a, a->GetSourceCard(), game), event);
+
+	//Tiles
+	for (Tile* t : game->GetTiles())
+		for (Effect* e : t->GetEffects())
+			e->TriggerPostEvent(EffectContext(e, t, game), event);
 
 	//Delayed triggers
 	for (Spell* s : game->GetDelayedTriggers())
