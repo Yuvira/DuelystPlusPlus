@@ -238,6 +238,85 @@ void Collections::RegisterSpells() {
 	effectDefinitions.try_emplace(MODIFIER_SHADOW_REFLECTION, MODIFIER_SHADOW_REFLECTION, KEYWORD_NONE, "Shadow Reflection");
 	effectDefinitions.at(MODIFIER_SHADOW_REFLECTION).AddModifier(STAT_ATK, MODTYPE_BUFF, 5);
 
+	//Soulshatter Pact
+	effectDefinitions.try_emplace(SPELL_SOULSHATTER_PACT, SPELL_SOULSHATTER_PACT, "Give all friendly minions +2 Attack this turn",
+		[](Game* game, Spell* spell) {
+			return game->map.GetAll(); });
+	effectDefinitions.at(SPELL_SOULSHATTER_PACT).RegisterSelfTrigger<OnResolveThisEvent>(
+		[](EffectContext ctx, OnResolveThisEvent& ev) {
+			for (Unit* unit : ctx.GetMap()->GetAllUnits(FILTER_MINIONS, FILTER_ALLY, ctx.GetOwner()))
+				unit->AddEffect(MODIFIER_SOULSHATTER_PACT);
+	});
+	effectDefinitions.try_emplace(MODIFIER_SOULSHATTER_PACT, MODIFIER_SOULSHATTER_PACT, KEYWORD_NONE, "Soulshatter Pact");
+	effectDefinitions.at(MODIFIER_SOULSHATTER_PACT).RegisterPostTrigger<OnTurnEndEvent>(
+		[](EffectContext ctx, OnTurnEndEvent& ev) {
+			return true; },
+		[](EffectContext ctx, OnTurnEndEvent& ev) {
+			ctx.card->RemoveEffect(ctx.effect); });
+	effectDefinitions.at(MODIFIER_SOULSHATTER_PACT).AddModifier(STAT_ATK, MODTYPE_BUFF, 2);
+
+	//Void Pulse
+	effectDefinitions.try_emplace(SPELL_VOID_PULSE, SPELL_VOID_PULSE, "Deal 2 damage to enemy General. Restore 3 Health to your General",
+		[](Game* game, Spell* spell) {
+			return game->map.GetAllUnitTiles(FILTER_GENERALS, FILTER_ENEMY, spell->owner); });
+	effectDefinitions.at(SPELL_VOID_PULSE).RegisterSelfTrigger<OnResolveThisEvent>(
+		[](EffectContext ctx, OnResolveThisEvent& ev) {
+			ctx.GetEnemyGeneral()->DealDamage(ctx.card, 2);
+			ctx.GetAllyGeneral()->Heal(ctx.card, 3);
+	});
+
+	//Wraithling Fury
+	effectDefinitions.try_emplace(SPELL_WRAITHLING_FURY, SPELL_WRAITHLING_FURY, "Give a friendly Wraithling minion +4/+4",
+		[](Game* game, Spell* spell) {
+			std::vector<BoardTile*> valid;
+			for (BoardTile* tile : game->map.GetAllUnitTiles(FILTER_MINIONS, FILTER_ALLY, spell->owner))
+				if (tile->unit->IsMinion() && tile->unit->ReadID() == CARD_WRAITHLING)
+					valid.push_back(tile);
+			return valid;
+	});
+	effectDefinitions.at(SPELL_WRAITHLING_FURY).RegisterSelfTrigger<OnResolveThisEvent>(
+		[](EffectContext ctx, OnResolveThisEvent& ev) {
+			if (ev.tile->HasUnit())
+				ev.tile->unit->AddEffect(MODIFIER_WRAITHLING_FURY);
+	});
+	effectDefinitions.try_emplace(MODIFIER_WRAITHLING_FURY, MODIFIER_WRAITHLING_FURY, KEYWORD_NONE, "Wraithling Fury");
+	effectDefinitions.at(MODIFIER_WRAITHLING_FURY).AddModifier(STAT_ATK, MODTYPE_BUFF, 4).AddModifier(STAT_HP, MODTYPE_BUFF, 4);
+
+	//Wraithling Swarm
+	effectDefinitions.try_emplace(SPELL_WRAITHLING_SWARM, SPELL_WRAITHLING_SWARM, "Summon three 1/1 Wraithlings nearby each other",
+		[](Game* game, Spell* spell) {
+			return game->map.GetEmptyNearAllies(spell->owner); });
+	effectDefinitions.at(SPELL_WRAITHLING_SWARM).RegisterSelfTrigger<OnPreCastThisEvent>(
+		[](EffectContext ctx, OnPreCastThisEvent& ev) {
+			std::vector<BoardTile*> valid = ctx.GetMap()->GetEmptyNear(ev.tile);
+			ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
+				[](EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets) {
+					if (ctx.IsSpellContext() && targets.size() > 0) {
+						ctx.GetSpellContext().effect->AddTarget(targets[0]);
+						std::vector<BoardTile*> valid;
+						for (BoardTile* tile : ctx.GetMap()->GetEmptyNear(targets[0]))
+							if (tile != source)
+								valid.push_back(tile);
+						ctx.game->HighlightTargetsForCallback(valid, ctx, source,
+							[](EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets) {
+								if (ctx.IsSpellContext() && targets.size() > 1)
+									ctx.GetSpellContext().effect->AddTarget(targets[1]);
+						});
+					}
+			});
+	});
+	effectDefinitions.at(SPELL_WRAITHLING_SWARM).RegisterSelfTrigger<OnResolveThisEvent>(
+		[](EffectContext ctx, OnResolveThisEvent& ev) {
+			if (ctx.IsSpellContext()) {
+				std::vector<BoardTile*> targets = ctx.GetSpellContext().effect->GetEffectTargets();
+				targets.push_back(ev.tile);
+				for (BoardTile* tile : targets)
+					if (!tile->HasUnit())
+						ctx.game->SummonToken(CARD_WRAITHLING, tile, ctx.GetOwner());
+			}
+	});
+	effectDefinitions.at(SPELL_WRAITHLING_SWARM).SetToken(CARD_WRAITHLING);
+
 #pragma endregion
 
 }

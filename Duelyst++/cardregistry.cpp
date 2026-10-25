@@ -48,6 +48,12 @@ void Collections::RegisterCards() {
 	cardDefinitions.try_emplace(
 		CARD_SHADOWDANCER, CARD_SHADOWDANCER, RARITY_RARE, FACTION_ABYSSIAN, TRIBE_NONE,
 		"shadowdancer", "Shadowdancer", 5, 4, 4, SKILL_SHADOWDANCER);
+	cardDefinitions.try_emplace(
+		CARD_SPECTRAL_REVENANT, CARD_SPECTRAL_REVENANT, RARITY_LEGENDARY, FACTION_ABYSSIAN, TRIBE_NONE,
+		"spectralrevenant", "Spectral Revenant", 8, 6, 6, SKILL_SPECTRAL_REVENANT);
+	cardDefinitions.try_emplace(
+		CARD_VORPAL_REAVER, CARD_VORPAL_REAVER, RARITY_LEGENDARY, FACTION_ABYSSIAN, TRIBE_NONE,
+		"vorpalreaver", "Vorpal Reaver", 6, 6, 6, SKILL_VORPAL_REAVER);
 
 	//Spells
 	cardDefinitions.try_emplace(
@@ -89,6 +95,18 @@ void Collections::RegisterCards() {
 	cardDefinitions.try_emplace(
 		CARD_SHADOW_REFLECTION, CARD_SHADOW_REFLECTION, RARITY_COMMON, FACTION_ABYSSIAN,
 		"shadowreflection", "Shadow Reflection", 3, SPELL_SHADOW_REFLECTION);
+	cardDefinitions.try_emplace(
+		CARD_SOULSHATTER_PACT, CARD_SOULSHATTER_PACT, RARITY_NONE, FACTION_ABYSSIAN,
+		"soulshatterpact", "Soulshatter Pact", 2, SPELL_SOULSHATTER_PACT);
+	cardDefinitions.try_emplace(
+		CARD_VOID_PULSE, CARD_VOID_PULSE, RARITY_COMMON, FACTION_ABYSSIAN,
+		"voidpulse", "Void Pulse", 1, SPELL_VOID_PULSE);
+	cardDefinitions.try_emplace(
+		CARD_WRAITHLING_FURY, CARD_WRAITHLING_FURY, RARITY_EPIC, FACTION_ABYSSIAN,
+		"wraithlingfury", "Wraithling Fury", 3, SPELL_WRAITHLING_FURY);
+	cardDefinitions.try_emplace(
+		CARD_WRAITHLING_SWARM, CARD_WRAITHLING_SWARM, RARITY_NONE, FACTION_ABYSSIAN,
+		"wraithlingswarm", "Wraithling Swarm", 3, SPELL_WRAITHLING_SWARM);
 
 #pragma endregion
 

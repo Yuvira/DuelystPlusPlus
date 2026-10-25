@@ -164,6 +164,29 @@ void Collections::RegisterEffects() {
 			ctx.GetAllyGeneral()->Heal(ctx.card, 1);
 	});
 
+	//Spectral Revenant
+	effectDefinitions.try_emplace(SKILL_SPECTRAL_REVENANT, SKILL_SPECTRAL_REVENANT, KEYWORD_RUSH, "{Rush}|Whenever this damages an enemy minion, deal 4 damage to the enemy General");
+	effectDefinitions.at(SKILL_SPECTRAL_REVENANT).RegisterPostTrigger<OnDamageEvent>(
+		[](EffectContext ctx, OnDamageEvent& ev) {
+			return ctx.IsCardOnBoard(ev.source) && !ctx.SharesOwner(ev.target) && ev.target->IsMinion(); },
+		[](EffectContext ctx, OnDamageEvent& ev) {
+			ctx.GetEnemyGeneral()->DealDamage(ctx.card, 4);
+	});
+
+	//Vorpal Reaver
+	effectDefinitions.try_emplace(SKILL_VORPAL_REAVER, SKILL_VORPAL_REAVER, KEYWORD_CELERITY | KEYWORD_DYING_WISH, "{Flying}|{Dying Wish}: Summon six Wraithlings on random spaces");
+	effectDefinitions.at(SKILL_VORPAL_REAVER).RegisterPostTrigger<OnDeathEvent>(
+		[](EffectContext ctx, OnDeathEvent& ev) {
+			return ctx.IsCard(ev.unit); },
+		[](EffectContext ctx, OnDeathEvent& ev) {
+			for (int i = 0; i < 6; ++i) {
+				if (BoardTile* tile = ctx.GetMap()->GetRandomEmpty())
+					ctx.game->SummonToken(CARD_WRAITHLING, tile, ctx.GetOwner());
+				else break;
+			}
+	});
+	effectDefinitions.at(SKILL_VORPAL_REAVER).SetToken(CARD_WRAITHLING);
+
 #pragma endregion
 
 #pragma region Neutral
