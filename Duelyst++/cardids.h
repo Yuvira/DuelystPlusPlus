@@ -82,6 +82,9 @@ enum eCard {
 	CARD_WRAITHLING_FURY,
 	CARD_WRAITHLING_SWARM,
 
+	//Artifacts
+	CARD_HORN_OF_THE_FORSAKEN,
+
 #pragma endregion
 
 #pragma region Neutral

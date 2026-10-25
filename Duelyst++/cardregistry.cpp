@@ -108,6 +108,11 @@ void Collections::RegisterCards() {
 		CARD_WRAITHLING_SWARM, CARD_WRAITHLING_SWARM, RARITY_NONE, FACTION_ABYSSIAN,
 		"wraithlingswarm", "Wraithling Swarm", 3, SPELL_WRAITHLING_SWARM);
 
+	//Artifacts
+	cardDefinitions.try_emplace(
+		CARD_HORN_OF_THE_FORSAKEN, CARD_HORN_OF_THE_FORSAKEN, RARITY_NONE, FACTION_ABYSSIAN,
+		"hornoftheforsaken", "Horn of the Forsaken", 1, 3, ARTIFACT_HORN_OF_THE_FORSAKEN);
+
 #pragma endregion
 
 #pragma region Neutral

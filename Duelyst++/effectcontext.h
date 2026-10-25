@@ -41,6 +41,7 @@ struct EffectContext {
 	bool IsOwnedBy(Player* compare);
 	bool IsAllied(Card* compare);
 	bool IsOwnerTurn();
+	bool IsActiveArtifact();
 	Player* GetOwner();
 	Player* GetOpponent();
 	Unit* GetUnit();
