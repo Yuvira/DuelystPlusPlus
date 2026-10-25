@@ -110,7 +110,7 @@ public:
 	void SelectCard();
 	void MoveCursor(int x, int y);
 	void MoveCursorHand(int x, int y);
-	void MoveSelect(int x, int y);
+	void MoveSelect(int dX, int dY);
 
 	//Highlights
 	void HighlightTile(int x, int y, eColor color);

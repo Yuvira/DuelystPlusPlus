@@ -953,38 +953,47 @@ void Game::MoveCursorHand(int x, int y) {
 }
 
 //Move selected tiles
-void Game::MoveSelect(int x, int y) {
-	int _x = selectable[selectionIdx]->pos.x + x;
-	int _y = selectable[selectionIdx]->pos.y + y;
-	if (x != 0) {
-		for (int i = 0; x > 0 ? i < 9 : i > -9; i += x) {
-			for (int j = 0; j < 3; j > 0 ? j *= -1 : j = (j - 1) * -1) {
-				int __x = (_x + i + 9) % 9;
-				int __y = (_y + j + 5) % 5;
-				for (int k = 0; k < selectable.size(); ++k) {
-					if (&map.tiles[__x][__y] == selectable[k]) {
-						selectionIdx = k;
-						goto end;
-					}
-				}
-			}
+void Game::MoveSelect(int dX, int dY) {
+
+	//Skip if no delta provided
+	if (dX == 0 && dY == 0)
+		return;
+
+	//Direction indicators
+	bool direction = dX != 0;                    //True = Horizontal, False = Vertical
+	bool positive = direction ? dX > 0 : dY > 0; //True = Right/Up, False = Left/Down
+
+	//Initial values
+	Coord curPos = selectable[selectionIdx]->pos;
+	int curDelta, minDelta;
+	if (direction) minDelta = positive ? map.GetWidth() : -map.GetWidth();
+	else minDelta = positive ? map.GetHeight() : -map.GetHeight();
+
+	//Get indices of tiles in closest column/row in given direction
+	std::vector<int> indices;
+	for (int i = 0; i < selectable.size(); ++i) {
+		if (direction) curDelta = selectable[i]->pos.x - curPos.x;
+		else curDelta = selectable[i]->pos.y - curPos.y;
+		if (positive && curDelta <= 0) curDelta += direction ? map.GetWidth() : map.GetHeight();
+		else if (!positive && curDelta >= 0) curDelta -= direction ? map.GetWidth() : map.GetHeight();
+		if (curDelta == minDelta) indices.push_back(i);
+		else if (abs(curDelta) < abs(minDelta)) {
+			minDelta = curDelta;
+			indices = { i };
 		}
 	}
-	else if (y != 0) {
-		for (int i = 0; y > 0 ? i < 5 : i > -5; i += y) {
-			for (int j = 0; j < 5; j > 0 ? j *= -1 : j = (j - 1) * -1) {
-				int __x = (_x + j + 9) % 9;
-				int __y = (_y + i + 5) % 5;
-				for (int k = 0; k < selectable.size(); ++k) {
-					if (&map.tiles[__x][__y] == selectable[k]) {
-						selectionIdx = k;
-						goto end;
-					}
-				}
-			}
+
+	//Search row/column to get nearest available tile
+	minDelta = map.GetHeight();
+	for (int i : indices) {
+		if (direction) curDelta = selectable[i]->pos.y - curPos.y;
+		else curDelta = selectable[i]->pos.x - curPos.x;
+		if (abs(curDelta) < minDelta) {
+			minDelta = abs(curDelta);
+			selectionIdx = i;
 		}
 	}
-end:;
+
 }
 
 #pragma endregion
