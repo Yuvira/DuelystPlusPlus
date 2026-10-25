@@ -188,7 +188,7 @@ void Collections::RenderCardDetails(Renderer& renderer, int x, int& y, Card* car
 		y = max(y, startY + 6);
 		renderer.Render(tileDividerSprite, x, y);
 		y += 2;
-		RenderCardDetails(renderer, x, y, card->GetUnit()->curTile->tile);
+		card->GetUnit()->curTile->tile->DrawDetails(renderer, y);
 	}
 
 }
