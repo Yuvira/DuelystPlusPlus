@@ -110,8 +110,14 @@ void Game::RenderGame(Renderer& renderer) {
 	}
 
 	//Tiles
-	for (Tile* tile : tiles)
+	for (Tile* tile : tiles) {
+		if (tile->owner == &players[0])
+			tile->sprite.SetColor(COLOR_LTBLUE);
+		else if (tile->owner == &players[1])
+			tile->sprite.SetColor(COLOR_LTRED);
 		RenderSprite(renderer, tile->sprite, tile->curTile->pos);
+		tile->sprite.SetColor(COLOR_LTWHITE);
+	}
 
 	//Units
 	for (Unit* unit : units)
@@ -791,14 +797,6 @@ Tile* Game::CreateTile(eCard cardId, BoardTile* tile, Player* owner) {
 	newTile->curTile = tile;
 	tile->tile = newTile;
 	newTile->AddEffects();
-
-	//Set color
-	if (newTile->owner == &players[0])
-		newTile->sprite.SetColor(COLOR_LTBLUE);
-	else if (newTile->owner == &players[1])
-		newTile->sprite.SetColor(COLOR_LTRED);
-	else
-		newTile->sprite.SetColor(COLOR_LTWHITE);
 
 	//Return new tile object
 	return newTile;
