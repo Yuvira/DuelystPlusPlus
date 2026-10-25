@@ -670,7 +670,7 @@ void Game::UseEffect() {
 	}
 
 	//Trigger cast event for active card
-	if (activeCard != nullptr)
+	if (mode == MODE_NONE && activeCard != nullptr)
 		PostCast();
 
 }
