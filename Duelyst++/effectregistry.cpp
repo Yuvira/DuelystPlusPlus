@@ -92,6 +92,40 @@ void Collections::RegisterEffects() {
 	});
 	effectDefinitions.at(SKILL_GLOOMCHASER).SetToken(CARD_WRAITHLING);
 
+	//Nightsorrow Assassin
+	effectDefinitions.try_emplace(SKILL_NIGHTSORROW_ASSASSIN, SKILL_NIGHTSORROW_ASSASSIN, KEYWORD_OPENING_GAMBIT, "{Opening Gambit}: Destroy a nearby enemy minion with 2 or less attack");
+	effectDefinitions.at(SKILL_NIGHTSORROW_ASSASSIN).RegisterSelfTrigger<OnPreCastThisEvent>(
+		[](EffectContext ctx, OnPreCastThisEvent& ev) {
+			std::vector<BoardTile*> valid;
+			for (BoardTile* tile : ctx.GetMap()->GetUnitTilesNear(ev.tile, FILTER_MINIONS, FILTER_ENEMY, ctx.GetOwner()))
+				if (tile->unit->GetStat(STAT_ATK, true) <= 2)
+					valid.push_back(tile);
+			ctx.game->HighlightTargetsForCallback(valid, ctx, ev.tile,
+				[](EffectContext ctx, BoardTile* source, std::vector<BoardTile*>& targets) {
+					if (targets.size() > 0 && targets[0]->HasUnit())
+						targets[0]->unit->Destroy(ctx.card);
+			});
+	});
+
+	//Reaper of the Nine Moons
+	effectDefinitions.try_emplace(SKILL_REAPER_OF_THE_NINE_MOONS, SKILL_REAPER_OF_THE_NINE_MOONS, KEYWORD_FLYING | KEYWORD_DYING_WISH, "{Flying}|{Dying Wish}: Summon a random minion from the opponent's deck on this space");
+	effectDefinitions.at(SKILL_REAPER_OF_THE_NINE_MOONS).RegisterPostTrigger<OnDeathEvent>(
+		[](EffectContext ctx, OnDeathEvent& ev) {
+			return ctx.IsCard(ev.unit) && !ctx.GetTile()->HasUnit(); },
+		[](EffectContext ctx, OnDeathEvent& ev) {
+			std::vector<Unit*> valid;
+			for (PlayableCard* card : ctx.GetOpponent()->deck)
+				if (card->IsMinion())
+					valid.push_back(card->GetUnit());
+			if (valid.size() > 0) {
+				Unit* unit = valid[rand() % valid.size()];
+				if (ctx.GetOpponent()->RemoveFromDeck(unit)) {
+					unit->owner = ctx.GetOwner();
+					ctx.game->Summon(unit, ctx.GetTile(), false);
+				}
+			}
+	});
+
 #pragma endregion
 
 #pragma region Neutral

@@ -138,6 +138,49 @@ void Collections::RegisterSpells() {
 	effectDefinitions.try_emplace(MODIFIER_DEATHFIRE_CRESCENDO, MODIFIER_DEATHFIRE_CRESCENDO, KEYWORD_NONE, "Deathfire Crescendo");
 	effectDefinitions.at(MODIFIER_DEATHFIRE_CRESCENDO).AddModifier(STAT_ATK, MODTYPE_BUFF, 2).AddModifier(STAT_HP, MODTYPE_BUFF, 2);
 
+	//Grasp of Agony
+	effectDefinitions.try_emplace(SPELL_GRASP_OF_AGONY, SPELL_GRASP_OF_AGONY, "Choose an enemy minion. When it dies, it deals 3 damage to enemies around it",
+		[](Game* game, Spell* spell) {
+			return game->map.GetAllUnitTiles(FILTER_MINIONS, FILTER_ENEMY, spell->owner); });
+	effectDefinitions.at(SPELL_GRASP_OF_AGONY).RegisterSelfTrigger<OnResolveThisEvent>(
+		[](EffectContext ctx, OnResolveThisEvent& ev) {
+			if (ev.tile->HasUnit())
+				ev.tile->unit->AddEffect(EFFECT_GRASP_OF_AGONY);
+	});
+	effectDefinitions.try_emplace(EFFECT_GRASP_OF_AGONY, EFFECT_GRASP_OF_AGONY, KEYWORD_NONE, "Grasp of Agony|When this dies, it deals 3 damage to allies around it");
+	effectDefinitions.at(EFFECT_GRASP_OF_AGONY).RegisterPostTrigger<OnDeathEvent>(
+		[](EffectContext ctx, OnDeathEvent& ev) {
+			return ctx.IsCardOnBoard(ev.unit); },
+		[](EffectContext ctx, OnDeathEvent& ev) {
+			for (Unit* unit : ctx.GetMap()->GetUnitsNear(ctx.GetTile(), FILTER_ALL, FILTER_ALLY, ctx.GetOwner()))
+				unit->DealDamage(ctx.card, 3);
+	});
+
+	//Nether Summoning
+	effectDefinitions.try_emplace(SPELL_NETHER_SUMMONING, SPELL_NETHER_SUMMONING, "Summon 2 non-token minions destroyed since the end of your last turn nearby",
+		[](Game* game, Spell* spell) {
+			return game->map.GetAllUnitTiles(FILTER_GENERALS, FILTER_ALLY, spell->owner); });
+	effectDefinitions.at(SPELL_NETHER_SUMMONING).RegisterSelfTrigger<OnResolveThisEvent>(
+		[](EffectContext ctx, OnResolveThisEvent& ev) {
+			std::vector<Unit*> valid;
+			OnDeathEvent* deathEvent = nullptr;
+			for (Event* event : ctx.game->eventManager.GetEventsSincePlayersLastTurn(ctx.GetOwner())) {
+				if (deathEvent = event->As<OnDeathEvent>())
+					if (!deathEvent->unit->IsGeneral() && !deathEvent->unit->isToken)
+						valid.push_back(deathEvent->unit);
+			}
+			BoardTile* tile = nullptr;
+			for (int i = 0; i < 2; ++i) {
+				if (valid.size() > 0) {
+					if (tile = ctx.GetMap()->GetRandomEmptyNear(ev.tile)) {
+						int idx = rand() % valid.size();
+						ctx.game->SummonToken(valid[idx]->ReadID(), tile, ctx.GetOwner());
+						valid.erase(valid.begin() + idx);
+					}
+				}
+			}
+	});
+
 #pragma endregion
 
 }

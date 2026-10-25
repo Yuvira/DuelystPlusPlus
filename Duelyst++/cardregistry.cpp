@@ -30,6 +30,12 @@ void Collections::RegisterCards() {
 	cardDefinitions.try_emplace(
 		CARD_GLOOMCHASER, CARD_GLOOMCHASER, RARITY_NONE, FACTION_ABYSSIAN, TRIBE_NONE,
 		"gloomchaser", "Gloomchaser", 2, 2, 2, SKILL_GLOOMCHASER);
+	cardDefinitions.try_emplace(
+		CARD_NIGHTSORROW_ASSASSIN, CARD_NIGHTSORROW_ASSASSIN, RARITY_COMMON, FACTION_ABYSSIAN, TRIBE_NONE,
+		"nightsorrowassassin", "Nightsorrow Assassin", 3, 2, 1, SKILL_NIGHTSORROW_ASSASSIN);
+	cardDefinitions.try_emplace(
+		CARD_REAPER_OF_THE_NINE_MOONS, CARD_REAPER_OF_THE_NINE_MOONS, RARITY_EPIC, FACTION_ABYSSIAN, TRIBE_NONE,
+		"reaperoftheninemoons", "Reaper of the Nine Moons", 5, 5, 3, SKILL_REAPER_OF_THE_NINE_MOONS);
 
 	//Spells
 	cardDefinitions.try_emplace(
@@ -53,6 +59,12 @@ void Collections::RegisterCards() {
 	cardDefinitions.try_emplace(
 		CARD_DEATHFIRE_CRESCENDO, CARD_DEATHFIRE_CRESCENDO, RARITY_LEGENDARY, FACTION_ABYSSIAN,
 		"deathfirecrescendo", "Deathfire Crescendo", 3, SPELL_DEATHFIRE_CRESCENDO);
+	cardDefinitions.try_emplace(
+		CARD_GRASP_OF_AGONY, CARD_GRASP_OF_AGONY, RARITY_COMMON, FACTION_ABYSSIAN,
+		"graspofagony", "Grasp of Agony", 1, SPELL_GRASP_OF_AGONY);
+	cardDefinitions.try_emplace(
+		CARD_NETHER_SUMMONING, CARD_NETHER_SUMMONING, RARITY_LEGENDARY, FACTION_ABYSSIAN,
+		"nethersummoning", "Nether Summoning", 5, SPELL_NETHER_SUMMONING);
 
 #pragma endregion
 
