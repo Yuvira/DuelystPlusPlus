@@ -96,7 +96,10 @@ Game::Game(Collections* collections, bool* modeSwitch, bool* resetGame, bool* ex
 	mode = MODE_NONE;
 
 }
-Game::~Game() { collections->DeleteInstancesForGame(this); }
+Game::~Game() {
+	collections->DeleteInstancesForGame(this);
+	eventManager.DeleteEvents();
+}
 
 #pragma endregion
 

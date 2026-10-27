@@ -108,7 +108,7 @@ void EventManager::TriggerPostEvent(Game* game, Event* event) {
 			s->GetSpellEffect()->TriggerPostEvent(EffectContext(s->GetSpellEffect(), s, game), event);
 
 	//Push to event history
-	eventLog.push_back(event->Clone());
+	eventLog.push_back(event);
 
 }
 
@@ -254,6 +254,12 @@ bool EventManager::MostRecentPlayerTurnHasEvent(Player* player, bool (*Predicate
 				return true;
 	}
 	return false;
+}
+
+//Delete all event instances
+void EventManager::DeleteEvents() {
+	for (Event* event : eventLog)
+		delete event;
 }
 
 #pragma endregion

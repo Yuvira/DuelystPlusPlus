@@ -19,6 +19,7 @@ public:
 	std::vector<Event*> GetMostRecentTurnEvents(Player* player);
 	std::vector<Event*> GetEventsSincePlayersLastTurn(Player* player);
 	bool MostRecentPlayerTurnHasEvent(Player* player, bool (*Predicate)(Player* player, Event* event));
+	void DeleteEvents();
 private:
 	std::vector<Event*> eventLog;
 };
