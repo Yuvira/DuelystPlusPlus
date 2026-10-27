@@ -31,38 +31,64 @@ Collections::~Collections() {}
 #pragma region Instance Generators
 
 //Get a new effect instance based on definition with ID
-Effect* Collections::GetNewCardEffectInstance(eEffect effectId) {
+Effect* Collections::GetNewCardEffectInstance(Game* game, eEffect effectId) {
 	if (!effectDefinitions.contains(effectId) || effectDefinitions.at(effectId).type != EFFECTTYPE_CARD)
 		return nullptr;
-	return new Effect(effectDefinitions.at(effectId));
+	Effect* effect = new Effect(effectDefinitions.at(effectId));
+	AddEffectInstance(game, effect);
+	return effect;
 }
 
 //Get a new aura instance based on definition with ID
-Aura* Collections::GetNewAuraInstance(eEffect auraId, Player* owner, Card* sourceCard, Effect* sourceEffect) {
+Aura* Collections::GetNewAuraInstance(Game* game, eEffect auraId, Player* owner, Card* sourceCard, Effect* sourceEffect) {
 	if (!effectDefinitions.contains(auraId) || effectDefinitions.at(auraId).type != EFFECTTYPE_AURA)
 		return nullptr;
-	return new Aura(effectDefinitions.at(auraId), owner, sourceCard, sourceEffect);
+	Aura* aura = new Aura(effectDefinitions.at(auraId), owner, sourceCard, sourceEffect);
+	AddEffectInstance(game, aura);
+	return aura;
 }
 
 //Get a new effect instance based on definition with ID
-SpellEffect* Collections::GetNewSpellEffectInstance(eEffect effectId) {
+SpellEffect* Collections::GetNewSpellEffectInstance(Game* game, eEffect effectId) {
 	if (!effectDefinitions.contains(effectId) || effectDefinitions.at(effectId).type != EFFECTTYPE_SPELL)
 		return nullptr;
-	return new SpellEffect(effectDefinitions.at(effectId));
+	SpellEffect* effect = new SpellEffect(effectDefinitions.at(effectId));
+	AddEffectInstance(game, effect);
+	return effect;
+}
+
+//Track new instance
+void Collections::AddEffectInstance(Game* game, Effect* effect) {
+	if (!effectInstances.contains(game))
+		effectInstances[game] = { effect };
+	else
+		effectInstances[game].push_back(effect);
 }
 
 //Get a new card instance based on definition with ID
 Card* Collections::GetNewCardInstance(eCard cardId, Game* game, Player* player) {
 	if (!cardDefinitions.contains(cardId))
 		return nullptr;
-	if (cardDefinitions.at(cardId).type == CARDTYPE_UNIT)
-		return new Unit(cardDefinitions.at(cardId), game, player);
-	else if (cardDefinitions.at(cardId).type == CARDTYPE_SPELL)
-		return new Spell(cardDefinitions.at(cardId), game, player);
-	else if (cardDefinitions.at(cardId).type == CARDTYPE_ARTIFACT)
-		return new Artifact(cardDefinitions.at(cardId), game, player);
-	else if (cardDefinitions.at(cardId).type == CARDTYPE_TILE)
-		return new Tile(cardDefinitions.at(cardId), game, player);
+	if (cardDefinitions.at(cardId).type == CARDTYPE_UNIT) {
+		Unit* unit = new Unit(cardDefinitions.at(cardId), game, player);
+		AddCardInstance(game, unit);
+		return unit;
+	}
+	else if (cardDefinitions.at(cardId).type == CARDTYPE_SPELL) {
+		Spell* spell = new Spell(cardDefinitions.at(cardId), game, player);
+		AddCardInstance(game, spell);
+		return spell;
+	}
+	else if (cardDefinitions.at(cardId).type == CARDTYPE_ARTIFACT) {
+		Artifact* artifact = new Artifact(cardDefinitions.at(cardId), game, player);
+		AddCardInstance(game, artifact);
+		return artifact;
+	}
+	else if (cardDefinitions.at(cardId).type == CARDTYPE_TILE) {
+		Tile* tile = new Tile(cardDefinitions.at(cardId), game, player);
+		AddCardInstance(game, tile);
+		return tile;
+	}
 	return nullptr;
 }
 
@@ -70,12 +96,21 @@ Card* Collections::GetNewCardInstance(eCard cardId, Game* game, Player* player) 
 PlayableCard* Collections::GetNewPlayableCardInstance(eCard cardId, Game* game, Player* player) {
 	if (!cardDefinitions.contains(cardId))
 		return nullptr;
-	if (cardDefinitions.at(cardId).type == CARDTYPE_UNIT)
-		return new Unit(cardDefinitions.at(cardId), game, player);
-	else if (cardDefinitions.at(cardId).type == CARDTYPE_SPELL)
-		return new Spell(cardDefinitions.at(cardId), game, player);
-	else if (cardDefinitions.at(cardId).type == CARDTYPE_ARTIFACT)
-		return new Artifact(cardDefinitions.at(cardId), game, player);
+	if (cardDefinitions.at(cardId).type == CARDTYPE_UNIT) {
+		Unit* unit = new Unit(cardDefinitions.at(cardId), game, player);
+		AddCardInstance(game, unit);
+		return unit;
+	}
+	else if (cardDefinitions.at(cardId).type == CARDTYPE_SPELL) {
+		Spell* spell = new Spell(cardDefinitions.at(cardId), game, player);
+		AddCardInstance(game, spell);
+		return spell;
+	}
+	else if (cardDefinitions.at(cardId).type == CARDTYPE_ARTIFACT) {
+		Artifact* artifact = new Artifact(cardDefinitions.at(cardId), game, player);
+		AddCardInstance(game, artifact);
+		return artifact;
+	}
 	return nullptr;
 }
 
@@ -83,21 +118,49 @@ PlayableCard* Collections::GetNewPlayableCardInstance(eCard cardId, Game* game, 
 Unit* Collections::GetNewUnitInstance(eCard cardId, Game* game, Player* player) {
 	if (!cardDefinitions.contains(cardId) || cardDefinitions.at(cardId).type != CARDTYPE_UNIT)
 		return nullptr;
-	return new Unit(cardDefinitions.at(cardId), game, player);
+	Unit* unit = new Unit(cardDefinitions.at(cardId), game, player);
+	AddCardInstance(game, unit);
+	return unit;
 }
 
 //Get a new artifact instance based on definition with ID
 Artifact* Collections::GetNewArtifactInstance(eCard cardId, Game* game, Player* player) {
 	if (!cardDefinitions.contains(cardId) || cardDefinitions.at(cardId).type != CARDTYPE_ARTIFACT)
 		return nullptr;
-	return new Artifact(cardDefinitions.at(cardId), game, player);
+	Artifact* artifact = new Artifact(cardDefinitions.at(cardId), game, player);
+	AddCardInstance(game, artifact);
+	return artifact;
 }
 
 //Get a new unit instance based on definition with ID
 Tile* Collections::GetNewTileInstance(eCard cardId, Game* game, Player* player) {
 	if (!cardDefinitions.contains(cardId) || cardDefinitions.at(cardId).type != CARDTYPE_TILE)
 		return nullptr;
-	return new Tile(cardDefinitions.at(cardId), game, player);
+	Tile* tile = new Tile(cardDefinitions.at(cardId), game, player);
+	AddCardInstance(game, tile);
+	return tile;
+}
+
+//Track new instance
+void Collections::AddCardInstance(Game* game, Card* card) {
+	if (!cardInstances.contains(game))
+		cardInstances[game] = { card };
+	else
+		cardInstances[game].push_back(card);
+}
+
+//Instance deletion
+void Collections::DeleteInstancesForGame(Game* game) {
+	if (cardInstances.contains(game)) {
+		for (Card* card : cardInstances[game])
+			delete card;
+		cardInstances.erase(game);
+	}
+	if (effectInstances.contains(game)) {
+		for (Effect* effect : effectInstances[game])
+			delete effect;
+		effectInstances.erase(game);
+	}
 }
 
 #pragma endregion

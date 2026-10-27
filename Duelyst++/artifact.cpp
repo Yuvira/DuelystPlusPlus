@@ -16,7 +16,7 @@ Artifact::Artifact(const CardDefinition& definition, Game* game, Player* owner) 
 	destroyed = false;
 	isActive = false;
 	if (definition.effect != EFFECT_NONE && game != nullptr) {
-		Effect* effect = game->collections->GetNewCardEffectInstance(definition.effect);
+		Effect* effect = game->collections->GetNewCardEffectInstance(game, definition.effect);
 		if (effect != nullptr)
 			effects.push_back(effect);
 	}

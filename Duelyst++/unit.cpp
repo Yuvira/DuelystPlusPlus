@@ -35,7 +35,7 @@ Unit::Unit(const CardDefinition& definition, Game* game, Player* owner) : Card(d
 	forcefieldBroken = false;
 	curTile = nullptr;
 	if (definition.effect != EFFECT_NONE && game != nullptr) {
-		Effect* effect = game->collections->GetNewCardEffectInstance(definition.effect);
+		Effect* effect = game->collections->GetNewCardEffectInstance(game, definition.effect);
 		if (effect != nullptr)
 			effects.push_back(effect);
 	}

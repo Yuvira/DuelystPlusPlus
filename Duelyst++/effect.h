@@ -61,7 +61,7 @@ public:
 
 	//Constructors
 	Effect(const EffectDefinition& definition);
-	~Effect();
+	virtual ~Effect();
 
 	//Trigger dispatch
 	static void DispatchTrigger(const std::vector<EventTrigger>& triggers, EffectContext ctx, Event* ev);
@@ -109,7 +109,7 @@ public:
 
 	//Constructor
 	Aura(const EffectDefinition& definition, Player* owner, Card* sourceCard, Effect* sourceEffect);
-	~Aura();
+	~Aura() override;
 
 	//Utils
 	bool MatchesPredicate(Game* game, Card* card) { return Predicate && Predicate(EffectContext(this, card, game)); }
@@ -139,7 +139,7 @@ public:
 
 	//Constructor
 	SpellEffect(const EffectDefinition& definition);
-	~SpellEffect();
+	~SpellEffect() override;
 
 	//Initial targeting
 	std::vector<BoardTile*> GetTargets(Game* game, Spell* spell) {

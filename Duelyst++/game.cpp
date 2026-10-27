@@ -37,11 +37,13 @@ PathCoord::~PathCoord() {}
 #pragma region Game Constructor
 
 //Game constructor
-Game::Game(Collections* collections, bool* modeSwitch) : players{ Player(this, IS_DEBUG ? 9 : 2), Player(this, IS_DEBUG ? 9 : 3) } {
+Game::Game(Collections* collections, bool* modeSwitch, bool* resetGame, bool* exitGame) : players{ Player(this, IS_DEBUG ? 9 : 2), Player(this, IS_DEBUG ? 9 : 3) } {
 
 	//Collections reference
 	this->collections = collections;
 	this->modeSwitch = modeSwitch;
+	this->resetGame = resetGame;
+	this->exitGame = exitGame;
 
 	//Sprites
 	board.CreateFromFile("resources/board.txt");
@@ -94,7 +96,7 @@ Game::Game(Collections* collections, bool* modeSwitch) : players{ Player(this, I
 	mode = MODE_NONE;
 
 }
-Game::~Game() {}
+Game::~Game() { collections->DeleteInstancesForGame(this); }
 
 #pragma endregion
 
@@ -466,8 +468,10 @@ void Game::Input() {
 
 	}
 
-	//Switch mode
+	//Switch / Reset / Exit
 	if (asciiVal == 80 || asciiVal == 112) { *modeSwitch = false; } //P
+	if (asciiVal == 8) { *resetGame = true; }                       //Backspace
+	if (asciiVal == 27) { *exitGame = true; }                       //Escape
 
 }
 
@@ -612,7 +616,7 @@ void Game::ApplyAura(eEffect auraId, Player* owner, Card* sourceCard, Effect* so
 	//Get effect instance
 	if (auraId == EFFECT_NONE)
 		return;
-	Aura* newAura = collections->GetNewAuraInstance(auraId, owner, sourceCard, sourceEffect);
+	Aura* newAura = collections->GetNewAuraInstance(this, auraId, owner, sourceCard, sourceEffect);
 	if (newAura == nullptr)
 		return;
 

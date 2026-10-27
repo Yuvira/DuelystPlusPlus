@@ -25,6 +25,9 @@ public:
 	void Input();
 	void MoveCursor(int x, int y);
 
+	//Game setter
+	void SetGame(Game* game) { this->game = game; }
+
 	//Render position evals
 	constexpr int TileX(int x) { return (x * 7) + 1; }
 	constexpr int TileY(int y) { return (y * 7) + 6; }

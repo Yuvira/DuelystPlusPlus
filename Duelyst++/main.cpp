@@ -19,20 +19,22 @@ int main() {
 	//Variables
 	Renderer renderer;
 	Collections collections;
-	bool doGame = false;
-	Game game = Game(&collections, &doGame);
-	CardViewer cardViewer = CardViewer(&game, &collections, &doGame);
+	bool modeSwitch = false;
+	bool resetGame = false;
+	bool exitGame = false;
+	Game* game = new Game(&collections, &modeSwitch, &resetGame, &exitGame);
+	CardViewer cardViewer = CardViewer(game, &collections, &modeSwitch);
 
 	//Loop
-	while (true) {
+	while (!exitGame) {
 
 		//Game
-		if (doGame) {
-			game.Update();
+		if (modeSwitch) {
+			game->Update();
 			renderer.ClearScreen();
-			game.RenderGame(renderer);
+			game->RenderGame(renderer);
 			renderer.SwapBuffer();
-			game.Input();
+			game->Input();
 		}
 
 		//Collection
@@ -43,9 +45,19 @@ int main() {
 			cardViewer.Input();
 		}
 
+		//Reset game
+		if (resetGame) {
+			delete game;
+			game = new Game(&collections, &modeSwitch, &resetGame, &exitGame);
+			cardViewer.SetGame(game);
+			resetGame = false;
+			modeSwitch = false;
+		}
+
 	}
 
 	//End
+	delete game;
 	system("pause");
 	return 0;
 

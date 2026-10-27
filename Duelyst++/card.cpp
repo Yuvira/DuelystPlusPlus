@@ -155,7 +155,7 @@ int PlayableCard::GetStat(eStat stat, int base, bool withAuras) {
 Effect* Card::AddEffect(eEffect effectId) {
 	if (effectId == EFFECT_NONE || game == nullptr)
 		return nullptr;
-	Effect* newEffect = game->collections->GetNewCardEffectInstance(effectId);
+	Effect* newEffect = game->collections->GetNewCardEffectInstance(game, effectId);
 	if (newEffect == nullptr)
 		return nullptr;
 	effects.push_back(newEffect);

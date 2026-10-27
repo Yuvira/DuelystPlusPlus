@@ -60,7 +60,7 @@ class Game {
 public:
 	
 	//Constructor
-	Game(Collections* collections, bool* modeSwitch);
+	Game(Collections* collections, bool* modeSwitch, bool* resetGame, bool* exitGame);
 	~Game();
 
 	//Rendering
@@ -180,6 +180,8 @@ private:
 	std::vector<BoardTile*> callbackTargets;
 	std::vector<Spell*> delayedTriggers;
 	bool* modeSwitch;
+	bool* resetGame;
+	bool* exitGame;
 
 	//Turn tracking
 	bool turn;

@@ -24,9 +24,10 @@ public:
 	~Collections();
 
 	//Effect instance generators
-	Effect* GetNewCardEffectInstance(eEffect effectId);
-	Aura* GetNewAuraInstance(eEffect auraId, Player* owner, Card* sourceCard, Effect* sourceEffect);
-	SpellEffect* GetNewSpellEffectInstance(eEffect effectId);
+	Effect* GetNewCardEffectInstance(Game* game, eEffect effectId);
+	Aura* GetNewAuraInstance(Game* game, eEffect auraId, Player* owner, Card* sourceCard, Effect* sourceEffect);
+	SpellEffect* GetNewSpellEffectInstance(Game* game, eEffect effectId);
+	void AddEffectInstance(Game* game, Effect* effect);
 
 	//Card instance generators
 	Card* GetNewCardInstance(eCard cardId, Game* game, Player* player);
@@ -34,6 +35,10 @@ public:
 	Unit* GetNewUnitInstance(eCard cardId, Game* game, Player* player);
 	Artifact* GetNewArtifactInstance(eCard cardId, Game* game, Player* player);
 	Tile* GetNewTileInstance(eCard cardId, Game* game, Player* player);
+	void AddCardInstance(Game* game, Card* card);
+
+	//Instance deletion
+	void DeleteInstancesForGame(Game* game);
 
 	//Rendering
 	void RenderCardSprite(Renderer& renderer, int x, int y, int cardIdx);
@@ -65,6 +70,10 @@ private:
 	//Definition maps
 	std::unordered_map<eCard, CardDefinition> cardDefinitions;
 	std::unordered_map<eEffect, EffectDefinition> effectDefinitions;
+
+	//Object instance maps
+	std::unordered_map<Game*, std::vector<Card*>> cardInstances;
+	std::unordered_map<Game*, std::vector<Effect*>> effectInstances;
 
 	//ID list
 	std::vector<eCard> cardIds;

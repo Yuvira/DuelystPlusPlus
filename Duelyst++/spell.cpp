@@ -13,7 +13,7 @@ Spell::Spell(const CardDefinition& definition, Game* game, Player* owner) : Card
 	this->cost = definition.cost;
 	this->isToken = definition.isToken;
 	if (definition.effect != EFFECT_NONE && game != nullptr) {
-		SpellEffect* effect = game->collections->GetNewSpellEffectInstance(definition.effect);
+		SpellEffect* effect = game->collections->GetNewSpellEffectInstance(game, definition.effect);
 		if (effect != nullptr) {
 			spellEffect = effect;
 			effects.push_back(effect);
